@@ -1,0 +1,217 @@
+{
+  "typography": {
+    "2xs": {
+      "value": "{unit.10}",
+      "type": "dimension"
+    },
+    "xs": {
+      "value": "{unit.12}",
+      "type": "dimension"
+    },
+    "sm": {
+      "value": "{unit.14}",
+      "type": "dimension"
+    },
+    "base": {
+      "value": "{unit.16}",
+      "type": "dimension"
+    },
+    "lg": {
+      "value": "{unit.18}",
+      "type": "dimension"
+    },
+    "xl": {
+      "value": "{unit.20}",
+      "type": "dimension"
+    },
+    "2xl": {
+      "value": "{unit.24}",
+      "type": "dimension"
+    },
+    "3xl": {
+      "value": "{unit.28}",
+      "type": "dimension"
+    },
+    "4xl": {
+      "value": "{unit.36}",
+      "type": "dimension"
+    },
+    "5xl": {
+      "value": "{unit.40}",
+      "type": "dimension"
+    },
+    "6xl": {
+      "value": "{unit.48}",
+      "type": "dimension"
+    },
+    "7xl": {
+      "value": "{unit.64}",
+      "type": "dimension"
+    },
+    "8xl": {
+      "value": "{unit.72}",
+      "type": "dimension"
+    },
+    "9xl": {
+      "value": "{unit.80}",
+      "type": "dimension"
+    }
+  },
+  "layout": {
+    "viewport": {
+      "width": {
+        "value": "1280px",
+        "type": "dimension",
+        "description": "page, layout, breakpoint, screen, device"
+      },
+      "min": {
+        "value": "{viewport.tablet-viewport-max-width}",
+        "type": "dimension",
+        "description": "page, layout, breakpoint, screen, device"
+      },
+      "max": {
+        "value": "{viewport.desktop-viewport-max-width}",
+        "type": "dimension",
+        "description": "page, layout, breakpoint, screen, device"
+      },
+      "height": {
+        "value": "832px",
+        "type": "dimension",
+        "description": "page, layout, breakpoint, screen, device"
+      },
+      "margin-top": {
+        "value": "136px",
+        "type": "dimension",
+        "description": "page, layout, breakpoint, screen, device, margin"
+      }
+    },
+    "grid": {
+      "margin": {
+        "value": "{unit.40}",
+        "type": "dimension"
+      },
+      "columns": {
+        "value": "{unit.12}",
+        "type": "dimension"
+      },
+      "gutter": {
+        "value": "{unit.24}",
+        "type": "dimension"
+      }
+    },
+    "content": {
+      "sm-max": {
+        "value": "300px",
+        "type": "dimension"
+      },
+      "md-max": {
+        "value": "480px",
+        "type": "dimension"
+      },
+      "lg-max": {
+        "value": "680px",
+        "type": "dimension"
+      },
+      "min": {
+        "value": "288px",
+        "type": "dimension"
+      }
+    }
+  },
+  "spacing": {
+    "x0": {
+      "value": "{unit.0}",
+      "type": "dimension"
+    },
+    "x2": {
+      "value": "{unit.2}",
+      "type": "dimension"
+    },
+    "x4": {
+      "value": "{unit.4}",
+      "type": "dimension"
+    },
+    "x8": {
+      "value": "{unit.8}",
+      "type": "dimension"
+    },
+    "x12": {
+      "value": "{unit.12}",
+      "type": "dimension"
+    },
+    "x16": {
+      "value": "{unit.16}",
+      "type": "dimension"
+    },
+    "x20": {
+      "value": "{unit.20}",
+      "type": "dimension"
+    },
+    "x24": {
+      "value": "{unit.24}",
+      "type": "dimension"
+    },
+    "x32": {
+      "value": "{unit.32}",
+      "type": "dimension"
+    },
+    "x40": {
+      "value": "{unit.40}",
+      "type": "dimension"
+    },
+    "x48": {
+      "value": "{unit.48}",
+      "type": "dimension"
+    },
+    "x56": {
+      "value": "{unit.56}",
+      "type": "dimension"
+    },
+    "x64": {
+      "value": "{unit.64}",
+      "type": "dimension"
+    },
+    "x72": {
+      "value": "{unit.72}",
+      "type": "dimension"
+    },
+    "x80": {
+      "value": "{unit.80}",
+      "type": "dimension"
+    },
+    "x96": {
+      "value": "{unit.96}",
+      "type": "dimension"
+    },
+    "x144": {
+      "value": "{unit.144}",
+      "type": "dimension"
+    }
+  },
+  "radius": {
+    "soft": {
+      "value": "{unit.12}",
+      "type": "dimension"
+    },
+    "relaxed": {
+      "value": "{unit.16}",
+      "type": "dimension"
+    },
+    "default": {
+      "value": "{unit.8}",
+      "type": "dimension"
+    },
+    "slight": {
+      "value": "{unit.4}",
+      "type": "dimension"
+    },
+    "full": {
+      "value": "999px",
+      "type": "dimension"
+    },
+    "none": {
+      "value": "{unit.0}",
+      "type": "dimension"
+    }
+  }
+}
