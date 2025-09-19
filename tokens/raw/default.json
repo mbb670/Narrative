@@ -1,0 +1,212 @@
+{
+  "headline": {
+    "fontFamily": {
+      "value": "{fontFamily.playfair.display}",
+      "type": "text"
+    },
+    "regular": {
+      "value": "{fontWeight.400}",
+      "type": "number"
+    },
+    "strong": {
+      "value": "{fontWeight.600}",
+      "type": "number"
+    },
+    "lineHeight": {
+      "value": "{lineHeight.md}",
+      "type": "number"
+    },
+    "fontSize": {
+      "lg": {
+        "value": "{typography.5xl}",
+        "type": "dimension"
+      },
+      "md": {
+        "value": "{typography.4xl}",
+        "type": "dimension"
+      },
+      "sm": {
+        "value": "{typography.3xl}",
+        "type": "dimension"
+      }
+    }
+  },
+  "subheadline": {
+    "fontFamily": {
+      "value": "{fontFamily.playfair.display}",
+      "type": "text"
+    },
+    "regular": {
+      "value": "{fontWeight.400}",
+      "type": "number"
+    },
+    "strong": {
+      "value": "{fontWeight.600}",
+      "type": "number"
+    },
+    "lineHeight": {
+      "value": "{lineHeight.lg}",
+      "type": "number"
+    },
+    "fontSize": {
+      "lg": {
+        "value": "{typography.2xl}",
+        "type": "dimension"
+      },
+      "md": {
+        "value": "{typography.xl}",
+        "type": "dimension"
+      },
+      "sm": {
+        "value": "{typography.lg}",
+        "type": "dimension"
+      },
+      "xs": {
+        "value": "{typography.base}",
+        "type": "dimension"
+      }
+    }
+  },
+  "display": {
+    "fontFamily": {
+      "value": "{fontFamily.playfair.display}",
+      "type": "text"
+    },
+    "regular": {
+      "value": "{fontWeight.400}",
+      "type": "number"
+    },
+    "strong": {
+      "value": "{fontWeight.600}",
+      "type": "number"
+    },
+    "lineHeight": {
+      "value": "{lineHeight.sm}",
+      "type": "number"
+    },
+    "fontSize": {
+      "lg": {
+        "value": "{typography.8xl}",
+        "type": "dimension"
+      },
+      "md": {
+        "value": "{typography.7xl}",
+        "type": "dimension"
+      },
+      "sm": {
+        "value": "{typography.6xl}",
+        "type": "dimension"
+      }
+    }
+  },
+  "body": {
+    "fontFamily": {
+      "value": "{fontFamily.noto.serif}",
+      "type": "text"
+    },
+    "regular": {
+      "value": "{fontWeight.400}",
+      "type": "number"
+    },
+    "strong": {
+      "value": "{fontWeight.700}",
+      "type": "number"
+    },
+    "lineHeight": {
+      "value": "{lineHeight.2xl}",
+      "type": "number"
+    },
+    "fontSize": {
+      "lg": {
+        "value": "{typography.lg}",
+        "type": "dimension"
+      },
+      "md": {
+        "value": "{typography.base}",
+        "type": "dimension"
+      },
+      "sm": {
+        "value": "{typography.sm}",
+        "type": "dimension"
+      },
+      "xs": {
+        "value": "{typography.xs}",
+        "type": "dimension"
+      }
+    }
+  },
+  "system": {
+    "fontFamily": {
+      "value": "{fontFamily.noto.sans}",
+      "type": "text"
+    },
+    "regular": {
+      "value": "{fontWeight.400}",
+      "type": "number"
+    },
+    "strong": {
+      "value": "{fontWeight.600}",
+      "type": "number"
+    },
+    "lineHeight": {
+      "value": "{lineHeight.lg}",
+      "type": "number"
+    },
+    "fontSize": {
+      "lg": {
+        "value": "{typography.lg}",
+        "type": "dimension"
+      },
+      "md": {
+        "value": "{typography.base}",
+        "type": "dimension"
+      },
+      "sm": {
+        "value": "{typography.sm}",
+        "type": "dimension"
+      },
+      "xs": {
+        "value": "{typography.xs}",
+        "type": "dimension"
+      }
+    }
+  },
+  "uppercase": {
+    "fontFamily": {
+      "value": "{fontFamily.noto.sans}",
+      "type": "text"
+    },
+    "regular": {
+      "value": "{fontWeight.400}",
+      "type": "number"
+    },
+    "strong": {
+      "value": "{fontWeight.600}",
+      "type": "number"
+    },
+    "lineHeight": {
+      "value": "{lineHeight.sm}",
+      "type": "number"
+    },
+    "fontSize": {
+      "lg": {
+        "value": "{typography.sm}",
+        "type": "dimension"
+      },
+      "md": {
+        "value": "{typography.xs}",
+        "type": "dimension"
+      },
+      "sm": {
+        "value": "{typography.2xs}",
+        "type": "dimension"
+      }
+    }
+  },
+  "builder": {
+    "text style": {
+      "value": "Default",
+      "type": "text"
+    }
+  }
+}
