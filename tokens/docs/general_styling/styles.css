@@ -7,6 +7,17 @@
   --interactive-state: var(--default);
 }
 
+html,
+body {
+  font-variant-numeric: lining-nums proportional-nums;
+}
+
+body {
+  background: var(--background-default);
+  color: var(--foreground-default);
+  /*   margin: var(--layout-grid-margin); */
+}
+
 a,
 button {
   cursor: pointer;
