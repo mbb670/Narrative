@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Typography Demo</title>
+
+  <!-- Reset -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.2/reset.min.css">
+
+  <!-- CSS (relative to /tokens/docs/typographic_styles/) -->
+  <link rel="stylesheet" href="../../resolved/extended_tokens.css">
+  <link rel="stylesheet" href="../general_styling/styles.css">
+  <link rel="stylesheet" href="../token_switcher/switcher.css">
+  <link rel="stylesheet" href="../swatch_maker/swatch_maker.css">
+  <link rel="stylesheet" href="./typography.css">
+</head>
+<body>
+
+  <div id="typography-sections" data-swap-exclude="theme fontTheme colorTheme breakpoint"></div>
+
+  <!-- JS (order matters; keep defer) -->
+  <script defer src="../token_switcher/switcher.js"></script>
+  <script defer src="../swatch_maker/swatch_maker.js"></script>
+  <script defer src="./typography.js"></script>
+</body>
+</html>
