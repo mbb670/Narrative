@@ -1,0 +1,63 @@
+
+:root {
+  --interactive-color: #c2b389;
+  --default: 0%;
+  --hover: 30%;
+  --active: 60%;
+  --interactive-state: var(--default);
+}
+
+a,
+button {
+  cursor: pointer;
+  border: none;
+  --foreground-color: var(--foreground-default);
+}
+
+.interactive-background,
+button,
+select {
+  transition: background 100ms linear;
+  background: color-mix(
+    in srgb,
+    var(--background-color),
+    var(--interactive-color) var(--interactive-state)
+  ) !important;
+
+  &:hover {
+    --interactive-state: var(--hover);
+  }
+
+  &:active {
+    --interactive-state: var(--active);
+  }
+}
+
+.interactive-foreground,
+a,
+svg {
+  text-decoration: none;
+  transition: color 100ms linear;
+  color: color-mix(
+    in srgb,
+    var(--foreground-color),
+    var(--interactive-color) var(--interactive-state)
+  ) !important;
+
+  svg {
+    color: currentcolor;
+    fill: color-mix(
+      in srgb,
+      var(--foreground-color),
+      var(--interactive-color) var(--interactive-state)
+    ) !important;
+  }
+
+  &:hover {
+    --interactive-state: var(--hover);
+  }
+
+  &:active {
+    --interactive-state: var(--active);
+  }
+}
