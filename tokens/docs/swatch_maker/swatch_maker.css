@@ -1,0 +1,196 @@
+
+.grid {
+  position: relative; /* overlay positions against this */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--spacing-x12);
+}
+
+/* Group title */
+.group-title {
+  grid-column: 1 / -1;
+  color: var(--foreground-muted);
+  margin-top: var(--spacing-x64);
+  margin-bottom: var(--spacing-x12);
+
+  /*   Styles from .text-system-regular-md */
+  font-size: var(--headline-fontsize-md);
+  font-weight: var(--headline-strong);
+  font-family: var(--headline-fontfamily);
+  line-height: var(--headline-lineheight);
+}
+
+/* Card */
+.card,
+.expander {
+  position: relative;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-soft);
+  overflow: hidden;
+  background: var(--background-default);
+
+  /*   Styles from .text-system-regular-sm */
+  font-size: var(--system-fontsize-sm);
+  font-weight: var(--system-regular);
+  font-family: var(--system-fontfamily);
+  line-height: var(--system-lineheight);
+  letter-spacing: var(--letterspacing-none);
+}
+
+/* Swatch */
+.swatch {
+  height: var(--spacing-x144);
+  position: relative;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.swatch-fill {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
+/* Info (two rows) */
+.info {
+  display: grid;
+  padding: var(--spacing-x12);
+  gap: var(--spacing-x8);
+}
+
+.hexline {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-x8);
+}
+
+/* Chips */
+.token,
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-x4) var(--spacing-x12);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-default);
+  --background-color: var(--background-muted);
+  color: var(--foreground-default);
+}
+
+.chip,
+.hex {
+  color: var(--foreground-muted);
+}
+
+.chip {
+  border: 1px dashed var(--border-subtle);
+  --background-color: transparent;
+}
+
+.arrow {
+  color: var(--border-muted);
+  margin-top: var(--spacing-x4);
+}
+
+/* Chevron toggle (inline with HEX) */
+.toggle {
+  margin-left: auto;
+  cursor: pointer;
+  path {
+    stroke: var(--foreground-subtle);
+    transition: stroke 0.25s ease;
+  }
+  &:hover {
+    path {
+      stroke: var(--foreground-default);
+    }
+  }
+}
+
+/* Floating overlay that expands over the grid (no layout shift) */
+.expander {
+  position: absolute; /* positioned over .grid relative box */
+  z-index: 20;
+}
+
+.chainstack {
+  margin-left: var(--spacing-x2);
+  padding-left: var(--spacing-x8);
+  border-left: 1.4px solid var(--border-muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-x4);
+  align-items: flex-start;
+}
+
+/* Copy affordance + toast */
+.copyable {
+  cursor: pointer;
+  position: relative;
+
+  &:hover {
+    text-decoration: underline dotted;
+    &::after {
+      content: "";
+    }
+  }
+  &::after {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 100%;
+    display: inline-block;
+    width: var(--spacing-x12);
+    aspect-ratio: 1;
+    margin-left: 0.25rem;
+    background-color: var(--foreground-subtle);
+    mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><path d='M8.2 2 11 4.8V12H3V2h5.2ZM4 11h6V6H7V3H4v8ZM6 0v1H2v9H1V0h5Zm2 5h1.8L8 3.2V5Z'/></svg>");
+  }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  top: var(--spacing-x16);
+  transform: translateX(-50%) translateY(-16px);
+  background: var(--background-strong);
+  color: var(--foreground-alt);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-default);
+  padding: var(--spacing-x12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  font-family: var(--system-fontfamily);
+  z-index: 5000;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.format-switcher {
+  position: absolute;
+  top: var(--spacing-x24);
+  right: var(--spacing-x12);
+  color: var(--foreground-muted);
+  z-index: 100;
+  @media (max-width: 640px) {
+    top: var(--unit-72);
+    left: var(--spacing-x12);
+    right: 0;
+  }
+}
+
+.token-swap {
+  top: 0;
+  bottom: unset;
+  > :nth-child(2) {
+    /*     display: none; */
+  }
+}
+
+[data-type="string"],
+[data-type="dimension"],
+[data-type="number"] {
+  .swatch {
+    display: none;
+  }
+}
