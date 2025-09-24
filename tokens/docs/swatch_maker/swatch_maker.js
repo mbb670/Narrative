@@ -12,7 +12,7 @@
 
   /* ================= Settings ================= */
   const TOKEN_CSS_URL =
-    window.TOKEN_CSS_URL || "https://codepen.io/mbb670/pen/empLVpR.css";
+    window.TOKEN_CSS_URL || "https://mbb670.github.io/Narrative/tokens/resolved/extended_tokens.css";
   const THEME_UPDATE_DELAY_MS = 150;
   let CURRENT_FORMAT = "HEX";
   const NO_CLOSE_SELECTORS = [
