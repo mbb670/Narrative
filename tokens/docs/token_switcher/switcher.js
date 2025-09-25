@@ -1,3 +1,20 @@
+// You can set any subset; all are optional.
+// It's fine if this runs AFTER the external script loads.
+
+// window.tokenSwapDefaults = {
+//   // "auto" | "mobile" | "tablet" | "desktop"
+//   breakpoint: "auto",
+
+//   // "light" | "dark"
+//   theme: "light",
+
+//   // "default" | "slate"
+//   colorTheme: "default",
+
+//   // "default" | "opinion" | "lifestyle"
+//   fontTheme: "default"
+// };
+
 (function () {
   "use strict";
 
@@ -13,6 +30,136 @@
 
   // token text class shapes (matches your CSS utilities)
   const TOKEN_TEXT_RE = /^text-(display|headline|subheadline|body|system|uppercase)-(regular|semibold)-(lg|md|sm|xs)$/;
+
+  // =======================
+  // defaults plumbing (works even if set later in CodePen)
+  // =======================
+  let _extDefaults = null; // last-seen defaults object
+  let _defaultsAppliedOnce = false; // guard so we don't re-apply identical defaults
+  let _pendingDefaults = null; // stash if UI not ready yet
+
+  // Allow both names, just in case
+  defineReactiveDefaultsProp("tokenSwapDefaults");
+  defineReactiveDefaultsProp("TOKEN_SWAP_DEFAULTS");
+
+  // Public API as well
+  window.tokenSwap = window.tokenSwap || {};
+  window.tokenSwap.setDefaults = function (def) {
+    _extDefaults = sanitizeDefaults(def);
+    tryApplyDefaults(); // will update UI + styles
+  };
+
+  function defineReactiveDefaultsProp(name) {
+    try {
+      let _store;
+      Object.defineProperty(window, name, {
+        configurable: true,
+        get() {
+          return _store;
+        },
+        set(v) {
+          _store = v;
+          _extDefaults = sanitizeDefaults(v);
+          // Defer to next microtask so UI has a chance to mount
+          queueMicrotask(tryApplyDefaults);
+        }
+      });
+    } catch (_) {
+      // If defineProperty fails for any reason, we’ll fall back to polling in run()
+    }
+  }
+
+  function sanitizeDefaults(obj) {
+    if (!obj || typeof obj !== "object") return null;
+    const out = {};
+    if (typeof obj.theme === "string" && /^(light|dark)$/.test(obj.theme))
+      out.theme = obj.theme;
+    if (
+      typeof obj.colorTheme === "string" &&
+      /^(default|slate)$/.test(obj.colorTheme)
+    )
+      out.colorTheme = obj.colorTheme;
+    if (
+      typeof obj.fontTheme === "string" &&
+      /^(default|opinion|lifestyle)$/.test(obj.fontTheme)
+    )
+      out.fontTheme = obj.fontTheme;
+    if (
+      typeof obj.breakpoint === "string" &&
+      /^(auto|mobile|tablet|desktop)$/.test(obj.breakpoint)
+    )
+      out.breakpoint = obj.breakpoint;
+    return Object.keys(out).length ? out : null;
+  }
+
+  function optionExists(select, value) {
+    return !!(
+      select && Array.from(select.options).find((o) => o.value === value)
+    );
+  }
+
+  function tryApplyDefaults() {
+    // If we haven't got anything to apply, stop.
+    if (!_extDefaults) return;
+
+    // If controls aren't in the DOM yet, stash & try later
+    const tray = document.querySelector("#token-swap-root");
+    if (!tray) {
+      _pendingDefaults = _extDefaults;
+      return;
+    }
+
+    // If we already applied the exact same object once, skip
+    if (_defaultsAppliedOnce && _pendingDefaults == null) {
+      // still allow explicit programmatic calls to re-apply:
+      // you can call window.tokenSwap.setDefaults again with a new object
+      return;
+    }
+
+    // Apply to UI as if the user selected them
+    const root = document.documentElement;
+
+    // THEME segmented
+    if (_extDefaults.theme) {
+      const btn = tray.querySelector(
+        `#switch-theme [data-value="${_extDefaults.theme}"]`
+      );
+      if (btn) btn.click();
+    }
+
+    // COLOR THEME
+    if (_extDefaults.colorTheme) {
+      const sel = tray.querySelector("#switch-colorTheme select");
+      if (optionExists(sel, _extDefaults.colorTheme)) {
+        sel.value = _extDefaults.colorTheme;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+
+    // FONT THEME
+    if (_extDefaults.fontTheme) {
+      const sel = tray.querySelector("#switch-fontTheme select");
+      if (optionExists(sel, _extDefaults.fontTheme)) {
+        sel.value = _extDefaults.fontTheme;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+
+    // BREAKPOINT
+    if (_extDefaults.breakpoint) {
+      const sel = tray.querySelector("#switch-breakpoint select");
+      if (optionExists(sel, _extDefaults.breakpoint)) {
+        sel.value = _extDefaults.breakpoint;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      } else if (_extDefaults.breakpoint === "auto" && sel) {
+        sel.value = "auto";
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
+
+    _defaultsAppliedOnce = true;
+    _pendingDefaults = null;
+  }
 
   // =======================
   // small utils
@@ -316,8 +463,7 @@
         const wantsColor = allow.has("colorTheme");
         const wantsBreakpoint = allow.has("breakpoint");
 
-        // If this node explicitly allows breakpoint, we must also mirror companion axes
-        // (theme/colorTheme/fontTheme) onto this element so compound selectors match locally.
+        // If this node explicitly allows breakpoint, mirror companion axes
         if (wantsBreakpoint) {
           ["theme", "colorTheme", "fontTheme"].forEach((k) => {
             const attr = "data-" + k;
@@ -331,9 +477,7 @@
         KEYS.forEach((k) => {
           const attr = "data-" + k;
 
-          // If not allowed, normally we remove the attribute,
-          // BUT if this node allows breakpoint and k is a companion axis,
-          // we KEEP the mirrored static value.
+          // If not allowed, remove attribute except when breakpoint is allowed (keep companions)
           const isCompanion =
             k === "theme" || k === "colorTheme" || k === "fontTheme";
           if (!allow.has(k)) {
@@ -399,6 +543,10 @@
           root.setAttribute("data-theme", value);
         scheduleApply();
       };
+
+      // initial: prefer existing attr, else "light" (we'll re-apply defaults later if provided)
+      const initialTheme = root.getAttribute("data-theme") || "light";
+
       group.addEventListener("click", (e) => {
         const b = e.target.closest('[role="radio"]');
         if (!b) return;
@@ -420,7 +568,7 @@
           setTheme(btns[next].dataset.value);
         }
       });
-      setTheme("light");
+      setTheme(initialTheme);
     })();
 
     // flicker guard
@@ -453,6 +601,7 @@
           setGroupAttr(group, select.value === "auto" ? "" : select.value);
           applyBreakpoint(select.value);
         });
+        // initial seed (we'll override later if defaults appear)
         setGroupAttr(group, "");
         applyBreakpoint(select.value);
       } else {
@@ -460,35 +609,9 @@
           setGroupAttr(group, select.value);
           scheduleApply();
         });
+        // initial seed (we'll override later if defaults appear)
         setGroupAttr(group, select.value);
         scheduleApply();
-      }
-
-      if (!window.tokenSet) {
-        window.tokenSet = {
-          set: (g, v) => {
-            const attr = "data-" + g;
-            if (g === "theme") {
-              if (root.getAttribute(attr) !== (v || "light"))
-                root.setAttribute(attr, v || "light");
-              scheduleApply();
-              return;
-            }
-            if (g === "breakpoint") {
-              if (!v || v === "auto") root.removeAttribute("data-breakpoint");
-              else if (root.getAttribute("data-breakpoint") !== v)
-                root.setAttribute("data-breakpoint", v);
-              scheduleApply();
-              return;
-            }
-            if (KEYS.includes(g)) {
-              if (v == null || v === "") root.removeAttribute(attr);
-              else if (root.getAttribute(attr) !== v)
-                root.setAttribute(attr, v);
-              scheduleApply();
-            }
-          }
-        };
       }
     });
 
@@ -507,6 +630,21 @@
     // initial scoping
     applyExcludesOnce();
     scheduleApply();
+
+    // If defaults were defined earlier but UI wasn’t ready, apply now.
+    if (_pendingDefaults || _extDefaults) tryApplyDefaults();
+
+    // As a last resort for CodePen, poll briefly for late defaults (e.g., set after a delay)
+    let polls = 0;
+    const POLL_LIMIT = 60; // ~6s at 100ms
+    const t = setInterval(() => {
+      polls++;
+      if (_extDefaults) {
+        tryApplyDefaults();
+        clearInterval(t);
+      }
+      if (polls >= POLL_LIMIT) clearInterval(t);
+    }, 100);
 
     // keep excluded containers synced to viewport label; re-apply scopes in auto
     window.addEventListener(

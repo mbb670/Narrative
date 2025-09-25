@@ -7,18 +7,15 @@
   const GROUP_H2_CL = "text-group-heading";
   const DEFAULT_WEIGHT = "regular"; // render Regular only on load
 
-  const GROUPS = [
-    { key: "display", label: "Display", sizes: ["lg", "md", "sm"] },
-    { key: "headline", label: "Headline", sizes: ["lg", "md", "sm"] },
-    {
-      key: "subheadline",
-      label: "Subheadline",
-      sizes: ["lg", "md", "sm", "xs"]
-    },
-    { key: "body", label: "Body", sizes: ["lg", "md", "sm", "xs"] },
-    { key: "system", label: "System", sizes: ["lg", "md", "sm", "xs"] },
-    { key: "uppercase", label: "Uppercase", sizes: ["lg", "md", "sm"] }
-  ];
+  // Canonical group definitions (unchanging)
+  const TYPE_GROUP_DEFS = {
+    display: { label: "Display", sizes: ["lg", "md", "sm"] },
+    headline: { label: "Headline", sizes: ["lg", "md", "sm"] },
+    subheadline: { label: "Subheadline", sizes: ["lg", "md", "sm", "xs"] },
+    body: { label: "Body", sizes: ["lg", "md", "sm", "xs"] },
+    system: { label: "System", sizes: ["lg", "md", "sm", "xs"] },
+    uppercase: { label: "Uppercase", sizes: ["lg", "md", "sm"] }
+  };
 
   const WEIGHTS = {
     regular: {
@@ -46,37 +43,184 @@
     })();
   container.innerHTML = "";
 
-  // ---------- SWITCHER ----------
-  (function buildSwitcher() {
-    const prev = document.getElementById(SWITCHER_ID);
-    if (prev) prev.remove();
+  // ---------- READ GROUP FROM DOM (data-type-group / optional label/sizes) ----------
+  const GROUPS = (() => {
+    const key = (container.dataset.typeGroup || "").trim();
+    const parseList = (s) =>
+      s
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
 
-    const rg = document.createElement("div");
-    rg.id = SWITCHER_ID;
-    rg.className =
-      "type-weight-switcher fixed-control elevation-elevation-fixed-top";
-    rg.setAttribute("role", "radiogroup");
-    rg.setAttribute(
+    // If no data-type-group: render ALL groups (original behavior)
+    if (!key) {
+      return Object.entries(TYPE_GROUP_DEFS).map(([k, def]) => ({
+        key: k,
+        label: def.label,
+        sizes: def.sizes.slice()
+      }));
+    }
+
+    // If a key is provided: render only that single group (with optional overrides)
+    const base = TYPE_GROUP_DEFS[key];
+    if (!base) {
+      console.warn(
+        `Unknown data-type-group="${key}". Falling back to 'display'.`
+      );
+      const fb = TYPE_GROUP_DEFS.display;
+      return [{ key: "display", label: fb.label, sizes: fb.sizes.slice() }];
+    }
+
+    const label = container.dataset.typeLabel || base.label;
+    const sizes = container.dataset.typeSizes
+      ? parseList(container.dataset.typeSizes)
+      : base.sizes.slice();
+
+    return [{ key, label, sizes }];
+  })();
+
+  // ---------- TYPOGRAPHY CONTROLS (Weight + Style) ----------
+  (function buildTypographyControls() {
+    const WRAP_ID = "typography-controls";
+    const ITALIC_SWITCHER_ID = "style-switcher";
+
+    // Clean up any existing controls/wrappers
+    const prevWrap = document.getElementById(WRAP_ID);
+    if (prevWrap) prevWrap.remove();
+    const prevWeight = document.getElementById(
+      typeof SWITCHER_ID !== "undefined" ? SWITCHER_ID : ""
+    );
+    if (prevWeight) prevWeight.remove();
+    const prevStyle = document.getElementById(ITALIC_SWITCHER_ID);
+    if (prevStyle) prevStyle.remove();
+
+    // Create wrapper and place it before your container
+    const wrap = document.createElement("div");
+    wrap.id = WRAP_ID;
+    wrap.className = "typography-controls";
+    wrap.setAttribute(
       "data-swap-exclude",
       "theme fontTheme colorTheme breakpoint"
     );
-    rg.setAttribute("aria-label", "Font weight");
+    container.insertAdjacentElement("beforebegin", wrap);
 
-    const mk = (value, label, checked) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "switcher-btn";
-      b.setAttribute("role", "radio");
-      b.dataset.value = value;
-      b.setAttribute("aria-checked", checked ? "true" : "false");
-      b.tabIndex = checked ? 0 : -1;
-      b.textContent = label;
-      return b;
-    };
+    // ========== WEIGHT SWITCHER ==========
+    (function buildWeightSwitcher() {
+      const rg = document.createElement("div");
+      rg.id = SWITCHER_ID; // uses your existing constant
+      rg.className =
+        "type-weight-switcher elevation-elevation-fixed-top content-switcher";
+      rg.setAttribute("role", "radiogroup");
+      rg.setAttribute("aria-label", "Font weight");
 
-    rg.appendChild(mk("regular", "Regular", true));
-    rg.appendChild(mk("semibold", "SemiBold", false));
-    container.insertAdjacentElement("beforebegin", rg);
+      const mk = (value, label, checked) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "switcher-btn";
+        b.setAttribute("role", "radio");
+        b.dataset.value = value;
+        b.setAttribute("aria-checked", checked ? "true" : "false");
+        b.tabIndex = checked ? 0 : -1;
+        b.textContent = label;
+        return b;
+      };
+
+      rg.appendChild(mk("regular", "Regular", true));
+      rg.appendChild(mk("semibold", "SemiBold", false));
+
+      // Mount into wrapper
+      wrap.appendChild(rg);
+    })();
+
+    // ========== STYLE SWITCHER (Regular / Italic) ==========
+    (function buildItalicSwitcher() {
+      const rg = document.createElement("div");
+      rg.id = "style-switcher";
+      rg.className =
+        "type-style-switcher elevation-elevation-fixed-top content-switcher";
+      rg.setAttribute("role", "radiogroup");
+      rg.setAttribute("aria-label", "Font style");
+
+      const mk = (value, label, checked) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "switcher-btn";
+        b.setAttribute("role", "radio");
+        b.dataset.value = value;
+        b.setAttribute("aria-checked", checked ? "true" : "false");
+        b.tabIndex = checked ? 0 : -1;
+        b.textContent = label;
+        return b;
+      };
+
+      const btnRegular = mk("regular", "Regular", true);
+      const btnItalic = mk("italic", "Italic", false);
+      rg.appendChild(btnRegular);
+      rg.appendChild(btnItalic);
+
+      // Mount into wrapper
+      wrap.appendChild(rg);
+
+      // Helper: toggle class on all .text-sample elements
+      const applyItalic = (isItalic) => {
+        document.querySelectorAll(".text-sample").forEach((el) => {
+          el.classList.toggle("italic-active", isItalic);
+        });
+      };
+
+      // Update UI selection
+      const setChecked = (btn) => {
+        const buttons = rg.querySelectorAll('[role="radio"]');
+        buttons.forEach((b) => {
+          const active = b === btn;
+          b.setAttribute("aria-checked", active ? "true" : "false");
+          b.tabIndex = active ? 0 : -1;
+        });
+      };
+
+      // Click handling
+      rg.addEventListener("click", (e) => {
+        const btn = e.target.closest('[role="radio"]');
+        if (!btn) return;
+        setChecked(btn);
+        applyItalic(btn.dataset.value === "italic");
+      });
+
+      // Keyboard support (arrow keys / home/end / space/enter)
+      rg.addEventListener("keydown", (e) => {
+        const buttons = Array.from(rg.querySelectorAll('[role="radio"]'));
+        const current = document.activeElement.closest('[role="radio"]');
+        if (!current) return;
+
+        const idx = buttons.indexOf(current);
+        let nextIdx = idx;
+
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          nextIdx = (idx + 1) % buttons.length;
+          e.preventDefault();
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          nextIdx = (idx - 1 + buttons.length) % buttons.length;
+          e.preventDefault();
+        } else if (e.key === "Home") {
+          nextIdx = 0;
+          e.preventDefault();
+        } else if (e.key === "End") {
+          nextIdx = buttons.length - 1;
+          e.preventDefault();
+        } else if (e.key !== " " && e.key !== "Enter") {
+          return;
+        }
+
+        const targetBtn =
+          e.key === " " || e.key === "Enter" ? current : buttons[nextIdx];
+        setChecked(targetBtn);
+        applyItalic(targetBtn.dataset.value === "italic");
+        targetBtn.focus();
+      });
+
+      // Initialize state (regular)
+      applyItalic(false);
+    })();
   })();
 
   // ---------- RENDER (REGULAR ONLY) ----------
@@ -140,7 +284,7 @@
     for (const g of GROUPS) {
       // Group heading
       const h2 = document.createElement("h2");
-      h2.className = [GROUP_H2_CL, "text-display-semibold-md"]
+      h2.className = [GROUP_H2_CL, "text-display-semibold-sm"]
         .filter(Boolean)
         .join(" ");
       h2.id = `group-${g.key}`;
@@ -241,7 +385,7 @@
         sample.classList.add(`text-${groupKey}-${W.classPart}-${size}`);
       }
 
-      // Optional: update the title chip (only if you want the label to change)
+      // Optional: update the title chip
       const titleEl = sec.parentElement?.querySelector(".text-title.copyable");
       if (titleEl) {
         const className = `text-${groupKey}-${W.classPart}-${size}`;

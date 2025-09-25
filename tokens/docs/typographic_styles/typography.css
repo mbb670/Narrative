@@ -1,16 +1,14 @@
 #switch-theme,
-/* #switch-fontTheme, */
 #switch-colorTheme,
-/* #switch-breakpoint */
-#format-switcher
-/* .group-title */ {
+#format-switcher {
   display: none;
 }
 
 #typography-sections {
   max-width: 1920px;
   margin: 0 auto;
-  padding-inline: var(--layout-grid-margin);
+  padding: var(--layout-grid-margin);
+  padding-top: unset;
   &::after {
     content: "";
     width: 100%;
@@ -111,21 +109,65 @@
 }
 
 /* WEIGHT SWITCHER */
-#type-weight-switcher {
+.typography-controls {
+  position: fixed;
+  z-index: 200;
   top: 0;
   right: 0;
-  bottom: unset;
-  left: unset;
-  margin: var(--spacing-x24) var(--spacing-x16);
-  border: 1px solid var(--border-muted);
-  padding: var(--spacing-x4);
-  gap: var(--spacing-x2);
+  display: flex;
+  gap: var(--spacing-x12);
+  margin: var(--spacing-x20) var(--spacing-x16);
+  .content-switcher {
+    background: var(--background-muted);
+    border: 1px solid var(--border-muted) !important;
+    padding: var(--spacing-x4);
+    gap: var(--spacing-x2);
+    margin: unset !important;
 
-  button {
-    border-radius: var(--radius-slight);
-  }
-  [aria-checked="true"] {
-    background: var(--background-default) !important;
-    outline: 1px solid var(--border-subtle);
+    button {
+      border-radius: var(--radius-slight);
+    }
+    [aria-checked="true"] {
+      background: var(--background-default) !important;
+      outline: 1px solid var(--border-subtle);
+    }
   }
 }
+
+.italic-active {
+  font-style: italic;
+}
+
+
+
+.zeroheight-demo {
+  padding: unset !important;
+  margin-top: var(--unit-96) !important;
+
+  .text-group-heading {
+    display: none;
+  }
+
+  .text-group {
+    gap: var(--spacing-x16);
+  }
+  .text-sample {
+    padding-inline: var(--spacing-x16);
+  }
+
+  .grid {
+    margin: var(--spacing-x16);
+  }
+  
+
+  [data-group="display"], [data-group="headline"], [data-group="uppercase"]{
+    .text-parent {
+    min-width: 240px !important;
+  }
+    
+[data-group="subheadline"],  [data-group="body"]{
+    .text-parent {
+       min-width: unset !important;
+  }
+}
+}}

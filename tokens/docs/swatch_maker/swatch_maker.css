@@ -1,4 +1,3 @@
-
 .grid {
   position: relative; /* overlay positions against this */
   display: grid;
@@ -182,9 +181,6 @@
 .token-swap {
   top: 0;
   bottom: unset;
-  > :nth-child(2) {
-    /*     display: none; */
-  }
 }
 
 [data-type="string"],
