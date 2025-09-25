@@ -50,7 +50,7 @@ select {
 }
 
 #switch-theme,
-#type-weight-switcher {
+.content-switcher {
   display: flex;
   border: 1px solid var(--border-default);
   overflow: hidden;
