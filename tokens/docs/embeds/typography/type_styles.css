@@ -1,3 +1,9 @@
+@import url("../../../resolved/extended_tokens.css");
+@import url("../../general_styling/styles.css");
+@import url("../../token_switcher/switcher.css");
+@import url("../../swatch_maker/swatch_maker.css");
+@import url("../../typographic_styles/typography.css");
+
 .token-swap,
 .typography-controls {
   margin-inline: unset;
