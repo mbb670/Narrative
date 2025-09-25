@@ -1,0 +1,3 @@
+window.tokenSwapDefaults = {
+  breakpoint: "mobile"
+};

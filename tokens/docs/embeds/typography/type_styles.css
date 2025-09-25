@@ -2,3 +2,41 @@
 .typography-controls {
   margin-inline: unset;
 }
+
+
+.zeroheight-demo {
+  padding: unset !important;
+  margin-top: var(--unit-96) !important;
+
+  .text-group-heading {
+    display: none;
+  }
+
+  .text-group {
+    gap: var(--spacing-x16);
+  }
+
+  .text-sample {
+    padding-inline: var(--spacing-x16);
+  }
+
+  .grid {
+    margin: var(--spacing-x16);
+  }
+
+
+  [data-group="display"],
+  [data-group="headline"],
+  [data-group="uppercase"] {
+    .text-parent {
+      min-width: 240px !important;
+    }
+
+    [data-group="subheadline"],
+    [data-group="body"] {
+      .text-parent {
+        min-width: unset !important;
+      }
+    }
+  }
+}
