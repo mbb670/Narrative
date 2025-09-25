@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Token → CSS Var Converter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Token → CSS</h1>
+        <div class="toolbar">
+            <button id="sample">Load sample</button>
+            <label class="chip" title="Upload single JSON (inline editor)"><input id="file" type="file"
+                    accept="application/json" style="display:none"><span>📁 Upload JSON</span></label>
+            <button id="collectionsBtn" title="Create/manage collections of sets">Collections…</button>
+            <button id="fmt" title="Pretty‑print the inline JSON">Format JSON</button>
+            <button id="convert" class="primary" title="Convert → CSS">Convert →</button>
+            <button id="copy" title="Copy CSS">Copy CSS</button>
+            <button id="dl" title="Download CSS">Download CSS</button>
+            <button id="copySwitch" title="Copy tiny JS to toggle 'Other' collections">Copy switcher</button>
+        </div>
+    </header>
+    <section class="settings">
+        <div class="grid">
+            <label class="chip" title="Optional prefix added to every CSS var name">Prefix <input id="prefix"
+                    placeholder="(optional)" style="width:9em"></label>
+            <label class="chip" title=":root by default; change to a custom selector">Selector <input id="selector"
+                    value=":root" style="width:9em"></label>
+            <label class="chip" title="How var names are cased">Name case <select id="case">
+                    <option value="kebab">kebab-case</option>
+                    <option value="snake">snake_case</option>
+                    <option value="camel">camelCase</option>
+                </select></label>
+            <label class="chip" title="Joiner between path parts">Path joiner <input id="joiner" value="-"
+                    style="width:4em"></label>
+            <label class="chip" title="Plain numbers become px"><input id="numPx" type="checkbox"> Numbers → px</label>
+            <label class="chip" title="Convert fontSize to rem using Base"><input id="fontRem" type="checkbox"> fontSize
+                → rem</label>
+            <label class="chip" title="Rem base for fontSize">Base (px) <input id="remBase" type="number" value="16"
+                    min="1" style="width:5em"></label>
+            <label class="chip" title="Ignore keys starting with '_' or '$'"><input id="excludePriv" type="checkbox"
+                    checked> Skip keys starting with _</label>
+            <label class="chip" title="Keep references as var(--…)"><input id="emitVarRefs" type="radio" name="ref"
+                    checked> Emit var(--…) for {refs}</label>
+            <label class="chip" title="Resolve references to raw values"><input id="resolveRefs" type="radio"
+                    name="ref"> Resolve {refs} to values</label>
+            <label class="chip" title="Add resolved fallback inside var()"><input id="emitFallback" type="checkbox">
+                Fallback for var refs</label>
+            <label class="chip" title="Disable coloring overlay while selecting for perfect highlight"><input
+                    id="smartSel" type="checkbox" checked> Selection-friendly colors</label>
+            <label class="chip" title="Include inline JSON editor as the last override"><input id="useInline"
+                    type="checkbox" checked> Use inline JSON override</label>
+            <label class="chip"
+                title="Order: Global → Breakpoints (mobile→tablet→desktop→other asc) → Other (default first) → Mode (light→dark) → Styles"><input
+                    id="autoSort" type="checkbox" checked> Auto sort</label>
+            <label class="chip"
+                title="Also emit manual attribute toggles (breakpoints via [data-breakpoint='…'] and Other defaults via [data-collection='…'])"><input
+                    id="attrManual" type="checkbox"> Manual attribute toggles</label>
+        </div>
+    </section>
+    <div class="wrap">
+        <div class="pane">
+            <h2>JSON Tokens (editable)</h2>
+            <div class="box">
+                <div class="editor">
+                    <pre id="jsonHL" class="overlay hl" aria-hidden="true"></pre><textarea id="json" class="area"
+                        spellcheck="false" placeholder="Paste tokens JSON here…"></textarea></div>
+                <div class="status" id="jstatus">Ready. Tip: press <span class="kbd">Tab</span> inserts \t. Press <span
+                        class="kbd">⌘/Ctrl</span>+<span class="kbd">↵</span> to convert.</div>
+            </div>
+        </div>
+        <div class="pane">
+            <h2>CSS (vars + wrappers/classes, editable)</h2>
+            <div class="box">
+                <div class="editor">
+                    <pre id="cssHL" class="overlay hl" aria-hidden="true"></pre><textarea id="css" class="area"
+                        spellcheck="false"
+                        placeholder=":root{\n  --color-primary:#e11d48;\n}\n\n.text-display-regular-lg {\n  font-size: var(--display-font-size-lg);\n}"></textarea>
+                </div>
+                <div class="status">Output updates on “Convert”.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="collectionsModal" class="modal" aria-hidden="true">
+        <div class="sheet" role="dialog" aria-modal="true">
+            <header>
+                <div class="row" style="padding:.6rem 1rem"><strong>Collections</strong><button
+                        id="closeCollections">Close</button></div>
+            </header>
+            <div class="glist" id="glist"></div>
+            <div class="row" style="padding:10px"><button id="addGroup">+ Add collection</button><button
+                    id="addFolderColl">Add folder(s) → collections</button><input id="folderPick" type="file"
+                    webkitdirectory directory multiple accept="application/json" style="display:none"></div>
+        </div>
+    </div>
+
+    <div id="setEditor" class="overlay2" aria-hidden="true">
+        <div class="card">
+            <div class="row"><strong id="seTitle">Edit set</strong><span class="grow"></span><button
+                    id="seClose">✕</button></div><textarea id="seArea" spellcheck="false"></textarea>
+            <div class="row"><button id="seSave" class="primary">Save</button><button id="seCancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script defer src="script.js"></script>
+</body>
+
+</html>

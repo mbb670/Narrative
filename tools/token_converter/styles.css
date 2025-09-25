@@ -1,0 +1,405 @@
+:root {
+    --pad: 12px;
+    --lh: 1.5;
+    --padx: 12px
+}
+
+html,
+body {
+    height: 100%
+}
+
+body {
+    margin: 0;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    font: 14px/var(--lh) ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Roboto Mono", monospace;
+    background: #0b0d10;
+    color: #e8eaf0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+    color: inherit
+}
+
+button {
+    background: #1f2533;
+    border: 1px solid #2a3245;
+    padding: .45rem .7rem;
+    border-radius: .5rem;
+    cursor: pointer;
+    transition: background .15s
+}
+
+button:hover,
+.chip:hover {
+    background: #1a2130
+}
+
+button.primary {
+    background: #2c7be5;
+    border-color: #2c7be5
+}
+
+button.primary:hover {
+    filter: brightness(1.05)
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .35rem .5rem;
+    border: 1px solid #273042;
+    background: #131926;
+    border-radius: .5rem;
+    white-space: nowrap
+}
+
+.muted {
+    opacity: .75
+}
+
+.kbd {
+    border: 1px solid #2a3245;
+    border-bottom-color: #222b3c;
+    border-right-color: #222b3c;
+    background: #0e131d;
+    padding: 0 .35rem;
+    border-radius: .3rem;
+    font-size: .9em
+}
+
+header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid #1b1f29;
+    background: #0f1218
+}
+
+h1 {
+    font: 600 14px/1 ui-sans-serif, system-ui, Segoe UI, Roboto;
+    color: #cbd5e1;
+    margin: 0
+}
+
+small {
+    opacity: .7
+}
+
+.toolbar {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-left: auto
+}
+
+.settings {
+    padding: var(--pad);
+    border-bottom: 1px solid #1b1f29;
+    background: #0b0f16
+}
+
+.settings .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 8px
+}
+
+.settings .chip input,
+.settings .chip select {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px dashed #2a3245;
+    outline: none
+}
+
+.wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: var(--pad)
+}
+
+@media(max-width:900px) {
+    .wrap {
+        grid-template-columns: 1fr
+    }
+}
+
+.pane {
+    display: flex;
+    flex-direction: column;
+    min-height: 0
+}
+
+.pane h2 {
+    margin: .25rem 0 .25rem;
+    font: 600 12px/1 ui-sans-serif, system-ui;
+    color: #94a3b8;
+    letter-spacing: .06em;
+    text-transform: uppercase
+}
+
+.box {
+    position: relative;
+    border: 1px solid #1b2130;
+    background: #0e1117;
+    border-radius: .6rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 auto
+}
+
+.status {
+    padding: 6px 10px;
+    border-top: 1px solid #1b2130;
+    font-size: 12px;
+    color: #9da9c0;
+    background: #0b0f16
+}
+
+.editor {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0
+}
+
+.area {
+    position: relative;
+    z-index: 2;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: 10px var(--padx);
+    resize: none;
+    background: transparent;
+    border: 0;
+    outline: none;
+    white-space: pre;
+    overflow: auto;
+    color: transparent;
+    caret-color: #e8eaf0;
+    tab-size: 2;
+    line-height: var(--lh);
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga"0, "calt"0;
+    text-rendering: optimizeLegibility
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    padding: 10px var(--padx);
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+    z-index: 1;
+    tab-size: 2;
+    line-height: var(--lh);
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga"0, "calt"0;
+    text-rendering: optimizeLegibility
+}
+
+.selecting .overlay {
+    display: none
+}
+
+.selecting .area {
+    color: #e8eaf0
+}
+
+.hl {
+    font: inherit;
+    color: #d4d4d4
+}
+
+.hl .s {
+    color: #ce9178
+}
+
+.hl .n {
+    color: #b5cea8
+}
+
+.hl .b {
+    color: #569cd6
+}
+
+.hl .p {
+    color: #808080
+}
+
+.hl .c {
+    color: #6a9955
+}
+
+.hl .sel {
+    color: #c586c0
+}
+
+.hl .prop {
+    color: #9cdcfe
+}
+
+.hl .u {
+    color: #b5cea8
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: flex-end;
+    background: rgba(0, 0, 0, .55);
+    z-index: 9999
+}
+
+.modal.open {
+    display: flex
+}
+
+body.modal-open {
+    overflow: hidden
+}
+
+.sheet {
+    position: relative;
+    background: #0b0f16;
+    border-top: 1px solid #1b1f29;
+    max-height: 85vh;
+    overflow: auto;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px
+}
+
+.sheet header {
+    position: sticky;
+    top: 0;
+    background: #0f1218;
+    border-bottom: 1px solid #1b1f29
+}
+
+.glist {
+    padding: 12px;
+    display: grid;
+    gap: 10px
+}
+
+.gcard {
+    border: 1px solid #223;
+    border-radius: 10px;
+    background: #0e1117;
+    padding: 10px
+}
+
+.row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center
+}
+
+.grow {
+    flex: 1
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed
+}
+
+.table th,
+.table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #1b2130;
+    font-size: 12px;
+    vertical-align: middle
+}
+
+.table th {
+    text-align: left;
+    color: #9fb1c9
+}
+
+.col-on {
+    width: 44px
+}
+
+.col-num {
+    width: 40px
+}
+
+.col-ctrl {
+    width: 260px
+}
+
+.col-json {
+    width: 140px
+}
+
+.col-actions {
+    width: 120px
+}
+
+.tag {
+    padding: .1rem .4rem;
+    border: 1px solid #2a3245;
+    background: #0e131d;
+    border-radius: .35rem;
+    font-size: .85em
+}
+
+.overlay2 {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000
+}
+
+.overlay2.open {
+    display: flex
+}
+
+.card {
+    background: #0e1117;
+    border: 1px solid #223;
+    border-radius: 10px;
+    max-width: min(900px, 90vw);
+    width: 90vw;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px
+}
+
+.card textarea {
+    height: 50vh;
+    background: #0b0f16;
+    color: #e8eaf0;
+    border: 1px solid #273042;
+    border-radius: 8px;
+    padding: 8px;
+    resize: vertical
+}
