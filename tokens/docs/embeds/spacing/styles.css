@@ -1,0 +1,56 @@
+@import url("../../../resolved/extended_tokens.css");
+@import url("../../general_styling/styles.css");
+@import url("../../token_switcher/switcher.css");
+@import url("../../swatch_maker/swatch_maker.css");
+
+
+
+#switch-theme,
+#switch-fontTheme,
+#switch-colorTheme,
+#format-switcher,
+.group-title {
+    display: none;
+}
+
+body {
+    margin: unset !important;
+
+    &::after {
+        content: "";
+        width: 100%;
+        height: var(--unit-80);
+        background: var(--background-default);
+        border-bottom: 1px solid var(--border-subtle);
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+}
+
+.spacing-list {
+    padding: var(--spacing-x96) var(--layout-grid-margin);
+
+    li {
+        display: flex;
+        align-items: flex-start;
+        flex-wrap: nowrap;
+        gap: var(--spacing-x8);
+        margin-bottom: var(--spacing-x8);
+        align-items: stretch;
+
+        article {
+            width: 150px;
+            flex: 0 0 auto;
+        }
+
+        aside {
+            flex: 0 0 auto;
+            background: var(--background-subtle);
+            border-radius: var(--radius-default);
+            min-height: 0;
+            overflow: auto;
+            width: calc(var(--spacing-demo) * 4);
+        }
+    }
+}
