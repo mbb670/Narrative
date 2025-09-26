@@ -9,7 +9,10 @@
 }
 
 body{
-    margin: var(--layout-grid-margin);
+    margin: var(--spacing-x16);
     margin-top: var(--spacing-x96);
-
 }
+
+/* .grid{
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+} */
