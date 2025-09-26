@@ -4,15 +4,43 @@
 @import url("../../swatch_maker/swatch_maker.css");
 @import url("../../typographic_styles/typography.css");
 
-.token-swap,
+
+
+#typography-sections {
+  &::after {
+    width: 100%;
+    height: var(--unit-48);
+    background: var(--background-subtle);
+    border-bottom: unset;
+    border-radius: var(--radius-relaxed);
+  }
+}
+
+.typography-controls{
+  margin-top: var(--spacing-x8);
+  div{
+    box-shadow: unset;
+  }
+}
+
+
+
+.token-swap{
+  /* background-color: var(--background-default); */
+  border: unset;
+  padding: unset;
+   margin-top: var(--spacing-x12);
+}
+
+/* .token-swap,
 .typography-controls {
   margin-inline: unset;
-}
+} */
 
 
 .zeroheight-demo {
   padding: unset !important;
-  margin-top: var(--unit-96) !important;
+  margin-top: var(--unit-72) !important;
 
   .text-group-heading {
     display: none;
