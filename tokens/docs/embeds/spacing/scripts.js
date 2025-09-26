@@ -33,7 +33,7 @@ window.tokenSwapDefaults = {
             const li = document.createElement("li");
 
             const article = document.createElement("article");
-            article.className = "card";
+            article.className = "card hide-resolved-values";
             article.dataset.token = `--spacing-x${n}`;
 
             const aside = document.createElement("aside");
@@ -56,3 +56,37 @@ window.tokenSwapDefaults = {
         }) :
         run();
 })();
+
+
+// Toggle for resolved values
+
+(function () {
+    const toggle = document.getElementById('toggleResolved');
+
+    // Ensure default OFF: all .card elements carry .hide-resolved-values
+    function applyDefaultOff() {
+      document.querySelectorAll('.card').forEach(card => {
+        card.classList.add('hide-resolved-values');
+      });
+    }
+
+    function updateCards(isOn) {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        if (isOn) {
+          card.classList.remove('hide-resolved-values');
+        } else {
+          card.classList.add('hide-resolved-values');
+        }
+      });
+      // Keep ARIA in sync for button-like semantics
+      toggle.setAttribute('aria-pressed', String(isOn));
+    }
+
+    // Init
+    applyDefaultOff();
+    updateCards(toggle.checked); // should be false initially
+
+    // Wire up
+    toggle.addEventListener('change', () => updateCards(toggle.checked));
+  })();

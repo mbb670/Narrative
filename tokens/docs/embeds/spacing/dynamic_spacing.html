@@ -13,10 +13,17 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 
-<body>
-    <ul class="spacing-list" data-swap-exclude="theme fontTheme colorTheme breakpoint"></ul>
+<body data-swap-exclude="theme fontTheme colorTheme breakpoint">
+    <div class="toggle-wrap text-display-regular-lg" id="resolvedToggleControl">
+        <label for="toggleResolved">Show resolved values</label>
+        <input type="checkbox" id="toggleResolved" class="visually-hidden" aria-pressed="false" />
+        <label for="toggleResolved" class="switch" aria-hidden="true"></label>
+    </div>
+
+
+    <ul class="spacing-list"></ul>
     <!-- JS -->
-  <script type="module" defer src="scripts.js"></script>
+    <script type="module" defer src="scripts.js"></script>
 </body>
 
 </html>

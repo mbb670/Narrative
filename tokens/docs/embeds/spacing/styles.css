@@ -3,8 +3,6 @@
 @import url("../../token_switcher/switcher.css");
 @import url("../../swatch_maker/swatch_maker.css");
 
-
-
 #switch-theme,
 #switch-fontTheme,
 #switch-colorTheme,
@@ -15,21 +13,10 @@
 
 body {
     margin: unset !important;
-
-    &::after {
-        content: "";
-        width: 100%;
-        height: var(--unit-80);
-        background: var(--background-default);
-        border-bottom: 1px solid var(--border-subtle);
-        position: fixed;
-        top: 0;
-        left: 0;
-    }
 }
 
 .spacing-list {
-    padding: var(--spacing-x96) var(--layout-grid-margin);
+    padding: var(--unit-96) var(--layout-grid-margin);
 
     li {
         display: flex;
@@ -53,4 +40,88 @@ body {
             width: calc(var(--spacing-demo) * 4);
         }
     }
+}
+
+
+
+
+
+
+/* Toggle for resolved values */
+
+.hide-resolved-values {
+    border: unset !important;
+    overflow: visible;
+
+    .token {
+        width: var(--unit-96);
+    }
+
+    .info {
+        padding: unset;
+        border: unset !important;
+    }
+
+    .hexline {
+        display: none;
+    }
+}
+
+
+
+/* Switch styles (kept minimal) */
+.toggle-wrap {
+    position: fixed;
+    right:0;
+    margin: var(--spacing-x24);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-x12);
+}
+
+.switch {
+    --w: var(--spacing-x56);
+    --h: var(--spacing-x24);
+    --pad: var(--spacing-x4);
+    position: relative;
+    width: var(--w);
+    height: var(--h);
+    border-radius: var(--h);
+    background: var(--background-medium);
+    cursor: pointer;
+    transition: background .2s;
+}
+
+.switch::after {
+    content: "";
+    position: absolute;
+    top: var(--pad);
+    left: var(--pad);
+    width: calc(var(--h) - var(--pad) * 2);
+    height: calc(var(--h) - var(--pad) * 2);
+    border-radius: 50%;
+    background: var(--background-default);
+    transition: transform .2s;
+}
+
+#toggleResolved:checked+.switch {
+    background: var(--system-positive-default);
+    background: var(--background-strong);
+}
+
+#toggleResolved:checked+.switch::after {
+    transform: translateX(calc(var(--w) - var(--h)));
+}
+
+/* Visually hide the native checkbox but keep it accessible */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
 }
