@@ -10,7 +10,7 @@
   &::after {
     width: 100%;
     height: var(--unit-48);
-    background: var(--background-subtle);
+    background: var(--background-muted);
     border-bottom: unset;
     border-radius: var(--radius-relaxed);
   }
@@ -27,6 +27,7 @@
 
 .token-swap{
   /* background-color: var(--background-default); */
+  background: unset;
   border: unset;
   padding: unset;
    margin-top: var(--spacing-x12);
