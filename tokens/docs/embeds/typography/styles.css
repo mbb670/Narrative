@@ -47,7 +47,7 @@
   }
 
   .text-group {
-    gap: var(--spacing-x16);
+    gap: var(--spacing-x64) var(--spacing-x16);
   }
 
   .text-sample {
