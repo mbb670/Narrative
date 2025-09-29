@@ -1,23 +1,25 @@
-import registerFormatName from '../tools/style-dictionary/register-formats.mjs';
-
+/**
+ * Primary SD config that compiles all JSON in tokens/raw into one CSS file.
+ * Output: tokens/resolved/tokens-test.css
+ */
 export default {
-  // IMPORTANT: only the raw sources here
-  source: [
-    'raw/**/*.json',      // <- your actual tokens
-    // 'tokens/**/*.json'    
-  ],
+  source: ["tokens/raw/**/*.json"],
 
-  // No transforms that resolve references.
+  // You can add "include" here if you have shared sets you want merged in.
+  // include: ["tokens/shared/**/*.json"],
+
   platforms: {
     css: {
-      transforms: [],          // don't use 'resolveReferences' or groups that include it
-      buildPath: 'resolved/',  // wherever you want the CSS written
+      // The built-in transform group for CSS variables
+      transformGroup: "css",
+      // IMPORTANT: write only inside tokens/resolved/
+      buildPath: "tokens/resolved/",
       files: [
         {
-          destination: 'tokens.css',
-          format: 'narrative/css-collections' // <- our formatter
-        }
-      ]
-    }
-  }
+          destination: "tokens-test.css",
+          format: "narrative/css-collections", // our custom formatter
+        },
+      ],
+    },
+  },
 };
