@@ -1,0 +1,50 @@
+name: Build Tokens
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "tokens/raw/**"
+      - "sd.config.cjs"
+      - "package.json"
+      - "package-lock.json"
+  pull_request:
+    paths:
+      - "tokens/raw/**"
+      - "sd.config.cjs"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build tokens
+        run: npm run build
+
+      - name: Commit generated files back
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(tokens): rebuild outputs [skip ci]"
+          file_pattern: |
+            tokens/resolved/**
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
