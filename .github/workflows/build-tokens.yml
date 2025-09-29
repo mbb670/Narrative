@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       config:
-        description: "Build only this config from sd-configs/ (e.g. token-test.mjs)"
+        description: "Build only this config from sd-configs/ (e.g. css-primary.mjs)"
         required: false
         default: ""
 
