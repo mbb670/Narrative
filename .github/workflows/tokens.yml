@@ -9,8 +9,8 @@ on:
       - ".github/workflows/tokens.yml"
 
 permissions:
-  contents: write   # <-- lets github-actions[bot] push commits
-
+  contents: write   
+  
 jobs:
   build:
     runs-on: ubuntu-latest
