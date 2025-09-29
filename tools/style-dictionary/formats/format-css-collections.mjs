@@ -1,328 +1,304 @@
-// tools/style-dictionary/formats/format-css-collections.mjs
-// Strict folder-based collections: global | breakpoint | mode | styles | other(<folder>)
+/**
+ * format-css-collections.mjs
+ * Style Dictionary v4 custom formatter that:
+ *  - Groups tokens by folder: global | breakpoint | mode | styles | other
+ *  - Emits sections in readable, “expected” CSS blocks
+ *  - Canonicalizes last token segment (font-family → fontfamily, etc.)
+ *  - Builds breakpoints (mobile base, tablet ≥640, desktop ≥1024)
+ *  - Builds modes ([data-theme="light|dark"])
+ *  - Builds “other” themes (colorTheme/fontTheme), with data-* attributes
+ *  - Builds style utility classes when a token’s value is an object
+ */
 
-const JOINER = "-";
-const RESERVED_TYPES = new Set(["global", "breakpoint", "mode", "styles"]);
-const DEFAULT_BP_ORDER = ["mobile", "tablet", "desktop"];
-const DEFAULT_BP_MIN = { mobile: 0, tablet: 640, desktop: 1024 };
-const INCLUDE_OTHER_DEFAULTS_IN_BASE = true;
+const BP_MIN = { mobile: 0, tablet: 640, desktop: 1024 };
 
-// Map dashed CSS-y leaf keys to the undashed style your expected CSS uses.
-const CANON_LEAF = [
+const CANON_LEAF = new Map([
   ["font-family", "fontfamily"],
-  ["font-size", "fontsize"],
-  ["line-height", "lineheight"],
   ["font-weight", "fontweight"],
   ["letter-spacing", "letterspacing"],
-  ["text-transform", "texttransform"],
-  ["font-stretch", "fontstretch"],
-];
-const canonLeaf = (seg) => {
-  for (const [from, to] of CANON_LEAF) {
-    if (seg === from) return to;
-    // handle suffixes like font-size-lg → fontsize-lg
-    if (seg.startsWith(from + "-")) return seg.replace(from + "-", to + "-");
+  ["line-height", "lineheight"],
+]);
+
+// ---------- small helpers ----------
+const kebab = (s) =>
+  String(s)
+    .trim()
+    .replace(/[\s_]+/g, "-")
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/-+/g, "-")
+    .toLowerCase();
+
+const canonLeaf = (name) => {
+  const parts = name.split("-");
+  // Walk from the end and replace the first leaf match
+  for (let i = parts.length; i > 0; i--) {
+    const tail = parts.slice(i - 1).join("-");
+    if (CANON_LEAF.has(tail)) {
+      parts.splice(i - 1, parts.length - (i - 1), CANON_LEAF.get(tail));
+      break;
+    }
   }
-  return seg;
+  return parts.join("-");
 };
 
-const isPriv = (s) => /^[_$]/.test(s);
-const stripExt = (s) => s.replace(/\.(json|ya?ml|ts|js)$/i, "");
+const varName = (token) => canonLeaf(kebab(token.name || token.path?.join("-") || ""));
 
-function lastIndexOfTokens(segs) {
-  for (let i = segs.length - 1; i >= 0; i--) {
-    if (segs[i].toLowerCase() === "tokens") return i;
+const byNameAsc = (a, b) => varName(a).localeCompare(varName(b));
+
+const cssProp = (p) => kebab(p);
+
+// Styles: derive a property if value is scalar and token doesn't specify one
+const inferScalarProp = (t) => {
+  const n = varName(t);
+  if (/\belevation\b|\bshadow\b|\bfocus\b/i.test(n)) return "box-shadow";
+  return "value";
+};
+
+// Pull “folder/type” segments from file path *after* tokens/raw/
+const pathSegs = (filePath = "") => {
+  const p = String(filePath).replace(/\\/g, "/");
+  const i = p.lastIndexOf("/tokens/raw/");
+  const sub = i >= 0 ? p.slice(i + "/tokens/raw/".length) : p;
+  return sub.split("/").filter(Boolean);
+};
+
+const classify = (filePath = "") => {
+  const p = filePath.replace(/\\/g, "/");
+  if (p.includes("/global/")) return "global";
+  if (p.includes("/breakpoint/")) return "breakpoint";
+  if (p.includes("/mode/")) return "mode";
+  if (p.includes("/styles/")) return "styles";
+  return "other";
+};
+
+// Write helpers
+const IND = (n) => "  ".repeat(n);
+const rule = (name, value, i = 2) => `${IND(i)}--${name}: ${value};\n`;
+
+const start = (title) => (title ? `/* ${title} */\n` : "");
+const open = (sel, i = 0) => `${IND(i)}${sel} {\n`;
+const close = (i = 0) => `${IND(i)}}\n`;
+
+const joinShadow = (v) => (Array.isArray(v) ? v.join(", ") : v);
+
+// Emit a utility class from a token whose value is an object
+const emitClassFromObject = (sel, obj, i = 0) => {
+  let out = open(sel, i);
+  for (const [k, v] of Object.entries(obj)) {
+    if (v == null) continue;
+    if (typeof v === "object" && !Array.isArray(v)) {
+      // nested object → flatten one level with --custom-props?
+      // Here we stringify directly (advanced schemas can be added later)
+      out += `${IND(i + 1)}/* unsupported nested: ${k} */\n`;
+      continue;
+    }
+    const val = Array.isArray(v) ? joinShadow(v) : v;
+    out += `${IND(i + 1)}${cssProp(k)}: ${val};\n`;
   }
-  return -1;
-}
+  out += close(i);
+  return out;
+};
 
-/** === Classification: strictly by folder name === */
-function classify(token) {
-  const fp = (token.filePath || "").replace(/\\/g, "/");
-  const segs = fp.split("/");
-  let i = lastIndexOfTokens(segs);
-  let idx = i >= 0 ? i + 1 : 0;
-  if (segs[idx] && segs[idx].toLowerCase() === "raw") idx += 1;
+// Emit a utility class from a scalar (infer a property)
+const emitClassFromScalar = (sel, prop, value, i = 0) => {
+  return `${open(sel, i)}${IND(i + 1)}${cssProp(prop)}: ${value};\n${close(i)}`;
+};
 
-  const folderRaw = segs[idx] || "";
-  const folder = folderRaw.toLowerCase();
-  const nextRaw = segs[idx + 1] || ""; // may be file or subfolder
-  const next = stripExt(nextRaw);
-
-  if (RESERVED_TYPES.has(folder)) {
-    // global has no setName; others do
-    return {
-      type: folder,                             // "global" | "breakpoint" | "mode" | "styles"
-      collectionKey: folder,                    // label/selector base
-      collectionKeyLabel: folderRaw,            // preserve original case for comments/attrs
-      setName: folder === "global" ? "default" : (next || "default"),
-    };
-  }
-
-  // Anything else is "other" with collection=<folderRaw> and set=<next>
-  return {
-    type: "other",
-    collectionKey: folder,                      // lowercase for internal use
-    collectionKeyLabel: folderRaw,              // keep original like "colorTheme", "fontTheme"
-    setName: next || "default",
-  };
-}
-
-/** Build CSS custom property name from token.path */
-function varNameFromToken(t) {
-  // normalize only "leaf" keys that are the property names like font-family → fontfamily
-  const parts = t.path.filter((p) => !isPriv(p)).map((p) => String(p));
-  if (parts.length) {
-    const leaf = parts[parts.length - 1];
-    parts[parts.length - 1] = canonLeaf(leaf);
-  }
-  return "--" + parts.map((p) =>
-    p.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/[\s_]+/g, "-").toLowerCase()
-  ).join(JOINER);
-}
-
-const visibleVarTokens = (all) =>
-  all.filter((t) => !t.path.some(isPriv) && typeof t.value !== "object");
-
-const styleObjectTokens = (all) =>
-  all.filter((t) => !t.path.some(isPriv) && (typeof t.value === "object" || Array.isArray(t.value)));
-
-/** Reference detection on *original* string "{a.b.c}" */
-function refFromString(str) {
-  const m = /^\{([^}]+)\}$/.exec(String(str).trim());
-  if (!m) return null;
-  const refVar =
-    "--" +
-    m[1]
-      .split(".")
-      .map((p, i, arr) => {
-        // apply same leaf canonicalization to the last segment
-        if (i === arr.length - 1) p = canonLeaf(p);
-        return p.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/[\s_]+/g, "-").toLowerCase();
-      })
-      .join(JOINER);
-  return { refVar };
-}
-
-function tokenDecl(t) {
-  const name = varNameFromToken(t);
-  const orig = t.original && t.original.value != null ? t.original.value : t.value;
-  if (typeof orig === "string") {
-    const r = refFromString(orig);
-    if (r) return `${name}: var(${r.refVar});`;
-  }
-  return `${name}: ${t.value};`;
-}
-
-function emitBlock(selector, lines, comment) {
-  if (!lines.length) return "";
-  const head = comment ? `/* ${comment} */\n\n` : "";
-  return head + `${selector} {\n` + lines.map((l) => `  ${l}`).join("\n") + `\n}\n\n`;
-}
-
-function emitAtMedia(min, inner, comment) {
-  if (!inner) return "";
-  const head = comment ? `/* ${comment} */\n\n` : "";
-  const indented = inner.split("\n").map((l) => (l ? "  " + l : l)).join("\n");
-  return `${head}@media (min-width: ${min}px) {\n${indented}}\n\n`;
-}
-
-/** Sort tokens for stable output */
-const sortByVar = (a, b) => (varNameFromToken(a) < varNameFromToken(b) ? -1 : 1);
-
-/** Pull a numeric "minWidth" from tokens in a breakpoint set, else defaults */
-function minWidthForSet(setName, tokensInSet) {
-  // look for *_meta/minWidth or minWidth token (original or resolved)
-  const t = tokensInSet.find((x) =>
-    /(^|\/)_?meta\/minwidth$/i.test(x.path.slice(-2).join("/")) ||
-    /^minwidth$/i.test(x.path.slice(-1)[0])
-  );
-  if (t) {
-    const v = parseFloat(String(t.value));
-    if (!Number.isNaN(v)) return v;
-  }
-  if (Object.prototype.hasOwnProperty.call(DEFAULT_BP_MIN, setName)) return DEFAULT_BP_MIN[setName];
-  return 0;
-}
-
-/** === Styles helpers: keep refs by using original value === */
-const lowerKeys = (o) => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k.toLowerCase(), v]));
-
-function looksLikeTypography(obj) {
-  const o = lowerKeys(obj);
-  return (
-    o["fontsize"] != null || o["font-size"] != null ||
-    o["fontfamily"] != null || o["font-family"] != null ||
-    o["lineheight"] != null || o["line-height"] != null ||
-    o["letterspacing"] != null || o["letter-spacing"] != null ||
-    o["fontweight"] != null || o["font-weight"] != null ||
-    o["texttransform"] != null || o["text-transform"] != null ||
-    o["fontstretch"] != null || o["font-stretch"] != null
-  );
-}
-function looksLikeShadowPiece(o) {
-  const k = lowerKeys(o);
-  return ("x" in k || "y" in k || "blur" in k || "spread" in k) && ("color" in k || "type" in k);
-}
-function valWithRefs(v) {
-  if (typeof v !== "string") return v;
-  const r = refFromString(v);
-  return r ? `var(${r.refVar})` : v;
-}
-function boxShadowFromPieces(pieces) {
-  return pieces
-    .map((o) => {
-      const x = valWithRefs(o.x ?? 0);
-      const y = valWithRefs(o.y ?? 0);
-      const blur = valWithRefs(o.blur ?? 0);
-      const spread = valWithRefs(o.spread ?? 0);
-      const color = valWithRefs(o.color ?? "currentColor");
-      const inset = String(o.type || "").toLowerCase().includes("inner") || o.inset ? " inset" : "";
-      return `${x} ${y} ${blur} ${spread} ${color}${inset}`.trim();
-    })
-    .join(", ");
-}
-
-/** class selector builder: keep 'styles' trimmed from the front */
-function classSelectorFromPath(pathParts, forcedPrefix) {
-  const parts = pathParts.slice();
-  while (parts[0] && parts[0].toLowerCase() === "styles") parts.shift();
-  const cls = parts.map((p) =>
-    p.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/[\s_]+/g, "-").toLowerCase()
-  ).join(JOINER);
-  return `.${forcedPrefix}${cls}`;
-}
-
+// ---------- formatter ----------
 export default function formatter({ dictionary }) {
-  const all = dictionary.allTokens;
-  const varTokens = visibleVarTokens(all);
-  const styleTokens = styleObjectTokens(all);
+  // Buckets
+  const buckets = {
+    global: [],
+    breakpoint: [],
+    mode: [],
+    styles: [],
+    other: [],
+  };
 
-  // Group tokens
-  const groups = {};
-  for (const t of varTokens) {
-    const info = classify(t);
-    const key = `${info.type}::${info.collectionKeyLabel}::${info.setName}`;
-    (groups[key] ||= { info, tokens: [] }).tokens.push(t);
-  }
+  // Indexers for detailed grouping
+  const bp = { mobile: [], tablet: [], desktop: [] };
+  const modes = { light: [], dark: [] };
+  const other = {
+    colorTheme: { default: [], variants: {} }, // variants[name]=[]
+    fontTheme: { default: [], variants: {} },
+    misc: [], // anything else in "other"
+  };
+  const styles = new Map(); // key = "folder/sub", value = tokens[]
 
-  const decls = (arr) => arr.slice().sort(sortByVar).map(tokenDecl);
+  // Distribute tokens
+  for (const t of dictionary.allTokens) {
+    const col = classify(t.filePath || t.file?.path || "");
+    buckets[col].push(t);
 
-  let css = "";
-
-  // 1) Base: global + other/*/default (optional)
-  const baseLines = [];
-  for (const g of Object.values(groups)) {
-    const { type, setName } = g.info;
-    if (type === "global" || (INCLUDE_OTHER_DEFAULTS_IN_BASE && type === "other" && setName.toLowerCase() === "default")) {
-      baseLines.push(...decls(g.tokens));
-    }
-  }
-  css += emitBlock(":root", baseLines, "Base: Global + inline + defaults");
-
-  // 2) Breakpoints (mobile default block first, then media queries)
-  const bpGroups = Object.values(groups).filter((g) => g.info.type === "breakpoint");
-  if (bpGroups.length) {
-    const bySet = {};
-    for (const g of bpGroups) (bySet[g.info.setName] ||= []).push(...g.tokens);
-    // determine order using defaults; include any extra sets at the end sorted by minWidth
-    const known = DEFAULT_BP_ORDER.filter((s) => bySet[s]);
-    const unknown = Object.keys(bySet).filter((s) => !known.includes(s))
-      .map((s) => ({ s, min: minWidthForSet(s, bySet[s]) }))
-      .sort((a, b) => a.min - b.min)
-      .map((x) => x.s);
-    const order = [...known, ...unknown];
-
-    for (const set of order) {
-      const min = minWidthForSet(set, bySet[set]);
-      const block = emitBlock(":root", decls(bySet[set]),
-        min === 0 ? `Breakpoint default — breakpoint/${set}` : `Breakpoint min-width ${min}px — breakpoint/${set}`
-      );
-      css += min === 0 ? block : emitAtMedia(min, block);
-    }
-  }
-
-  // 3) Other collections
-  const others = Object.values(groups).filter((g) => g.info.type === "other");
-  const collections = [...new Set(others.map((g) => g.info.collectionKeyLabel))];
-  for (const colLabel of collections) {
-    const inCol = others.filter((g) => g.info.collectionKeyLabel === colLabel);
-    const defaults = inCol.filter((g) => g.info.setName.toLowerCase() === "default");
-    const nonDefaults = inCol.filter((g) => g.info.setName.toLowerCase() !== "default");
-
-    for (const g of defaults) {
-      css += emitBlock(":root", decls(g.tokens), `Other ${colLabel} — default`);
-    }
-    for (const g of nonDefaults) {
-      const attr = `data-${colLabel}`;
-      css += emitBlock(`[${attr}="${g.info.setName}"]`, decls(g.tokens), `Other ${colLabel} — set ${g.info.setName}`);
-    }
-  }
-
-  // 4) Modes
-  const modeGroups = Object.values(groups).filter((g) => g.info.type === "mode");
-  if (modeGroups.length) {
-    const byMode = {};
-    for (const g of modeGroups) (byMode[g.info.setName] ||= []).push(...g.tokens);
-    // ensure light/dark come first if present
-    const order = ["light", "dark", ...Object.keys(byMode).sort()];
-    const seen = new Set();
-    for (const m of order) {
-      if (!byMode[m] || seen.has(m)) continue;
-      seen.add(m);
-      css += emitBlock(`[data-theme="${m}"]`, decls(byMode[m]), `Mode ${m} — mode/${m}`);
-    }
-  }
-
-  // 5) Styles → classes (typography + elevation + generic)
-  let classes = "";
-  for (const t of styleTokens) {
-    // Prefer original (to keep {refs}) but fall back to resolved
-    const value = (t.original && t.original.value != null) ? t.original.value : t.value;
-
-    // Elevation (array/object of shadow pieces)
-    if ((Array.isArray(value) && value.every(looksLikeShadowPiece)) || looksLikeShadowPiece(value)) {
-      const pieces = Array.isArray(value) ? value : [value];
-      classes += emitBlock(
-        classSelectorFromPath(t.path, "elevation-"),
-        [`box-shadow: ${boxShadowFromPieces(pieces)};`],
-        `Styles: ${t.path.filter((p) => p !== "styles").join("/")}`
-      );
+    if (col === "breakpoint") {
+      const seg = pathSegs(t.filePath);
+      // tokens/raw/breakpoint/<mobile|tablet|desktop>/...
+      const variant = seg[1] || "mobile";
+      (bp[variant] || bp.mobile).push(t);
       continue;
     }
 
-    // Typography objects
-    if (value && typeof value === "object" && looksLikeTypography(value)) {
-      const decls = Object.entries(value).map(([k, v]) => {
-        const prop = k.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-        const val =
-          Array.isArray(v) ? v.map(valWithRefs).join(" ") :
-          typeof v === "string" ? valWithRefs(v) : v;
-        return `${prop}: ${val};`;
-      });
-      classes += emitBlock(
-        classSelectorFromPath(t.path, "text-"),
-        decls,
-        `Styles: ${t.path.filter((p) => p !== "styles").join("/")}`
-      );
+    if (col === "mode") {
+      const seg = pathSegs(t.filePath);
+      const variant = seg[1] || "light";
+      (modes[variant] || modes.light).push(t);
       continue;
     }
 
-    // Generic style objects
-    if (value && typeof value === "object") {
-      const decls = Object.entries(value).map(([k, v]) => {
-        const prop = k.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-        const val = typeof v === "string" ? valWithRefs(v) : v;
-        return `${prop}: ${val};`;
-      });
-      classes += emitBlock(
-        classSelectorFromPath(t.path, "style-"),
-        decls,
-        `Styles: ${t.path.filter((p) => p !== "styles").join("/")}`
-      );
+    if (col === "styles") {
+      const seg = pathSegs(t.filePath);
+      // Expect: styles/<section>/<subsection>/<file>.json
+      const sect = seg[1] || "styles";
+      const sub = seg[2] || "styles";
+      const key = `${sect}/${sub}`;
+      if (!styles.has(key)) styles.set(key, []);
+      styles.get(key).push(t);
+      continue;
+    }
+
+    if (col === "other") {
+      const seg = pathSegs(t.filePath);
+      // other/<themeType>/<variant>/...
+      const themeType = seg[0] || "misc";
+      if (themeType === "colorTheme" || themeType === "fontTheme") {
+        const variant = seg[1] || "default";
+        if (variant === "default") {
+          other[themeType].default.push(t);
+        } else {
+          if (!other[themeType].variants[variant])
+            other[themeType].variants[variant] = [];
+          other[themeType].variants[variant].push(t);
+        }
+      } else {
+        other.misc.push(t);
+      }
     }
   }
-  if (classes.trim()) css += `/* Styles (utility classes) */\n` + classes;
 
-  return css.trim() + "\n";
+  // ---------- Emit CSS ----------
+  let out = "";
+
+  // GLOBAL BASE
+  buckets.global.sort(byNameAsc);
+  out += start("Base: Global + inline + defaults");
+  out += open(":root", 0);
+  for (const t of buckets.global) {
+    out += rule(varName(t), t.value, 1);
+  }
+  out += close(0);
+  out += "\n";
+
+  // BREAKPOINTS
+  // “Breakpoint default — breakpoint/mobile”
+  if (bp.mobile.length) {
+    out += start("Breakpoint default — breakpoint/mobile");
+    out += open(":root", 0);
+    for (const t of bp.mobile.sort(byNameAsc)) {
+      out += rule(varName(t), t.value, 1);
+    }
+    out += close(0);
+    out += "\n";
+  }
+  // tablet ≥640
+  if (bp.tablet.length) {
+    out += start("Breakpoint min-width 640px — breakpoint/tablet");
+    out += `@media (min-width: ${BP_MIN.tablet}px) {\n`;
+    out += open(":root", 1);
+    for (const t of bp.tablet.sort(byNameAsc)) {
+      out += rule(varName(t), t.value, 2);
+    }
+    out += close(1);
+    out += "}\n\n";
+  }
+  // desktop ≥1024
+  if (bp.desktop.length) {
+    out += start("Breakpoint min-width 1024px — breakpoint/desktop");
+    out += `@media (min-width: ${BP_MIN.desktop}px) {\n`;
+    out += open(":root", 1);
+    for (const t of bp.desktop.sort(byNameAsc)) {
+      out += rule(varName(t), t.value, 2);
+    }
+    out += close(1);
+    out += "}\n\n";
+  }
+
+  // OTHER: colorTheme
+  const emitThemeBlock = (hdr, selector, tokens) => {
+    if (!tokens?.length) return "";
+    let s = start(hdr);
+    s += open(selector, 0);
+    for (const t of tokens.sort(byNameAsc)) s += rule(varName(t), t.value, 1);
+    s += close(0);
+    s += "\n";
+    return s;
+  };
+
+  // colorTheme default (:root)
+  out += emitThemeBlock("Other colorTheme — default", ":root", other.colorTheme.default);
+  // colorTheme variants ([data-colorTheme="name"])
+  for (const [name, toks] of Object.entries(other.colorTheme.variants)) {
+    out += emitThemeBlock(
+      `Other colorTheme — set ${name}`,
+      `[data-colorTheme="${name}"]`,
+      toks
+    );
+  }
+
+  // fontTheme default (:root)
+  out += emitThemeBlock("Other fontTheme — default", ":root", other.fontTheme.default);
+  // fontTheme variants
+  for (const [name, toks] of Object.entries(other.fontTheme.variants)) {
+    out += emitThemeBlock(
+      `Other fontTheme — set ${name}`,
+      `[data-fontTheme="${name}"]`,
+      toks
+    );
+  }
+
+  // MODES
+  if (modes.light.length) {
+    out += start("Mode light — mode/light");
+    out += open('[data-theme="light"]', 0);
+    for (const t of modes.light.sort(byNameAsc)) {
+      out += rule(varName(t), t.value, 1);
+    }
+    out += close(0);
+    out += "\n";
+  }
+
+  if (modes.dark.length) {
+    out += start("Mode dark — mode/dark");
+    out += open('[data-theme="dark"]', 0);
+    for (const t of modes.dark.sort(byNameAsc)) {
+      out += rule(varName(t), t.value, 1);
+    }
+    out += close(0);
+    out += "\n";
+  }
+
+  // STYLES / utility classes
+  if (styles.size) {
+    out += start("Styles (utility classes)");
+    for (const [section, toks] of [...styles.entries()].sort()) {
+      out += `/* Styles: ${section} */\n`;
+      for (const t of toks) {
+        const cls = "." + kebab(t.name);
+        const v = t.value;
+
+        if (v && typeof v === "object" && !Array.isArray(v)) {
+          out += emitClassFromObject(cls, v, 0);
+        } else {
+          const prop =
+            t.attributes?.cssProperty ||
+            t.original?.attributes?.cssProperty ||
+            inferScalarProp(t);
+          const val = Array.isArray(v) ? joinShadow(v) : v;
+          out += emitClassFromScalar(cls, prop, val, 0);
+        }
+      }
+      out += "\n";
+    }
+  }
+
+  return out.trimEnd() + "\n";
 }
