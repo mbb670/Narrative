@@ -1,35 +1,52 @@
 // tools/style-dictionary/formats/format-css-collections.mjs
-// Folder-based collections -> CSS:
-//  global     -> :root (base variables)
-//  breakpoint -> :root (mobile) + @media(min-width: …) for tablet/desktop
-//  mode       -> [data-theme="light" | "dark"] blocks
-//  styles     -> utility classes (e.g. elevation-*)
-//  other      -> "Other ..." sections (defaults/overrides)
-//
-// NOTE: This file targets Style Dictionary v3.x API: { name, format }.
+// Folder -> CSS collections:
+//  global     -> :root
+//  breakpoint -> :root (mobile) + @media(min-width:...) tablet/desktop
+//  mode       -> [data-theme="..."]
+//  styles     -> utility classes (object tokens => multiple declarations)
+//  other      -> attribute blocks for colorTheme/fontTheme, otherwise :root sections
 
+const RESERVED = new Set(["global", "breakpoint", "mode", "styles"]);
 const BP_MIN = { mobile: 0, tablet: 640, desktop: 1024 };
 
-const INDENT = (n = 2) => " ".repeat(n);
+const LEAF_CANON = new Map([
+  ["font-family", "fontfamily"],
+  ["font-size", "fontsize"],
+  ["font-weight", "fontweight"],
+  ["letter-spacing", "letterspacing"],
+  ["line-height", "lineheight"],
+]);
+
+const IND = (n = 2) => " ".repeat(n);
 const by = (prop) => (a, b) => (a[prop] > b[prop] ? 1 : a[prop] < b[prop] ? -1 : 0);
 
-function getCollection(token) {
-  const p = token.filePath.replace(/\\/g, "/");
-  // tokens/raw/<collection>/...
-  const m = p.match(/\/tokens\/raw\/([^/]+)/);
-  return m ? m[1] : "other";
+// ---------- helpers ----------
+const norm = (s) =>
+  String(s)
+    .replace(/[^A-Za-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase();
+
+function canonPath(path) {
+  const p = path.slice();
+  const i = p.length - 1;
+  const leaf = p[i];
+  if (LEAF_CANON.has(leaf)) p[i] = LEAF_CANON.get(leaf);
+  return p.map(norm);
 }
 
-function getSubgroup(token, collection) {
-  // e.g. tokens/raw/breakpoint/tablet/… → "tablet"
-  const p = token.filePath.replace(/\\/g, "/");
-  const rx = new RegExp(`/tokens/raw/${collection}/([^/]+)/`);
-  const m = p.match(rx);
-  return m ? m[1] : undefined;
+function varNameFromToken(t) {
+  return canonPath(t.path).join("-");
+}
+
+function classNameFromToken(t) {
+  // drop the leading "styles" segment
+  const p = canonPath(t.path.slice(1));
+  return p.join("-");
 }
 
 function cssVarLine(t) {
-  return `--${t.name}: ${t.value};`;
+  return `--${varNameFromToken(t)}: ${t.value};`;
 }
 
 function block(title, body) {
@@ -39,103 +56,106 @@ function block(title, body) {
 
 function rootBlock(lines) {
   if (!lines.length) return "";
-  return `:root {\n${INDENT()}${lines.join(`\n${INDENT()}`)}\n}\n`;
+  return `:root {\n${IND()}${lines.join(`\n${IND()}`)}\n}\n`;
 }
 
 function modeBlock(mode, lines) {
   if (!lines.length) return "";
-  return `[data-theme="${mode}"] {\n${INDENT()}${lines.join(`\n${INDENT()}`)}\n}\n`;
+  return `[data-theme="${mode}"] {\n${IND()}${lines.join(`\n${IND()}`)}\n}\n`;
 }
 
 function mediaRoot(minWidthPx, lines) {
   if (!lines.length) return "";
-  return `@media (min-width: ${minWidthPx}px) {\n  :root {\n    ${lines.join(`\n    `)}\n  }\n}\n`;
+  return `@media (min-width: ${minWidthPx}px) {\n  :root {\n    ${lines.join(
+    `\n    `
+  )}\n  }\n}\n`;
 }
 
-function styleClassRule(token) {
-  // Expect names like "elevation-elevation-action" etc.
-  // If value is already a declaration "box-shadow: …", keep it.
-  // Otherwise assume it's a box-shadow literal.
-  const v = String(token.value).trim();
-  const decl = v.includes(":") ? v : `box-shadow: ${v};`;
-  return `.${token.name} {\n  ${decl}\n}`;
+function styleRuleFromToken(t) {
+  const cls = classNameFromToken(t);
+  const v = t.value;
+
+  // Object → multiple declarations (typography, etc.)
+  if (v && typeof v === "object" && !Array.isArray(v)) {
+    const decls = Object.entries(v).map(([k, val]) => `${k}: ${val};`);
+    return `.${cls} {\n  ${decls.join("\n  ")}\n}`;
+  }
+
+  // String → default to box-shadow if it looks like an elevation value,
+  // otherwise treat as a raw declaration if it already includes a colon.
+  const str = String(v).trim();
+  const decl = str.includes(":") ? str : `box-shadow: ${str};`;
+  return `.${cls} {\n  ${decl}\n}`;
 }
 
+function topFolder(t) {
+  const p = t.filePath.replace(/\\/g, "/");
+  const m = p.match(/\/tokens\/raw\/([^/]+)/);
+  return m ? m[1] : "other";
+}
+
+function secondFolder(t) {
+  const p = t.filePath.replace(/\\/g, "/");
+  const m = p.match(/\/tokens\/raw\/[^/]+\/([^/]+)/);
+  return m ? m[1] : undefined;
+}
+
+function thirdFolder(t) {
+  const p = t.filePath.replace(/\\/g, "/");
+  const m = p.match(/\/tokens\/raw\/[^/]+\/[^/]+\/([^/]+)/);
+  return m ? m[1] : undefined;
+}
+
+// ---------- main formatter ----------
 export default {
   name: "css/collections",
-  format: ({ dictionary }) => {
-    // Partition tokens by top-level collection folder
-    const groups = {
-      global: [],
-      breakpoint: [],
-      mode: [],
-      styles: [],
-      other: []
-    };
+  format: ({ dictionary /*, file*/ }) => {
+    const groups = { global: [], breakpoint: [], mode: [], styles: [], other: [] };
 
     for (const t of dictionary.allTokens) {
-      const col = getCollection(t);
-      if (groups[col]) groups[col].push(t);
+      const folder = topFolder(t);
+      if (RESERVED.has(folder)) groups[folder].push(t);
       else groups.other.push(t);
     }
 
-    // ===== GLOBAL =====
-    const globalVars = groups.global
-      .slice()
-      .sort(by("name"))
-      .map(cssVarLine);
-
     let out = "";
-    out += block("Base: Global + inline + defaults", rootBlock(globalVars));
+
+    // ===== GLOBAL =====
+    const globalLines = groups.global.slice().sort(by("name")).map(cssVarLine);
+    out += block("Base: Global + inline + defaults", rootBlock(globalLines));
 
     // ===== BREAKPOINTS =====
-    // Split by mobile/tablet/desktop
-    const bpBySub = { mobile: [], tablet: [], desktop: [] };
+    const bp = { mobile: [], tablet: [], desktop: [] };
     for (const t of groups.breakpoint) {
-      const sub = getSubgroup(t, "breakpoint") || "mobile";
-      if (!bpBySub[sub]) bpBySub[sub] = [];
-      bpBySub[sub].push(t);
+      const which = secondFolder(t) || "mobile";
+      (bp[which] ||= []).push(t);
     }
-
-    // MOBILE (default root)
-    const mobileLines = (bpBySub.mobile || [])
-      .slice()
-      .sort(by("name"))
-      .map(cssVarLine);
-    if (mobileLines.length) {
-      out += block("Breakpoint default — breakpoint/mobile", rootBlock(mobileLines));
+    const mobile = (bp.mobile || []).slice().sort(by("name")).map(cssVarLine);
+    if (mobile.length) {
+      out += block("Breakpoint default — breakpoint/mobile", rootBlock(mobile));
     }
-
-    // TABLET / DESKTOP (@media)
-    const tabletLines = (bpBySub.tablet || [])
-      .slice()
-      .sort(by("name"))
-      .map(cssVarLine);
-    if (tabletLines.length) {
+    const tablet = (bp.tablet || []).slice().sort(by("name")).map(cssVarLine);
+    if (tablet.length) {
       out += block(
         "Breakpoint min-width 640px — breakpoint/tablet",
-        mediaRoot(BP_MIN.tablet, tabletLines)
+        mediaRoot(BP_MIN.tablet, tablet)
       );
     }
-
-    const desktopLines = (bpBySub.desktop || [])
-      .slice()
-      .sort(by("name"))
-      .map(cssVarLine);
-    if (desktopLines.length) {
+    const desktop = (bp.desktop || []).slice().sort(by("name")).map(cssVarLine);
+    if (desktop.length) {
       out += block(
         "Breakpoint min-width 1024px — breakpoint/desktop",
-        mediaRoot(BP_MIN.desktop, desktopLines)
+        mediaRoot(BP_MIN.desktop, desktop)
       );
     }
 
-    // ===== MODE (light/dark/others) =====
-    const modeBuckets = {};
+    // ===== MODE =====
+    const modes = {};
     for (const t of groups.mode) {
-      const sub = getSubgroup(t, "mode") || "default";
-      (modeBuckets[sub] ||= []).push(t);
+      const which = secondFolder(t) || "default";
+      (modes[which] ||= []).push(t);
     }
-    for (const [mode, toks] of Object.entries(modeBuckets)) {
+    for (const [mode, toks] of Object.entries(modes)) {
       const lines = toks.slice().sort(by("name")).map(cssVarLine);
       const title =
         mode === "light"
@@ -146,36 +166,55 @@ export default {
       out += block(title, modeBlock(mode, lines));
     }
 
-    // ===== STYLES (utility classes) =====
-    const styleRules = groups.styles
-      .slice()
-      .sort(by("name"))
-      .map(styleClassRule);
+    // ===== STYLES =====
+    const styleRules = groups.styles.slice().sort(by("name")).map(styleRuleFromToken);
     if (styleRules.length) {
-      out += block("Styles (utility classes)", "");
-      out += block("Styles: generated from /styles", styleRules.join("\n\n") + "\n");
+      out += block("Styles: styles/styles", styleRules.join("\n\n") + "\n");
     }
 
     // ===== OTHER =====
-    // Dump anything unclassified into labeled sections grouped by second folder
+    // Group by top-level "other" name (e.g., colorTheme, fontTheme, etc.)
     if (groups.other.length) {
       const otherBuckets = {};
       for (const t of groups.other) {
-        // tokens/raw/<other>/<sub>/...
-        const other = getCollection(t); // will be "other"
-        const sub = getSubgroup(t, other) || "default";
-        (otherBuckets[sub] ||= []).push(t);
+        const first = topFolder(t); // will be a non-reserved folder
+        (otherBuckets[first] ||= []).push(t);
       }
-      for (const [sub, toks] of Object.entries(otherBuckets)) {
-        const lines = toks.slice().sort(by("name")).map(cssVarLine);
-        const title =
-          sub === "default"
-            ? "Other — default"
-            : `Other ${sub} — set ${sub}`;
-        out += block(title, rootBlock(lines));
+
+      for (const [folderName, toks] of Object.entries(otherBuckets)) {
+        // Further split by set name under that folder, e.g. default, slate, opinion...
+        const sets = {};
+        for (const t of toks) {
+          const setName = secondFolder(t) || "default";
+          (sets[setName] ||= []).push(t);
+        }
+
+        for (const [setName, setTokens] of Object.entries(sets)) {
+          const lines = setTokens.slice().sort(by("name")).map(cssVarLine);
+
+          // Special handling for colorTheme/fontTheme attribute blocks
+          const attrKey =
+            folderName === "colorTheme"
+              ? `data-colorTheme`
+              : folderName === "fontTheme"
+              ? `data-fontTheme`
+              : null;
+
+          const titlePrefix = `Other ${folderName}`;
+          if (setName === "default") {
+            out += block(`${titlePrefix} — default`, rootBlock(lines));
+          } else if (attrKey) {
+            const body = `[${attrKey}="${setName}"] {\n${IND()}${lines.join(
+              `\n${IND()}`
+            )}\n}\n`;
+            out += block(`${titlePrefix} — set ${setName}`, body);
+          } else {
+            out += block(`${titlePrefix} — set ${setName}`, rootBlock(lines));
+          }
+        }
       }
     }
 
     return out.trim() + "\n";
-  }
+  },
 };
