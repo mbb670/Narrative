@@ -1,7 +1,4 @@
-// tools/format-token-test.mjs
-// Exports a function that Style Dictionary will use as a formatter.
-// Matches your “Style Dictionary Conversion Spec”.
-
+// tools/style-dictionary/sd-css-primary.mjs
 const JOINER = "-";
 
 const TYPE_MAP = {
@@ -21,7 +18,7 @@ const TYPE_MAP = {
 };
 
 const BREAKPOINT_DEFAULTS = { mobile: 0, tablet: 640, desktop: 1024 };
-const MANUAL_ATTR_TOGGLES = false; // flip to true if you want the mirrors
+const MANUAL_ATTR_TOGGLES = false; // flip to true if you want attribute mirrors
 
 const toKebab = (str) =>
   String(str)
@@ -49,14 +46,12 @@ function getCollectionInfo(token) {
   return { type, collectionKey, setName };
 }
 
-function visibleVarTokens(all) {
-  return all.filter((t) => !t.path.some(isPrivate) && typeof t.value !== "object");
-}
-function styleObjectTokens(all) {
-  return all.filter(
+const visibleVarTokens = (all) =>
+  all.filter((t) => !t.path.some(isPrivate) && typeof t.value !== "object");
+const styleObjectTokens = (all) =>
+  all.filter(
     (t) => !t.path.some(isPrivate) && (typeof t.value === "object" || Array.isArray(t.value))
   );
-}
 
 function computeBaseMap(varTokens) {
   const base = {};
@@ -117,7 +112,6 @@ function emitAtMedia(minWidth, innerCss, comment) {
 }
 
 function getBreakpointMinWidth(tokensInSet, setName) {
-  // look for *_meta.minWidth or minWidth tokens
   const cand = tokensInSet.find(
     (t) =>
       t.path.slice(-1)[0].toLowerCase() === "minwidth" ||
@@ -134,7 +128,7 @@ function getBreakpointMinWidth(tokensInSet, setName) {
   return 0;
 }
 
-export default function formatterCSS({ dictionary }) {
+export default function cssPrimaryFormatter({ dictionary }) {
   const all = dictionary.allTokens;
   const varTokens = visibleVarTokens(all);
   const styleTokens = styleObjectTokens(all);
@@ -168,7 +162,7 @@ export default function formatterCSS({ dictionary }) {
 
   let css = "";
 
-  // Base block: Globals + Other/defaults
+  // Base block
   const baseDecls = [];
   for (const g of Object.values(groups).filter((g) => g.info.type === "global")) {
     baseDecls.push(...decls(g.tokens));
@@ -200,8 +194,11 @@ export default function formatterCSS({ dictionary }) {
       else css += emitAtMedia(min, body, null);
 
       if (MANUAL_ATTR_TOGGLES) {
-        const attr = `[data-breakpoint="${set}"]`;
-        css += emitBlock(attr, decls(bySet[set]), `Manual breakpoint — ${set}`);
+        css += emitBlock(
+          `[data-breakpoint="${set}"]`,
+          decls(bySet[set]),
+          `Manual breakpoint — ${set}`
+        );
       }
     }
   }
@@ -255,7 +252,7 @@ export default function formatterCSS({ dictionary }) {
     if (!p) return v;
     if (p.fallback && !/\{.+\}/.test(String(p.fallback))) return `var(${p.refVar}, ${p.fallback})`;
     return `var(${p.refVar})`;
-    };
+  };
   const objToDecls = (obj, targetPropName) => {
     if (targetPropName === "box-shadow") {
       const arr = Array.isArray(obj) ? obj : [obj];
