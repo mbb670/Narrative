@@ -8,24 +8,33 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '../../');
 
-// --- 1) Load our formatter (support function default OR object exports)
+// ---- Load our formatter regardless of export shape
 async function loadFormatter() {
-  const mod = await import(pathToFileURL(path.resolve(__dirname, './formats/format-css-collections.mjs')));
+  const modUrl = pathToFileURL(path.resolve(__dirname, './formats/format-css-collections.mjs'));
+  const mod = await import(modUrl);
+
+  const tryGet = (obj) => {
+    if (!obj) return null;
+    if (typeof obj === 'function') return obj;
+    if (typeof obj.format === 'function') return obj.format;
+    if (typeof obj.formatter === 'function') return obj.formatter;
+    return null;
+  };
+
   const candidate =
-    mod.default && typeof mod.default === 'function' ? mod.default :
-    mod.formatter && typeof mod.formatter === 'function' ? mod.formatter :
-    mod.format && typeof mod.format === 'function' ? mod.format :
+    tryGet(mod.default) || tryGet(mod) ||
     null;
 
   if (!candidate) {
     throw new Error(
-      'format-css-collections.mjs must export a function (default) or an object with a `formatter` or `format` function.'
+      'format-css-collections.mjs must export a formatter function (default), ' +
+      'or an object with a `format` or `formatter` function.'
     );
   }
   return candidate;
 }
 
-// --- 2) Resolve SD config (two levels up from this file)
+// ---- Resolve SD config (keeps your existing path; falls back if missing)
 const configPath = path.resolve(
   repoRoot,
   process.env.SD_CONFIG ?? 'sd-configs/css.mjs'
@@ -42,7 +51,6 @@ async function loadConfig() {
       `[tokens] Could not import config at ${configPath}. Using a minimal default config.\n` +
       `Reason: ${err?.message ?? err}`
     );
-    // Fallback config builds raw tokens with our formatter
     return {
       source: ['raw/**/*.json', 'tokens/**/*.json'],
       platforms: {
@@ -56,22 +64,28 @@ async function loadConfig() {
   }
 }
 
-(async function run() {
-  // Register formatter robustly
-  const formatter = await loadFormatter();
-  StyleDictionary.registerFormat({
-    name: 'narrative/css-collections',
-    formatter,
-  });
+// ---- Register format for SD v3 (formatter) and v2 (format)
+function registerFormatCompat(fn) {
+  // Try v3 first
+  try {
+    StyleDictionary.registerFormat({ name: 'narrative/css-collections', formatter: fn });
+    return 'v3';
+  } catch (_) {
+    // Fall back to v2 API
+    StyleDictionary.registerFormat({ name: 'narrative/css-collections', format: fn });
+    return 'v2';
+  }
+}
 
-  // Load config & build
+(async function run() {
+  const formatter = await loadFormatter();
+  const sdVersion = registerFormatCompat(formatter);
+
   const config = await loadConfig();
   const SD = StyleDictionary.extend(config);
   await SD.buildAllPlatforms();
 
-  console.log(
-    `✅ Built tokens with format "narrative/css-collections". Using config: ${path.relative(repoRoot, configPath)}`
-  );
+  console.log(`✅ Built tokens with "narrative/css-collections" using Style Dictionary ${sdVersion}-style registration.`);
 })().catch((e) => {
   console.error('❌ Token build failed:', e);
   process.exit(1);
