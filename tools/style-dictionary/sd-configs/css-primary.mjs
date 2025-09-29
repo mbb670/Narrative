@@ -4,7 +4,7 @@ export default {
   // IMPORTANT: only the raw sources here
   source: [
     'raw/**/*.json',      // <- your actual tokens
-    'tokens/**/*.json'    // (keep if you have some here)
+    // 'tokens/**/*.json'    
   ],
 
   // No transforms that resolve references.
