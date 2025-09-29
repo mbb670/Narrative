@@ -119,48 +119,48 @@
   --color-yellow-700: #70410d;
   --color-yellow-800: #47240b;
   --color-yellow-900: #200f07;
-  --font-family-benton-modern-compressed: benton-modern-display-compre;
-  --font-family-benton-modern-condensed: benton-modern-display-conden;
-  --font-family-benton-modern-display: benton-modern-display;
-  --font-family-benton-modern-extra-condensed: benton-modern-display-extra;
-  --font-family-benton-modern-text: benton-modern-text;
-  --font-family-franklin-gothic-compressed: franklin-gothic-compressed;
-  --font-family-franklin-gothic-condensed: franklin-gothic-condensed;
-  --font-family-franklin-gothic-default: franklin-gothic;
-  --font-family-franklin-gothic-extra-compressed: franklin-gothic-extra-compre;
-  --font-family-noto-sans: Noto Sans;
-  --font-family-noto-serif: Noto Serif;
-  --font-family-playfair-display: Playfair Display;
-  --font-weight-100: 100;
-  --font-weight-150: 150;
-  --font-weight-200: 200;
-  --font-weight-250: 250;
-  --font-weight-300: 300;
-  --font-weight-350: 350;
-  --font-weight-400: 400;
-  --font-weight-450: 450;
-  --font-weight-500: 500;
-  --font-weight-550: 550;
-  --font-weight-600: 600;
-  --font-weight-650: 650;
-  --font-weight-700: 700;
-  --font-weight-750: 750;
-  --font-weight-800: 800;
-  --font-weight-850: 850;
-  --font-weight-900: 900;
-  --font-weight-950: 950;
-  --letter-spacing-2xl: 0.025em;
-  --letter-spacing-3xl: 0.03em;
-  --letter-spacing-lg: 0.015em;
-  --letter-spacing-md: 0.01em;
-  --letter-spacing-none: 0em;
-  --letter-spacing-sm: 0.005em;
-  --letter-spacing-xl: 0.02em;
-  --line-height-2xl: 1.55;
-  --line-height-lg: 1.35;
-  --line-height-md: 1.25;
-  --line-height-sm: 1.15;
-  --line-height-xl: 1.45;
+  --fontfamily-benton-modern-compressed: benton-modern-display-compre;
+  --fontfamily-benton-modern-condensed: benton-modern-display-conden;
+  --fontfamily-benton-modern-display: benton-modern-display;
+  --fontfamily-benton-modern-extra-condensed: benton-modern-display-extra;
+  --fontfamily-benton-modern-text: benton-modern-text;
+  --fontfamily-franklin-gothic-compressed: franklin-gothic-compressed;
+  --fontfamily-franklin-gothic-condensed: franklin-gothic-condensed;
+  --fontfamily-franklin-gothic-default: franklin-gothic;
+  --fontfamily-franklin-gothic-extra-compressed: franklin-gothic-extra-compre;
+  --fontfamily-noto-sans: Noto Sans;
+  --fontfamily-noto-serif: Noto Serif;
+  --fontfamily-playfair-display: Playfair Display;
+  --fontweight-100: 100;
+  --fontweight-150: 150;
+  --fontweight-200: 200;
+  --fontweight-250: 250;
+  --fontweight-300: 300;
+  --fontweight-350: 350;
+  --fontweight-400: 400;
+  --fontweight-450: 450;
+  --fontweight-500: 500;
+  --fontweight-550: 550;
+  --fontweight-600: 600;
+  --fontweight-650: 650;
+  --fontweight-700: 700;
+  --fontweight-750: 750;
+  --fontweight-800: 800;
+  --fontweight-850: 850;
+  --fontweight-900: 900;
+  --fontweight-950: 950;
+  --letterspacing-2xl: 0.025em;
+  --letterspacing-3xl: 0.03em;
+  --letterspacing-lg: 0.015em;
+  --letterspacing-md: 0.01em;
+  --letterspacing-none: 0em;
+  --letterspacing-sm: 0.005em;
+  --letterspacing-xl: 0.02em;
+  --lineheight-2xl: 1.55;
+  --lineheight-lg: 1.35;
+  --lineheight-md: 1.25;
+  --lineheight-sm: 1.15;
+  --lineheight-xl: 1.45;
   --unit-0: 0px;
   --unit-1: 1px;
   --unit-10: 10px;
@@ -197,48 +197,48 @@
   --body-font-size-md: var(--typography-lg);
   --body-font-size-sm: var(--typography-base);
   --body-font-size-xs: var(--typography-sm);
-  --body-fontfamily: var(--font-family-benton-modern-text, benton-modern-text);
-  --body-lineheight: var(--line-height-2xl, 1.55);
-  --body-regular: var(--font-weight-400, 400);
-  --body-strong: var(--font-weight-700, 700);
+  --body-fontfamily: var(--fontfamily-benton-modern-text, benton-modern-text);
+  --body-lineheight: var(--lineheight-2xl, 1.55);
+  --body-regular: var(--fontweight-400, 400);
+  --body-strong: var(--fontweight-700, 700);
   --builder-text-style: Opinion;
   --display-font-size-lg: var(--typography-9xl);
   --display-font-size-md: var(--typography-8xl);
   --display-font-size-sm: var(--typography-7xl);
-  --display-fontfamily: var(--font-family-benton-modern-condensed, benton-modern-display-conden);
-  --display-lineheight: var(--line-height-sm, 1.15);
-  --display-regular: var(--font-weight-400, 400);
-  --display-strong: var(--font-weight-600, 600);
+  --display-fontfamily: var(--fontfamily-benton-modern-condensed, benton-modern-display-conden);
+  --display-lineheight: var(--lineheight-sm, 1.15);
+  --display-regular: var(--fontweight-400, 400);
+  --display-strong: var(--fontweight-600, 600);
   --headline-font-size-lg: var(--typography-6xl);
   --headline-font-size-md: var(--typography-5xl);
   --headline-font-size-sm: var(--typography-4xl);
-  --headline-fontfamily: var(--font-family-benton-modern-condensed, benton-modern-display-conden);
-  --headline-lineheight: var(--line-height-md, 1.25);
-  --headline-regular: var(--font-weight-400, 400);
-  --headline-strong: var(--font-weight-600, 600);
+  --headline-fontfamily: var(--fontfamily-benton-modern-condensed, benton-modern-display-conden);
+  --headline-lineheight: var(--lineheight-md, 1.25);
+  --headline-regular: var(--fontweight-400, 400);
+  --headline-strong: var(--fontweight-600, 600);
   --subheadline-font-size-lg: var(--typography-3xl);
   --subheadline-font-size-md: var(--typography-2xl);
   --subheadline-font-size-sm: var(--typography-xl);
   --subheadline-font-size-xs: var(--typography-lg);
-  --subheadline-fontfamily: var(--font-family-benton-modern-condensed, benton-modern-display-conden);
-  --subheadline-lineheight: var(--line-height-md, 1.25);
-  --subheadline-regular: var(--font-weight-400, 400);
-  --subheadline-strong: var(--font-weight-600, 600);
+  --subheadline-fontfamily: var(--fontfamily-benton-modern-condensed, benton-modern-display-conden);
+  --subheadline-lineheight: var(--lineheight-md, 1.25);
+  --subheadline-regular: var(--fontweight-400, 400);
+  --subheadline-strong: var(--fontweight-600, 600);
   --system-font-size-lg: var(--typography-xl);
   --system-font-size-md: var(--typography-lg);
   --system-font-size-sm: var(--typography-base);
   --system-font-size-xs: var(--typography-sm);
-  --system-fontfamily: var(--font-family-franklin-gothic-default, franklin-gothic);
-  --system-lineheight: var(--line-height-md, 1.25);
-  --system-regular: var(--font-weight-400, 400);
-  --system-strong: var(--font-weight-500, 500);
+  --system-fontfamily: var(--fontfamily-franklin-gothic-default, franklin-gothic);
+  --system-lineheight: var(--lineheight-md, 1.25);
+  --system-regular: var(--fontweight-400, 400);
+  --system-strong: var(--fontweight-500, 500);
   --uppercase-font-size-lg: var(--typography-sm);
   --uppercase-font-size-md: var(--typography-xs);
   --uppercase-font-size-sm: var(--typography-2xs);
-  --uppercase-fontfamily: var(--font-family-franklin-gothic-condensed, franklin-gothic-condensed);
-  --uppercase-lineheight: var(--line-height-sm, 1.15);
-  --uppercase-regular: var(--font-weight-400, 400);
-  --uppercase-strong: var(--font-weight-500, 500);
+  --uppercase-fontfamily: var(--fontfamily-franklin-gothic-condensed, franklin-gothic-condensed);
+  --uppercase-lineheight: var(--lineheight-sm, 1.15);
+  --uppercase-regular: var(--fontweight-400, 400);
+  --uppercase-strong: var(--fontweight-500, 500);
   --brand-neutrals-050: var(--color-slate-white, #ffffff);
   --brand-neutrals-100: var(--color-slate-100, #f5f5f5);
   --brand-neutrals-200: var(--color-slate-200, #ebebeb);
@@ -280,9 +280,10 @@
   --builder-theme: Slate;
 }
 
-/* Breakpoint custom — breakpoint/default */
+/* Breakpoint min-width 640px — breakpoint/tablet */
 
-:root {
+@media (min-width: 640px) {
+  :root {
   --layout-content-lg-max: 680px;
   --layout-content-md-max: 480px;
   --layout-content-min: 288px;
@@ -333,6 +334,7 @@
   --typography-xl: var(--unit-20, 20px);
   --typography-xs: var(--unit-12, 12px);
 }
+}
 
 /* Other fontTheme — default */
 
@@ -341,48 +343,48 @@
   --body-font-size-md: var(--typography-lg);
   --body-font-size-sm: var(--typography-base);
   --body-font-size-xs: var(--typography-sm);
-  --body-fontfamily: var(--font-family-benton-modern-text, benton-modern-text);
-  --body-lineheight: var(--line-height-2xl, 1.55);
-  --body-regular: var(--font-weight-400, 400);
-  --body-strong: var(--font-weight-700, 700);
+  --body-fontfamily: var(--fontfamily-benton-modern-text, benton-modern-text);
+  --body-lineheight: var(--lineheight-2xl, 1.55);
+  --body-regular: var(--fontweight-400, 400);
+  --body-strong: var(--fontweight-700, 700);
   --builder-text-style: Opinion;
   --display-font-size-lg: var(--typography-9xl);
   --display-font-size-md: var(--typography-8xl);
   --display-font-size-sm: var(--typography-7xl);
-  --display-fontfamily: var(--font-family-benton-modern-condensed, benton-modern-display-conden);
-  --display-lineheight: var(--line-height-sm, 1.15);
-  --display-regular: var(--font-weight-400, 400);
-  --display-strong: var(--font-weight-600, 600);
+  --display-fontfamily: var(--fontfamily-benton-modern-condensed, benton-modern-display-conden);
+  --display-lineheight: var(--lineheight-sm, 1.15);
+  --display-regular: var(--fontweight-400, 400);
+  --display-strong: var(--fontweight-600, 600);
   --headline-font-size-lg: var(--typography-6xl);
   --headline-font-size-md: var(--typography-5xl);
   --headline-font-size-sm: var(--typography-4xl);
-  --headline-fontfamily: var(--font-family-benton-modern-condensed, benton-modern-display-conden);
-  --headline-lineheight: var(--line-height-md, 1.25);
-  --headline-regular: var(--font-weight-400, 400);
-  --headline-strong: var(--font-weight-600, 600);
+  --headline-fontfamily: var(--fontfamily-benton-modern-condensed, benton-modern-display-conden);
+  --headline-lineheight: var(--lineheight-md, 1.25);
+  --headline-regular: var(--fontweight-400, 400);
+  --headline-strong: var(--fontweight-600, 600);
   --subheadline-font-size-lg: var(--typography-3xl);
   --subheadline-font-size-md: var(--typography-2xl);
   --subheadline-font-size-sm: var(--typography-xl);
   --subheadline-font-size-xs: var(--typography-lg);
-  --subheadline-fontfamily: var(--font-family-benton-modern-condensed, benton-modern-display-conden);
-  --subheadline-lineheight: var(--line-height-md, 1.25);
-  --subheadline-regular: var(--font-weight-400, 400);
-  --subheadline-strong: var(--font-weight-600, 600);
+  --subheadline-fontfamily: var(--fontfamily-benton-modern-condensed, benton-modern-display-conden);
+  --subheadline-lineheight: var(--lineheight-md, 1.25);
+  --subheadline-regular: var(--fontweight-400, 400);
+  --subheadline-strong: var(--fontweight-600, 600);
   --system-font-size-lg: var(--typography-xl);
   --system-font-size-md: var(--typography-lg);
   --system-font-size-sm: var(--typography-base);
   --system-font-size-xs: var(--typography-sm);
-  --system-fontfamily: var(--font-family-franklin-gothic-default, franklin-gothic);
-  --system-lineheight: var(--line-height-md, 1.25);
-  --system-regular: var(--font-weight-400, 400);
-  --system-strong: var(--font-weight-500, 500);
+  --system-fontfamily: var(--fontfamily-franklin-gothic-default, franklin-gothic);
+  --system-lineheight: var(--lineheight-md, 1.25);
+  --system-regular: var(--fontweight-400, 400);
+  --system-strong: var(--fontweight-500, 500);
   --uppercase-font-size-lg: var(--typography-sm);
   --uppercase-font-size-md: var(--typography-xs);
   --uppercase-font-size-sm: var(--typography-2xs);
-  --uppercase-fontfamily: var(--font-family-franklin-gothic-condensed, franklin-gothic-condensed);
-  --uppercase-lineheight: var(--line-height-sm, 1.15);
-  --uppercase-regular: var(--font-weight-400, 400);
-  --uppercase-strong: var(--font-weight-500, 500);
+  --uppercase-fontfamily: var(--fontfamily-franklin-gothic-condensed, franklin-gothic-condensed);
+  --uppercase-lineheight: var(--lineheight-sm, 1.15);
+  --uppercase-regular: var(--fontweight-400, 400);
+  --uppercase-strong: var(--fontweight-500, 500);
 }
 
 /* Other colorTheme — default */
@@ -429,9 +431,9 @@
   --builder-theme: Slate;
 }
 
-/* Mode default — mode/default */
+/* Mode light — mode/light */
 
-[data-theme="default"] {
+[data-theme="light"] {
   --background-button-brand-default: var(--brand-primary-500, #19b9c1);
   --background-button-brand-hover: var(--brand-primary-600, #0e838a);
   --background-button-primary-default: var(--brand-neutrals-900, #1a1a1a);
@@ -522,62 +524,31 @@
 
 /* Styles (utility classes) */
 
-.style-elevation-action {
-  x: 0;
-  y: var(--unit-1, 1px);
-  blur: var(--unit-4, 4px);
-  spread: 0;
-  color: var(--color-alpha-black-a100, #10100e14);
-  type: dropShadow;
+.elevation-elevation-action {
+  box-shadow: 0 1px 4px 0 var(--color-alpha-black-a100, #10100e14);
 }
 
-.style-elevation-active {
-  x: 0;
-  y: var(--unit-2, 2px);
-  blur: var(--unit-8, 8px);
-  spread: 0;
-  color: var(--color-alpha-black-a100, #10100e14);
-  type: dropShadow;
+.elevation-elevation-active {
+  box-shadow: 0 2px 8px 0 var(--color-alpha-black-a100, #10100e14);
 }
 
-.style-elevation-fixed-bottom {
-  x: 0;
-  y: -var(--unit-4, 4px);
-  blur: var(--unit-12, 12px);
-  spread: 0;
-  color: var(--color-alpha-black-a100, #10100e14);
-  type: dropShadow;
+.elevation-elevation-fixed-bottom {
+  box-shadow: 0 -4px 12px 0 var(--color-alpha-black-a100, #10100e14);
 }
 
-.style-elevation-fixed-top {
-  x: 0;
-  y: var(--unit-4, 4px);
-  blur: var(--unit-12, 12px);
-  spread: 0;
-  color: var(--color-alpha-black-a100, #10100e14);
-  type: dropShadow;
+.elevation-elevation-fixed-top {
+  box-shadow: 0 4px 12px 0 var(--color-alpha-black-a100, #10100e14);
 }
 
-.style-elevation-overlay {
-  x: 0;
-  y: var(--unit-12, 12px);
-  blur: var(--unit-36, 36px);
-  spread: 0;
-  color: var(--color-alpha-black-a200, #10100e29);
-  type: dropShadow;
+.elevation-elevation-overlay {
+  box-shadow: 0 12px 36px 0 var(--color-alpha-black-a200, #10100e29);
 }
 
-.style-elevation-raised {
-  x: 0;
-  y: var(--unit-8, 8px);
-  blur: var(--unit-24, 24px);
-  spread: 0;
-  color: var(--color-alpha-black-a200, #10100e29);
-  type: dropShadow;
+.elevation-elevation-raised {
+  box-shadow: 0 8px 24px 0 var(--color-alpha-black-a200, #10100e29);
 }
 
-.style-form-focus {
-  0: [object Object];
-  1: [object Object];
+.elevation-form-focus {
+  box-shadow: 0 0 0 2px var(--background-default), 0 0 0 4px var(--color-blue-200, #c9daf8);
 }
 
