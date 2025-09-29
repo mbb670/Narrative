@@ -1,26 +1,12 @@
 name: Build tokens
-
 on:
+  workflow_dispatch:
   push:
     paths:
-      - "raw/**"
-      - "tokens/**"
-      - "sd-configs/**"
-      - "tools/style-dictionary/**"
-      - "package.json"
-      - "package-lock.json"
-  pull_request:
-    paths:
-      - "raw/**"
-      - "tokens/**"
-      - "sd-configs/**"
-      - "tools/style-dictionary/**"
-      - "package.json"
-      - "package-lock.json"
-  workflow_dispatch: {}
-
-permissions:
-  contents: write
+      - 'tokens/raw/**.json'
+      - 'tools/style-dictionary/**.mjs'
+      - 'package.json'
+      - '.github/workflows/tokens.yml'
 
 jobs:
   build:
@@ -29,61 +15,39 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # Detect whether a lockfile exists
-      - name: Detect lockfile
-        id: lock
-        run: |
-          if compgen -G "package-lock.json npm-shrinkwrap.json yarn.lock" > /dev/null; then
-            echo "has_lock=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_lock=false" >> $GITHUB_OUTPUT
-          fi
-
-      # Use Node with cache only if a lockfile exists
-      - name: Use Node (cached)
-        if: steps.lock.outputs.has_lock == 'true'
+      - name: Use Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-
-      # Fallback without cache (no lockfile yet)
-      - name: Use Node (no cache)
-        if: steps.lock.outputs.has_lock != 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+          node-version: '20.x'
+          # IMPORTANT: no cache here, avoids lockfile error
 
       - name: Install deps
-        run: |
-          if [ "${{ steps.lock.outputs.has_lock }}" = "true" ]; then
-            npm ci
-          else
-            npm install --no-audit --no-fund
-          fi
+        run: npm i --no-audit --no-fund
 
       - name: Build tokens
         run: node tools/style-dictionary/build.mjs
-        env:
-          SD_CONFIG: sd-configs/css.mjs
+
+      - name: Cleanup stray root resolved folder (if any)
+        run: |
+          if [ -d "resolved" ]; then
+            echo "Found stray ./resolved folder. Removing…"
+            rm -rf resolved
+          fi
 
       - name: Show diff (debug)
         run: |
+          echo "Changed files:"
           git status --porcelain
-          git --no-pager diff --stat || true
+          echo
+          git --no-pager diff -- tokens/resolved/tokens-test.css || true
 
-      - name: Commit generated files back
-        if: github.event_name != 'pull_request'
+      - name: Commit generated file
+        if: ${{ github.actor != 'github-actions[bot]' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add resolved/
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "chore(tokens): rebuild resolved tokens [skip ci]"
-            git push
-          fi
+          git add tokens/resolved/tokens-test.css
+          # Don't fail if nothing changed
+          git diff --cached --quiet && echo "No changes to commit." || git commit -m "chore(tokens): update tokens-test.css [skip ci]"
+          git push
