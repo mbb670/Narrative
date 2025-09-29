@@ -30,21 +30,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # required to push
+          fetch-depth: 0
 
-      - name: Use Node
+      # Detect whether a lockfile exists
+      - name: Detect lockfile
+        id: lock
+        run: |
+          if compgen -G "package-lock.json npm-shrinkwrap.json yarn.lock" > /dev/null; then
+            echo "has_lock=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_lock=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Use Node with cache only if a lockfile exists
+      - name: Use Node (cached)
+        if: steps.lock.outputs.has_lock == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: npm
+
+      # Fallback without cache (no lockfile yet)
+      - name: Use Node (no cache)
+        if: steps.lock.outputs.has_lock != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Install deps
         run: |
-          if [ -f package-lock.json ]; then
-            echo "Using npm ci"
+          if [ "${{ steps.lock.outputs.has_lock }}" = "true" ]; then
             npm ci
           else
-            echo "No lockfile found; using npm install"
             npm install --no-audit --no-fund
           fi
 
@@ -55,9 +72,7 @@ jobs:
 
       - name: Show diff (debug)
         run: |
-          echo "Changed files:"
           git status --porcelain
-          echo
           git --no-pager diff --stat || true
 
       - name: Commit generated files back
