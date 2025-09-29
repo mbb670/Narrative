@@ -1,220 +1,261 @@
-// tools/style-dictionary/formats/format-css-collections.mjs
-// Folder -> CSS collections:
-//  global     -> :root
-//  breakpoint -> :root (mobile) + @media(min-width:...) tablet/desktop
-//  mode       -> [data-theme="..."]
-//  styles     -> utility classes (object tokens => multiple declarations)
-//  other      -> attribute blocks for colorTheme/fontTheme, otherwise :root sections
+// Custom formatter to emit one CSS file composed by folder "collections"
+const HEADER = '/* Base: Global + inline + defaults */';
+const STYLES_HEADER = '/* Styles (utility classes) */';
 
-const RESERVED = new Set(["global", "breakpoint", "mode", "styles"]);
 const BP_MIN = { mobile: 0, tablet: 640, desktop: 1024 };
+const BP_MEDIA = {
+  tablet: `@media (min-width: ${BP_MIN.tablet}px)`,
+  desktop: `@media (min-width: ${BP_MIN.desktop}px)`
+};
 
-const LEAF_CANON = new Map([
-  ["font-family", "fontfamily"],
-  ["font-size", "fontsize"],
-  ["font-weight", "fontweight"],
-  ["letter-spacing", "letterspacing"],
-  ["line-height", "lineheight"],
-]);
+const SECTION_TITLES = {
+  global: '/* Base: Global + inline + defaults */',
+  breakpoint_mobile: '/* Breakpoint default — breakpoint/mobile */',
+  breakpoint_tablet: '/* Breakpoint min-width 640px — breakpoint/tablet */',
+  breakpoint_desktop: '/* Breakpoint min-width 1024px — breakpoint/desktop */',
+  mode_light: '/* Mode light — mode/light */',
+  mode_dark: '/* Mode dark — mode/dark */',
+  styles: STYLES_HEADER,
+  other_default: '/* Other colorTheme — default */',
+};
 
-const IND = (n = 2) => " ".repeat(n);
-const by = (prop) => (a, b) => (a[prop] > b[prop] ? 1 : a[prop] < b[prop] ? -1 : 0);
-
-// ---------- helpers ----------
-const norm = (s) =>
-  String(s)
-    .replace(/[^A-Za-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase();
-
-function canonPath(path) {
-  const p = path.slice();
-  const i = p.length - 1;
-  const leaf = p[i];
-  if (LEAF_CANON.has(leaf)) p[i] = LEAF_CANON.get(leaf);
-  return p.map(norm);
+function isCssVarToken(t) {
+  // Only emit CSS variables for tokens that look like design tokens (skip aliases that SD already resolves)
+  return typeof t.value !== 'object';
 }
 
-function varNameFromToken(t) {
-  return canonPath(t.path).join("-");
+function cssVarLine(name, value) {
+  return `  --${name}: ${value};`;
 }
 
-function classNameFromToken(t) {
-  // drop the leading "styles" segment
-  const p = canonPath(t.path.slice(1));
-  return p.join("-");
+function toVarName(token) {
+  // Use SD's final "name" (already kebab-cased under transformGroup 'css')
+  // Strip any leading underscores, just in case
+  return token.name.replace(/^_+/, '');
 }
 
-function cssVarLine(t) {
-  return `--${varNameFromToken(t)}: ${t.value};`;
+function classifyToken(token) {
+  // Decide collection from the token's source file path (folder name)
+  const fp = token.filePath || '';
+  if (fp.includes('/global/')) return { type: 'global' };
+  if (fp.includes('/breakpoint/')) {
+    if (fp.includes('/mobile/')) return { type: 'breakpoint', bp: 'mobile' };
+    if (fp.includes('/tablet/')) return { type: 'breakpoint', bp: 'tablet' };
+    if (fp.includes('/desktop/')) return { type: 'breakpoint', bp: 'desktop' };
+    // default to mobile if unspecified
+    return { type: 'breakpoint', bp: 'mobile' };
+  }
+  if (fp.includes('/mode/')) {
+    if (fp.includes('/light/')) return { type: 'mode', theme: 'light' };
+    if (fp.includes('/dark/')) return { type: 'mode', theme: 'dark' };
+  }
+  if (fp.includes('/styles/')) return { type: 'styles' };
+  return { type: 'other' };
 }
 
-function block(title, body) {
-  if (!body.trim()) return "";
-  return `/* ${title} */\n${body}\n`;
+// Group tokens
+function bucketize(tokens) {
+  const buckets = {
+    global: [],
+    breakpoint: { mobile: [], tablet: [], desktop: [] },
+    mode: { light: [], dark: [] },
+    styles: [],
+    other: []
+  };
+
+  for (const t of tokens) {
+    const c = classifyToken(t);
+    if (c.type === 'global') buckets.global.push(t);
+    else if (c.type === 'breakpoint') buckets.breakpoint[c.bp].push(t);
+    else if (c.type === 'mode') buckets.mode[c.theme].push(t);
+    else if (c.type === 'styles') buckets.styles.push(t);
+    else buckets.other.push(t);
+  }
+  // sort for stable output
+  const byPath = (a, b) => (a.path.join('/') > b.path.join('/') ? 1 : -1);
+  buckets.global.sort(byPath);
+  buckets.breakpoint.mobile.sort(byPath);
+  buckets.breakpoint.tablet.sort(byPath);
+  buckets.breakpoint.desktop.sort(byPath);
+  buckets.mode.light.sort(byPath);
+  buckets.mode.dark.sort(byPath);
+  buckets.styles.sort(byPath);
+  buckets.other.sort(byPath);
+  return buckets;
 }
 
-function rootBlock(lines) {
-  if (!lines.length) return "";
-  return `:root {\n${IND()}${lines.join(`\n${IND()}`)}\n}\n`;
+function emitRootBlock(lines) {
+  return `:root {\n${lines.join('\n')}\n}`;
 }
 
-function modeBlock(mode, lines) {
-  if (!lines.length) return "";
-  return `[data-theme="${mode}"] {\n${IND()}${lines.join(`\n${IND()}`)}\n}\n`;
+function emitSectionComment(title) {
+  return `\n${title}\n`;
 }
 
-function mediaRoot(minWidthPx, lines) {
-  if (!lines.length) return "";
-  return `@media (min-width: ${minWidthPx}px) {\n  :root {\n    ${lines.join(
-    `\n    `
-  )}\n  }\n}\n`;
+function emitBreakpointBlock(bp, lines) {
+  if (bp === 'mobile') {
+    return emitRootBlock(lines);
+  }
+  const media = bp === 'tablet' ? BP_MEDIA.tablet : BP_MEDIA.desktop;
+  return `${media} {\n  :root {\n${lines.map(l => l.replace(/^  /, '    ')).join('\n')}\n  }\n}\n`;
 }
 
-function styleRuleFromToken(t) {
-  const cls = classNameFromToken(t);
-  const v = t.value;
+function isElevationClass(token) {
+  return token.name.startsWith('elevation-') || token.path.includes('elevation');
+}
 
-  // Object → multiple declarations (typography, etc.)
-  if (v && typeof v === "object" && !Array.isArray(v)) {
-    const decls = Object.entries(v).map(([k, val]) => `${k}: ${val};`);
-    return `.${cls} {\n  ${decls.join("\n  ")}\n}`;
+function isTextClass(token) {
+  return token.name.startsWith('text-') || token.path.includes('text');
+}
+
+function emitStyles(tokens) {
+  // Very light opinionated mapper: if a token resolves to a valid CSS declaration list, emit it.
+  // Expect tokens shaped like:
+  //   { name: 'elevation-elevation-action', value: '0 1px 4px 0 rgba(16, 16, 14, 0.08)' }
+  // or
+  //   { name: 'text-display-regular-lg-font-size', value: 'var(--display-fontsize-lg)' } etc.
+  // If you already store full classes in tokens, just output directly.
+
+  const rules = [];
+  const classBuckets = new Map();
+
+  for (const t of tokens) {
+    if (!isCssVarToken(t)) continue;
+
+    // Try to detect "*.box-shadow" or "*-shadow" values → elevation classes
+    if (isElevationClass(t)) {
+      rules.push(`.${t.name} {\n  box-shadow: ${t.value};\n}`);
+      continue;
+    }
+
+    // Text classes: group properties by the class name prefix (before the last dash that is a property key)
+    if (isTextClass(t)) {
+      // Expect names like: text-display-regular-lg-font-size, text-display-regular-lg-font-weight, ...
+      const parts = t.name.split('-');
+      if (parts.length > 3) {
+        const cls = parts.slice(0, -2).join('-'); // crude but works with your naming
+        const propKey = parts.slice(-2).join('-'); // e.g., font-size
+        const map = classBuckets.get(cls) ?? new Map();
+        map.set(propKey, t.value);
+        classBuckets.set(cls, map);
+      }
+    }
   }
 
-  // String → default to box-shadow if it looks like an elevation value,
-  // otherwise treat as a raw declaration if it already includes a colon.
-  const str = String(v).trim();
-  const decl = str.includes(":") ? str : `box-shadow: ${str};`;
-  return `.${cls} {\n  ${decl}\n}`;
+  for (const [cls, propMap] of classBuckets) {
+    const decl = [];
+    for (const [k, v] of propMap) {
+      // convert dashed end to valid CSS property
+      decl.push(`  ${k}: ${v};`);
+    }
+    rules.push(`.${cls} {\n${decl.join('\n')}\n}`);
+  }
+
+  if (!rules.length) return '';
+  return `${STYLES_HEADER}\n${rules.join('\n\n')}\n`;
 }
 
-function topFolder(t) {
-  const p = t.filePath.replace(/\\/g, "/");
-  const m = p.match(/\/tokens\/raw\/([^/]+)/);
-  return m ? m[1] : "other";
-}
-
-function secondFolder(t) {
-  const p = t.filePath.replace(/\\/g, "/");
-  const m = p.match(/\/tokens\/raw\/[^/]+\/([^/]+)/);
-  return m ? m[1] : undefined;
-}
-
-function thirdFolder(t) {
-  const p = t.filePath.replace(/\\/g, "/");
-  const m = p.match(/\/tokens\/raw\/[^/]+\/[^/]+\/([^/]+)/);
-  return m ? m[1] : undefined;
-}
-
-// ---------- main formatter ----------
 export default {
-  name: "css/collections",
-  format: ({ dictionary /*, file*/ }) => {
-    const groups = { global: [], breakpoint: [], mode: [], styles: [], other: [] };
+  name: 'css/collections',
+  format: ({ dictionary }) => {
+    const buckets = bucketize(dictionary.allTokens);
 
-    for (const t of dictionary.allTokens) {
-      const folder = topFolder(t);
-      if (RESERVED.has(folder)) groups[folder].push(t);
-      else groups.other.push(t);
-    }
+    const out = [];
 
-    let out = "";
-
-    // ===== GLOBAL =====
-    const globalLines = groups.global.slice().sort(by("name")).map(cssVarLine);
-    out += block("Base: Global + inline + defaults", rootBlock(globalLines));
-
-    // ===== BREAKPOINTS =====
-    const bp = { mobile: [], tablet: [], desktop: [] };
-    for (const t of groups.breakpoint) {
-      const which = secondFolder(t) || "mobile";
-      (bp[which] ||= []).push(t);
-    }
-    const mobile = (bp.mobile || []).slice().sort(by("name")).map(cssVarLine);
-    if (mobile.length) {
-      out += block("Breakpoint default — breakpoint/mobile", rootBlock(mobile));
-    }
-    const tablet = (bp.tablet || []).slice().sort(by("name")).map(cssVarLine);
-    if (tablet.length) {
-      out += block(
-        "Breakpoint min-width 640px — breakpoint/tablet",
-        mediaRoot(BP_MIN.tablet, tablet)
-      );
-    }
-    const desktop = (bp.desktop || []).slice().sort(by("name")).map(cssVarLine);
-    if (desktop.length) {
-      out += block(
-        "Breakpoint min-width 1024px — breakpoint/desktop",
-        mediaRoot(BP_MIN.desktop, desktop)
-      );
-    }
-
-    // ===== MODE =====
-    const modes = {};
-    for (const t of groups.mode) {
-      const which = secondFolder(t) || "default";
-      (modes[which] ||= []).push(t);
-    }
-    for (const [mode, toks] of Object.entries(modes)) {
-      const lines = toks.slice().sort(by("name")).map(cssVarLine);
-      const title =
-        mode === "light"
-          ? "Mode light — mode/light"
-          : mode === "dark"
-          ? "Mode dark — mode/dark"
-          : `Mode ${mode} — mode/${mode}`;
-      out += block(title, modeBlock(mode, lines));
-    }
-
-    // ===== STYLES =====
-    const styleRules = groups.styles.slice().sort(by("name")).map(styleRuleFromToken);
-    if (styleRules.length) {
-      out += block("Styles: styles/styles", styleRules.join("\n\n") + "\n");
-    }
-
-    // ===== OTHER =====
-    // Group by top-level "other" name (e.g., colorTheme, fontTheme, etc.)
-    if (groups.other.length) {
-      const otherBuckets = {};
-      for (const t of groups.other) {
-        const first = topFolder(t); // will be a non-reserved folder
-        (otherBuckets[first] ||= []).push(t);
+    // GLOBAL
+    if (buckets.global.length) {
+      const lines = [];
+      for (const t of buckets.global) {
+        if (!isCssVarToken(t)) continue;
+        lines.push(cssVarLine(toVarName(t), t.value));
       }
+      out.push(emitSectionComment(SECTION_TITLES.global));
+      out.push(emitRootBlock(lines));
+    }
 
-      for (const [folderName, toks] of Object.entries(otherBuckets)) {
-        // Further split by set name under that folder, e.g. default, slate, opinion...
-        const sets = {};
-        for (const t of toks) {
-          const setName = secondFolder(t) || "default";
-          (sets[setName] ||= []).push(t);
-        }
+    // BREAKPOINTS
+    const emitBp = (bp) => {
+      const set = buckets.breakpoint[bp];
+      if (!set.length) return;
+      const lines = [];
+      for (const t of set) {
+        if (!isCssVarToken(t)) continue;
+        lines.push(cssVarLine(toVarName(t), t.value));
+      }
+      const titleKey =
+        bp === 'mobile' ? 'breakpoint_mobile' :
+        bp === 'tablet' ? 'breakpoint_tablet' : 'breakpoint_desktop';
+      out.push(emitSectionComment(SECTION_TITLES[titleKey]));
+      out.push(emitBreakpointBlock(bp, lines));
+    };
+    emitBp('mobile');
+    emitBp('tablet');
+    emitBp('desktop');
 
-        for (const [setName, setTokens] of Object.entries(sets)) {
-          const lines = setTokens.slice().sort(by("name")).map(cssVarLine);
+    // MODES (themes)
+    const emitMode = (theme) => {
+      const set = buckets.mode[theme];
+      if (!set.length) return;
+      const lines = [];
+      for (const t of set) {
+        if (!isCssVarToken(t)) continue;
+        lines.push(cssVarLine(toVarName(t), t.value));
+      }
+      const selector = `[data-theme="${theme}"]`;
+      const body = `  --builder-mode: ${theme === 'light' ? 'Light' : 'Dark'};`;
+      out.push(emitSectionComment(
+        theme === 'light' ? SECTION_TITLES.mode_light : SECTION_TITLES.mode_dark
+      ));
+      out.push(`${selector} {\n${lines.join('\n')}\n${body}\n}`);
+    };
+    emitMode('light');
+    emitMode('dark');
 
-          // Special handling for colorTheme/fontTheme attribute blocks
-          const attrKey =
-            folderName === "colorTheme"
-              ? `data-colorTheme`
-              : folderName === "fontTheme"
-              ? `data-fontTheme`
-              : null;
-
-          const titlePrefix = `Other ${folderName}`;
-          if (setName === "default") {
-            out += block(`${titlePrefix} — default`, rootBlock(lines));
-          } else if (attrKey) {
-            const body = `[${attrKey}="${setName}"] {\n${IND()}${lines.join(
-              `\n${IND()}`
-            )}\n}\n`;
-            out += block(`${titlePrefix} — set ${setName}`, body);
-          } else {
-            out += block(`${titlePrefix} — set ${setName}`, rootBlock(lines));
+    // OTHER (e.g., colorTheme/fontTheme sets from folders other than the four reserved ones)
+    if (buckets.other.length) {
+      out.push(emitSectionComment(SECTION_TITLES.other_default));
+      // Group by top-level token path head to avoid mixing themes/styles
+      const groups = new Map();
+      for (const t of buckets.other) {
+        const head = t.path?.[0] ?? 'other';
+        (groups.get(head) ?? groups.set(head, []).get(head)).push(t);
+      }
+      // Default :root block for other/default-ish variables
+      const rootLines = [];
+      const deferredBlocks = [];
+      for (const [groupName, toks] of groups) {
+        // If tokens look like selector-scoped sets (e.g., data-colorTheme or data-fontTheme),
+        // look for a 'selector' attribute (custom) or infer from path.
+        const selectorTokens = toks.filter(tt => (tt.attributes && tt.attributes.selector));
+        if (selectorTokens.length) {
+          const selMap = new Map();
+          for (const tt of selectorTokens) {
+            const sel = tt.attributes.selector;
+            const arr = selMap.get(sel) ?? [];
+            arr.push(tt);
+            selMap.set(sel, arr);
+          }
+          for (const [sel, arr] of selMap) {
+            const lines = arr.filter(isCssVarToken).map(tt => cssVarLine(toVarName(tt), tt.value));
+            deferredBlocks.push(`${sel} {\n${lines.join('\n')}\n}`);
+          }
+        } else {
+          // Otherwise just put them in :root
+          for (const tt of toks) {
+            if (!isCssVarToken(tt)) continue;
+            rootLines.push(cssVarLine(toVarName(tt), tt.value));
           }
         }
       }
+      if (rootLines.length) out.push(emitRootBlock(rootLines));
+      if (deferredBlocks.length) out.push(deferredBlocks.join('\n\n'));
     }
 
-    return out.trim() + "\n";
-  },
+    // STYLES (utility classes)
+    if (buckets.styles.length) {
+      out.push(emitStyles(buckets.styles));
+    }
+
+    return out.filter(Boolean).join('\n\n');
+  }
 };
