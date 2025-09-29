@@ -1,20 +1,19 @@
-// tools/build.mjs
+// tools/style-dictionary/build.mjs
 import StyleDictionary from "style-dictionary";
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 import url from "node:url";
-import formatterCSS from "./format-token-test.mjs";
+import cssPrimaryFormatter from "./sd-css-primary.mjs";
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const CONFIG_DIR = path.resolve(__dirname, "../sd-configs");
+const CONFIG_DIR = path.resolve(__dirname, "../../sd-configs");
 
-// Register custom formatter
+// SD v4 expects { name, format } here (not "formatter")
 StyleDictionary.registerFormat({
-  name: "custom/css-token-test",
-  formatter: formatterCSS
+  name: "custom/css-primary",
+  format: cssPrimaryFormatter
 });
 
-// Helper: import an ESM config file and return the default export
 async function loadConfig(filePath) {
   const mod = await import(url.pathToFileURL(filePath).href);
   return mod.default || mod;
