@@ -1,14 +1,15 @@
-// sd-configs/token-test.mjs
+// A preset that emits tokens-test.css using the generic CSS format.
+// Add more presets beside this file as needed.
 export default {
   source: ["tokens/raw/**/*.json"],
   platforms: {
-    cssTokenTest: {
+    cssPrimary: {
       transformGroup: "css",
       buildPath: "tokens/resolved/",
       files: [
         {
           destination: "tokens-test.css",
-          format: "custom/css-primary"   // <- updated to the new registered name
+          format: "custom/css-collections"  // uses the registered formatter
         }
       ]
     }
