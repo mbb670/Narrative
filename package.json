@@ -2,7 +2,7 @@
   "name": "narrative-tokens",
   "private": true,
   "scripts": {
-    "build": "node tools/build.mjs"
+    "build": "node tools/style-dictionary/build.mjs"
   },
   "devDependencies": {
     "style-dictionary": "^4.0.0"
