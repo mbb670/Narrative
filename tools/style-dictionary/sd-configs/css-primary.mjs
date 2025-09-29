@@ -1,20 +1,31 @@
-// tools/style-dictionary/sd-configs/css-primary.mjs
-// SD v4 config – no legacy transforms; we compute names ourselves in the format.
-// Keep references (var(--...)) with outputReferences: true.
-
+// Primary build config (v3-style). Writes to tokens/resolved/tokens-test.css
 export default {
-  source: ["tokens/raw/**/*.json"],
+  // Optional, but useful while debugging collisions etc.
+  log: { verbosity: 'verbose' },
+
+  // Your raw token JSON
+  source: ['tokens/raw/**/*.json'],
+
   platforms: {
     css: {
-      // No transforms necessary; our formatter builds names from token.path
-      buildPath: "tokens/resolved/",
+      // Use SD's built-in css transformGroup to avoid 'name/cti/kebab' errors
+      transformGroup: 'css',
+
+      // Output folder relative to repo root
+      buildPath: 'tokens/resolved/',
+
       files: [
         {
-          destination: "tokens-test.css",
-          format: "css/collections",
-          options: { outputReferences: true },
-        },
-      ],
-    },
-  },
+          destination: 'tokens-test.css',
+          // <-- this is the custom format we register below
+          format: 'css/collections',
+
+          // You can pass options down to the formatter here if desired
+          options: {
+            // e.g., classPrefix: '', etc.
+          }
+        }
+      ]
+    }
+  }
 };
