@@ -254,16 +254,16 @@
 
 }
 
-/* Other color-theme — default */
+/* Other colorTheme — default */
 
 :root {
   --brand-neutrals-black: var(--color-slate-black);
   --brand-neutrals-white: var(--color-slate-white);
 }
 
-/* Other color-theme — set slate */
+/* Other colorTheme — set slate */
 
-[data-color-theme="slate"] {
+[data-colorTheme="slate"] {
   --brand-neutrals-050: var(--color-slate-white);
   --brand-neutrals-100: var(--color-slate-100);
   --brand-neutrals-200: var(--color-slate-200);
@@ -303,9 +303,9 @@
   --builder-theme: Slate;
 }
 
-/* Other font-theme — set opinion */
+/* Other fontTheme — set opinion */
 
-[data-font-theme="opinion"] {
+[data-fontTheme="opinion"] {
   --body-font-family: var(--font-family-benton-modern-text);
   --body-font-size-lg: var(--typography-xl);
   --body-font-size-md: var(--typography-lg);
@@ -449,41 +449,41 @@
 /* Styles: elevation/action */
 
 .elevation-elevation-action {
-  box-shadow: 0 1px 4px 0 rgba(16, 16, 14, 0.08);
+  box-shadow: 0 var(--unit-1) var(--unit-4) 0 var(--color-alpha-black-a100);
 }
 
 /* Styles: elevation/active */
 
 .elevation-elevation-active {
-  box-shadow: 0 2px 8px 0 rgba(16, 16, 14, 0.08);
+  box-shadow: 0 var(--unit-2) var(--unit-8) 0 var(--color-alpha-black-a100);
 }
 
 /* Styles: elevation/fixed-top */
 
 .elevation-elevation-fixed-top {
-  box-shadow: 0 4px 12px 0 rgba(16, 16, 14, 0.08);
+  box-shadow: 0 var(--unit-4) var(--unit-12) 0 var(--color-alpha-black-a100);
 }
 
 /* Styles: elevation/fixed-bottom */
 
 .elevation-elevation-fixed-bottom {
-  box-shadow: 0 -4px 12px 0 rgba(16, 16, 14, 0.08);
+  box-shadow: 0 -{unit.4} var(--unit-12) 0 var(--color-alpha-black-a100);
 }
 
 /* Styles: elevation/raised */
 
 .elevation-elevation-raised {
-  box-shadow: 0 8px 24px 0 rgba(16, 16, 14, 0.16);
+  box-shadow: 0 var(--unit-8) var(--unit-24) 0 var(--color-alpha-black-a200);
 }
 
 /* Styles: elevation/overlay */
 
 .elevation-elevation-overlay {
-  box-shadow: 0 12px 36px 0 rgba(16, 16, 14, 0.16);
+  box-shadow: 0 var(--unit-12) var(--unit-36) 0 var(--color-alpha-black-a200);
 }
 
 /* Styles: form/focus */
 
 .elevation-form-focus {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #c9daf8 inset;
+  box-shadow: 0 0 0 var(--unit-2) var(--background-default), 0 0 0 var(--unit-4) var(--color-blue-200) inset;
 }
