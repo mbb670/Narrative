@@ -1,17 +1,18 @@
-// tools/style-dictionary/build.mjs
 import StyleDictionary from "style-dictionary";
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 import url from "node:url";
-import cssPrimaryFormatter from "./sd-css-primary.mjs";
+
+// import the generic formatter
+import cssCollectionsFormatter from "./formats/format-css-collections.mjs";
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const CONFIG_DIR = path.resolve(__dirname, "../../sd-configs");
+const CONFIG_DIR = path.resolve(__dirname, "./sd-configs");
 
-// v4: registerFormat expects { name, format }
+// Register the formatter (v4 expects { name, format })
 StyleDictionary.registerFormat({
-  name: "custom/css-primary",
-  format: cssPrimaryFormatter
+  name: "custom/css-collections",
+  format: cssCollectionsFormatter
 });
 
 async function loadConfig(filePath) {
@@ -34,14 +35,13 @@ if (only) {
 }
 
 if (!toBuild.length) {
-  console.error("No configs found in sd-configs/. Add a *.mjs file.");
+  console.error("No configs found in tools/style-dictionary/sd-configs/. Add a *.mjs file.");
   process.exit(1);
 }
 
-// v4: create an instance with 'new', then await build
 for (const cfgPath of toBuild) {
   const cfg = await loadConfig(cfgPath);
   console.log(`\nBuilding with config: ${path.basename(cfgPath)}\n`);
-  const sd = new StyleDictionary(cfg);
+  const sd = new StyleDictionary(cfg);   // v4: instantiate, then build
   await sd.buildAllPlatforms();
 }
