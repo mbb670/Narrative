@@ -4,19 +4,28 @@ import fs from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import StyleDictionary from 'style-dictionary';
 
-// 1) Register our formatter
-import cssCollectionsFormatter from './formats/format-css-collections.mjs';
-StyleDictionary.registerFormat({
-  name: 'narrative/css-collections',
-  formatter: cssCollectionsFormatter,
-});
-
-// 2) Resolve repo paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '../../');
 
-// Allow override via env var: SD_CONFIG=sd-configs/other.mjs
+// --- 1) Load our formatter (support function default OR object exports)
+async function loadFormatter() {
+  const mod = await import(pathToFileURL(path.resolve(__dirname, './formats/format-css-collections.mjs')));
+  const candidate =
+    mod.default && typeof mod.default === 'function' ? mod.default :
+    mod.formatter && typeof mod.formatter === 'function' ? mod.formatter :
+    mod.format && typeof mod.format === 'function' ? mod.format :
+    null;
+
+  if (!candidate) {
+    throw new Error(
+      'format-css-collections.mjs must export a function (default) or an object with a `formatter` or `format` function.'
+    );
+  }
+  return candidate;
+}
+
+// --- 2) Resolve SD config (two levels up from this file)
 const configPath = path.resolve(
   repoRoot,
   process.env.SD_CONFIG ?? 'sd-configs/css.mjs'
@@ -24,35 +33,23 @@ const configPath = path.resolve(
 
 async function loadConfig() {
   try {
-    // Helpful check + readable error if path is wrong
     await fs.access(configPath);
-    const mod = await import(pathToFileURL(configPath));
-    if (!mod?.default) {
-      throw new Error(`No default export in ${configPath}`);
-    }
-    return mod.default;
+    const cfg = await import(pathToFileURL(configPath));
+    if (!cfg?.default) throw new Error(`No default export in ${configPath}`);
+    return cfg.default;
   } catch (err) {
     console.warn(
       `[tokens] Could not import config at ${configPath}. Using a minimal default config.\n` +
       `Reason: ${err?.message ?? err}`
     );
-
-    // 3) Fallback default config (raw sources; no ref-resolving transforms)
+    // Fallback config builds raw tokens with our formatter
     return {
-      source: [
-        'raw/**/*.json',
-        'tokens/**/*.json',
-      ],
+      source: ['raw/**/*.json', 'tokens/**/*.json'],
       platforms: {
         css: {
-          transforms: [], // keep refs as var(--...), do not resolve
+          transforms: [],
           buildPath: 'resolved/',
-          files: [
-            {
-              destination: 'tokens.css',
-              format: 'narrative/css-collections',
-            },
-          ],
+          files: [{ destination: 'tokens.css', format: 'narrative/css-collections' }],
         },
       },
     };
@@ -60,15 +57,20 @@ async function loadConfig() {
 }
 
 (async function run() {
-  const config = await loadConfig();
+  // Register formatter robustly
+  const formatter = await loadFormatter();
+  StyleDictionary.registerFormat({
+    name: 'narrative/css-collections',
+    formatter,
+  });
 
-  // 4) Build
+  // Load config & build
+  const config = await loadConfig();
   const SD = StyleDictionary.extend(config);
   await SD.buildAllPlatforms();
 
   console.log(
-    `✅ Built tokens with format "narrative/css-collections". ` +
-    `Config: ${path.relative(repoRoot, configPath)}`
+    `✅ Built tokens with format "narrative/css-collections". Using config: ${path.relative(repoRoot, configPath)}`
   );
 })().catch((e) => {
   console.error('❌ Token build failed:', e);
