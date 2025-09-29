@@ -1,3 +1,4 @@
+# .github/workflows/build-tokens.yml
 name: Build Tokens
 
 on:
@@ -17,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       config:
-        description: "Optional: build only this config file from sd-configs/ (e.g. token-test.mjs)"
+        description: "Build only this config from sd-configs/ (e.g. token-test.mjs)"
         required: false
         default: ""
 
