@@ -8,7 +8,7 @@ export default {
       files: [
         {
           destination: "tokens-test.css",
-          format: "custom/css-token-test" // provided by our formatter module
+          format: "custom/css-primary"   // <- updated to the new registered name
         }
       ]
     }
