@@ -1,5 +1,8 @@
 /* Base: Global + inline + defaults */
+
 :root {
+  --brand-neutrals-black: var(--color-slate-black);
+  --brand-neutrals-white: var(--color-slate-white);
   --color-alpha-black-a000: rgba(16, 16, 14, 0);
   --color-alpha-black-a100: rgba(16, 16, 14, 0.08);
   --color-alpha-black-a200: rgba(16, 16, 14, 0.16);
@@ -117,48 +120,48 @@
   --color-yellow-700: #70410d;
   --color-yellow-800: #47240b;
   --color-yellow-900: #200f07;
-  --fontfamily-benton-modern-compressed: benton-modern-display-compre;
-  --fontfamily-benton-modern-condensed: benton-modern-display-conden;
-  --fontfamily-benton-modern-display: benton-modern-display;
-  --fontfamily-benton-modern-extra-condensed: benton-modern-display-extra;
-  --fontfamily-benton-modern-text: benton-modern-text;
-  --fontfamily-franklin-gothic-compressed: franklin-gothic-compressed;
-  --fontfamily-franklin-gothic-condensed: franklin-gothic-condensed;
-  --fontfamily-franklin-gothic-default: franklin-gothic;
-  --fontfamily-franklin-gothic-extra-compressed: franklin-gothic-extra-compre;
-  --fontfamily-noto-sans: Noto Sans;
-  --fontfamily-noto-serif: Noto Serif;
-  --fontfamily-playfair-display: Playfair Display;
-  --fontweight-100: 100;
-  --fontweight-150: 150;
-  --fontweight-200: 200;
-  --fontweight-250: 250;
-  --fontweight-300: 300;
-  --fontweight-350: 350;
-  --fontweight-400: 400;
-  --fontweight-450: 450;
-  --fontweight-500: 500;
-  --fontweight-550: 550;
-  --fontweight-600: 600;
-  --fontweight-650: 650;
-  --fontweight-700: 700;
-  --fontweight-750: 750;
-  --fontweight-800: 800;
-  --fontweight-850: 850;
-  --fontweight-900: 900;
-  --fontweight-950: 950;
-  --letterspacing-2xl: 0.025em;
-  --letterspacing-3xl: 0.03em;
-  --letterspacing-lg: 0.015em;
-  --letterspacing-md: 0.01em;
-  --letterspacing-none: 0em;
-  --letterspacing-sm: 0.005em;
-  --letterspacing-xl: 0.02em;
-  --lineheight-2xl: 1.55;
-  --lineheight-lg: 1.35;
-  --lineheight-md: 1.25;
-  --lineheight-sm: 1.15;
-  --lineheight-xl: 1.45;
+  --font-family-benton-modern-compressed: benton-modern-display-compre;
+  --font-family-benton-modern-condensed: benton-modern-display-conden;
+  --font-family-benton-modern-display: benton-modern-display;
+  --font-family-benton-modern-extra-condensed: benton-modern-display-extra;
+  --font-family-benton-modern-text: benton-modern-text;
+  --font-family-franklin-gothic-compressed: franklin-gothic-compressed;
+  --font-family-franklin-gothic-condensed: franklin-gothic-condensed;
+  --font-family-franklin-gothic-default: franklin-gothic;
+  --font-family-franklin-gothic-extra-compressed: franklin-gothic-extra-compre;
+  --font-family-noto-sans: Noto Sans;
+  --font-family-noto-serif: Noto Serif;
+  --font-family-playfair-display: Playfair Display;
+  --font-weight-100: 100;
+  --font-weight-150: 150;
+  --font-weight-200: 200;
+  --font-weight-250: 250;
+  --font-weight-300: 300;
+  --font-weight-350: 350;
+  --font-weight-400: 400;
+  --font-weight-450: 450;
+  --font-weight-500: 500;
+  --font-weight-550: 550;
+  --font-weight-600: 600;
+  --font-weight-650: 650;
+  --font-weight-700: 700;
+  --font-weight-750: 750;
+  --font-weight-800: 800;
+  --font-weight-850: 850;
+  --font-weight-900: 900;
+  --font-weight-950: 950;
+  --letter-spacing-2xl: 0.025em;
+  --letter-spacing-3xl: 0.03em;
+  --letter-spacing-lg: 0.015em;
+  --letter-spacing-md: 0.01em;
+  --letter-spacing-none: 0em;
+  --letter-spacing-sm: 0.005em;
+  --letter-spacing-xl: 0.02em;
+  --line-height-2xl: 1.55;
+  --line-height-lg: 1.35;
+  --line-height-md: 1.25;
+  --line-height-sm: 1.15;
+  --line-height-xl: 1.45;
   --unit-0: 0px;
   --unit-1: 1px;
   --unit-10: 10px;
@@ -191,12 +194,11 @@
   --viewport-desktop-viewport-max-width: 1280px;
   --viewport-mobile-viewport-max-width: 640px;
   --viewport-tablet-viewport-max-width: 1024px;
-  --brand-neutrals-black: var(--color-slate-black);
-  --brand-neutrals-white: var(--color-slate-white);
 }
 
 @media (min-width: 640px) {
   /* Breakpoint min-width 640px — breakpoint/tablet */
+
   :root {
     --layout-content-lg-max: 680px;
     --layout-content-md-max: 480px;
@@ -249,17 +251,18 @@
     --typography-xs: var(--unit-12);
   }
 
-
 }
 
-/* Other colorTheme — default */
+/* Other color-theme — default */
+
 :root {
   --brand-neutrals-black: var(--color-slate-black);
   --brand-neutrals-white: var(--color-slate-white);
 }
 
-/* Other colorTheme — set slate */
-[data-colorTheme="slate"] {
+/* Other color-theme — set slate */
+
+[data-color-theme="slate"] {
   --brand-neutrals-050: var(--color-slate-white);
   --brand-neutrals-100: var(--color-slate-100);
   --brand-neutrals-200: var(--color-slate-200);
@@ -299,57 +302,59 @@
   --builder-theme: Slate;
 }
 
-/* Other fontTheme — set opinion */
-[data-fontTheme="opinion"] {
-  --body-fontfamily: var(--fontfamily-benton-modern-text);
-  --body-fontsize-lg: var(--typography-xl);
-  --body-fontsize-md: var(--typography-lg);
-  --body-fontsize-sm: var(--typography-base);
-  --body-fontsize-xs: var(--typography-sm);
-  --body-lineheight: var(--lineheight-2xl);
-  --body-regular: var(--fontweight-400);
-  --body-strong: var(--fontweight-700);
+/* Other font-theme — set opinion */
+
+[data-font-theme="opinion"] {
+  --body-font-family: var(--font-family-benton-modern-text);
+  --body-font-size-lg: var(--typography-xl);
+  --body-font-size-md: var(--typography-lg);
+  --body-font-size-sm: var(--typography-base);
+  --body-font-size-xs: var(--typography-sm);
+  --body-line-height: var(--line-height-2xl);
+  --body-regular: var(--font-weight-400);
+  --body-strong: var(--font-weight-700);
   --builder-text-style: Opinion;
-  --display-fontfamily: var(--fontfamily-benton-modern-condensed);
-  --display-fontsize-lg: var(--typography-9xl);
-  --display-fontsize-md: var(--typography-8xl);
-  --display-fontsize-sm: var(--typography-7xl);
-  --display-lineheight: var(--lineheight-sm);
-  --display-regular: var(--fontweight-400);
-  --display-strong: var(--fontweight-600);
-  --headline-fontfamily: var(--fontfamily-benton-modern-condensed);
-  --headline-fontsize-lg: var(--typography-6xl);
-  --headline-fontsize-md: var(--typography-5xl);
-  --headline-fontsize-sm: var(--typography-4xl);
-  --headline-lineheight: var(--lineheight-md);
-  --headline-regular: var(--fontweight-400);
-  --headline-strong: var(--fontweight-600);
-  --subheadline-fontfamily: var(--fontfamily-benton-modern-condensed);
-  --subheadline-fontsize-lg: var(--typography-3xl);
-  --subheadline-fontsize-md: var(--typography-2xl);
-  --subheadline-fontsize-sm: var(--typography-xl);
-  --subheadline-fontsize-xs: var(--typography-lg);
-  --subheadline-lineheight: var(--lineheight-md);
-  --subheadline-regular: var(--fontweight-400);
-  --subheadline-strong: var(--fontweight-600);
-  --system-fontfamily: var(--fontfamily-franklin-gothic-default);
-  --system-fontsize-lg: var(--typography-xl);
-  --system-fontsize-md: var(--typography-lg);
-  --system-fontsize-sm: var(--typography-base);
-  --system-fontsize-xs: var(--typography-sm);
-  --system-lineheight: var(--lineheight-md);
-  --system-regular: var(--fontweight-400);
-  --system-strong: var(--fontweight-500);
-  --uppercase-fontfamily: var(--fontfamily-franklin-gothic-condensed);
-  --uppercase-fontsize-lg: var(--typography-sm);
-  --uppercase-fontsize-md: var(--typography-xs);
-  --uppercase-fontsize-sm: var(--typography-2xs);
-  --uppercase-lineheight: var(--lineheight-sm);
-  --uppercase-regular: var(--fontweight-400);
-  --uppercase-strong: var(--fontweight-500);
+  --display-font-family: var(--font-family-benton-modern-condensed);
+  --display-font-size-lg: var(--typography-9xl);
+  --display-font-size-md: var(--typography-8xl);
+  --display-font-size-sm: var(--typography-7xl);
+  --display-line-height: var(--line-height-sm);
+  --display-regular: var(--font-weight-400);
+  --display-strong: var(--font-weight-600);
+  --headline-font-family: var(--font-family-benton-modern-condensed);
+  --headline-font-size-lg: var(--typography-6xl);
+  --headline-font-size-md: var(--typography-5xl);
+  --headline-font-size-sm: var(--typography-4xl);
+  --headline-line-height: var(--line-height-md);
+  --headline-regular: var(--font-weight-400);
+  --headline-strong: var(--font-weight-600);
+  --subheadline-font-family: var(--font-family-benton-modern-condensed);
+  --subheadline-font-size-lg: var(--typography-3xl);
+  --subheadline-font-size-md: var(--typography-2xl);
+  --subheadline-font-size-sm: var(--typography-xl);
+  --subheadline-font-size-xs: var(--typography-lg);
+  --subheadline-line-height: var(--line-height-md);
+  --subheadline-regular: var(--font-weight-400);
+  --subheadline-strong: var(--font-weight-600);
+  --system-font-family: var(--font-family-franklin-gothic-default);
+  --system-font-size-lg: var(--typography-xl);
+  --system-font-size-md: var(--typography-lg);
+  --system-font-size-sm: var(--typography-base);
+  --system-font-size-xs: var(--typography-sm);
+  --system-line-height: var(--line-height-md);
+  --system-regular: var(--font-weight-400);
+  --system-strong: var(--font-weight-500);
+  --uppercase-font-family: var(--font-family-franklin-gothic-condensed);
+  --uppercase-font-size-lg: var(--typography-sm);
+  --uppercase-font-size-md: var(--typography-xs);
+  --uppercase-font-size-sm: var(--typography-2xs);
+  --uppercase-line-height: var(--line-height-sm);
+  --uppercase-regular: var(--font-weight-400);
+  --uppercase-strong: var(--font-weight-500);
 }
 
 /* Mode light — mode/light */
+
 [data-theme="light"] {
   --background-button-brand-default: var(--brand-primary-500);
   --background-button-brand-hover: var(--brand-primary-600);
@@ -441,36 +446,43 @@
 
 /* Styles (utility classes) */
 /* Styles: elevation/action */
+
 .elevation-elevation-action {
   box-shadow: 0 1px 4px 0 rgba(16, 16, 14, 0.08);
 }
 
 /* Styles: elevation/active */
+
 .elevation-elevation-active {
   box-shadow: 0 2px 8px 0 rgba(16, 16, 14, 0.08);
 }
 
 /* Styles: elevation/fixed-top */
+
 .elevation-elevation-fixed-top {
   box-shadow: 0 4px 12px 0 rgba(16, 16, 14, 0.08);
 }
 
 /* Styles: elevation/fixed-bottom */
+
 .elevation-elevation-fixed-bottom {
   box-shadow: 0 -4px 12px 0 rgba(16, 16, 14, 0.08);
 }
 
 /* Styles: elevation/raised */
+
 .elevation-elevation-raised {
   box-shadow: 0 8px 24px 0 rgba(16, 16, 14, 0.16);
 }
 
 /* Styles: elevation/overlay */
+
 .elevation-elevation-overlay {
   box-shadow: 0 12px 36px 0 rgba(16, 16, 14, 0.16);
 }
 
 /* Styles: form/focus */
+
 .elevation-form-focus {
   box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #c9daf8 inset;
 }
