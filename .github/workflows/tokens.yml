@@ -1,0 +1,68 @@
+name: Build tokens
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      # 🔔 only rebuild when sources or the builder change
+      - 'raw/**'
+      - 'tokens/**'
+      - 'sd-configs/**'
+      - 'tools/style-dictionary/**'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # ✅ needed to push resolved files
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build tokens
+        env:
+          # if you keep a custom config, point to it (relative to repo root)
+          SD_CONFIG: sd-configs/css.mjs
+        run: node tools/style-dictionary/build.mjs
+
+      - name: Show diff (debug)
+        run: |
+          echo "Changed files:"
+          git status --porcelain || true
+          git diff --name-only || true
+
+      # ✅ Only commit on push events we can write to (not PRs from forks)
+      - name: Commit generated files back
+        if: github.event_name == 'push'
+        run: |
+          if [ -n "$(git status --porcelain resolved/)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add resolved/*
+            git commit -m "chore(tokens): update resolved artifacts [skip ci]"
+            git push
+          else
+            echo "No changes in resolved/; skipping commit."
+          fi
+
+      # For PRs (esp. from forks), we can’t push. Upload as an artifact.
+      - name: Upload resolved tokens (PRs/forks)
+        if: github.event_name != 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: resolved-tokens
+          path: resolved/**
