@@ -5,13 +5,21 @@ on:
     branches: [ main ]
     paths:
       - "tokens/raw/**"
-      - "sd.config.js"     # <- if you renamed to .js
+      - "sd-configs/**"
+      - "tools/**"
       - "package.json"
   pull_request:
     paths:
       - "tokens/raw/**"
-      - "sd.config.js"
+      - "sd-configs/**"
+      - "tools/**"
       - "package.json"
+  workflow_dispatch:
+    inputs:
+      config:
+        description: "Optional: build only this config file from sd-configs/ (e.g. token-test.mjs)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -23,7 +31,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # keep credentials so pushes can reuse the GITHUB_TOKEN
           persist-credentials: true
 
       - name: Use Node
@@ -36,11 +43,13 @@ jobs:
 
       - name: Build tokens
         run: npm run build
+        env:
+          SD_CONFIG: ${{ github.event.inputs.config }}
 
       - name: Commit generated files back
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}     # <- important
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit_message: "chore(tokens): rebuild outputs [skip ci]"
           file_pattern: tokens/resolved/**
           commit_user_name: github-actions[bot]
