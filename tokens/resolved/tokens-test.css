@@ -471,7 +471,6 @@
 }
 
 /* Styles: form/focus */
-.style-form-focus {
-  0: [object Object];
-  1: [object Object];
+.elevation-form-focus {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #c9daf8 inset;
 }
