@@ -8,7 +8,7 @@ import cssPrimaryFormatter from "./sd-css-primary.mjs";
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const CONFIG_DIR = path.resolve(__dirname, "../../sd-configs");
 
-// SD v4 expects { name, format } here (not "formatter")
+// v4: registerFormat expects { name, format }
 StyleDictionary.registerFormat({
   name: "custom/css-primary",
   format: cssPrimaryFormatter
@@ -38,9 +38,10 @@ if (!toBuild.length) {
   process.exit(1);
 }
 
+// v4: create an instance with 'new', then await build
 for (const cfgPath of toBuild) {
   const cfg = await loadConfig(cfgPath);
-  const SD = StyleDictionary.extend(cfg);
   console.log(`\nBuilding with config: ${path.basename(cfgPath)}\n`);
-  SD.buildAllPlatforms();
+  const sd = new StyleDictionary(cfg);
+  await sd.buildAllPlatforms();
 }
