@@ -1,5 +1,11 @@
-// tools/style-dictionary/sd-css-primary.mjs
+// tools/style-dictionary/formats/format-css-collections.mjs
 const JOINER = "-";
+
+// === Tunables ===============================================================
+const INCLUDE_FALLBACKS = false;        // var(--token, fallback) → set false for var(--token)
+const VAR_SEGMENT_CASE = "lower";       // 'lower' (fontfamily) or 'kebab' (font-family)
+const MANUAL_ATTR_TOGGLES = false;      // duplicate default blocks as [data-...] mirrors
+const BREAKPOINT_DEFAULTS = { mobile: 0, tablet: 640, desktop: 1024 };
 
 const TYPE_MAP = {
   global: "global",
@@ -17,31 +23,39 @@ const TYPE_MAP = {
   styles: "styles"
 };
 
-const BREAKPOINT_DEFAULTS = { mobile: 0, tablet: 640, desktop: 1024 };
-const MANUAL_ATTR_TOGGLES = false; // flip to true if you want attribute mirrors
-
+// === helpers ================================================================
 const toKebab = (str) =>
-  String(str)
-    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
-    .replace(/[\s_]+/g, "-")
-    .toLowerCase();
+  String(str).replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/[\s_]+/g, "-").toLowerCase();
 
+const normSeg = (s) => {
+  const raw = String(s);
+  if (VAR_SEGMENT_CASE === "lower") return raw.toLowerCase().replace(/[\s_]+/g, "-");
+  return toKebab(raw);
+};
+
+const cssProp = (k) => toKebab(k);
 const isPrivate = (seg) => /^[_$]/.test(seg);
 
 const varNameFromToken = (t) =>
-  "--" + t.path.filter((p) => !isPrivate(p)).map(toKebab).join(JOINER);
+  "--" + t.path.filter((p) => !isPrivate(p)).map(normSeg).join(JOINER);
 
 function getCollectionInfo(token) {
+  // tokens/raw/<collection>/<set or file>.json/(…)
   const rel = token.filePath.replace(/\\/g, "/");
   const idx = rel.indexOf("tokens/raw/");
   if (idx === -1) return { type: "other", collectionKey: "misc", setName: "default" };
   const rest = rel.slice(idx + "tokens/raw/".length);
-  const parts = rest.split("/");
+  const parts = rest.split("/"); // [collection, maybeSetOrFile, ...]
   const rawCol = parts[0] || "misc";
   const type = TYPE_MAP[rawCol.toLowerCase()] || "other";
+
   let setName = "default";
-  if (parts.length >= 2 && !/\.json$/i.test(parts[1])) setName = parts[1];
-  else if (type === "global") setName = "global";
+  if (parts.length >= 2) {
+    const p1 = parts[1];
+    // if it's a file (like mobile.json), take the base filename without extension
+    const maybe = p1.replace(/\.json$/i, "");
+    setName = maybe || "default";
+  }
   const collectionKey = type === "other" ? rawCol : type;
   return { type, collectionKey, setName };
 }
@@ -55,24 +69,17 @@ const styleObjectTokens = (all) =>
 
 function computeBaseMap(varTokens) {
   const base = {};
-  const byGroup = {};
+  // Globals first
   for (const t of varTokens) {
     const info = getCollectionInfo(t);
-    const k = `${info.type}__${info.collectionKey}__${info.setName}`;
-    (byGroup[k] ||= { info, tokens: [] }).tokens.push(t);
+    if (info.type === "global") base[varNameFromToken(t)] = String(t.value);
   }
-  // Globals
-  Object.values(byGroup)
-    .filter((g) => g.info.type === "global")
-    .forEach((g) => g.tokens.forEach((t) => (base[varNameFromToken(t)] = String(t.value))));
-  // Other/defaults
-  const other = Object.values(byGroup).filter((g) => g.info.type === "other");
-  const keys = [...new Set(other.map((g) => g.info.collectionKey))];
-  for (const col of keys) {
-    const def = other.find(
-      (g) => g.info.collectionKey === col && g.info.setName.toLowerCase() === "default"
-    );
-    if (def) def.tokens.forEach((t) => (base[varNameFromToken(t)] = String(t.value)));
+  // Other defaults next (for fallback resolution if enabled)
+  for (const t of varTokens) {
+    const info = getCollectionInfo(t);
+    if (info.type === "other" && info.setName.toLowerCase() === "default") {
+      base[varNameFromToken(t)] = String(t.value);
+    }
   }
   return base;
 }
@@ -80,21 +87,29 @@ function computeBaseMap(varTokens) {
 function refPieces(str, baseMap) {
   const m = /^\{([^}]+)\}$/.exec(String(str).trim());
   if (!m) return null;
-  const refPath = m[1].split(".").map(toKebab).join(JOINER);
+  const refPath = m[1].split(".").map(normSeg).join(JOINER);
   const refVar = `--${refPath}`;
   const fallback = baseMap[refVar] ?? null;
   return { refVar, fallback };
 }
 
-function emitBlock(selector, bodyLines, comment) {
-  if (!bodyLines.length) return "";
+function tokenDecl(t, baseMap) {
+  const name = varNameFromToken(t);
+  const orig = t.original && t.original.value != null ? t.original.value : t.value;
+  const ref = typeof orig === "string" ? refPieces(orig, baseMap) : null;
+  if (ref) {
+    if (INCLUDE_FALLBACKS && ref.fallback && !/\{.+\}/.test(String(ref.fallback))) {
+      return `${name}: var(${ref.refVar}, ${ref.fallback});`;
+    }
+    return `${name}: var(${ref.refVar});`;
+  }
+  return `${name}: ${t.value};`;
+}
+
+function emitBlock(selector, lines, comment) {
+  if (!lines.length) return "";
   const header = comment ? `/* ${comment} */\n` : "";
-  return (
-    header +
-    `${selector} {\n` +
-    bodyLines.map((l) => `  ${l}`).join("\n") +
-    `\n}\n\n`
-  );
+  return header + `${selector} {\n` + lines.map((l) => `  ${l}`).join("\n") + `\n}\n\n`;
 }
 
 function emitAtMedia(minWidth, innerCss, comment) {
@@ -112,28 +127,97 @@ function emitAtMedia(minWidth, innerCss, comment) {
 }
 
 function getBreakpointMinWidth(tokensInSet, setName) {
+  // try explicit token (minWidth) first
   const cand = tokensInSet.find(
     (t) =>
       t.path.slice(-1)[0].toLowerCase() === "minwidth" ||
       t.path.slice(-2).join("/").toLowerCase().endsWith("_meta/minwidth")
   );
   if (cand) {
-    const v = String(cand.value);
-    const n = parseFloat(v);
+    const n = parseFloat(String(cand.value));
     if (!isNaN(n)) return n;
   }
+  // else defaults
   if (Object.prototype.hasOwnProperty.call(BREAKPOINT_DEFAULTS, setName)) {
     return BREAKPOINT_DEFAULTS[setName];
   }
   return 0;
 }
 
-export default function cssPrimaryFormatter({ dictionary }) {
+const isShadowPiece = (o) =>
+  o &&
+  typeof o === "object" &&
+  (Object.hasOwn(o, "x") || Object.hasOwn(o, "y") || Object.hasOwn(o, "blur") || Object.hasOwn(o, "spread") || Object.hasOwn(o, "color"));
+
+const looksLikeTypography = (o) =>
+  o &&
+  typeof o === "object" &&
+  (Object.hasOwn(o, "fontSize") ||
+    Object.hasOwn(o, "fontFamily") ||
+    Object.hasOwn(o, "lineHeight") ||
+    Object.hasOwn(o, "letterSpacing") ||
+    Object.hasOwn(o, "fontWeight") ||
+    Object.hasOwn(o, "textTransform") ||
+    Object.hasOwn(o, "fontStretch"));
+
+function stylePrefixAndNameParts(t) {
+  // drop leading "styles" from the class name
+  const parts = t.path.filter((p) => !isPrivate(p));
+  const clean = parts[0] === "styles" ? parts.slice(1) : parts;
+  const first = (clean[0] || "").toLowerCase();
+
+  // elevation → box-shadow class
+  if (first === "elevation") return { prefix: "elevation-", parts: clean };
+
+  return { prefix: looksLikeTypography(t.value) ? "text-" : "style-", parts: clean };
+}
+
+function valWithRefs(v, baseMap) {
+  if (typeof v !== "string") return v;
+  const p = refPieces(v, baseMap);
+  if (!p) return v;
+  if (INCLUDE_FALLBACKS && p.fallback && !/\{.+\}/.test(String(p.fallback)))
+    return `var(${p.refVar}, ${p.fallback})`;
+  return `var(${p.refVar})`;
+}
+
+function objToDecls(obj, baseMap, targetPropName) {
+  if (targetPropName === "box-shadow") {
+    const arr = Array.isArray(obj) ? obj : [obj];
+    const segs = arr.map((o) => {
+      const x = valWithRefs(o.x ?? 0, baseMap);
+      const y = valWithRefs(o.y ?? 0, baseMap);
+      const blur = valWithRefs(o.blur ?? 0, baseMap);
+      const spread = valWithRefs(o.spread ?? 0, baseMap);
+      const color = valWithRefs(o.color ?? "currentColor", baseMap);
+      const inset = o.inset ? " inset" : "";
+      return `${x} ${y} ${blur} ${spread} ${color}${inset}`.trim();
+    });
+    return [`${targetPropName}: ${segs.join(", ")};`];
+  }
+  // generic: map object keys to CSS props, preserving refs
+  return Object.entries(obj).map(([k, v]) => {
+    const prop = cssProp(k);
+    const val =
+      typeof v === "string" ? valWithRefs(v, baseMap) :
+      Array.isArray(v) ? v.map((x) => valWithRefs(x, baseMap)).join(" ") :
+      v;
+    return `${prop}: ${val};`;
+  });
+}
+
+function classNameFromParts(parts, prefix) {
+  return "." + prefix + parts.map(normSeg).join(JOINER);
+}
+
+// === formatter ==============================================================
+export default function cssCollectionsFormatter({ dictionary }) {
   const all = dictionary.allTokens;
   const varTokens = visibleVarTokens(all);
   const styleTokens = styleObjectTokens(all);
   const baseMap = computeBaseMap(varTokens);
 
+  // group var tokens
   const groups = {};
   for (const t of varTokens) {
     const info = getCollectionInfo(t);
@@ -141,28 +225,15 @@ export default function cssPrimaryFormatter({ dictionary }) {
     (groups[k] ||= { info, tokens: [] }).tokens.push(t);
   }
 
-  const tokenToDecl = (t) => {
-    const name = varNameFromToken(t);
-    const orig = t.original && t.original.value != null ? t.original.value : t.value;
-    const ref = typeof orig === "string" ? refPieces(orig, baseMap) : null;
-    if (ref) {
-      if (ref.fallback && !/\{.+\}/.test(String(ref.fallback))) {
-        return `${name}: var(${ref.refVar}, ${ref.fallback});`;
-      }
-      return `${name}: var(${ref.refVar});`;
-    }
-    return `${name}: ${t.value};`;
-  };
-
   const decls = (tokens) =>
     tokens
       .slice()
       .sort((a, b) => (varNameFromToken(a) < varNameFromToken(b) ? -1 : 1))
-      .map(tokenToDecl);
+      .map((t) => tokenDecl(t, baseMap));
 
   let css = "";
 
-  // Base block
+  // Base (Global + inline + defaults)
   const baseDecls = [];
   for (const g of Object.values(groups).filter((g) => g.info.type === "global")) {
     baseDecls.push(...decls(g.tokens));
@@ -172,7 +243,7 @@ export default function cssPrimaryFormatter({ dictionary }) {
   )) {
     baseDecls.push(...decls(g.tokens));
   }
-  css += emitBlock(":root", baseDecls, "Base: Global + Other defaults");
+  css += emitBlock(":root", baseDecls, "Base: Global + inline + defaults");
 
   // Breakpoints
   const bpGroups = Object.values(groups).filter((g) => g.info.type === "breakpoint");
@@ -188,7 +259,9 @@ export default function cssPrimaryFormatter({ dictionary }) {
       const body = emitBlock(
         ":root",
         decls(bySet[set]),
-        min === 0 ? `Breakpoint default — breakpoint/${set}` : `Breakpoint min-width ${min}px — breakpoint/${set}`
+        min === 0
+          ? `Breakpoint default — breakpoint/${set}`
+          : `Breakpoint min-width ${min}px — breakpoint/${set}`
       );
       if (min === 0) css += body;
       else css += emitAtMedia(min, body, null);
@@ -225,12 +298,12 @@ export default function cssPrimaryFormatter({ dictionary }) {
       css += emitBlock(
         `[data-${col}="${g.info.setName}"]`,
         decls(g.tokens),
-        `Other ${col} — ${g.info.setName}`
+        `Other ${col} — set ${g.info.setName}`
       );
     }
   }
 
-  // Mode
+  // Mode (light first, then dark, then others)
   const modeGroups = Object.values(groups).filter((g) => g.info.type === "mode");
   if (modeGroups.length) {
     const byMode = {};
@@ -240,69 +313,39 @@ export default function cssPrimaryFormatter({ dictionary }) {
     for (const m of order) {
       if (!byMode[m] || seen.has(m)) continue;
       seen.add(m);
-      css += emitBlock(`[data-theme="${m}"]`, decls(byMode[m]), `Mode ${m} — theme/${m}`);
+      css += emitBlock(`[data-theme="${m}"]`, decls(byMode[m]), `Mode ${m} — mode/${m}`);
     }
   }
 
-  // Styles → utility classes
-  const toProp = (k) => toKebab(k);
-  const valWithRefs = (v) => {
-    if (typeof v !== "string") return v;
-    const p = refPieces(v, baseMap);
-    if (!p) return v;
-    if (p.fallback && !/\{.+\}/.test(String(p.fallback))) return `var(${p.refVar}, ${p.fallback})`;
-    return `var(${p.refVar})`;
-  };
-  const objToDecls = (obj, targetPropName) => {
-    if (targetPropName === "box-shadow") {
-      const arr = Array.isArray(obj) ? obj : [obj];
-      const pieces = arr.map((o) => {
-        const x = valWithRefs(o.x ?? 0);
-        const y = valWithRefs(o.y ?? 0);
-        const blur = valWithRefs(o.blur ?? 0);
-        const spread = valWithRefs(o.spread ?? 0);
-        const color = valWithRefs(o.color ?? "currentColor");
-        const inset = o.inset ? " inset" : "";
-        return `${x} ${y} ${blur} ${spread} ${color}${inset}`.trim();
-      });
-      return [`${targetPropName}: ${pieces.join(", ")};`];
-    }
-    return Object.entries(obj).map(([k, v]) => {
-      const prop = toProp(k);
-      const val =
-        typeof v === "string" ? valWithRefs(v) :
-        Array.isArray(v) ? v.map(valWithRefs).join(" ") :
-        v;
-      return `${prop}: ${val};`;
-    });
-  };
-  const className = (t, prefix) =>
-    prefix + t.path.filter((p) => !isPrivate(p)).map(toKebab).join(JOINER);
-
+  // Styles → classes
   let classes = "";
   for (const t of styleTokens) {
-    const info = getCollectionInfo(t);
-    if (info.type !== "styles") continue;
-    const $type = t.$type || (t.attributes && t.attributes.type) || t.type || "";
-    if ($type === "typography") {
+    const { prefix, parts } = stylePrefixAndNameParts(t);
+
+    if (prefix === "elevation-" && (isShadowPiece(t.value) || (Array.isArray(t.value) && t.value.every(isShadowPiece)))) {
       classes += emitBlock(
-        "." + className(t, "text-"),
-        objToDecls(t.value),
-        `Styles: typography — ${t.path.join("/")}`
+        classNameFromParts(parts, prefix),
+        objToDecls(t.value, baseMap, "box-shadow"),
+        `Styles: ${parts.join("/")}`
       );
-    } else if ($type === "boxShadow" || $type === "box-shadow") {
-      classes += emitBlock(
-        "." + className(t, "elevation-"),
-        objToDecls(t.value, "box-shadow"),
-        `Styles: boxShadow — ${t.path.join("/")}`
-      );
-    } else {
-      classes += emitBlock(
-        "." + className(t, "style-"),
-        objToDecls(t.value),
-        `Styles: ${$type || "object"} — ${t.path.join("/")}`
-      );
+      continue;
     }
+
+    if (looksLikeTypography(t.value)) {
+      classes += emitBlock(
+        classNameFromParts(parts, "text-"),
+        objToDecls(t.value, baseMap),
+        `Styles: ${parts.join("/")}`
+      );
+      continue;
+    }
+
+    // generic style object → style-* prefix
+    classes += emitBlock(
+      classNameFromParts(parts, "style-"),
+      objToDecls(t.value, baseMap),
+      `Styles: ${parts.join("/")}`
+    );
   }
   if (classes) css += `/* Styles (utility classes) */\n` + classes;
 
