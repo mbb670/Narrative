@@ -1,11 +1,12 @@
-// tools/style-dictionary/build.mjs
+// ESM entry for building tokens with Style Dictionary v3
 import StyleDictionary from 'style-dictionary';
-import './register-formats.mjs';            // registers css/collections
+import registerFormats from './register-formats.mjs';
 import config from './sd-configs/css-primary.mjs';
 
 async function run() {
   try {
-    const sd = new StyleDictionary(config); // SD v4 constructor
+    registerFormats();                // <-- important: register BEFORE building
+    const sd = new StyleDictionary(config);  // v3 constructor API
     await sd.buildAllPlatforms();
     console.log('[tokens] Build complete.');
   } catch (err) {
@@ -13,4 +14,5 @@ async function run() {
     process.exit(1);
   }
 }
+
 run();
