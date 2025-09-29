@@ -1,6 +1,7 @@
 {
   "name": "narrative-tokens",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "node tools/style-dictionary/build.mjs"
   },
