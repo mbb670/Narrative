@@ -1,304 +1,181 @@
-/**
- * format-css-collections.mjs
- * Style Dictionary v4 custom formatter that:
- *  - Groups tokens by folder: global | breakpoint | mode | styles | other
- *  - Emits sections in readable, “expected” CSS blocks
- *  - Canonicalizes last token segment (font-family → fontfamily, etc.)
- *  - Builds breakpoints (mobile base, tablet ≥640, desktop ≥1024)
- *  - Builds modes ([data-theme="light|dark"])
- *  - Builds “other” themes (colorTheme/fontTheme), with data-* attributes
- *  - Builds style utility classes when a token’s value is an object
- */
+// tools/style-dictionary/formats/format-css-collections.mjs
+// Folder-based collections -> CSS:
+//  global     -> :root (base variables)
+//  breakpoint -> :root (mobile) + @media(min-width: …) for tablet/desktop
+//  mode       -> [data-theme="light" | "dark"] blocks
+//  styles     -> utility classes (e.g. elevation-*)
+//  other      -> "Other ..." sections (defaults/overrides)
+//
+// NOTE: This file targets Style Dictionary v3.x API: { name, format }.
 
 const BP_MIN = { mobile: 0, tablet: 640, desktop: 1024 };
 
-const CANON_LEAF = new Map([
-  ["font-family", "fontfamily"],
-  ["font-weight", "fontweight"],
-  ["letter-spacing", "letterspacing"],
-  ["line-height", "lineheight"],
-]);
+const INDENT = (n = 2) => " ".repeat(n);
+const by = (prop) => (a, b) => (a[prop] > b[prop] ? 1 : a[prop] < b[prop] ? -1 : 0);
 
-// ---------- small helpers ----------
-const kebab = (s) =>
-  String(s)
-    .trim()
-    .replace(/[\s_]+/g, "-")
-    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
-    .replace(/-+/g, "-")
-    .toLowerCase();
-
-const canonLeaf = (name) => {
-  const parts = name.split("-");
-  // Walk from the end and replace the first leaf match
-  for (let i = parts.length; i > 0; i--) {
-    const tail = parts.slice(i - 1).join("-");
-    if (CANON_LEAF.has(tail)) {
-      parts.splice(i - 1, parts.length - (i - 1), CANON_LEAF.get(tail));
-      break;
-    }
-  }
-  return parts.join("-");
-};
-
-const varName = (token) => canonLeaf(kebab(token.name || token.path?.join("-") || ""));
-
-const byNameAsc = (a, b) => varName(a).localeCompare(varName(b));
-
-const cssProp = (p) => kebab(p);
-
-// Styles: derive a property if value is scalar and token doesn't specify one
-const inferScalarProp = (t) => {
-  const n = varName(t);
-  if (/\belevation\b|\bshadow\b|\bfocus\b/i.test(n)) return "box-shadow";
-  return "value";
-};
-
-// Pull “folder/type” segments from file path *after* tokens/raw/
-const pathSegs = (filePath = "") => {
-  const p = String(filePath).replace(/\\/g, "/");
-  const i = p.lastIndexOf("/tokens/raw/");
-  const sub = i >= 0 ? p.slice(i + "/tokens/raw/".length) : p;
-  return sub.split("/").filter(Boolean);
-};
-
-const classify = (filePath = "") => {
-  const p = filePath.replace(/\\/g, "/");
-  if (p.includes("/global/")) return "global";
-  if (p.includes("/breakpoint/")) return "breakpoint";
-  if (p.includes("/mode/")) return "mode";
-  if (p.includes("/styles/")) return "styles";
-  return "other";
-};
-
-// Write helpers
-const IND = (n) => "  ".repeat(n);
-const rule = (name, value, i = 2) => `${IND(i)}--${name}: ${value};\n`;
-
-const start = (title) => (title ? `/* ${title} */\n` : "");
-const open = (sel, i = 0) => `${IND(i)}${sel} {\n`;
-const close = (i = 0) => `${IND(i)}}\n`;
-
-const joinShadow = (v) => (Array.isArray(v) ? v.join(", ") : v);
-
-// Emit a utility class from a token whose value is an object
-const emitClassFromObject = (sel, obj, i = 0) => {
-  let out = open(sel, i);
-  for (const [k, v] of Object.entries(obj)) {
-    if (v == null) continue;
-    if (typeof v === "object" && !Array.isArray(v)) {
-      // nested object → flatten one level with --custom-props?
-      // Here we stringify directly (advanced schemas can be added later)
-      out += `${IND(i + 1)}/* unsupported nested: ${k} */\n`;
-      continue;
-    }
-    const val = Array.isArray(v) ? joinShadow(v) : v;
-    out += `${IND(i + 1)}${cssProp(k)}: ${val};\n`;
-  }
-  out += close(i);
-  return out;
-};
-
-// Emit a utility class from a scalar (infer a property)
-const emitClassFromScalar = (sel, prop, value, i = 0) => {
-  return `${open(sel, i)}${IND(i + 1)}${cssProp(prop)}: ${value};\n${close(i)}`;
-};
-
-// ---------- formatter ----------
-export default function formatter({ dictionary }) {
-  // Buckets
-  const buckets = {
-    global: [],
-    breakpoint: [],
-    mode: [],
-    styles: [],
-    other: [],
-  };
-
-  // Indexers for detailed grouping
-  const bp = { mobile: [], tablet: [], desktop: [] };
-  const modes = { light: [], dark: [] };
-  const other = {
-    colorTheme: { default: [], variants: {} }, // variants[name]=[]
-    fontTheme: { default: [], variants: {} },
-    misc: [], // anything else in "other"
-  };
-  const styles = new Map(); // key = "folder/sub", value = tokens[]
-
-  // Distribute tokens
-  for (const t of dictionary.allTokens) {
-    const col = classify(t.filePath || t.file?.path || "");
-    buckets[col].push(t);
-
-    if (col === "breakpoint") {
-      const seg = pathSegs(t.filePath);
-      // tokens/raw/breakpoint/<mobile|tablet|desktop>/...
-      const variant = seg[1] || "mobile";
-      (bp[variant] || bp.mobile).push(t);
-      continue;
-    }
-
-    if (col === "mode") {
-      const seg = pathSegs(t.filePath);
-      const variant = seg[1] || "light";
-      (modes[variant] || modes.light).push(t);
-      continue;
-    }
-
-    if (col === "styles") {
-      const seg = pathSegs(t.filePath);
-      // Expect: styles/<section>/<subsection>/<file>.json
-      const sect = seg[1] || "styles";
-      const sub = seg[2] || "styles";
-      const key = `${sect}/${sub}`;
-      if (!styles.has(key)) styles.set(key, []);
-      styles.get(key).push(t);
-      continue;
-    }
-
-    if (col === "other") {
-      const seg = pathSegs(t.filePath);
-      // other/<themeType>/<variant>/...
-      const themeType = seg[0] || "misc";
-      if (themeType === "colorTheme" || themeType === "fontTheme") {
-        const variant = seg[1] || "default";
-        if (variant === "default") {
-          other[themeType].default.push(t);
-        } else {
-          if (!other[themeType].variants[variant])
-            other[themeType].variants[variant] = [];
-          other[themeType].variants[variant].push(t);
-        }
-      } else {
-        other.misc.push(t);
-      }
-    }
-  }
-
-  // ---------- Emit CSS ----------
-  let out = "";
-
-  // GLOBAL BASE
-  buckets.global.sort(byNameAsc);
-  out += start("Base: Global + inline + defaults");
-  out += open(":root", 0);
-  for (const t of buckets.global) {
-    out += rule(varName(t), t.value, 1);
-  }
-  out += close(0);
-  out += "\n";
-
-  // BREAKPOINTS
-  // “Breakpoint default — breakpoint/mobile”
-  if (bp.mobile.length) {
-    out += start("Breakpoint default — breakpoint/mobile");
-    out += open(":root", 0);
-    for (const t of bp.mobile.sort(byNameAsc)) {
-      out += rule(varName(t), t.value, 1);
-    }
-    out += close(0);
-    out += "\n";
-  }
-  // tablet ≥640
-  if (bp.tablet.length) {
-    out += start("Breakpoint min-width 640px — breakpoint/tablet");
-    out += `@media (min-width: ${BP_MIN.tablet}px) {\n`;
-    out += open(":root", 1);
-    for (const t of bp.tablet.sort(byNameAsc)) {
-      out += rule(varName(t), t.value, 2);
-    }
-    out += close(1);
-    out += "}\n\n";
-  }
-  // desktop ≥1024
-  if (bp.desktop.length) {
-    out += start("Breakpoint min-width 1024px — breakpoint/desktop");
-    out += `@media (min-width: ${BP_MIN.desktop}px) {\n`;
-    out += open(":root", 1);
-    for (const t of bp.desktop.sort(byNameAsc)) {
-      out += rule(varName(t), t.value, 2);
-    }
-    out += close(1);
-    out += "}\n\n";
-  }
-
-  // OTHER: colorTheme
-  const emitThemeBlock = (hdr, selector, tokens) => {
-    if (!tokens?.length) return "";
-    let s = start(hdr);
-    s += open(selector, 0);
-    for (const t of tokens.sort(byNameAsc)) s += rule(varName(t), t.value, 1);
-    s += close(0);
-    s += "\n";
-    return s;
-  };
-
-  // colorTheme default (:root)
-  out += emitThemeBlock("Other colorTheme — default", ":root", other.colorTheme.default);
-  // colorTheme variants ([data-colorTheme="name"])
-  for (const [name, toks] of Object.entries(other.colorTheme.variants)) {
-    out += emitThemeBlock(
-      `Other colorTheme — set ${name}`,
-      `[data-colorTheme="${name}"]`,
-      toks
-    );
-  }
-
-  // fontTheme default (:root)
-  out += emitThemeBlock("Other fontTheme — default", ":root", other.fontTheme.default);
-  // fontTheme variants
-  for (const [name, toks] of Object.entries(other.fontTheme.variants)) {
-    out += emitThemeBlock(
-      `Other fontTheme — set ${name}`,
-      `[data-fontTheme="${name}"]`,
-      toks
-    );
-  }
-
-  // MODES
-  if (modes.light.length) {
-    out += start("Mode light — mode/light");
-    out += open('[data-theme="light"]', 0);
-    for (const t of modes.light.sort(byNameAsc)) {
-      out += rule(varName(t), t.value, 1);
-    }
-    out += close(0);
-    out += "\n";
-  }
-
-  if (modes.dark.length) {
-    out += start("Mode dark — mode/dark");
-    out += open('[data-theme="dark"]', 0);
-    for (const t of modes.dark.sort(byNameAsc)) {
-      out += rule(varName(t), t.value, 1);
-    }
-    out += close(0);
-    out += "\n";
-  }
-
-  // STYLES / utility classes
-  if (styles.size) {
-    out += start("Styles (utility classes)");
-    for (const [section, toks] of [...styles.entries()].sort()) {
-      out += `/* Styles: ${section} */\n`;
-      for (const t of toks) {
-        const cls = "." + kebab(t.name);
-        const v = t.value;
-
-        if (v && typeof v === "object" && !Array.isArray(v)) {
-          out += emitClassFromObject(cls, v, 0);
-        } else {
-          const prop =
-            t.attributes?.cssProperty ||
-            t.original?.attributes?.cssProperty ||
-            inferScalarProp(t);
-          const val = Array.isArray(v) ? joinShadow(v) : v;
-          out += emitClassFromScalar(cls, prop, val, 0);
-        }
-      }
-      out += "\n";
-    }
-  }
-
-  return out.trimEnd() + "\n";
+function getCollection(token) {
+  const p = token.filePath.replace(/\\/g, "/");
+  // tokens/raw/<collection>/...
+  const m = p.match(/\/tokens\/raw\/([^/]+)/);
+  return m ? m[1] : "other";
 }
+
+function getSubgroup(token, collection) {
+  // e.g. tokens/raw/breakpoint/tablet/… → "tablet"
+  const p = token.filePath.replace(/\\/g, "/");
+  const rx = new RegExp(`/tokens/raw/${collection}/([^/]+)/`);
+  const m = p.match(rx);
+  return m ? m[1] : undefined;
+}
+
+function cssVarLine(t) {
+  return `--${t.name}: ${t.value};`;
+}
+
+function block(title, body) {
+  if (!body.trim()) return "";
+  return `/* ${title} */\n${body}\n`;
+}
+
+function rootBlock(lines) {
+  if (!lines.length) return "";
+  return `:root {\n${INDENT()}${lines.join(`\n${INDENT()}`)}\n}\n`;
+}
+
+function modeBlock(mode, lines) {
+  if (!lines.length) return "";
+  return `[data-theme="${mode}"] {\n${INDENT()}${lines.join(`\n${INDENT()}`)}\n}\n`;
+}
+
+function mediaRoot(minWidthPx, lines) {
+  if (!lines.length) return "";
+  return `@media (min-width: ${minWidthPx}px) {\n  :root {\n    ${lines.join(`\n    `)}\n  }\n}\n`;
+}
+
+function styleClassRule(token) {
+  // Expect names like "elevation-elevation-action" etc.
+  // If value is already a declaration "box-shadow: …", keep it.
+  // Otherwise assume it's a box-shadow literal.
+  const v = String(token.value).trim();
+  const decl = v.includes(":") ? v : `box-shadow: ${v};`;
+  return `.${token.name} {\n  ${decl}\n}`;
+}
+
+export default {
+  name: "css/collections",
+  format: ({ dictionary }) => {
+    // Partition tokens by top-level collection folder
+    const groups = {
+      global: [],
+      breakpoint: [],
+      mode: [],
+      styles: [],
+      other: []
+    };
+
+    for (const t of dictionary.allTokens) {
+      const col = getCollection(t);
+      if (groups[col]) groups[col].push(t);
+      else groups.other.push(t);
+    }
+
+    // ===== GLOBAL =====
+    const globalVars = groups.global
+      .slice()
+      .sort(by("name"))
+      .map(cssVarLine);
+
+    let out = "";
+    out += block("Base: Global + inline + defaults", rootBlock(globalVars));
+
+    // ===== BREAKPOINTS =====
+    // Split by mobile/tablet/desktop
+    const bpBySub = { mobile: [], tablet: [], desktop: [] };
+    for (const t of groups.breakpoint) {
+      const sub = getSubgroup(t, "breakpoint") || "mobile";
+      if (!bpBySub[sub]) bpBySub[sub] = [];
+      bpBySub[sub].push(t);
+    }
+
+    // MOBILE (default root)
+    const mobileLines = (bpBySub.mobile || [])
+      .slice()
+      .sort(by("name"))
+      .map(cssVarLine);
+    if (mobileLines.length) {
+      out += block("Breakpoint default — breakpoint/mobile", rootBlock(mobileLines));
+    }
+
+    // TABLET / DESKTOP (@media)
+    const tabletLines = (bpBySub.tablet || [])
+      .slice()
+      .sort(by("name"))
+      .map(cssVarLine);
+    if (tabletLines.length) {
+      out += block(
+        "Breakpoint min-width 640px — breakpoint/tablet",
+        mediaRoot(BP_MIN.tablet, tabletLines)
+      );
+    }
+
+    const desktopLines = (bpBySub.desktop || [])
+      .slice()
+      .sort(by("name"))
+      .map(cssVarLine);
+    if (desktopLines.length) {
+      out += block(
+        "Breakpoint min-width 1024px — breakpoint/desktop",
+        mediaRoot(BP_MIN.desktop, desktopLines)
+      );
+    }
+
+    // ===== MODE (light/dark/others) =====
+    const modeBuckets = {};
+    for (const t of groups.mode) {
+      const sub = getSubgroup(t, "mode") || "default";
+      (modeBuckets[sub] ||= []).push(t);
+    }
+    for (const [mode, toks] of Object.entries(modeBuckets)) {
+      const lines = toks.slice().sort(by("name")).map(cssVarLine);
+      const title =
+        mode === "light"
+          ? "Mode light — mode/light"
+          : mode === "dark"
+          ? "Mode dark — mode/dark"
+          : `Mode ${mode} — mode/${mode}`;
+      out += block(title, modeBlock(mode, lines));
+    }
+
+    // ===== STYLES (utility classes) =====
+    const styleRules = groups.styles
+      .slice()
+      .sort(by("name"))
+      .map(styleClassRule);
+    if (styleRules.length) {
+      out += block("Styles (utility classes)", "");
+      out += block("Styles: generated from /styles", styleRules.join("\n\n") + "\n");
+    }
+
+    // ===== OTHER =====
+    // Dump anything unclassified into labeled sections grouped by second folder
+    if (groups.other.length) {
+      const otherBuckets = {};
+      for (const t of groups.other) {
+        // tokens/raw/<other>/<sub>/...
+        const other = getCollection(t); // will be "other"
+        const sub = getSubgroup(t, other) || "default";
+        (otherBuckets[sub] ||= []).push(t);
+      }
+      for (const [sub, toks] of Object.entries(otherBuckets)) {
+        const lines = toks.slice().sort(by("name")).map(cssVarLine);
+        const title =
+          sub === "default"
+            ? "Other — default"
+            : `Other ${sub} — set ${sub}`;
+        out += block(title, rootBlock(lines));
+      }
+    }
+
+    return out.trim() + "\n";
+  }
+};
