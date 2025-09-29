@@ -6,21 +6,20 @@ on:
     branches: [ main ]
     paths:
       - "tokens/raw/**"
-      - "sd-configs/**"
-      - "tools/**"
+      - "tools/style-dictionary/**"
       - "package.json"
   pull_request:
     paths:
       - "tokens/raw/**"
-      - "sd-configs/**"
-      - "tools/**"
+      - "tools/style-dictionary/**"
       - "package.json"
   workflow_dispatch:
     inputs:
       config:
-        description: "Build only this config from sd-configs/ (e.g. css-primary.mjs)"
+        description: "Build only this config from tools/style-dictionary/sd-configs/ (e.g. css-primary.mjs)"
         required: false
         default: ""
+
 
 permissions:
   contents: write
