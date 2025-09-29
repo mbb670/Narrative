@@ -1,50 +1,76 @@
+// tools/style-dictionary/build.mjs
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import StyleDictionary from 'style-dictionary';
-import cssConfig from '../sd-configs/css.mjs'; // the file above
-import '../tools/style-dictionary/register-formats.mjs'; // side-effect: registers the format
 
-const SD = StyleDictionary.extend(cssConfig);
-SD.buildAllPlatforms();
-console.log('Built CSS via narrative/css-collections');
-
-// import the generic formatter
-import cssCollectionsFormatter from "./formats/format-css-collections.mjs";
-
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const CONFIG_DIR = path.resolve(__dirname, "./sd-configs");
-
-// Register the formatter (v4 expects { name, format })
+// 1) Register our formatter
+import cssCollectionsFormatter from './formats/format-css-collections.mjs';
 StyleDictionary.registerFormat({
-  name: "custom/css-collections",
-  format: cssCollectionsFormatter
+  name: 'narrative/css-collections',
+  formatter: cssCollectionsFormatter,
 });
 
-async function loadConfig(filePath) {
-  const mod = await import(url.pathToFileURL(filePath).href);
-  return mod.default || mod;
-}
+// 2) Resolve repo paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const repoRoot = path.resolve(__dirname, '../../');
 
-const only = process.env.SD_CONFIG && process.env.SD_CONFIG.trim();
-const toBuild = [];
+// Allow override via env var: SD_CONFIG=sd-configs/other.mjs
+const configPath = path.resolve(
+  repoRoot,
+  process.env.SD_CONFIG ?? 'sd-configs/css.mjs'
+);
 
-if (only) {
-  toBuild.push(path.resolve(CONFIG_DIR, only));
-} else {
-  const files = await readdir(CONFIG_DIR);
-  for (const f of files) {
-    if (f.endsWith(".mjs") || f.endsWith(".js")) {
-      toBuild.push(path.resolve(CONFIG_DIR, f));
+async function loadConfig() {
+  try {
+    // Helpful check + readable error if path is wrong
+    await fs.access(configPath);
+    const mod = await import(pathToFileURL(configPath));
+    if (!mod?.default) {
+      throw new Error(`No default export in ${configPath}`);
     }
+    return mod.default;
+  } catch (err) {
+    console.warn(
+      `[tokens] Could not import config at ${configPath}. Using a minimal default config.\n` +
+      `Reason: ${err?.message ?? err}`
+    );
+
+    // 3) Fallback default config (raw sources; no ref-resolving transforms)
+    return {
+      source: [
+        'raw/**/*.json',
+        'tokens/**/*.json',
+      ],
+      platforms: {
+        css: {
+          transforms: [], // keep refs as var(--...), do not resolve
+          buildPath: 'resolved/',
+          files: [
+            {
+              destination: 'tokens.css',
+              format: 'narrative/css-collections',
+            },
+          ],
+        },
+      },
+    };
   }
 }
 
-if (!toBuild.length) {
-  console.error("No configs found in tools/style-dictionary/sd-configs/. Add a *.mjs file.");
-  process.exit(1);
-}
+(async function run() {
+  const config = await loadConfig();
 
-for (const cfgPath of toBuild) {
-  const cfg = await loadConfig(cfgPath);
-  console.log(`\nBuilding with config: ${path.basename(cfgPath)}\n`);
-  const sd = new StyleDictionary(cfg);   // v4: instantiate, then build
-  await sd.buildAllPlatforms();
-}
+  // 4) Build
+  const SD = StyleDictionary.extend(config);
+  await SD.buildAllPlatforms();
+
+  console.log(
+    `✅ Built tokens with format "narrative/css-collections". ` +
+    `Config: ${path.relative(repoRoot, configPath)}`
+  );
+})().catch((e) => {
+  console.error('❌ Token build failed:', e);
+  process.exit(1);
+});
