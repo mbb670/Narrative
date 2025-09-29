@@ -1,7 +1,10 @@
-import StyleDictionary from "style-dictionary";
-import { readdir } from "node:fs/promises";
-import path from "node:path";
-import url from "node:url";
+import StyleDictionary from 'style-dictionary';
+import cssConfig from '../sd-configs/css.mjs'; // the file above
+import '../tools/style-dictionary/register-formats.mjs'; // side-effect: registers the format
+
+const SD = StyleDictionary.extend(cssConfig);
+SD.buildAllPlatforms();
+console.log('Built CSS via narrative/css-collections');
 
 // import the generic formatter
 import cssCollectionsFormatter from "./formats/format-css-collections.mjs";
