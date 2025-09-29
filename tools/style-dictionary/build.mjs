@@ -8,66 +8,55 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "../../");
 
-// ---------- helpers
-function nonEmpty(v) {
-  return typeof v === "string" && v.trim().length > 0;
-}
+// ---------------- helpers ----------------
+const nonEmpty = (v) => typeof v === "string" && v.trim().length > 0;
+const toURL = (p) => pathToFileURL(p);
+const dynImport = (p) => import(toURL(p).href);
 
-async function importModule(p) {
-  return import(pathToFileURL(p));
-}
-
-// Get a formatter function regardless of how the format file exports it
 async function loadFormatter() {
-  const formatPath = path.resolve(__dirname, "./formats/format-css-collections.mjs");
-  const mod = await importModule(formatPath);
+  const fmtPath = path.resolve(__dirname, "./formats/format-css-collections.mjs");
+  const mod = await dynImport(fmtPath);
 
-  const pickFn = (obj) => {
-    if (!obj) return null;
-    if (typeof obj === "function") return obj;
-    if (typeof obj.format === "function") return obj.format;      // SD v2 style
-    if (typeof obj.formatter === "function") return obj.formatter; // SD v3 style
+  // Try common export shapes
+  const pick = (x) => {
+    if (!x) return null;
+    if (typeof x === "function") return x;
+    if (typeof x.formatter === "function") return x.formatter; // SD v3
+    if (typeof x.format === "function") return x.format;       // SD v2
     return null;
   };
 
-  const fn =
-    pickFn(mod?.default) ||
-    pickFn(mod) ||
-    null;
-
+  const fn = pick(mod?.default) || pick(mod);
   if (!fn) {
     throw new Error(
       "format-css-collections.mjs must export a formatter function (default), " +
-      "or an object with `format` (v2) or `formatter` (v3)."
+      "or an object with `formatter` (v3) or `format` (v2)."
     );
   }
   return fn;
 }
 
-// Resolve SD config (env override, with safe fallback)
 async function loadConfig() {
+  // Allow env override; default to repo’s sd-configs/css.mjs if present
   const rel = nonEmpty(process.env.SD_CONFIG) ? process.env.SD_CONFIG.trim() : "sd-configs/css.mjs";
-  const configPath = path.resolve(repoRoot, rel);
+  const cfgPath = path.resolve(repoRoot, rel);
 
   try {
-    const stat = await fs.stat(configPath);
-    if (stat.isDirectory()) {
-      throw new Error(`Path points to a directory, not a module: ${configPath}`);
-    }
-    const cfg = await importModule(configPath);
-    if (!cfg?.default) throw new Error(`No default export in ${configPath}`);
-    return cfg.default;
+    const stat = await fs.stat(cfgPath);
+    if (stat.isDirectory()) throw new Error(`Path points to a directory, not a module: ${cfgPath}`);
+    const mod = await dynImport(cfgPath);
+    if (!mod?.default) throw new Error(`No default export in ${cfgPath}`);
+    return mod.default;
   } catch (err) {
     console.warn(
-      `[tokens] Could not import config at ${configPath}. Using a minimal default config.\n` +
+      `[tokens] Could not import config at ${cfgPath}. Using a minimal default config.\n` +
       `Reason: ${err?.message ?? err}`
     );
-    // Minimal, but enough to prove the pipeline works
     return {
+      // Fallback sources so the build keeps going
       source: ["raw/**/*.json", "tokens/**/*.json"],
       platforms: {
         css: {
-          transforms: [],
           buildPath: "resolved/",
           files: [{ destination: "tokens.css", format: "narrative/css-collections" }],
         },
@@ -76,40 +65,54 @@ async function loadConfig() {
   }
 }
 
-// Register format in a way that works on v2 and v3
-function registerFormatCompat(sd, name, fn) {
-  // Try v3 (expects `formatter`)
+function registerFormatCompat(StyleDictionary, name, formatterFn) {
+  // Try v3 first
   try {
-    sd.registerFormat({ name, formatter: fn });
+    StyleDictionary.registerFormat({ name, formatter: formatterFn });
     return "v3";
-  } catch (_) {
-    // Fallback to v2 (expects `format`)
-    sd.registerFormat({ name, format: fn });
+  } catch {
+    // Fallback to v2
+    StyleDictionary.registerFormat({ name, format: formatterFn });
     return "v2";
   }
 }
 
-// Create a dictionary from config regardless of API surface
-function createDictionary(sd, config) {
-  if (typeof sd.extend === "function") return sd.extend(config); // classic API
-  if (typeof sd.create === "function") return sd.create(config); // alt API
-  if (typeof sd === "function") return sd(config);               // callable export
-  throw new Error("Unsupported Style Dictionary export: cannot find extend/create/callable");
+// Create an instance no matter which API surface we have
+function createDictionary(StyleDictionary, config) {
+  if (typeof StyleDictionary.extend === "function") {
+    // v2 API
+    return StyleDictionary.extend(config);
+  }
+
+  // v3: default export is a class
+  try {
+    return new StyleDictionary(config);
+  } catch {
+    // Some builds expose a factory
+    if (typeof StyleDictionary.create === "function") {
+      return StyleDictionary.create(config);
+    }
+    if (typeof StyleDictionary === "function") {
+      // As a last resort, callable factory (non-class)
+      return StyleDictionary(config);
+    }
+  }
+
+  throw new Error("Unsupported Style Dictionary export: no extend/create and cannot construct with `new`.");
 }
 
-// ---------- run
-(async function run() {
-  // Some installs export as default, some as namespace
-  const StyleDictionary = StyleDictionaryNS?.default ?? StyleDictionaryNS;
+// ---------------- run ----------------
+(async () => {
+  const SDNS = StyleDictionaryNS?.default ?? StyleDictionaryNS; // class in v3
 
   const formatter = await loadFormatter();
   const config = await loadConfig();
-  const regMode = registerFormatCompat(StyleDictionary, "narrative/css-collections", formatter);
 
-  const SD = createDictionary(StyleDictionary, config);
-  await SD.buildAllPlatforms();
+  const reg = registerFormatCompat(SDNS, "narrative/css-collections", formatter);
+  const dict = createDictionary(SDNS, config);
 
-  console.log(`✅ Built tokens using ${regMode}-style format registration.`);
+  await dict.buildAllPlatforms();
+  console.log(`✅ Built tokens (format registration: ${reg}).`);
 })().catch((e) => {
   console.error("❌ Token build failed:", e);
   process.exit(1);
