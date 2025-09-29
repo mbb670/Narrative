@@ -103,16 +103,21 @@ function createDictionary(StyleDictionary, config) {
 
 // ---------------- run ----------------
 (async () => {
-  const SDNS = StyleDictionaryNS?.default ?? StyleDictionaryNS; // class in v3
+  const SDNS = StyleDictionaryNS?.default ?? StyleDictionaryNS;
 
   const formatter = await loadFormatter();
   const config = await loadConfig();
 
-  const reg = registerFormatCompat(SDNS, "narrative/css-collections", formatter);
+  registerFormatCompat(SDNS, "narrative/css-collections", formatter);
   const dict = createDictionary(SDNS, config);
 
+  // 🔥 clean output so results always refresh
+  const outDir = path.resolve(repoRoot, "resolved");
+  await fs.rm(outDir, { recursive: true, force: true });
+  await fs.mkdir(outDir, { recursive: true });
+
   await dict.buildAllPlatforms();
-  console.log(`✅ Built tokens (format registration: ${reg}).`);
+  console.log(`✅ Built tokens into ${outDir}`);
 })().catch((e) => {
   console.error("❌ Token build failed:", e);
   process.exit(1);
