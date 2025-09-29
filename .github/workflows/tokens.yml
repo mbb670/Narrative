@@ -10,54 +10,27 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: tokens-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # Use cache only if a lockfile exists
-      - name: Use Node 20 (cached)
-        if: hashFiles('package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock') != ''
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      # Fallback: no cache when there's no lockfile
-      - name: Use Node 20 (no cache)
-        if: hashFiles('package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock') == ''
+      # No caching, so no lockfile requirement
+      - name: Use Node 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install deps
-        run: |
-          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
-            npm ci --no-audit --no-fund
-          else
-            npm i --no-audit --no-fund
-          fi
+        run: npm i --no-audit --no-fund
 
       - name: Build tokens
         run: node tools/style-dictionary/build.mjs
 
-      # Guard against the stray root-level "resolved" folder some runs produced
+      # Safety: remove any mistakenly-created root `resolved/`
       - name: Cleanup stray root resolved folder (if any)
-        run: |
-          if [ -d "./resolved" ]; then
-            echo "Removing stray ./resolved folder"
-            rm -rf ./resolved
-          fi
-
-      - name: Show diff (debug)
-        run: |
-          git status
-          git --no-pager diff -- tokens/resolved/ || true
+        run: if [ -d "./resolved" ]; then rm -rf ./resolved; fi
 
       - name: Commit generated file
         if: github.ref == 'refs/heads/main'
@@ -66,7 +39,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Add anything produced under the correct folder (whatever the exact filename)
           git add -A tokens/resolved/
           if git diff --staged --quiet; then
             echo "No changes to commit."
