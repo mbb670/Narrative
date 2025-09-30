@@ -2076,7 +2076,7 @@
           "$type": "color"
         },
         "inverse": {
-          "$value": "{brand.neutrals.white}",
+          "$value": "{colorTheme.default.brand.neutrals.white}",
           "$type": "color"
         }
       },
