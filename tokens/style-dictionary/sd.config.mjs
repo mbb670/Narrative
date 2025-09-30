@@ -1,192 +1,228 @@
-import StyleDictionary from 'style-dictionary';
+import StyleDictionary from "style-dictionary";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// ---------- small helpers ----------
-const kebab = (str) =>
-  String(str)
-    // IMPORTANT: no "i" flag here; we only split lower/digit → UPPER boundaries
-    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
-    .replace(/[\s_]+/g, "-")
-    .toLowerCase();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = process.cwd();
+const RAW_DIR = path.join(REPO_ROOT, "tokens", "raw");
 
-const toVarNameFromPath = (pathArr) => `--${pathArr.map(kebab).join("-")}`;
-
-// turn "{a.b.c}" → "var(--a-b-c)"
+// ---- naming helpers (match your preferred var names) ----
+const COLLAPSE = new Map([
+  ["fontSize", "fontsize"],
+  ["fontFamily", "fontfamily"],
+  ["lineHeight", "lineheight"],
+  ["letterSpacing", "letterspacing"],
+  ["fontStretch", "fontstretch"]
+]);
+const seg = (s) => COLLAPSE.get(s) ?? String(s).toLowerCase();
+const varNameFromPath = (arr) => `--${arr.map(seg).join("-")}`;
 const refToVar = (val) => {
   if (typeof val === "string") {
     const m = val.match(/^\{([^}]+)\}$/);
-    if (m) return `var(--${kebab(m[1].replace(/\./g, "-"))})`;
+    if (m) return `var(--${m[1].split(".").map(seg).join("-")})`;
   }
   return val;
 };
 
-// serialize var declarations (sorted for stable diffs)
-const decls = (list) =>
-  list
-    .slice()
-    .sort((a, b) =>
-      toVarNameFromPath(a.path).localeCompare(toVarNameFromPath(b.path))
-    )
-    .map((t) => {
-      const raw = t.original?.value ?? t.value;
-      const v =
-        typeof raw === "string" && /^\{.+\}$/.test(raw) ? refToVar(raw) : t.value;
-      return `  ${toVarNameFromPath(t.path)}: ${v};`;
-    })
-    .join("\n");
+// ---- file utils ----
+const readJson = (p) => JSON.parse(fs.readFileSync(p, "utf8"));
+const listFiles = (dir) =>
+  fs.existsSync(dir)
+    ? fs.readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => path.join(dir, f))
+    : [];
 
-// pull collection + set from token.filePath
-const metaFromFile = (t) => {
-  const fp = t.filePath.replace(/\\+/g, "/");
-  const m = fp.match(/\/tokens\/raw\/([^/]+)\/([^/]+)\.json$/i);
-  return {
-    collection: m ? m[1] : "global",
-    set: m ? m[2] : "default",
-  };
+const listDirs = (dir) =>
+  fs.existsSync(dir)
+    ? fs
+        .readdirSync(dir, { withFileTypes: true })
+        .filter((d) => d.isDirectory())
+        .map((d) => d.name)
+    : [];
+
+// ---- flatten tokens (DTCG-style) ----
+const flattenValues = (obj, prefix = [], out = []) => {
+  // “value” node with primitive or string → a var
+  if (
+    obj &&
+    typeof obj === "object" &&
+    "value" in obj &&
+    (typeof obj.value !== "object" || obj.value === null)
+  ) {
+    out.push({ path: prefix, value: obj.value });
+    return out;
+  }
+
+  // walk children
+  if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+    for (const [k, v] of Object.entries(obj)) {
+      if (k === "value") continue; // composite handled elsewhere
+      flattenValues(v, prefix.concat(k), out);
+    }
+  }
+  return out;
 };
 
-// ---------- register the custom format ----------
+// ---- styles (typography / boxShadow / generic composites) ----
+const collectStyleBlocks = (stylesJson) => {
+  const blocks = [];
+
+  const walk = (node, p = []) => {
+    if (!node || typeof node !== "object") return;
+
+    if (
+      "value" in node &&
+      node.value &&
+      typeof node.value === "object" &&
+      !Array.isArray(node.value)
+    ) {
+      const type = node.type || "";
+      const classSuffix = p.map(seg).join("-");
+      if (type === "typography") {
+        const rules = Object.entries(node.value)
+          .map(([k, v]) => `  ${seg(k)}: ${refToVar(v)};`)
+          .join("\n");
+        blocks.push(`.text-${classSuffix} {\n${rules}\n}`);
+        return;
+      }
+      if (type === "boxShadow") {
+        const toShadow = (obj) =>
+          ["x", "y", "blur", "spread", "color"]
+            .map((k) => refToVar(obj?.[k]))
+            .filter(Boolean)
+            .join(" ");
+        const shadow =
+          Array.isArray(node.value)
+            ? node.value.map(toShadow).join(", ")
+            : toShadow(node.value);
+        const cls =
+          p[0] === "elevation" ? `.elevation-${p.slice(1).map(seg).join("-")}` : `.${classSuffix}`;
+        blocks.push(`${cls} {\n  box-shadow: ${shadow};\n}`);
+        return;
+      }
+
+      // generic composite → CSS properties
+      const rules = Object.entries(node.value)
+        .map(([k, v]) => `  ${seg(k)}: ${refToVar(v)};`)
+        .join("\n");
+      blocks.push(`.${classSuffix} {\n${rules}\n}`);
+      return;
+    }
+
+    // walk children
+    for (const [k, v] of Object.entries(node)) {
+      if (k === "value") continue;
+      walk(v, p.concat(k));
+    }
+  };
+
+  walk(stylesJson, []);
+  return blocks;
+};
+
+// ---- make :root or selector block from a file ----
+const varsBlockFromFile = (filePath) => {
+  const json = readJson(filePath);
+  const vars = flattenValues(json);
+  if (!vars.length) return "";
+
+  const body = vars
+    .slice()
+    .sort((a, b) => varNameFromPath(a.path).localeCompare(varNameFromPath(b.path)))
+    .map(({ path: p, value }) => `  ${varNameFromPath(p)}: ${refToVar(value)};`)
+    .join("\n");
+
+  return `:root {\n${body}\n}`;
+};
+
+// ---- custom format: build the whole CSS in your required order ----
 StyleDictionary.registerFormat({
   name: "nw/css-collections",
-  format: ({ dictionary }) => {
-    let out = `/* Auto-generated by Style Dictionary. Do not edit directly. */\n\n`;
+  format: () => {
+    let css = `/* Auto-generated by Style Dictionary. Do not edit directly. */\n\n`;
 
-    const all = dictionary.allTokens;
-
-    const isStyles = (t) =>
-      t.filePath.replace(/\\+/g, "/").includes("/tokens/raw/styles/");
-    // Treat ANY object **or array** as composite (exclude from :root vars)
-    const isComposite = (t) =>
-      typeof t.value === "object" && t.value !== null;
-
-    // Vars come from non-styles, non-composite tokens
-    const varTokens = all.filter((t) => !isStyles(t) && !isComposite(t));
-
-    // --- partition by collection ---
-    const globals = [];
-    const breakpoints = { mobile: [], tablet: [], desktop: [] };
-    const others = {}; // { collection: { default:[], setName:[] } }
-    const modes = {}; // { setName: [] }
-
-    for (const t of varTokens) {
-      const { collection, set } = metaFromFile(t);
-      if (collection === "global") globals.push(t);
-      else if (collection === "breakpoint") (breakpoints[set] ||= []).push(t);
-      else if (collection === "mode") (modes[set] ||= []).push(t);
-      else if (collection === "styles") {
-        // ignored for vars
-      } else {
-        (others[collection] ||= {});
-        (others[collection][set] ||= []).push(t);
+    // 1) Global
+    const globalFiles = listFiles(path.join(RAW_DIR, "global"));
+    if (globalFiles.length) {
+      css += `/* Base: Global + inline + defaults */\n`;
+      for (const f of globalFiles) {
+        const block = varsBlockFromFile(f);
+        if (block) css += block + "\n\n";
       }
     }
 
-    const section = (title, body) =>
-      body.trim() ? `/* ${title} */\n${body}\n\n` : "";
+    // 2–4) Breakpoints
+    const bpDir = path.join(RAW_DIR, "breakpoint");
+    const mobile = path.join(bpDir, "mobile.json");
+    const tablet = path.join(bpDir, "tablet.json");
+    const desktop = path.join(bpDir, "desktop.json");
 
-    // 1. Global
-    if (globals.length) {
-      out += section("Global", `:root {\n${decls(globals)}\n}`);
+    if (fs.existsSync(mobile)) {
+      css += `/* Breakpoint default — breakpoint/mobile */\n${varsBlockFromFile(mobile)}\n\n`;
+    }
+    if (fs.existsSync(tablet)) {
+      const inner = varsBlockFromFile(tablet).replace(/^/gm, "  ");
+      css += `/* Breakpoint min-width 640px — breakpoint/tablet */\n@media (min-width: 640px) {\n${inner}\n}\n\n`;
+    }
+    if (fs.existsSync(desktop)) {
+      const inner = varsBlockFromFile(desktop).replace(/^/gm, "  ");
+      css += `/* Breakpoint min-width 1024px — breakpoint/desktop */\n@media (min-width: 1024px) {\n${inner}\n}\n\n`;
     }
 
-    // 2–4. Breakpoints
-    const mq = {
-      tablet: "(min-width: 640px)",
-      desktop: "(min-width: 1024px)",
-    };
-    if (breakpoints.mobile?.length) {
-      out += section("Breakpoint: mobile", `:root {\n${decls(breakpoints.mobile)}\n}`);
-    }
-    for (const bp of ["tablet", "desktop"]) {
-      const list = breakpoints[bp] || [];
-      if (!list.length) continue;
-      out += section(
-        `Breakpoint: ${bp}`,
-        `@media ${mq[bp]} {\n  :root {\n${decls(list)
-          .split("\n")
-          .map((l) => "    " + l)
-          .join("\n")}\n  }\n}`
-      );
-    }
+    // 5–9) “Other” collections (everything except global/breakpoint/mode/styles)
+    const topDirs = listDirs(RAW_DIR)
+      .filter((d) => !["global", "breakpoint", "mode", "styles"].includes(d))
+      .sort();
+    for (const col of topDirs) {
+      const dir = path.join(RAW_DIR, col);
+      const files = listFiles(dir).sort(); // alphabetical: default.json first naturally if named default.json
 
-    // 5–9. “Other” collections (alphabetical; default first)
-    for (const col of Object.keys(others).sort()) {
-      const sets = others[col];
-      const names = Object.keys(sets).sort((a, b) => {
-        if (a === "default") return -1;
-        if (b === "default") return 1;
-        return a.localeCompare(b);
-      });
-      for (const setName of names) {
-        const list = sets[setName];
-        const selector =
-          setName === "default" ? ":root" : `[data-${kebab(col)}="${setName}"]`;
-        out += section(`${col}: ${setName}`, `${selector} {\n${decls(list)}\n}`);
+      // default (→ :root) first, then others (→ [data-<collection>="<set>"])
+      const def = files.find((f) => path.basename(f).toLowerCase() === "default.json");
+      if (def) {
+        css += `/* Other ${col} — default */\n${varsBlockFromFile(def)}\n\n`;
+      }
+      for (const f of files) {
+        if (f === def) continue;
+        const setName = path.basename(f, ".json");
+        const block = varsBlockFromFile(f).replace(/^:root\s+\{/, `[data-${col}="${setName}"] {`);
+        css += `/* Other ${col} — set ${setName} */\n${block}\n\n`;
       }
     }
 
-    // 10–11. Mode (light first)
-    for (const mName of Object.keys(modes).sort((a, b) => {
-      if (a === "light") return -1;
-      if (b === "light") return 1;
-      return a.localeCompare(b);
-    })) {
-      const selector = mName === "light" ? ":root" : `[data-mode="${mName}"]`;
-      out += section(`mode: ${mName}`, `${selector} {\n${decls(modes[mName])}\n}`);
-    }
-
-    // 12. Styles → classes (typography, boxShadow, generic composite)
-    const styleTokens = all.filter((t) => isStyles(t) && isComposite(t));
-    if (styleTokens.length) {
-      out += "/* Styles */\n";
-      for (const t of styleTokens) {
-        const type = t.type || "";
-        const pathKebab = t.path.map(kebab).join("-");
-        const v = t.original?.value ?? t.value;
-
-        if (type === "typography" && v && typeof v === "object" && !Array.isArray(v)) {
-          const className = `.text-${pathKebab}`;
-          const rules = Object.entries(v)
-            .map(([k, val]) => `  ${kebab(k)}: ${refToVar(val)};`)
-            .join("\n");
-          out += `${className} {\n${rules}\n}\n\n`;
-          continue;
-        }
-
-        if (type === "boxShadow") {
-          const className =
-            t.path[0] === "elevation" ? `.elevation-${t.path.slice(1).map(kebab).join("-")}` : `.${pathKebab}`;
-          const toShadow = (obj) =>
-            ["x", "y", "blur", "spread", "color"]
-              .map((k) => refToVar(obj?.[k]))
-              .filter(Boolean)
-              .join(" ");
-          const val = Array.isArray(v)
-            ? v.map(toShadow).join(", ")
-            : typeof v === "object"
-            ? toShadow(v)
-            : refToVar(v);
-          out += `${className} {\n  box-shadow: ${val};\n}\n\n`;
-          continue;
-        }
-
-        // generic composite class fallback
-        if (v && typeof v === "object") {
-          const className = `.${pathKebab}`;
-          const rules = Object.entries(v)
-            .map(([k, val]) => `  ${kebab(k)}: ${refToVar(val)};`)
-            .join("\n");
-          out += `${className} {\n${rules}\n}\n\n`;
-        }
+    // 10–11) Mode (light = default → :root; others → [data-mode="…"])
+    const modeDir = path.join(RAW_DIR, "mode");
+    if (fs.existsSync(modeDir)) {
+      const modeFiles = listFiles(modeDir).sort();
+      const light = modeFiles.find((f) => path.basename(f).toLowerCase() === "light.json");
+      if (light) {
+        css += `/* Mode light — mode/light */\n${varsBlockFromFile(light)}\n\n`;
+      }
+      for (const f of modeFiles) {
+        if (f === light) continue;
+        const setName = path.basename(f, ".json");
+        const block = varsBlockFromFile(f).replace(/^:root\s+\{/, `[data-mode="${setName}"] {`);
+        css += `/* Mode ${setName} — mode/${setName} */\n${block}\n\n`;
       }
     }
 
-    return out.trim() + "\n";
+    // 12) Styles
+    const stylesFile = path.join(RAW_DIR, "styles", "styles.json");
+    if (fs.existsSync(stylesFile)) {
+      const stylesJson = readJson(stylesFile);
+      const blocks = collectStyleBlocks(stylesJson);
+      if (blocks.length) {
+        css += `/* Styles: styles/styles */\n` + blocks.join("\n\n") + "\n\n";
+      }
+    }
+
+    return css.trim() + "\n";
   },
 });
 
-// ---------- export SD config ----------
+// ---- SD config stays minimal; we only use our custom format ----
 export default {
-  source: ["tokens/raw/**/*.json"],
+  source: ["tokens/raw/**/*.json"], // still needed; CLI requires a source, but formatter reads raw files itself
   platforms: {
     css: {
       transformGroup: "css",
@@ -194,10 +230,9 @@ export default {
       files: [
         {
           destination: "tokens-test.css",
-          format: "nw/css-collections",
-          options: { outputReferences: true }
-        },
-      ],
-    },
-  },
+          format: "nw/css-collections"
+        }
+      ]
+    }
+  }
 };
