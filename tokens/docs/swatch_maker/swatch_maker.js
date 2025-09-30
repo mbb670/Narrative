@@ -31,7 +31,7 @@
   const WATCH_ATTRS = [
     "class",
     "style",
-    "data-theme",
+    "data-mode",
     "data-color-mode",
     "data-mode",
     "data-colorTheme",

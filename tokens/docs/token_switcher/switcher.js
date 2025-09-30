@@ -279,7 +279,7 @@
   function getEnv() {
     const r = document.documentElement;
     return {
-      theme: r.getAttribute("data-theme") || "light",
+      theme: r.getAttribute("data-mode") || "light",
       colorTheme: r.getAttribute("data-colorTheme") || "default",
       fontTheme: r.getAttribute("data-fontTheme") || "default",
       breakpoint: r.hasAttribute("data-breakpoint")
@@ -363,8 +363,8 @@
     if (wantsTheme && wantsColor) {
       const bubble = ensureThemeBubble(el);
       const themeVal = themeForEl || "light";
-      if (bubble.getAttribute("data-theme") !== themeVal) {
-        bubble.setAttribute("data-theme", themeVal);
+      if (bubble.getAttribute("data-mode") !== themeVal) {
+        bubble.setAttribute("data-mode", themeVal);
       }
       bindColorTarget(bubble, el);
     } else if (wantsTheme || wantsColor) {
@@ -539,13 +539,13 @@
         btns.forEach((b) =>
           b.setAttribute("aria-checked", String(b.dataset.value === value))
         );
-        if (root.getAttribute("data-theme") !== value)
-          root.setAttribute("data-theme", value);
+        if (root.getAttribute("data-mode") !== value)
+          root.setAttribute("data-mode", value);
         scheduleApply();
       };
 
       // initial: prefer existing attr, else "light" (we'll re-apply defaults later if provided)
-      const initialTheme = root.getAttribute("data-theme") || "light";
+      const initialTheme = root.getAttribute("data-mode") || "light";
 
       group.addEventListener("click", (e) => {
         const b = e.target.closest('[role="radio"]');
@@ -620,7 +620,7 @@
     mo.observe(document.documentElement, {
       attributes: true,
       attributeFilter: [
-        "data-theme",
+        "data-mode",
         "data-colorTheme",
         "data-fontTheme",
         "data-breakpoint"
