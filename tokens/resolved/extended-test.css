@@ -654,7 +654,7 @@
   --body-lineheight: var(--lineheight-2xl);
   --body-regular: var(--fontweight-400);
   --body-strong: var(--fontweight-700);
-  --builder-text style: Default;
+  --builder-text-style: Default;
   --display-fontfamily: var(--fontfamily-playfair-display);
   --display-fontsize-lg: var(--typography-8xl);
   --display-fontsize-md: var(--typography-7xl);
@@ -704,7 +704,7 @@
   --body-lineheight: var(--lineheight-2xl);
   --body-regular: var(--fontweight-400);
   --body-strong: var(--fontweight-700);
-  --builder-text style: Default;
+  --builder-text-style: Default;
   --display-fontfamily: var(--fontfamily-playfair-display);
   --display-fontsize-lg: var(--typography-8xl);
   --display-fontsize-md: var(--typography-7xl);
@@ -754,7 +754,7 @@
   --body-lineheight: var(--lineheight-2xl);
   --body-regular: var(--fontweight-400);
   --body-strong: var(--fontweight-600);
-  --builder-text style: Lifestyle;
+  --builder-text-style: Lifestyle;
   --display-fontfamily: var(--fontfamily-franklin-gothic-default);
   --display-fontsize-lg: var(--typography-8xl);
   --display-fontsize-md: var(--typography-7xl);
@@ -804,7 +804,7 @@
   --body-lineheight: var(--lineheight-2xl);
   --body-regular: var(--fontweight-400);
   --body-strong: var(--fontweight-700);
-  --builder-text style: Opinion;
+  --builder-text-style: Opinion;
   --display-fontfamily: var(--fontfamily-benton-modern-condensed);
   --display-fontsize-lg: var(--typography-9xl);
   --display-fontsize-md: var(--typography-8xl);
