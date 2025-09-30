@@ -1,16 +1,18 @@
+/* Token Swap (mode-only) */
+
 // You can set any subset; all are optional.
 // It's fine if this runs AFTER the external script loads.
-
+//
 // window.tokenSwapDefaults = {
 //   // "auto" | "mobile" | "tablet" | "desktop"
 //   breakpoint: "auto",
-
-//   // "light" | "dark"
-//   theme: "light",
-
+//
+//   // "light" | "dark" (prefer "mode", but "theme" is also accepted and mapped)
+//   mode: "light",
+//
 //   // "default" | "slate"
 //   colorTheme: "default",
-
+//
 //   // "default" | "opinion" | "lifestyle"
 //   fontTheme: "default"
 // };
@@ -21,7 +23,8 @@
   // =======================
   // constants / config
   // =======================
-  const KEYS = ["theme", "colorTheme", "fontTheme", "breakpoint"];
+  // Canonical axes (theme → mode)
+  const KEYS = ["mode", "colorTheme", "fontTheme", "breakpoint"];
   const BREAKPOINTS = [
     { label: "desktop", min: 1024 },
     { label: "tablet", min: 640 },
@@ -34,11 +37,11 @@
   // =======================
   // defaults plumbing (works even if set later in CodePen)
   // =======================
-  let _extDefaults = null; // last-seen defaults object
+  let _extDefaults = null; // last-seen defaults object (normalized)
   let _defaultsAppliedOnce = false; // guard so we don't re-apply identical defaults
   let _pendingDefaults = null; // stash if UI not ready yet
 
-  // Allow both names, just in case
+  // Allow both global names
   defineReactiveDefaultsProp("tokenSwapDefaults");
   defineReactiveDefaultsProp("TOKEN_SWAP_DEFAULTS");
 
@@ -69,26 +72,32 @@
     }
   }
 
+  // Normalize incoming defaults; accept legacy object key "theme" → "mode"
   function sanitizeDefaults(obj) {
     if (!obj || typeof obj !== "object") return null;
     const out = {};
-    if (typeof obj.theme === "string" && /^(light|dark)$/.test(obj.theme))
-      out.theme = obj.theme;
+    const modeVal = obj.mode ?? obj.theme; // accept both (object key only)
+    if (typeof modeVal === "string" && /^(light|dark)$/.test(modeVal))
+      out.mode = modeVal;
+
     if (
       typeof obj.colorTheme === "string" &&
       /^(default|slate)$/.test(obj.colorTheme)
     )
       out.colorTheme = obj.colorTheme;
+
     if (
       typeof obj.fontTheme === "string" &&
       /^(default|opinion|lifestyle)$/.test(obj.fontTheme)
     )
       out.fontTheme = obj.fontTheme;
+
     if (
       typeof obj.breakpoint === "string" &&
       /^(auto|mobile|tablet|desktop)$/.test(obj.breakpoint)
     )
       out.breakpoint = obj.breakpoint;
+
     return Object.keys(out).length ? out : null;
   }
 
@@ -99,30 +108,23 @@
   }
 
   function tryApplyDefaults() {
-    // If we haven't got anything to apply, stop.
     if (!_extDefaults) return;
 
-    // If controls aren't in the DOM yet, stash & try later
     const tray = document.querySelector("#token-swap-root");
     if (!tray) {
       _pendingDefaults = _extDefaults;
       return;
     }
 
-    // If we already applied the exact same object once, skip
-    if (_defaultsAppliedOnce && _pendingDefaults == null) {
-      // still allow explicit programmatic calls to re-apply:
-      // you can call window.tokenSwap.setDefaults again with a new object
-      return;
-    }
+    if (_defaultsAppliedOnce && _pendingDefaults == null) return;
 
     // Apply to UI as if the user selected them
     const root = document.documentElement;
 
-    // THEME segmented
-    if (_extDefaults.theme) {
+    // MODE (segmented)
+    if (_extDefaults.mode) {
       const btn = tray.querySelector(
-        `#switch-theme [data-value="${_extDefaults.theme}"]`
+        `#switch-theme [data-value="${_extDefaults.mode}"]`
       );
       if (btn) btn.click();
     }
@@ -227,8 +229,8 @@
     const html = `
 <div id="token-swap-root" class="token-swap" data-swap-exclude="fontTheme breakpoint">
 
-  <!-- Theme segmented toggle -->
-  <div id="switch-theme" class="switcher switcher-theme" role="radiogroup" aria-label="Theme">
+  <!-- Mode segmented toggle (UI id kept as switch-theme) -->
+  <div id="switch-theme" class="switcher switcher-theme" role="radiogroup" aria-label="Mode">
     <button type="button" class="switcher-btn" role="radio" aria-checked="true"  data-value="light">Light</button>
     <button type="button" class="switcher-btn" role="radio" aria-checked="false" data-value="dark">Dark</button>
   </div>
@@ -274,12 +276,34 @@
   }
 
   // =======================
+  // attribute helpers (mode only)
+  // =======================
+  function getAxisAttrName(k) {
+    return "data-" + (k === "mode" ? "mode" : k);
+  }
+  function readAxisAttr(node, k) {
+    return node.getAttribute(getAxisAttrName(k));
+  }
+  function hasAxisAttr(node, k) {
+    return node.hasAttribute(getAxisAttrName(k));
+  }
+  function setAxisAttr(node, k, v) {
+    const attr = getAxisAttrName(k);
+    if (!v) { removeAxisAttr(node, k); return; }
+    if (node.getAttribute(attr) !== v) node.setAttribute(attr, v);
+  }
+  function removeAxisAttr(node, k) {
+    const attr = getAxisAttrName(k);
+    if (node.hasAttribute(attr)) node.removeAttribute(attr);
+  }
+
+  // =======================
   // env helpers
   // =======================
   function getEnv() {
     const r = document.documentElement;
     return {
-      theme: r.getAttribute("data-mode") || "light",
+      mode: r.getAttribute("data-mode") || "light",
       colorTheme: r.getAttribute("data-colorTheme") || "default",
       fontTheme: r.getAttribute("data-fontTheme") || "default",
       breakpoint: r.hasAttribute("data-breakpoint")
@@ -296,10 +320,12 @@
     return "mobile";
   }
 
+  // Parse space-separated keys, normalize "theme" -> "mode" for data-swap-allow/exclude
   const parseKeys = (s) =>
     (s || "")
       .trim()
       .split(/\s+/)
+      .map((k) => (k === "theme" ? "mode" : k))
       .filter((k) => KEYS.includes(k));
 
   // =======================
@@ -346,7 +372,7 @@
     target.setAttribute("data-swap-color-bound", "");
   }
 
-  function applyPresentationRebind(el, allowSet, themeForEl) {
+  function applyPresentationRebind(el, allowSet, modeForEl) {
     if (allowSet.has("fontTheme") || allowSet.has("breakpoint")) {
       const explicit = el.getAttribute("data-swap-classes");
       if (explicit) {
@@ -357,17 +383,17 @@
       }
     }
 
-    const wantsTheme = allowSet.has("theme");
+    const wantsMode = allowSet.has("mode");
     const wantsColor = allowSet.has("colorTheme");
 
-    if (wantsTheme && wantsColor) {
+    if (wantsMode && wantsColor) {
       const bubble = ensureThemeBubble(el);
-      const themeVal = themeForEl || "light";
-      if (bubble.getAttribute("data-mode") !== themeVal) {
-        bubble.setAttribute("data-mode", themeVal);
+      const modeVal = modeForEl || "light";
+      if (bubble.getAttribute("data-mode") !== modeVal) {
+        bubble.setAttribute("data-mode", modeVal);
       }
       bindColorTarget(bubble, el);
-    } else if (wantsTheme || wantsColor) {
+    } else if (wantsMode || wantsColor) {
       bindColorTarget(el, el);
     }
   }
@@ -388,20 +414,12 @@
     });
   };
 
-  // helper: is this element inside a container that excludes a given key?
-  function isExcludedFor(el, key) {
-    const anc = el.closest("[data-swap-exclude]");
-    if (!anc) return false;
-    const keys = parseKeys(anc.getAttribute("data-swap-exclude"));
-    return keys.includes(key);
-  }
-
   // helper: read nearest attribute value up the tree; fallback to env
   function nearestAxisValue(el, k, env) {
-    const attr = "data-" + k;
     let n = el.parentElement;
     while (n) {
-      if (n.hasAttribute(attr)) return n.getAttribute(attr);
+      const v = readAxisAttr(n, k);
+      if (v != null) return v;
       n = n.parentElement;
     }
     return env[k];
@@ -413,8 +431,8 @@
     document.querySelectorAll("[data-swap-exclude]").forEach((el) => {
       const keys = parseKeys(el.getAttribute("data-swap-exclude"));
       if (!keys.includes("breakpoint")) return;
-      if (el.getAttribute("data-breakpoint") !== autoLabel) {
-        el.setAttribute("data-breakpoint", autoLabel);
+      if (readAxisAttr(el, "breakpoint") !== autoLabel) {
+        setAxisAttr(el, "breakpoint", autoLabel);
       }
     });
   }
@@ -427,17 +445,15 @@
       const keys = parseKeys(el.getAttribute("data-swap-exclude"));
 
       keys.forEach((k) => {
-        const attr = "data-" + k;
         if (k === "breakpoint") {
           const autoLabel = currentAutoBreakpointLabel();
-          if (el.getAttribute(attr) !== autoLabel)
-            el.setAttribute(attr, autoLabel);
+          if (readAxisAttr(el, k) !== autoLabel) setAxisAttr(el, k, autoLabel);
           return;
         }
         // Non-breakpoint keys: pin to initial env (unchanged)
-        let v = e[k];
-        if (!v) el.removeAttribute(attr);
-        else if (el.getAttribute(attr) !== v) el.setAttribute(attr, v);
+        const v = e[k];
+        if (!v) removeAxisAttr(el, k);
+        else if (readAxisAttr(el, k) !== v) setAxisAttr(el, k, v);
       });
 
       pinnedExcludes.add(el);
@@ -459,30 +475,26 @@
         if (el === document.documentElement) return;
 
         const allow = new Set(parseKeys(el.getAttribute("data-swap-allow")));
-        const wantsTheme = allow.has("theme");
+        const wantsMode = allow.has("mode");
         const wantsColor = allow.has("colorTheme");
         const wantsBreakpoint = allow.has("breakpoint");
 
         // If this node explicitly allows breakpoint, mirror companion axes
         if (wantsBreakpoint) {
-          ["theme", "colorTheme", "fontTheme"].forEach((k) => {
-            const attr = "data-" + k;
+          ["mode", "colorTheme", "fontTheme"].forEach((k) => {
             const desired = nearestAxisValue(el, k, env);
-            if (el.getAttribute(attr) !== desired)
-              el.setAttribute(attr, desired);
+            if (readAxisAttr(el, k) !== desired) setAxisAttr(el, k, desired);
           });
         }
 
         // For each axis…
         KEYS.forEach((k) => {
-          const attr = "data-" + k;
-
-          // If not allowed, remove attribute except when breakpoint is allowed (keep companions)
-          const isCompanion =
-            k === "theme" || k === "colorTheme" || k === "fontTheme";
           if (!allow.has(k)) {
+            // If not allowed, remove attribute except when breakpoint is allowed (keep companions)
+            const isCompanion =
+              k === "mode" || k === "colorTheme" || k === "fontTheme";
             if (!(wantsBreakpoint && isCompanion)) {
-              if (el.hasAttribute(attr)) el.removeAttribute(attr);
+              if (hasAxisAttr(el, k)) removeAxisAttr(el, k);
             }
             return;
           }
@@ -494,21 +506,21 @@
             v = v && v !== "auto" ? v : currentAutoBreakpointLabel();
           }
 
-          // Avoid theme/colorTheme collision on same node (only if BOTH are allowed)
-          if (k === "theme" && wantsTheme && wantsColor) {
-            if (el.hasAttribute(attr)) el.removeAttribute(attr);
+          // Avoid mode/colorTheme collision on same node (only if BOTH are allowed)
+          if (k === "mode" && wantsMode && wantsColor) {
+            if (hasAxisAttr(el, k)) removeAxisAttr(el, k);
           } else {
             if (!v) {
-              if (el.hasAttribute(attr)) el.removeAttribute(attr);
-            } else if (el.getAttribute(attr) !== v) {
-              el.setAttribute(attr, v);
+              if (hasAxisAttr(el, k)) removeAxisAttr(el, k);
+            } else if (readAxisAttr(el, k) !== v) {
+              setAxisAttr(el, k, v);
             }
           }
         });
 
-        // presentation & theme split (uses env.theme)
-        const themeVal = env.theme || "light";
-        applyPresentationRebind(el, allow, themeVal);
+        // presentation & mode split (uses env.mode)
+        const modeVal = env.mode || "light";
+        applyPresentationRebind(el, allow, modeVal);
       });
     } finally {
       IN_APPLY = false;
@@ -530,12 +542,12 @@
     const tray = document.querySelector("#token-swap-root");
     if (!tray) return;
 
-    // theme segmented toggle
-    (function initThemeToggle() {
+    // Mode segmented toggle (UI id kept as "switch-theme")
+    (function initModeToggle() {
       const group = tray.querySelector("#switch-theme");
       if (!group) return;
       const btns = Array.from(group.querySelectorAll('[role="radio"]'));
-      const setTheme = (value) => {
+      const setMode = (value) => {
         btns.forEach((b) =>
           b.setAttribute("aria-checked", String(b.dataset.value === value))
         );
@@ -544,13 +556,13 @@
         scheduleApply();
       };
 
-      // initial: prefer existing attr, else "light" (we'll re-apply defaults later if provided)
-      const initialTheme = root.getAttribute("data-mode") || "light";
+      // initial: prefer existing attr, else "light" (defaults may re-apply later)
+      const initialMode = root.getAttribute("data-mode") || "light";
 
       group.addEventListener("click", (e) => {
         const b = e.target.closest('[role="radio"]');
         if (!b) return;
-        setTheme(b.dataset.value);
+        setMode(b.dataset.value);
       });
       group.addEventListener("keydown", (e) => {
         const idx = btns.findIndex(
@@ -565,10 +577,10 @@
         if (next !== idx) {
           e.preventDefault();
           btns[next].focus();
-          setTheme(btns[next].dataset.value);
+          setMode(btns[next].dataset.value);
         }
       });
-      setTheme(initialTheme);
+      setMode(initialMode);
     })();
 
     // flicker guard
@@ -584,17 +596,15 @@
       if (!group || !select) return;
 
       const setGroupAttr = (name, value) => {
-        const attr = "data-" + name;
-        if (!value) root.removeAttribute(attr);
-        else if (root.getAttribute(attr) !== value)
-          root.setAttribute(attr, value);
+        if (!value) removeAxisAttr(root, name);
+        else if (readAxisAttr(root, name) !== value) setAxisAttr(root, name, value);
       };
 
       if (group === "breakpoint") {
         const applyBreakpoint = (val) => {
-          if (!val || val === "auto") root.removeAttribute("data-breakpoint");
-          else if (root.getAttribute("data-breakpoint") !== val)
-            root.setAttribute("data-breakpoint", val);
+          if (!val || val === "auto") removeAxisAttr(root, "breakpoint");
+          else if (readAxisAttr(root, "breakpoint") !== val)
+            setAxisAttr(root, "breakpoint", val);
           scheduleApply();
         };
         select.addEventListener("change", () => {
