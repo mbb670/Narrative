@@ -17,6 +17,8 @@ const COLLAPSE = new Map([
 ]);
 const seg = (s) => COLLAPSE.get(s) ?? String(s).toLowerCase();
 const varNameFromPath = (arr) => `--${arr.map(seg).join("-")}`;
+
+// turn "{a.b.c}" into "var(--a-b-c)"
 const refToVar = (val) => {
   if (typeof val === "string") {
     const m = val.match(/^\{([^}]+)\}$/);
@@ -25,11 +27,51 @@ const refToVar = (val) => {
   return val;
 };
 
+// Proper CSS property casing: camelCase → kebab-case (and normalize spaces/_)
 const prop = (s) =>
   String(s)
     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
     .replace(/[\s_]+/g, "-")
     .toLowerCase();
+
+// ---- math & reference resolver ----
+// Replace all "{x.y}" with "var(--x-y)"
+const replaceRefs = (str) =>
+  str.replace(/\{([^}]+)\}/g, (_, p) => `var(--${p.split(".").map(seg).join("-")})`);
+
+// Decide if expression needs calc(): contains operators or a unary minus before a var()
+const needsCalcWrap = (expr) => {
+  const t = expr.trim();
+  if (/^calc\(/i.test(t)) return false;           // user already wrote calc()
+  if (/^[+-]?\d+(\.\d+)?([a-z%]+)?$/i.test(t)) return false; // plain number/unit
+  if (/^var\(--/.test(t)) return false;           // single var()
+  // any arithmetic operator after refs replacement
+  return /[+\-*/]/.test(t) || /^-\s*var\(--/.test(t);
+};
+
+// Master resolver: handles single refs, unary minus refs, and full expressions
+const resolveValue = (val) => {
+  if (typeof val !== "string") return val;
+  const t = val.trim();
+
+  // exactly one reference → var(--…)
+  if (/^\{[^}]+\}$/.test(t)) return replaceRefs(t);
+
+  // unary minus reference → calc(var(--…) * -1)
+  if (/^-\s*\{[^}]+\}$/.test(t)) {
+    const v = replaceRefs(t.replace(/^-+\s*/, "")); // remove leading '-' for clarity
+    return `calc(${v} * -1)`;
+  }
+
+  // expression containing at least one reference → replace refs, wrap in calc if needed
+  if (t.includes("{")) {
+    const expr = replaceRefs(t);
+    return needsCalcWrap(expr) ? `calc(${expr})` : expr;
+  }
+
+  // plain string value (no refs) → leave as-is
+  return val;
+};
 
 // ---- fs utils ----
 const readJson = (p) => JSON.parse(fs.readFileSync(p, "utf8"));
@@ -75,7 +117,7 @@ const collectStyleBlocks = (stylesJson) => {
 
       if (type === "typography") {
         const rules = Object.entries(node.value)
-          .map(([k, v]) => `  ${prop(k)}: ${refToVar(v)};`)
+          .map(([k, v]) => `  ${prop(k)}: ${resolveValue(v)};`)
           .join("\n");
         blocks.push(`.text-${classSuffix} {\n${rules}\n}`);
         return;
@@ -83,7 +125,7 @@ const collectStyleBlocks = (stylesJson) => {
 
       if (type === "boxShadow") {
         const toShadow = (obj) =>
-          ["x", "y", "blur", "spread", "color"].map((k) => refToVar(obj?.[k])).filter(Boolean).join(" ");
+          ["x", "y", "blur", "spread", "color"].map((k) => resolveValue(obj?.[k])).filter(Boolean).join(" ");
         const shadow = Array.isArray(node.value) ? node.value.map(toShadow).join(", ") : toShadow(node.value);
         const cls = p[0] === "elevation" ? `.elevation-${p.slice(1).map(seg).join("-")}` : `.${classSuffix}`;
         blocks.push(`${cls} {\n  box-shadow: ${shadow};\n}`);
@@ -91,7 +133,7 @@ const collectStyleBlocks = (stylesJson) => {
       }
 
       const rules = Object.entries(node.value)
-        .map(([k, v]) => `  ${prop(k)}: ${refToVar(v)};`)
+        .map(([k, v]) => `  ${prop(k)}: ${resolveValue(v)};`)
         .join("\n");
       blocks.push(`.${classSuffix} {\n${rules}\n}`);
       return;
@@ -115,7 +157,7 @@ const varDeclsFromFile = (filePath) => {
   return vars
     .slice()
     .sort((a, b) => varNameFromPath(a.path).localeCompare(varNameFromPath(b.path)))
-    .map(({ path: p, value }) => `  ${varNameFromPath(p)}: ${refToVar(value)};`)
+    .map(({ path: p, value }) => `  ${varNameFromPath(p)}: ${resolveValue(value)};`)
     .join("\n");
 };
 const blockWithDecls = (selector, decls) => (decls ? `${selector} {\n${decls}\n}` : "");
