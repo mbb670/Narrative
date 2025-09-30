@@ -36,25 +36,21 @@ const prop = (s) =>
 
 // ---- math & reference resolver ----
 // Replace all "{x.y}" with "var(--x-y)"
-// turn "{a.b.c}" → "var(--a-b-c)" (global, anywhere in the string)
+// Replace all "{x.y}" with "var(--x-y)"
 const replaceRefs = (str) =>
   String(str).replace(/\{([^}]+)\}/g, (_, p) => `var(--${p.split(".").map(seg).join("-")})`);
 
 // Decide if expression needs calc(): treat + - * / as math, but ignore hyphens inside var names
 const needsCalcWrap = (expr) => {
   const t = String(expr).trim();
-  if (/^calc\(/i.test(t)) return false; // already calc()
-
-  // plain number or unit (e.g., 12, 1.5rem, 100%)
-  if (/^[+-]?\d+(\.\d+)?([a-z%]+)?$/i.test(t)) return false;
-
-  // *** FIX: only skip if the ENTIRE string is a single var(), not just starts with one
-  if (/^var\(--[a-z0-9-]+\)$/i.test(t)) return false;
+  if (/^calc\(/i.test(t)) return false;                         // already calc()
+  if (/^[+-]?\d+(\.\d+)?([a-z%]+)?$/i.test(t)) return false;    // plain number/unit
+  if (/^var\(--[a-z0-9-]+\)$/i.test(t)) return false;           // a single var()
 
   // Hide var(...) so hyphens inside names don't count as "minus"
   const masked = t.replace(/var\(--[a-z0-9-]+\)/gi, "X");
 
-  // Any arithmetic operator (or unary minus before X) means we need calc()
+  // Any arithmetic operator or unary minus before a ref
   if (/[+\-*/]/.test(masked) || /^-\s*X/.test(masked)) return true;
 
   // Parentheses next to operators (complex expressions)
@@ -63,13 +59,41 @@ const needsCalcWrap = (expr) => {
   return false;
 };
 
-// Master resolver: replace refs first; then wrap with calc() only when needed
+// NEW: if a var() is immediately followed by a unit, wrap as calc(var(...) * 1unit)
+const fixUnitAffixes = (s) =>
+  s.replace(
+    /(var\(--[a-z0-9-]+\))\s*(px|rem|em|%|vh|vw|vmin|vmax|cqi|cqmin|cqmax)/gi,
+    'calc($1 * 1$2)'
+  );
+
+// (Optional) normalize spaces around + and - inside calc for better compatibility
+const normalizeCalcWhitespace = (s) =>
+  s.replace(/calc\((.*?)\)/gi, (_m, inner) =>
+    `calc(${inner
+      // space around + and -
+      .replace(/\s*\+\s*/g, ' + ')
+      .replace(/\s*-\s*/g, ' - ')
+      // collapse any runs of whitespace
+      .replace(/\s{2,}/g, ' ')
+      .trim()})`
+  );
+
+// Master resolver: replace refs; fix var()+unit; wrap with calc() only when needed; normalize spaces
 const resolveValue = (val) => {
   if (typeof val !== "string") return val;
-  const withRefs = replaceRefs(val.trim());
-  return needsCalcWrap(withRefs) ? `calc(${withRefs})` : withRefs;
-};
+  const t = val.trim();
+  let withRefs = replaceRefs(t);
 
+  // If we created any var()+unit, fix those first (this already adds calc())
+  const unitFixed = fixUnitAffixes(withRefs);
+  if (unitFixed !== withRefs) {
+    return normalizeCalcWhitespace(unitFixed);
+  }
+
+  // Otherwise, add calc() only if the expression actually does math
+  const maybeCalc = needsCalcWrap(withRefs) ? `calc(${withRefs})` : withRefs;
+  return normalizeCalcWhitespace(maybeCalc);
+};
 
 // ---- fs utils ----
 const readJson = (p) => JSON.parse(fs.readFileSync(p, "utf8"));
