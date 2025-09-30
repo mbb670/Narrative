@@ -379,8 +379,11 @@ StyleDictionary.registerFormat({
   },
 });
 
-// ---------- Zeroheight (DTCG) export helpers ----------
+// ---------- Zeroheight (DTCG) export helpers (improved alias rebasing) ----------
 const isPlainObj = (v) => v && typeof v === "object" && !Array.isArray(v);
+
+// Keep track of your "other collection" folder names so we can prioritize defaults
+let __OTHER_COLLECTIONS = new Set();
 
 // Convert raw node → DTCG ($value/$type/$description)
 const toDTCG = (node) => {
@@ -414,7 +417,7 @@ const toDTCG = (node) => {
   return out;
 };
 
-// Deep merge groups safely; tokens (objects with $value) overwrite entirely
+// Deep merge groups safely; tokens ($value) overwrite entirely
 const mergeDTCG = (base, extra) => {
   if (!isPlainObj(base)) return toDTCG(extra);
   if (!isPlainObj(extra)) return base;
@@ -478,6 +481,7 @@ const buildZeroheightObject = () => {
 
   // 5) Other collections → <collection>.<set>
   const others = listDirs(RAW_DIR).filter((d) => !["global", "breakpoint", "mode", "styles"].includes(d));
+  __OTHER_COLLECTIONS = new Set(others); // remember for priority
   for (const col of others.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))) {
     const dir = path.join(RAW_DIR, col);
     for (const f of listFiles(dir).sort()) {
@@ -508,38 +512,89 @@ const buildTokenIndex = (root) => {
   return index;
 };
 
-// Find canonical path for an alias: prefer exact, else unique suffix match
-const findCanonicalAlias = (alias, keys) => {
-  if (keys.has(alias)) return alias;
+// Ranking function for candidate paths (lower is better)
+const pathPriority = (pathStr) => {
+  const parts = pathStr.split(".");
+  const first = parts[0];
+  const second = parts[1];
+
+  // Reserved group names we want to de-prioritize vs globals
+  const reserved = new Set(["breakpoint", "mode", "styles", ...__OTHER_COLLECTIONS]);
+
+  // 0: global/top-level (first segment NOT a reserved group)
+  if (!reserved.has(first)) return 0;
+
+  // 1: breakpoint.mobile.*
+  if (first === "breakpoint" && second === "mobile") return 1;
+
+  // 2: mode.light.*
+  if (first === "mode" && second === "light") return 2;
+
+  // 3: <collection>.default.*  (for any 'other' collection name)
+  if (__OTHER_COLLECTIONS.has(first) && second === "default") return 3;
+
+  // 10+: others (breakpoint tablet/desktop, other modes, other sets)
+  if (first === "breakpoint") return 10;
+  if (first === "mode") return 11;
+  if (__OTHER_COLLECTIONS.has(first)) return 12;
+
+  // styles or anything else
+  return 20;
+};
+
+// Find best canonical path for an alias, using priorities & tie-breaks
+const chooseBest = (cands, selfPath) => {
+  // Avoid self-alias
+  const filtered = cands.filter((p) => p !== selfPath);
+  const ranked = filtered
+    .map((p) => ({ p, score: pathPriority(p), len: p.split(".").length }))
+    .sort((a, b) => a.score - b.score || a.len - b.len || a.p.localeCompare(b.p));
+  return ranked.length ? ranked[0].p : null;
+};
+
+const findCanonicalAlias = (alias, index, selfPath) => {
+  if (index.has(alias) && alias !== selfPath) return alias;
+
+  // Collect matches by suffix (allow exact or endsWith)
   const matches = [];
-  for (const k of keys.keys()) {
-    if (k.endsWith("." + alias) || k === alias) matches.push(k);
+  for (const k of index.keys()) {
+    if (k === alias || k.endsWith("." + alias)) matches.push(k);
   }
-  return matches.length === 1 ? matches[0] : alias; // only rewrite on unique match
+  if (!matches.length) return alias;
+
+  // If unique, take it; else choose by priority
+  if (matches.length === 1 && matches[0] !== selfPath) return matches[0];
+
+  const best = chooseBest(matches, selfPath);
+  return best || alias;
 };
 
 // Rewrite every {…} inside $value strings to canonical, fully-qualified paths
 const rebaseAliasesInPlace = (root) => {
   const index = buildTokenIndex(root);
 
-  const rewrite = (val) => {
+  const rewrite = (val, selfPath) => {
     if (typeof val !== "string" || !val.includes("{")) return val;
-    return val.replace(/\{([^}]+)\}/g, (_, raw) => `{${findCanonicalAlias(raw.trim(), index)}}`);
+    return val.replace(/\{([^}]+)\}/g, (_, raw) => {
+      const found = findCanonicalAlias(raw.trim(), index, selfPath);
+      return `{${found}}`;
+    });
   };
 
-  const walk = (obj) => {
+  const walk = (obj, pathArr = []) => {
     if (!isPlainObj(obj)) return;
     if (Object.prototype.hasOwnProperty.call(obj, "$value")) {
-      obj.$value = rewrite(obj.$value);
+      const selfPath = pathArr.join(".");
+      obj.$value = rewrite(obj.$value, selfPath);
       return;
     }
     for (const [k, v] of Object.entries(obj)) {
       if (k.startsWith("$")) continue;
-      walk(v);
+      walk(v, pathArr.concat(k));
     }
   };
 
-  walk(root);
+  walk(root, []);
   return root;
 };
 
@@ -552,6 +607,7 @@ StyleDictionary.registerFormat({
     return JSON.stringify(rebased, null, 2) + "\n";
   },
 });
+
 
 // ---- build all files ----
   export default {
@@ -576,4 +632,3 @@ StyleDictionary.registerFormat({
       }
     }
   };
-
