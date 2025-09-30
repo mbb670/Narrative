@@ -379,17 +379,154 @@ StyleDictionary.registerFormat({
   },
 });
 
-// ---- build both files ----
-export default {
-  source: ["tokens/raw/**/*.json"],
-  platforms: {
-    css: {
-      transformGroup: "css",
-      buildPath: "tokens/resolved/",
-      files: [
-        { destination: "tokens.css",    format: "nw/css-collections" },
-        { destination: "extended-test.css",  format: "nw/css-collections-extended" }
-      ]
+// ---------- Zeroheight (DTCG) export helpers ----------
+const isPlainObj = (v) => v && typeof v === "object" && !Array.isArray(v);
+
+// Convert a raw token/group node into DTCG-compliant shape:
+// - token: { value, type?, description? }  ->  { $value, $type?, $description? }
+// - group: plain object; may carry group-level { type, description } -> { $type?, $description?, ...children }
+const toDTCG = (node) => {
+  if (!isPlainObj(node)) return node;
+
+  const hasValue = Object.prototype.hasOwnProperty.call(node, "value");
+  const has$Value = Object.prototype.hasOwnProperty.call(node, "$value");
+
+  // If this is a token (raw or already DTCG), map/normalize to $-props
+  if (hasValue || has$Value) {
+    const val = hasValue ? node.value : node.$value;
+    const out = { $value: val };
+    if (typeof node.type === "string") out.$type = node.type;
+    if (typeof node.$type === "string") out.$type = node.$type;
+    if (typeof node.description === "string") out.$description = node.description;
+    if (typeof node.$description === "string") out.$description = node.$description;
+    return out; // leave composite values (objects) as-is; ZH allows custom types
+  }
+
+  // Otherwise treat as a group (carry group metadata if present)
+  const out = {};
+  if (typeof node.type === "string") out.$type = node.type;
+  if (typeof node.$type === "string") out.$type = node.$type;
+  if (typeof node.description === "string") out.$description = node.description;
+  if (typeof node.$description === "string") out.$description = node.$description;
+
+  for (const [k, v] of Object.entries(node)) {
+    if (k === "type" || k === "description" || k === "$type" || k === "$description") continue;
+    out[k] = toDTCG(v);
+  }
+  return out;
+};
+
+// Deep merge groups safely; tokens (objects with $value) overwrite entirely
+const mergeDTCG = (base, extra) => {
+  if (!isPlainObj(base)) return toDTCG(extra);
+  if (!isPlainObj(extra)) return base;
+
+  const isToken = (o) => isPlainObj(o) && Object.prototype.hasOwnProperty.call(o, "$value");
+
+  const out = { ...base };
+  for (const [k, v] of Object.entries(extra)) {
+    if (!(k in out)) {
+      out[k] = toDTCG(v);
+      continue;
+    }
+    if (isToken(out[k]) || isToken(v)) {
+      out[k] = toDTCG(v); // token overwrite
+    } else {
+      out[k] = mergeDTCG(out[k], v); // group merge
     }
   }
+  return out;
 };
+
+// Build one unified DTCG object for Zeroheight.
+// Rules:
+//  - "global" files merge into TOP LEVEL (so aliases like {unit.4} still work).
+//  - Everything else becomes a group named by its folder (e.g., breakpoint.mobile, colorTheme.default).
+//  - "styles" goes under a "styles" group as-is (custom types allowed).
+const buildZeroheightObject = () => {
+  let zh = {};
+
+  // 1) Global → top-level merge
+  for (const f of listFiles(path.join(RAW_DIR, "global")).sort()) {
+    zh = mergeDTCG(zh, toDTCG(readJson(f)));
+  }
+
+  // Helper to place a file inside a group path like ["breakpoint","mobile"]
+  const putInPath = (obj, pathArr, content) => {
+    let cursor = obj;
+    for (const seg of pathArr.slice(0, -1)) {
+      cursor[seg] = cursor[seg] && isPlainObj(cursor[seg]) ? cursor[seg] : {};
+      cursor = cursor[seg];
+    }
+    const leaf = pathArr[pathArr.length - 1];
+    cursor[leaf] = mergeDTCG(cursor[leaf] || {}, content);
+  };
+
+  // 2) Breakpoints → breakpoint.mobile/tablet/desktop groups
+  const bpDir = path.join(RAW_DIR, "breakpoint");
+  for (const f of listFiles(bpDir).sort()) {
+    const name = path.basename(f, ".json");
+    putInPath(zh, ["breakpoint", name], toDTCG(readJson(f)));
+  }
+
+  // 3) Modes → mode.light/dark/…
+  const modeDir = path.join(RAW_DIR, "mode");
+  for (const f of listFiles(modeDir).sort()) {
+    const name = path.basename(f, ".json");
+    putInPath(zh, ["mode", name], toDTCG(readJson(f)));
+  }
+
+  // 4) Styles → styles group (typography/boxShadow composites permitted)
+  const stylesDir = path.join(RAW_DIR, "styles");
+  for (const f of listFiles(stylesDir).sort()) {
+    zh.styles = mergeDTCG(zh.styles || {}, toDTCG(readJson(f)));
+  }
+
+  // 5) Other collections (everything else except the four known)
+  const others = listDirs(RAW_DIR).filter((d) => !["global", "breakpoint", "mode", "styles"].includes(d));
+  for (const col of others.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))) {
+    const dir = path.join(RAW_DIR, col);
+    for (const f of listFiles(dir).sort()) {
+      const setName = path.basename(f, ".json");
+      putInPath(zh, [col, setName], toDTCG(readJson(f)));
+    }
+  }
+
+  return zh;
+};
+
+// Register a formatter that outputs DTCG-compliant JSON for Zeroheight
+StyleDictionary.registerFormat({
+  name: "nw/zeroheight-json",
+  format: () => {
+    const out = buildZeroheightObject();
+    // Important: valid JSON with $-keys; no comments/trailing commas.
+    return JSON.stringify(out, null, 2) + "\n";
+  },
+});
+
+
+// ---- build all files ----
+  export default {
+    source: ["tokens/raw/**/*.json"],
+    platforms: {
+      css: {
+        transformGroup: "css",
+        buildPath: "tokens/resolved/",
+        files: [
+          { destination: "tokens.css",       format: "nw/css-collections" },
+          { destination: "extended-test.css", format: "nw/css-collections-extended" }
+        ]
+      },
+
+      // NEW: Zeroheight unified JSON
+      zeroheight: {
+        // No SD transforms needed; our formatter builds from raw files directly
+        buildPath: "tokens/resolved/",
+        files: [
+          { destination: "zeroheight.json", format: "nw/zeroheight-json" }
+        ]
+      }
+    }
+  };
+
