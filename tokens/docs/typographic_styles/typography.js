@@ -109,7 +109,7 @@
       const rg = document.createElement("div");
       rg.id = SWITCHER_ID; // uses your existing constant
       rg.className =
-        "type-weight-switcher elevation-elevation-fixed-top content-switcher";
+        "type-weight-switcher elevation-fixed-top content-switcher";
       rg.setAttribute("role", "radiogroup");
       rg.setAttribute("aria-label", "Font weight");
 
@@ -137,7 +137,7 @@
       const rg = document.createElement("div");
       rg.id = "style-switcher";
       rg.className =
-        "type-style-switcher elevation-elevation-fixed-top content-switcher";
+        "type-style-switcher elevation-fixed-top content-switcher";
       rg.setAttribute("role", "radiogroup");
       rg.setAttribute("aria-label", "Font style");
 
@@ -249,7 +249,7 @@
     return `
       <div class="text-parent">
         <span class="copyable text-title interactive-background text-system-semibold-sm token" data-copy="${cls}">${title}</span>
-        <section class="text-container elevation-elevation-fixed-top"
+        <section class="text-container elevation-fixed-top"
                  data-group="${groupKey}" data-size="${size}" data-label="${groupLabel}">
           <h2 data-swap-allow="fontTheme breakpoint" class="text-sample ${cls}" >Sample</h2>
           <ul class="grid text-system-regular-sm">

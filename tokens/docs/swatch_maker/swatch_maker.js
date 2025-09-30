@@ -338,7 +338,7 @@
       resolveVarChainSmart(token, specifiedMap, document.body).chain;
 
     const exp = buildExpander(card, token, chain, specifiedMap);
-    exp.classList.add("elevation-elevation-overlay");
+    exp.classList.add("elevation-overlay");
     document.body.appendChild(exp);
     positionExpanderOverCard(exp, card);
 
@@ -442,7 +442,7 @@
     const latestChain = resolveVarChainSmart(token, specifiedMap, document.body)
       .chain;
     const fresh = buildExpander(card, token, latestChain, specifiedMap);
-    fresh.classList.add("elevation-elevation-overlay");
+    fresh.classList.add("elevation-overlay");
 
     const s = openExpander.el.style;
     fresh.style.top = s.top;
