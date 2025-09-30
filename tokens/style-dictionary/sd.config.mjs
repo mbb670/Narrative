@@ -692,7 +692,7 @@ StyleDictionary.registerFormat({
         buildPath: "tokens/resolved/",
         files: [
           { destination: "tokens.css",       format: "nw/css-collections" },
-          { destination: "extended-test.css", format: "nw/css-collections-extended" }
+          { destination: "extended_tokens.css", format: "nw/css-collections-extended" }
         ]
       },
 
