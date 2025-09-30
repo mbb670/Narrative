@@ -87,18 +87,20 @@ function resolveFully(str, map){
 }
 
 function withUnits(nameParts, val, opts){
-  const asRem = opts.fontSizeRem && /(^|\.|\/)font(Size|size)$/.test(nameParts.join("."));
-  if (typeof val === "number"){
-    if (asRem){
+  const isFontSize = /(^|\.|\/)font(Size|size)$/.test(nameParts.join('.'));
+  if (typeof val === 'number'){
+    if (opts.fontSizeRem && isFontSize){
       const rem = val / (opts.remBase || 16);
-      return Number(rem.toFixed(5)).toString().replace(/\.0+$/,"");
+      const pretty = String(+rem.toFixed(5)).replace(/\.0+$/,'');
+      return `${pretty}rem`;              // <-- add the rem unit
     }
     return opts.numPx ? `${val}px` : String(val);
   }
-  if (typeof val === "string") return val;
-  if (Array.isArray(val)) return val.map(v => withUnits(nameParts, v, opts)).join(" ");
+  if (typeof val === 'string') return val;
+  if (Array.isArray(val)) return val.map(v => withUnits(nameParts, v, opts)).join(' ');
   return String(val);
 }
+
 
 function toVarWithFallback(parts, map, itPath, { prefixParts=[], fmt, emitFallback=false, unitOpts }){
   const name = `--${toCase([...prefixParts, ...parts], fmt)}`;
@@ -339,7 +341,9 @@ function classesFromTokens(obj, refMap, options){
 
 /* ----- Main formatter ----- */
 
-export default function ({ dictionary, platform, options={} }){
+export const name = 'css/collections';
+
+export const formatter = ({ dictionary, platform, options = {} }) => {
   // Platform options we support
   const {
     // casing / naming
