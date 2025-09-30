@@ -230,21 +230,28 @@ StyleDictionary.registerFormat({
       }
     }
 
-    // 10–11) Mode
+    // 10–11) Mode (+ manual selectors for all sets using data-mode only)
     const modeDir = path.join(RAW_DIR, "mode");
     if (fs.existsSync(modeDir)) {
       const modeFiles = listFiles(modeDir).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
       const light = modeFiles.find((f) => path.basename(f).toLowerCase() === "light.json");
       if (light) {
-        css += `/* Mode light — mode/light */\n${varsBlockFromFile(light)}\n\n`;
+        // root default
+        css += `/* Mode light — mode/light (root default) */\n${varsBlockFromFile(light)}\n\n`;
+        // manual attr
+        const decls = varDeclsFromFile(light);
+        css += `/* Mode light — mode/light (manual attr) */\n` +
+               blockWithDecls(`[data-mode="light"]`, decls) + "\n\n";
       }
       for (const f of modeFiles) {
         if (f === light) continue;
         const setName = path.basename(f, ".json");
-        const block = varsBlockFromFile(f).replace(/^:root\s+\{/, `[data-mode="${setName}"] {`);
-        css += `/* Mode ${setName} — mode/${setName} */\n${block}\n\n`;
+        const decls = varDeclsFromFile(f);
+        css += `/* Mode ${setName} — mode/${setName} */\n` +
+               blockWithDecls(`[data-mode="${setName}"]`, decls) + "\n\n";
       }
     }
+
 
     // 12) Styles
     const stylesFile = path.join(RAW_DIR, "styles", "styles.json");
