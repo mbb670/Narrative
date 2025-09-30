@@ -3168,11 +3168,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.md}",
@@ -3200,11 +3200,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.lg}",
@@ -3236,11 +3236,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.sm}",
@@ -3268,11 +3268,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.700}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.2xl}",
@@ -3304,11 +3304,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.lg}",
@@ -3340,11 +3340,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.sm}",
@@ -3380,11 +3380,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.md}",
@@ -3412,11 +3412,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.md}",
@@ -3448,11 +3448,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.sm}",
@@ -3480,11 +3480,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.2xl}",
@@ -3516,11 +3516,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.500}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.md}",
@@ -3552,11 +3552,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.500}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.sm}",
@@ -3592,11 +3592,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.md}",
@@ -3624,11 +3624,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.md}",
@@ -3660,11 +3660,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.600}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.sm}",
@@ -3692,11 +3692,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.700}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.2xl}",
@@ -3728,11 +3728,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.500}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.md}",
@@ -3764,11 +3764,11 @@
         },
         "regular": {
           "$value": "{fontWeight.400}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "strong": {
           "$value": "{fontWeight.500}",
-          "$type": "number"
+          "$type": "fontWeight"
         },
         "lineHeight": {
           "$value": "{lineHeight.sm}",
