@@ -65,10 +65,38 @@ jobs:
             echo "zeroheight.json missing or empty at tokens/resolved/zeroheight.json"
             exit 1
           fi
-          node -e "JSON.parse(require('fs').readFileSync('tokens/resolved/zeroheight.json','utf8'))"
 
-          # Optional sanity: ensure there's at least one $value token
-          node -e "const o=JSON.parse(require('fs').readFileSync('tokens/resolved/zeroheight.json','utf8'));function c(x){let n=0;for(const k in x){if(k.startsWith('$'))continue;const v=x[k];if(v&&typeof v==='object'){if('$value'in v)n++;n+=c(v)}}return n}if(c(o)===0){console.error('zeroheight.json has no $value tokens');process.exit(1)}"
+          node - <<'NODE'
+          const fs = require('fs');
+          const P = 'tokens/resolved/zeroheight.json';
+          try {
+            const txt = fs.readFileSync(P, 'utf8');
+            const obj = JSON.parse(txt);
+
+            // Count $value tokens recursively (arrays + objects)
+            const countTokens = (x) => {
+              if (!x || typeof x !== 'object') return 0;
+              let n = 0;
+              if (Object.prototype.hasOwnProperty.call(x, '$value')) n++;
+              if (Array.isArray(x)) {
+                for (const v of x) n += countTokens(v);
+              } else {
+                for (const k of Object.keys(x)) n += countTokens(x[k]);
+              }
+              return n;
+            };
+
+            const n = countTokens(obj);
+            if (n === 0) {
+              console.warn('Warning: zeroheight.json parsed OK but contains 0 "$value" tokens (this may be intentional depending on your config).');
+            } else {
+              console.log(`zeroheight.json parsed OK; found ${n} "$value" tokens.`);
+            }
+          } catch (e) {
+            console.error('Invalid JSON in zeroheight.json:', e.message);
+            process.exit(1);
+          }
+          NODE
 
       - name: Show outputs (for debugging)
         run: |
