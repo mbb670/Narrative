@@ -45,25 +45,44 @@ jobs:
       - name: Ensure output dir exists
         run: mkdir -p tokens/resolved
 
-      - name: Build tokens → CSS
+      - name: Build tokens → CSS/JSON
         env:
           CI: true
         run: npm run build:tokens
 
-      - name: Verify at least one non-empty CSS output
+      - name: Verify outputs exist (CSS + zeroheight.json)
         run: |
-          # Fail if no non-empty .css files exist in tokens/resolved/
-          COUNT=$(find tokens/resolved -maxdepth 1 -type f -name '*.css' -size +0c | wc -l | tr -d ' ')
-          if [ "$COUNT" -eq 0 ]; then
+          # At least one non-empty CSS file
+          COUNT_CSS=$(find tokens/resolved -maxdepth 1 -type f -name '*.css' -size +0c | wc -l | tr -d ' ')
+          if [ "$COUNT_CSS" -eq 0 ]; then
             echo "No non-empty CSS outputs found in tokens/resolved/"
             ls -la tokens/resolved || true
             exit 1
           fi
 
+          # zeroheight.json exists and is valid JSON
+          if [ ! -s tokens/resolved/zeroheight.json ]; then
+            echo "zeroheight.json missing or empty at tokens/resolved/zeroheight.json"
+            exit 1
+          fi
+          node -e "JSON.parse(require('fs').readFileSync('tokens/resolved/zeroheight.json','utf8'))"
+
+          # Optional sanity: ensure there's at least one $value token
+          node -e "const o=JSON.parse(require('fs').readFileSync('tokens/resolved/zeroheight.json','utf8'));function c(x){let n=0;for(const k in x){if(k.startsWith('$'))continue;const v=x[k];if(v&&typeof v==='object'){if('$value'in v)n++;n+=c(v)}}return n}if(c(o)===0){console.error('zeroheight.json has no $value tokens');process.exit(1)}"
+
       - name: Show outputs (for debugging)
         run: |
           echo "Built files:"
           ls -la tokens/resolved || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tokens-outputs
+          path: |
+            tokens/resolved/*.css
+            tokens/resolved/zeroheight.json
+          retention-days: 7
 
       - name: Commit & push if changed (any files under tokens/resolved/)
         run: |
