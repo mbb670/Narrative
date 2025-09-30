@@ -43,17 +43,21 @@ const replaceRefs = (str) =>
 // Decide if expression needs calc(): treat + - * / as math, but ignore hyphens inside var names
 const needsCalcWrap = (expr) => {
   const t = String(expr).trim();
-  if (/^calc\(/i.test(t)) return false;               // already calc()
-  if (/^[+-]?\d+(\.\d+)?([a-z%]+)?$/i.test(t)) return false; // plain number/unit
-  if (/^var\(--/i.test(t)) return false;             // single var()
+  if (/^calc\(/i.test(t)) return false; // already calc()
+
+  // plain number or unit (e.g., 12, 1.5rem, 100%)
+  if (/^[+-]?\d+(\.\d+)?([a-z%]+)?$/i.test(t)) return false;
+
+  // *** FIX: only skip if the ENTIRE string is a single var(), not just starts with one
+  if (/^var\(--[a-z0-9-]+\)$/i.test(t)) return false;
 
   // Hide var(...) so hyphens inside names don't count as "minus"
   const masked = t.replace(/var\(--[a-z0-9-]+\)/gi, "X");
 
-  // If any arithmetic operators remain, or unary minus before X, we need calc
+  // Any arithmetic operator (or unary minus before X) means we need calc()
   if (/[+\-*/]/.test(masked) || /^-\s*X/.test(masked)) return true;
 
-  // Also if there are parentheses next to operators (complex expressions)
+  // Parentheses next to operators (complex expressions)
   if (/\)\s*[-+*/]/.test(masked) || /[-+*/]\s*\(/.test(masked)) return true;
 
   return false;
@@ -62,14 +66,10 @@ const needsCalcWrap = (expr) => {
 // Master resolver: replace refs first; then wrap with calc() only when needed
 const resolveValue = (val) => {
   if (typeof val !== "string") return val;
-  const t = val.trim();
-
-  // Replace refs even if user already wrote calc(...)
-  const withRefs = replaceRefs(t);
-
-  // If refs created/are part of math, decide on calc()
+  const withRefs = replaceRefs(val.trim());
   return needsCalcWrap(withRefs) ? `calc(${withRefs})` : withRefs;
 };
+
 
 // ---- fs utils ----
 const readJson = (p) => JSON.parse(fs.readFileSync(p, "utf8"));
