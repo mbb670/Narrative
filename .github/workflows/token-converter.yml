@@ -19,7 +19,11 @@ concurrency:
 
 jobs:
   build:
+    # Belt & suspenders: don't re-run on our own bot commits even if triggers expand later
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,8 +32,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          # Intentionally not enabling automatic npm cache here to avoid lockfile warnings
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           if [ -f package-lock.json ]; then
             npm ci
@@ -40,17 +45,39 @@ jobs:
       - name: Ensure output dir exists
         run: mkdir -p tokens/resolved
 
-      - name: Build tokens → CSS vars
+      - name: Build tokens → CSS
+        env:
+          CI: true
         run: npm run build:tokens
 
-      - name: Commit & push if changed
+      - name: Verify at least one non-empty CSS output
         run: |
-          if [ -n "$(git status --porcelain tokens/resolved/tokens-test.css)" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add tokens/resolved/tokens-test.css
-            git commit -m "chore(tokens): rebuild tokens-test.css [skip ci]"
-            git push
-          else
+          # Fail if no non-empty .css files exist in tokens/resolved/
+          COUNT=$(find tokens/resolved -maxdepth 1 -type f -name '*.css' -size +0c | wc -l | tr -d ' ')
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No non-empty CSS outputs found in tokens/resolved/"
+            ls -la tokens/resolved || true
+            exit 1
+          fi
+
+      - name: Show outputs (for debugging)
+        run: |
+          echo "Built files:"
+          ls -la tokens/resolved || true
+
+      - name: Commit & push if changed (any files under tokens/resolved/)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Stage all adds/updates/deletions in tokens/resolved
+          git add -A tokens/resolved
+
+          # Commit only if there are staged changes
+          if git diff --cached --quiet; then
             echo "No changes to commit."
+          else
+            FILES="$(git diff --cached --name-only | tr '\n' ' ')"
+            git commit -m "chore(tokens): rebuild ${FILES} from ${GITHUB_SHA::7} [skip ci]"
+            git push
           fi
