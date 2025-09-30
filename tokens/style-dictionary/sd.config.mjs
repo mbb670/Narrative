@@ -36,41 +36,39 @@ const prop = (s) =>
 
 // ---- math & reference resolver ----
 // Replace all "{x.y}" with "var(--x-y)"
+// turn "{a.b.c}" → "var(--a-b-c)" (global, anywhere in the string)
 const replaceRefs = (str) =>
-  str.replace(/\{([^}]+)\}/g, (_, p) => `var(--${p.split(".").map(seg).join("-")})`);
+  String(str).replace(/\{([^}]+)\}/g, (_, p) => `var(--${p.split(".").map(seg).join("-")})`);
 
-// Decide if expression needs calc(): contains operators or a unary minus before a var()
+// Decide if expression needs calc(): treat + - * / as math, but ignore hyphens inside var names
 const needsCalcWrap = (expr) => {
-  const t = expr.trim();
-  if (/^calc\(/i.test(t)) return false;           // user already wrote calc()
+  const t = String(expr).trim();
+  if (/^calc\(/i.test(t)) return false;               // already calc()
   if (/^[+-]?\d+(\.\d+)?([a-z%]+)?$/i.test(t)) return false; // plain number/unit
-  if (/^var\(--/.test(t)) return false;           // single var()
-  // any arithmetic operator after refs replacement
-  return /[+\-*/]/.test(t) || /^-\s*var\(--/.test(t);
+  if (/^var\(--/i.test(t)) return false;             // single var()
+
+  // Hide var(...) so hyphens inside names don't count as "minus"
+  const masked = t.replace(/var\(--[a-z0-9-]+\)/gi, "X");
+
+  // If any arithmetic operators remain, or unary minus before X, we need calc
+  if (/[+\-*/]/.test(masked) || /^-\s*X/.test(masked)) return true;
+
+  // Also if there are parentheses next to operators (complex expressions)
+  if (/\)\s*[-+*/]/.test(masked) || /[-+*/]\s*\(/.test(masked)) return true;
+
+  return false;
 };
 
-// Master resolver: handles single refs, unary minus refs, and full expressions
+// Master resolver: replace refs first; then wrap with calc() only when needed
 const resolveValue = (val) => {
   if (typeof val !== "string") return val;
   const t = val.trim();
 
-  // exactly one reference → var(--…)
-  if (/^\{[^}]+\}$/.test(t)) return replaceRefs(t);
+  // Replace refs even if user already wrote calc(...)
+  const withRefs = replaceRefs(t);
 
-  // unary minus reference → calc(var(--…) * -1)
-  if (/^-\s*\{[^}]+\}$/.test(t)) {
-    const v = replaceRefs(t.replace(/^-+\s*/, "")); // remove leading '-' for clarity
-    return `calc(${v} * -1)`;
-  }
-
-  // expression containing at least one reference → replace refs, wrap in calc if needed
-  if (t.includes("{")) {
-    const expr = replaceRefs(t);
-    return needsCalcWrap(expr) ? `calc(${expr})` : expr;
-  }
-
-  // plain string value (no refs) → leave as-is
-  return val;
+  // If refs created/are part of math, decide on calc()
+  return needsCalcWrap(withRefs) ? `calc(${withRefs})` : withRefs;
 };
 
 // ---- fs utils ----
