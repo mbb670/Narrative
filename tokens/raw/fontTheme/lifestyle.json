@@ -204,7 +204,7 @@
     }
   },
   "builder": {
-    "text style": {
+    "text-style": {
       "value": "Lifestyle",
       "type": "text"
     }
