@@ -382,16 +382,14 @@ StyleDictionary.registerFormat({
 // ---------- Zeroheight (DTCG) export helpers ----------
 const isPlainObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 
-// Convert a raw token/group node into DTCG-compliant shape:
-// - token: { value, type?, description? }  ->  { $value, $type?, $description? }
-// - group: plain object; may carry group-level { type, description } -> { $type?, $description?, ...children }
+// Convert raw node → DTCG ($value/$type/$description)
 const toDTCG = (node) => {
   if (!isPlainObj(node)) return node;
 
   const hasValue = Object.prototype.hasOwnProperty.call(node, "value");
   const has$Value = Object.prototype.hasOwnProperty.call(node, "$value");
 
-  // If this is a token (raw or already DTCG), map/normalize to $-props
+  // Token
   if (hasValue || has$Value) {
     const val = hasValue ? node.value : node.$value;
     const out = { $value: val };
@@ -399,14 +397,14 @@ const toDTCG = (node) => {
     if (typeof node.$type === "string") out.$type = node.$type;
     if (typeof node.description === "string") out.$description = node.description;
     if (typeof node.$description === "string") out.$description = node.$description;
-    return out; // leave composite values (objects) as-is; ZH allows custom types
+    return out;
   }
 
-  // Otherwise treat as a group (carry group metadata if present)
+  // Group (carry optional metadata)
   const out = {};
   if (typeof node.type === "string") out.$type = node.type;
   if (typeof node.$type === "string") out.$type = node.$type;
-  if (typeof node.description === "string") out.$description = node.description;
+  if (typeof node.description === "string") out.$description = node.$description;
   if (typeof node.$description === "string") out.$description = node.$description;
 
   for (const [k, v] of Object.entries(node)) {
@@ -438,20 +436,16 @@ const mergeDTCG = (base, extra) => {
   return out;
 };
 
-// Build one unified DTCG object for Zeroheight.
-// Rules:
-//  - "global" files merge into TOP LEVEL (so aliases like {unit.4} still work).
-//  - Everything else becomes a group named by its folder (e.g., breakpoint.mobile, colorTheme.default).
-//  - "styles" goes under a "styles" group as-is (custom types allowed).
+// Build one unified DTCG object for Zeroheight
 const buildZeroheightObject = () => {
   let zh = {};
 
-  // 1) Global → top-level merge
+  // 1) Global → merge into top-level
   for (const f of listFiles(path.join(RAW_DIR, "global")).sort()) {
     zh = mergeDTCG(zh, toDTCG(readJson(f)));
   }
 
-  // Helper to place a file inside a group path like ["breakpoint","mobile"]
+  // Helper: place a file into a group path like ["breakpoint","mobile"]
   const putInPath = (obj, pathArr, content) => {
     let cursor = obj;
     for (const seg of pathArr.slice(0, -1)) {
@@ -462,7 +456,7 @@ const buildZeroheightObject = () => {
     cursor[leaf] = mergeDTCG(cursor[leaf] || {}, content);
   };
 
-  // 2) Breakpoints → breakpoint.mobile/tablet/desktop groups
+  // 2) Breakpoints → breakpoint.mobile/tablet/desktop
   const bpDir = path.join(RAW_DIR, "breakpoint");
   for (const f of listFiles(bpDir).sort()) {
     const name = path.basename(f, ".json");
@@ -476,13 +470,13 @@ const buildZeroheightObject = () => {
     putInPath(zh, ["mode", name], toDTCG(readJson(f)));
   }
 
-  // 4) Styles → styles group (typography/boxShadow composites permitted)
+  // 4) Styles → styles group
   const stylesDir = path.join(RAW_DIR, "styles");
   for (const f of listFiles(stylesDir).sort()) {
     zh.styles = mergeDTCG(zh.styles || {}, toDTCG(readJson(f)));
   }
 
-  // 5) Other collections (everything else except the four known)
+  // 5) Other collections → <collection>.<set>
   const others = listDirs(RAW_DIR).filter((d) => !["global", "breakpoint", "mode", "styles"].includes(d));
   for (const col of others.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))) {
     const dir = path.join(RAW_DIR, col);
@@ -495,16 +489,69 @@ const buildZeroheightObject = () => {
   return zh;
 };
 
-// Register a formatter that outputs DTCG-compliant JSON for Zeroheight
+// Flatten all token paths: "a.b.c" → node with $value
+const buildTokenIndex = (root) => {
+  const index = new Map();
+  const walk = (obj, pathArr) => {
+    if (!isPlainObj(obj)) return;
+    const isToken = Object.prototype.hasOwnProperty.call(obj, "$value");
+    if (isToken) {
+      index.set(pathArr.join("."), obj);
+      return;
+    }
+    for (const [k, v] of Object.entries(obj)) {
+      if (k.startsWith("$")) continue;
+      walk(v, pathArr.concat(k));
+    }
+  };
+  walk(root, []);
+  return index;
+};
+
+// Find canonical path for an alias: prefer exact, else unique suffix match
+const findCanonicalAlias = (alias, keys) => {
+  if (keys.has(alias)) return alias;
+  const matches = [];
+  for (const k of keys.keys()) {
+    if (k.endsWith("." + alias) || k === alias) matches.push(k);
+  }
+  return matches.length === 1 ? matches[0] : alias; // only rewrite on unique match
+};
+
+// Rewrite every {…} inside $value strings to canonical, fully-qualified paths
+const rebaseAliasesInPlace = (root) => {
+  const index = buildTokenIndex(root);
+
+  const rewrite = (val) => {
+    if (typeof val !== "string" || !val.includes("{")) return val;
+    return val.replace(/\{([^}]+)\}/g, (_, raw) => `{${findCanonicalAlias(raw.trim(), index)}}`);
+  };
+
+  const walk = (obj) => {
+    if (!isPlainObj(obj)) return;
+    if (Object.prototype.hasOwnProperty.call(obj, "$value")) {
+      obj.$value = rewrite(obj.$value);
+      return;
+    }
+    for (const [k, v] of Object.entries(obj)) {
+      if (k.startsWith("$")) continue;
+      walk(v);
+    }
+  };
+
+  walk(root);
+  return root;
+};
+
+// Formatter: outputs DTCG JSON with rebased aliases
 StyleDictionary.registerFormat({
   name: "nw/zeroheight-json",
   format: () => {
-    const out = buildZeroheightObject();
-    // Important: valid JSON with $-keys; no comments/trailing commas.
-    return JSON.stringify(out, null, 2) + "\n";
+    const unified = buildZeroheightObject();
+    const rebased = rebaseAliasesInPlace(unified);
+    return JSON.stringify(rebased, null, 2) + "\n";
   },
 });
-
 
 // ---- build all files ----
   export default {
