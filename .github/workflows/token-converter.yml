@@ -1,0 +1,56 @@
+name: Token Converter
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'tokens/raw/**/*.json'
+      - 'tokens/style-dictionary/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/token-converter.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: token-converter
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm i
+          fi
+
+      - name: Ensure output dir exists
+        run: mkdir -p tokens/resolved
+
+      - name: Build tokens → CSS vars
+        run: npm run build:tokens
+
+      - name: Commit & push if changed
+        run: |
+          if [ -n "$(git status --porcelain tokens/resolved/tokens-test.css)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add tokens/resolved/tokens-test.css
+            git commit -m "chore(tokens): rebuild tokens-test.css [skip ci]"
+            git push
+          else
+            echo "No changes to commit."
+          fi
