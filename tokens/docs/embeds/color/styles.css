@@ -1,4 +1,5 @@
-@import url("../../../resolved/extended_tokens.css");
+/* @import url("../../../resolved/extended_tokens.css"); */
+@import url("../../../resolved/sample.css");
 @import url("../../general_styling/styles.css");
 @import url("../../token_switcher/switcher.css");
 @import url("../../swatch_maker/swatch_maker.css");
