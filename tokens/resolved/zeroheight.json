@@ -631,57 +631,57 @@
     "benton-modern": {
       "display": {
         "$value": "benton-modern-display",
-        "$type": "text"
+        "$type": "fontFamily"
       },
       "compressed": {
         "$value": "benton-modern-display-compre",
-        "$type": "text"
+        "$type": "fontFamily"
       },
       "condensed": {
         "$value": "benton-modern-display-conden",
-        "$type": "text"
+        "$type": "fontFamily"
       },
       "extra_condensed": {
         "$value": "benton-modern-display-extra",
-        "$type": "text"
+        "$type": "fontFamily"
       },
       "text": {
         "$value": "benton-modern-text",
-        "$type": "text"
+        "$type": "fontFamily"
       }
     },
     "franklin-gothic": {
       "default": {
         "$value": "franklin-gothic",
-        "$type": "text"
+        "$type": "fontFamily"
       },
       "compressed": {
         "$value": "franklin-gothic-compressed",
-        "$type": "text"
+        "$type": "fontFamily"
       },
       "condensed": {
         "$value": "franklin-gothic-condensed",
-        "$type": "text"
+        "$type": "fontFamily"
       },
       "extra_compressed": {
         "$value": "franklin-gothic-extra-compre",
-        "$type": "text"
+        "$type": "fontFamily"
       }
     },
     "noto": {
       "sans": {
         "$value": "Noto Sans",
-        "$type": "text"
+        "$type": "fontFamily"
       },
       "serif": {
         "$value": "Noto Serif",
-        "$type": "text"
+        "$type": "fontFamily"
       }
     },
     "playfair": {
       "display": {
         "$value": "Playfair Display",
-        "$type": "text"
+        "$type": "fontFamily"
       }
     }
   },
@@ -740,75 +740,75 @@
   "fontWeight": {
     "100": {
       "$value": 100,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "150": {
       "$value": 150,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "200": {
       "$value": 200,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "250": {
       "$value": 250,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "300": {
       "$value": 300,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "350": {
       "$value": 350,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "400": {
       "$value": 400,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "450": {
       "$value": 450,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "500": {
       "$value": 500,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "550": {
       "$value": 550,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "600": {
       "$value": 600,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "650": {
       "$value": 650,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "700": {
       "$value": 700,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "750": {
       "$value": 750,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "800": {
       "$value": 800,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "850": {
       "$value": 850,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "900": {
       "$value": 900,
-      "$type": "number"
+      "$type": "fontWeight"
     },
     "950": {
       "$value": 950,
-      "$type": "number"
+      "$type": "fontWeight"
     }
   },
   "breakpoint": {
@@ -3164,7 +3164,7 @@
       "headline": {
         "fontFamily": {
           "$value": "{fontFamily.playfair.display}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3196,7 +3196,7 @@
       "subheadline": {
         "fontFamily": {
           "$value": "{fontFamily.playfair.display}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3232,7 +3232,7 @@
       "display": {
         "fontFamily": {
           "$value": "{fontFamily.playfair.display}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3264,7 +3264,7 @@
       "body": {
         "fontFamily": {
           "$value": "{fontFamily.noto.serif}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3300,7 +3300,7 @@
       "system": {
         "fontFamily": {
           "$value": "{fontFamily.noto.sans}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3336,7 +3336,7 @@
       "uppercase": {
         "fontFamily": {
           "$value": "{fontFamily.noto.sans}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3376,7 +3376,7 @@
       "headline": {
         "fontFamily": {
           "$value": "{fontFamily.franklin-gothic.default}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3408,7 +3408,7 @@
       "subheadline": {
         "fontFamily": {
           "$value": "{fontFamily.franklin-gothic.default}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3444,7 +3444,7 @@
       "display": {
         "fontFamily": {
           "$value": "{fontFamily.franklin-gothic.default}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3476,7 +3476,7 @@
       "body": {
         "fontFamily": {
           "$value": "{fontFamily.franklin-gothic.default}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3512,7 +3512,7 @@
       "system": {
         "fontFamily": {
           "$value": "{fontFamily.franklin-gothic.default}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3548,7 +3548,7 @@
       "uppercase": {
         "fontFamily": {
           "$value": "{fontFamily.franklin-gothic.condensed}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3588,7 +3588,7 @@
       "headline": {
         "fontFamily": {
           "$value": "{fontFamily.benton-modern.condensed}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3620,7 +3620,7 @@
       "subheadline": {
         "fontFamily": {
           "$value": "{fontFamily.benton-modern.condensed}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3656,7 +3656,7 @@
       "display": {
         "fontFamily": {
           "$value": "{fontFamily.benton-modern.condensed}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3688,7 +3688,7 @@
       "body": {
         "fontFamily": {
           "$value": "{fontFamily.benton-modern.text}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3724,7 +3724,7 @@
       "system": {
         "fontFamily": {
           "$value": "{fontFamily.franklin-gothic.default}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
@@ -3760,7 +3760,7 @@
       "uppercase": {
         "fontFamily": {
           "$value": "{fontFamily.franklin-gothic.condensed}",
-          "$type": "text"
+          "$type": "fontFamily"
         },
         "regular": {
           "$value": "{fontWeight.400}",
