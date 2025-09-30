@@ -3,10 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node tools/style-dictionary/build.mjs"
+    "build:tokens": "style-dictionary build --config ./tokens/tools/style-dictionary/sd.config.mjs"
   },
   "devDependencies": {
     "style-dictionary": "^4.0.0"
   }
 }
-
