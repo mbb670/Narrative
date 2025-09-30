@@ -5,7 +5,7 @@ on:
   push:
     paths:
       - 'tokens/raw/**/*.json'
-      - 'tokens/tools/style-dictionary/**'
+      - 'tokens/style-dictionary/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/token-converter.yml'
