@@ -41,27 +41,42 @@ const replaceRefs = (str) =>
   String(str).replace(/\{([^}]+)\}/g, (_, p) => `var(--${p.split(".").map(seg).join("-")})`);
 
 // Decide if expression needs calc(): treat + - * / as math, but ignore hyphens inside var names
+// Decide if expression needs calc(): treat + - * / as math, but ignore hyphens inside identifiers
 const needsCalcWrap = (expr) => {
   const t = String(expr).trim();
-  if (/^calc\(/i.test(t)) return false; // already calc()
 
-  // plain number or unit (e.g., 12, 1.5rem, 100%)
+  // already calc()
+  if (/^calc\(/i.test(t)) return false;
+
+  // plain number/unit
   if (/^[+-]?\d+(\.\d+)?([a-z%]+)?$/i.test(t)) return false;
 
-  // *** FIX: only skip if the ENTIRE string is a single var(), not just starts with one
+  // exactly one var()
   if (/^var\(--[a-z0-9-]+\)$/i.test(t)) return false;
 
-  // Hide var(...) so hyphens inside names don't count as "minus"
-  const masked = t.replace(/var\(--[a-z0-9-]+\)/gi, "X");
+  // NEW GUARD: if there's no var() and no digits at all, it's a plain string/identifier → no calc
+  if (!/var\(--/i.test(t) && !/\d/.test(t)) return false;
 
-  // Any arithmetic operator (or unary minus before X) means we need calc()
-  if (/[+\-*/]/.test(masked) || /^-\s*X/.test(masked)) return true;
+  // Mask var(...) to avoid mis-reading hyphens inside names
+  let masked = t.replace(/var\(--[a-z0-9-]+\)/gi, "X");
 
-  // Parentheses next to operators (complex expressions)
+  // Mask hyphens that are part of identifiers (word-char - word-char), e.g. franklin-gothic
+  // (no lookbehind; safe on Node 20)
+  masked = masked.replace(/(\w)-(?=\w)/g, "$1·");
+
+  // Any clear math operators?
+  if (/[+*/]/.test(masked)) return true;
+
+  // Minus operator: unary or binary with numbers/vars
+  if (/(^|\s)-\s*(X|\d)/.test(masked)) return true;           // unary minus like "-1rem" or "- var(...)"
+  if (/(\d|X)\s*-\s*(\d|X)/.test(masked)) return true;        // binary minus like "var(...) - 1rem"
+
+  // Parentheses around operators
   if (/\)\s*[-+*/]/.test(masked) || /[-+*/]\s*\(/.test(masked)) return true;
 
   return false;
 };
+
 
 // Master resolver: replace refs first; then wrap with calc() only when needed
 const resolveValue = (val) => {
