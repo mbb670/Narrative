@@ -2,9 +2,11 @@
   "name": "narrative-tokens",
   "private": true,
   "type": "module",
+{
   "scripts": {
-    "build:tokens": "style-dictionary build --config ./tokens/tools/style-dictionary/sd.config.mjs"
-  },
+    "build:tokens": "style-dictionary build --config ./tokens/style-dictionary/sd.config.mjs"
+  }
+}
   "devDependencies": {
     "style-dictionary": "^4.0.0"
   }
