@@ -379,10 +379,10 @@ StyleDictionary.registerFormat({
   },
 });
 
-// ---------- Zeroheight (DTCG) export helpers (improved alias rebasing) ----------
+// ---------- Zeroheight (DTCG) export helpers ----------
 const isPlainObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 
-// Keep track of your "other collection" folder names so we can prioritize defaults
+// Keep track of your "other collection" folder names so we can prioritise defaults
 let __OTHER_COLLECTIONS = new Set();
 
 // Convert raw node → DTCG ($value/$type/$description)
@@ -512,39 +512,30 @@ const buildTokenIndex = (root) => {
   return index;
 };
 
-// Ranking function for candidate paths (lower is better)
+// ---------- Canonical alias rebasing (smart tie-breaks) ----------
 const pathPriority = (pathStr) => {
   const parts = pathStr.split(".");
   const first = parts[0];
   const second = parts[1];
 
-  // Reserved group names we want to de-prioritize vs globals
   const reserved = new Set(["breakpoint", "mode", "styles", ...__OTHER_COLLECTIONS]);
 
-  // 0: global/top-level (first segment NOT a reserved group)
+  // 0: global/top-level
   if (!reserved.has(first)) return 0;
-
   // 1: breakpoint.mobile.*
   if (first === "breakpoint" && second === "mobile") return 1;
-
   // 2: mode.light.*
   if (first === "mode" && second === "light") return 2;
-
-  // 3: <collection>.default.*  (for any 'other' collection name)
+  // 3: <collection>.default.*
   if (__OTHER_COLLECTIONS.has(first) && second === "default") return 3;
 
-  // 10+: others (breakpoint tablet/desktop, other modes, other sets)
   if (first === "breakpoint") return 10;
   if (first === "mode") return 11;
   if (__OTHER_COLLECTIONS.has(first)) return 12;
-
-  // styles or anything else
   return 20;
 };
 
-// Find best canonical path for an alias, using priorities & tie-breaks
 const chooseBest = (cands, selfPath) => {
-  // Avoid self-alias
   const filtered = cands.filter((p) => p !== selfPath);
   const ranked = filtered
     .map((p) => ({ p, score: pathPriority(p), len: p.split(".").length }))
@@ -555,21 +546,18 @@ const chooseBest = (cands, selfPath) => {
 const findCanonicalAlias = (alias, index, selfPath) => {
   if (index.has(alias) && alias !== selfPath) return alias;
 
-  // Collect matches by suffix (allow exact or endsWith)
   const matches = [];
   for (const k of index.keys()) {
     if (k === alias || k.endsWith("." + alias)) matches.push(k);
   }
   if (!matches.length) return alias;
-
-  // If unique, take it; else choose by priority
   if (matches.length === 1 && matches[0] !== selfPath) return matches[0];
 
   const best = chooseBest(matches, selfPath);
   return best || alias;
 };
 
-// Rewrite every {…} inside $value (strings, arrays, or nested objects) to canonical paths
+// Deep rewrite: fix aliases everywhere (strings, arrays, and nested objects)
 const rebaseAliasesInPlace = (root) => {
   const index = buildTokenIndex(root);
 
@@ -580,9 +568,8 @@ const rebaseAliasesInPlace = (root) => {
     if (typeof val === "string") return rewriteString(val, selfPath);
     if (Array.isArray(val)) return val.map((v) => rewriteDeep(v, selfPath));
     if (val && typeof val === "object") {
-      const out = Array.isArray(val) ? [] : {};
+      const out = {};
       for (const [k, v] of Object.entries(val)) {
-        // don't touch DTCG metadata keys inside composite values if they exist
         if (k.startsWith("$")) { out[k] = v; continue; }
         out[k] = rewriteDeep(v, selfPath);
       }
@@ -608,7 +595,7 @@ const rebaseAliasesInPlace = (root) => {
   return root;
 };
 
-// Infer $type from token path: fontFamily/fontWeight
+// ---------- Type hints ----------
 const applyNameBasedTypeHints = (root) => {
   const walk = (obj, pathArr = []) => {
     if (!obj || typeof obj !== "object") return;
@@ -636,14 +623,61 @@ const applyNameBasedTypeHints = (root) => {
   return root;
 };
 
+// Infer $type from alias target's type or path (fontFamily/fontWeight)
+const applyAliasBasedTypeHints = (root) => {
+  const index = buildTokenIndex(root);
 
+  const isGeneric = (t) =>
+    !t || t === "number" || t === "string" || t === "text";
 
+  const inferFromPath = (p) => {
+    const segs = p.split(".").map((s) => s.toLowerCase());
+    if (segs.includes("fontfamily")) return "fontFamily";
+    if (segs.includes("fontweight")) return "fontWeight";
+    return null;
+  };
+
+  const walk = (obj, pathArr = []) => {
+    if (!obj || typeof obj !== "object") return;
+
+    if (Object.prototype.hasOwnProperty.call(obj, "$value")) {
+      const v = obj.$value;
+      const isComposite = v && typeof v === "object";
+      if (!isComposite && typeof v === "string") {
+        const m = v.trim().match(/^\{([^}]+)\}$/);
+        if (m) {
+          const aliasPath = m[1].trim();
+          const target = index.get(aliasPath);
+          const targetType = (target && target.$type) || inferFromPath(aliasPath);
+
+          if (targetType && isGeneric(obj.$type)) {
+            if (targetType === "fontFamily" || targetType === "fontWeight") {
+              obj.$type = targetType;
+            }
+          }
+        }
+      }
+      return;
+    }
+
+    for (const [k, val] of Object.entries(obj)) {
+      if (k.startsWith("$")) continue;
+      walk(val, pathArr.concat(k));
+    }
+  };
+
+  walk(root, []);
+  return root;
+};
+
+// Formatter: outputs DTCG JSON with canonical aliases + type hints
 StyleDictionary.registerFormat({
   name: "nw/zeroheight-json",
   format: () => {
     const unified = buildZeroheightObject();
     const rebased = rebaseAliasesInPlace(unified);
-    const finalObj = applyNameBasedTypeHints(rebased);   // <— add this line
+    const withNameHints = applyNameBasedTypeHints(rebased);        // label base tokens by path
+    const finalObj = applyAliasBasedTypeHints(withNameHints);      // then upgrade aliasing tokens
     return JSON.stringify(finalObj, null, 2) + "\n";
   },
 });
