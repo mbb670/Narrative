@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = process.cwd();
 const RAW_DIR = path.join(REPO_ROOT, "tokens", "raw");
 
-// ---- naming helpers (match your preferred var names) ----
+// ---- naming helpers ----
 const COLLAPSE = new Map([
   ["fontSize", "fontsize"],
   ["fontFamily", "fontfamily"],
@@ -25,34 +25,25 @@ const refToVar = (val) => {
   return val;
 };
 
-// Proper CSS property casing: camelCase → kebab-case (and normalize spaces/_)
 const prop = (s) =>
   String(s)
     .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
     .replace(/[\s_]+/g, "-")
     .toLowerCase();
 
-// ---- file utils ----
+// ---- fs utils ----
 const readJson = (p) => JSON.parse(fs.readFileSync(p, "utf8"));
 const listFiles = (dir) =>
   fs.existsSync(dir)
-    ? fs
-        .readdirSync(dir)
-        .filter((f) => f.endsWith(".json"))
-        .map((f) => path.join(dir, f))
+    ? fs.readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => path.join(dir, f))
     : [];
-
 const listDirs = (dir) =>
   fs.existsSync(dir)
-    ? fs
-        .readdirSync(dir, { withFileTypes: true })
-        .filter((d) => d.isDirectory())
-        .map((d) => d.name)
+    ? fs.readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name)
     : [];
 
-// ---- flatten tokens (DTCG-style) ----
+// ---- flatten primitives ----
 const flattenValues = (obj, prefix = [], out = []) => {
-  // “value” node with primitive or string → a var
   if (
     obj &&
     typeof obj === "object" &&
@@ -62,30 +53,23 @@ const flattenValues = (obj, prefix = [], out = []) => {
     out.push({ path: prefix, value: obj.value });
     return out;
   }
-
-  // walk children
   if (obj && typeof obj === "object" && !Array.isArray(obj)) {
     for (const [k, v] of Object.entries(obj)) {
-      if (k === "value") continue; // composite handled elsewhere
+      if (k === "value") continue;
       flattenValues(v, prefix.concat(k), out);
     }
   }
   return out;
 };
 
-// ---- styles (typography / boxShadow / generic composites) ----
+// ---- styles (typography / boxShadow / generic) ----
 const collectStyleBlocks = (stylesJson) => {
   const blocks = [];
 
   const walk = (node, p = []) => {
     if (!node || typeof node !== "object") return;
 
-    if (
-      "value" in node &&
-      node.value &&
-      typeof node.value === "object" &&
-      !Array.isArray(node.value)
-    ) {
+    if ("value" in node && node.value && typeof node.value === "object" && !Array.isArray(node.value)) {
       const type = node.type || "";
       const classSuffix = p.map(seg).join("-");
 
@@ -99,20 +83,13 @@ const collectStyleBlocks = (stylesJson) => {
 
       if (type === "boxShadow") {
         const toShadow = (obj) =>
-          ["x", "y", "blur", "spread", "color"]
-            .map((k) => refToVar(obj?.[k]))
-            .filter(Boolean)
-            .join(" ");
-        const shadow = Array.isArray(node.value)
-          ? node.value.map(toShadow).join(", ")
-          : toShadow(node.value);
-        const cls =
-          p[0] === "elevation" ? `.elevation-${p.slice(1).map(seg).join("-")}` : `.${classSuffix}`;
+          ["x", "y", "blur", "spread", "color"].map((k) => refToVar(obj?.[k])).filter(Boolean).join(" ");
+        const shadow = Array.isArray(node.value) ? node.value.map(toShadow).join(", ") : toShadow(node.value);
+        const cls = p[0] === "elevation" ? `.elevation-${p.slice(1).map(seg).join("-")}` : `.${classSuffix}`;
         blocks.push(`${cls} {\n  box-shadow: ${shadow};\n}`);
         return;
       }
 
-      // generic composite → CSS properties
       const rules = Object.entries(node.value)
         .map(([k, v]) => `  ${prop(k)}: ${refToVar(v)};`)
         .join("\n");
@@ -130,7 +107,7 @@ const collectStyleBlocks = (stylesJson) => {
   return blocks;
 };
 
-// ---- var declarations (shared) ----
+// ---- var blocks ----
 const varDeclsFromFile = (filePath) => {
   const json = readJson(filePath);
   const vars = flattenValues(json);
@@ -141,20 +118,18 @@ const varDeclsFromFile = (filePath) => {
     .map(({ path: p, value }) => `  ${varNameFromPath(p)}: ${refToVar(value)};`)
     .join("\n");
 };
-
 const blockWithDecls = (selector, decls) => (decls ? `${selector} {\n${decls}\n}` : "");
 const varsBlockFromFile = (filePath) => blockWithDecls(":root", varDeclsFromFile(filePath));
 
-// ---- breakpoint min-width extraction (from tokens if present) ----
+// ---- breakpoint min detection ----
 const normalizeUnit = (v) => {
   if (typeof v === "number") return `${v}px`;
   if (typeof v !== "string") return null;
-  if (/^\{.+\}$/.test(v)) return null; // reference unresolved → skip
+  if (/^\{.+\}$/.test(v)) return null;
   if (/^\d+(\.\d+)?(px|rem|em|vw|vh|vmin|vmax|cqmin|cqmax|cqi)$/.test(v)) return v;
   if (/^\d+(\.\d+)?$/.test(v)) return `${v}px`;
   return null;
 };
-
 const extractBreakpointMin = (filePath, fallbackPx) => {
   try {
     if (!fs.existsSync(filePath)) return fallbackPx;
@@ -171,7 +146,7 @@ const extractBreakpointMin = (filePath, fallbackPx) => {
   }
 };
 
-// ---------- base formatter (unchanged behavior) ----------
+// ---------- BASE formatter (tokens-test.css) ----------
 StyleDictionary.registerFormat({
   name: "nw/css-collections",
   format: () => {
@@ -213,11 +188,9 @@ StyleDictionary.registerFormat({
     const topDirs = listDirs(RAW_DIR)
       .filter((d) => !["global", "breakpoint", "mode", "styles"].includes(d))
       .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
-
     for (const col of topDirs) {
       const dir = path.join(RAW_DIR, col);
       const files = listFiles(dir).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
-
       const def = files.find((f) => path.basename(f).toLowerCase() === "default.json");
       if (def) {
         css += `/* Other ${col} — default */\n${varsBlockFromFile(def)}\n\n`;
@@ -230,28 +203,21 @@ StyleDictionary.registerFormat({
       }
     }
 
-    // 10–11) Mode (+ manual selectors for all sets using data-mode only)
+    // 10–11) Mode (BASE = root for light, data-mode for everything else ONLY)
     const modeDir = path.join(RAW_DIR, "mode");
     if (fs.existsSync(modeDir)) {
       const modeFiles = listFiles(modeDir).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
       const light = modeFiles.find((f) => path.basename(f).toLowerCase() === "light.json");
       if (light) {
-        // root default
-        css += `/* Mode light — mode/light (root default) */\n${varsBlockFromFile(light)}\n\n`;
-        // manual attr
-        const decls = varDeclsFromFile(light);
-        css += `/* Mode light — mode/light (manual attr) */\n` +
-               blockWithDecls(`[data-mode="light"]`, decls) + "\n\n";
+        css += `/* Mode light — mode/light */\n${varsBlockFromFile(light)}\n\n`;
       }
       for (const f of modeFiles) {
         if (f === light) continue;
         const setName = path.basename(f, ".json");
-        const decls = varDeclsFromFile(f);
-        css += `/* Mode ${setName} — mode/${setName} */\n` +
-               blockWithDecls(`[data-mode="${setName}"]`, decls) + "\n\n";
+        const block = blockWithDecls(`[data-mode="${setName}"]`, varDeclsFromFile(f));
+        css += `/* Mode ${setName} — mode/${setName} */\n${block}\n\n`;
       }
     }
-
 
     // 12) Styles
     const stylesFile = path.join(RAW_DIR, "styles", "styles.json");
@@ -267,7 +233,7 @@ StyleDictionary.registerFormat({
   },
 });
 
-// ---------- extended formatter (adds manual wrappers) ----------
+// ---------- EXTENDED formatter (extended-test.css) ----------
 StyleDictionary.registerFormat({
   name: "nw/css-collections-extended",
   format: () => {
@@ -285,7 +251,7 @@ StyleDictionary.registerFormat({
       }
     }
 
-    // 2–4) Breakpoints (+ manual data-breakpoint wrappers)
+    // 2–4) Breakpoints + manual [data-breakpoint=...] wrappers
     const bpDir = path.join(RAW_DIR, "breakpoint");
     const mobile = path.join(bpDir, "mobile.json");
     const tablet = path.join(bpDir, "tablet.json");
@@ -304,8 +270,6 @@ StyleDictionary.registerFormat({
       const inner = varsBlockFromFile(desktop).replace(/^/gm, "  ");
       css += `/* Breakpoint min-width ${min} — breakpoint/desktop */\n@media (min-width: ${min}) {\n${inner}\n}\n\n`;
     }
-
-    // Manual breakpoint wrappers after media queries
     if (fs.existsSync(mobile)) {
       css += `/* Breakpoint manual mobile — breakpoint/mobile */\n` +
              blockWithDecls(`[data-breakpoint="mobile"]`, varDeclsFromFile(mobile)) + "\n\n";
@@ -319,20 +283,17 @@ StyleDictionary.registerFormat({
              blockWithDecls(`[data-breakpoint="desktop"]`, varDeclsFromFile(desktop)) + "\n\n";
     }
 
-    // 5–9) Other collections (+ manual default selector)
+    // 5–9) Other collections (+ manual default attr)
     const topDirs = listDirs(RAW_DIR)
       .filter((d) => !["global", "breakpoint", "mode", "styles"].includes(d))
       .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
-
     for (const col of topDirs) {
       const dir = path.join(RAW_DIR, col);
       const files = listFiles(dir).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
 
       const def = files.find((f) => path.basename(f).toLowerCase() === "default.json");
       if (def) {
-        // default root
         css += `/* Other ${col} — default */\n${varsBlockFromFile(def)}\n\n`;
-        // manual default immediately after
         css += `/* Other manual default ${col}=default — ${col}/default */\n` +
                blockWithDecls(`[data-${col}="default"]`, varDeclsFromFile(def)) + "\n\n";
       }
@@ -344,33 +305,27 @@ StyleDictionary.registerFormat({
       }
     }
 
-    // 10–11) Mode (+ manual selectors for all sets using data-mode & data-theme)
+    // 10–11) Mode (EXTENDED = root for light, PLUS manual attr for light, and data-mode for others)
     const modeDir = path.join(RAW_DIR, "mode");
     if (fs.existsSync(modeDir)) {
       const modeFiles = listFiles(modeDir).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
       const light = modeFiles.find((f) => path.basename(f).toLowerCase() === "light.json");
       if (light) {
-        // root default
         css += `/* Mode light — mode/light (root default) */\n${varsBlockFromFile(light)}\n\n`;
-        // manual aliases
         const decls = varDeclsFromFile(light);
         css += `/* Mode light — mode/light (manual attr) */\n` +
                blockWithDecls(`[data-mode="light"]`, decls) + "\n\n";
-        css += blockWithDecls(`[data-theme="light"]`, decls) + "\n\n";
       }
       for (const f of modeFiles) {
         if (f === light) continue;
         const setName = path.basename(f, ".json");
         const decls = varDeclsFromFile(f);
-        // existing behavior
         css += `/* Mode ${setName} — mode/${setName} */\n` +
                blockWithDecls(`[data-mode="${setName}"]`, decls) + "\n\n";
-        // theme alias for convenience
-        css += blockWithDecls(`[data-theme="${setName}"]`, decls) + "\n\n";
       }
     }
 
-    // 12) Styles (unchanged)
+    // 12) Styles
     const stylesFile = path.join(RAW_DIR, "styles", "styles.json");
     if (fs.existsSync(stylesFile)) {
       const stylesJson = readJson(stylesFile);
@@ -384,22 +339,16 @@ StyleDictionary.registerFormat({
   },
 });
 
-// ---- SD config: build both files ----
+// ---- build both files ----
 export default {
-  source: ["tokens/raw/**/*.json"], // CLI requires a source; formatters read raw files themselves
+  source: ["tokens/raw/**/*.json"],
   platforms: {
     css: {
       transformGroup: "css",
       buildPath: "tokens/resolved/",
       files: [
-        {
-          destination: "tokens-test.css",
-          format: "nw/css-collections"
-        },
-        {
-          destination: "extended-test.css",
-          format: "nw/css-collections-extended"
-        }
+        { destination: "tokens-test.css",    format: "nw/css-collections" },
+        { destination: "extended-test.css",  format: "nw/css-collections-extended" }
       ]
     }
   }
