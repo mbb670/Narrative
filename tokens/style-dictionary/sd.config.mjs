@@ -608,14 +608,43 @@ const rebaseAliasesInPlace = (root) => {
   return root;
 };
 
+// Infer $type from token path: fontFamily/fontWeight
+const applyNameBasedTypeHints = (root) => {
+  const walk = (obj, pathArr = []) => {
+    if (!obj || typeof obj !== "object") return;
 
-// Formatter: outputs DTCG JSON with rebased aliases
+    if (Object.prototype.hasOwnProperty.call(obj, "$value")) {
+      const isComposite = obj.$value && typeof obj.$value === "object";
+      if (!isComposite) {
+        const lowerSegs = pathArr.map((s) => String(s).toLowerCase());
+        if (lowerSegs.includes("fontfamily")) {
+          obj.$type = "fontFamily";
+        } else if (lowerSegs.includes("fontweight")) {
+          obj.$type = "fontWeight";
+        }
+      }
+      return;
+    }
+
+    for (const [k, v] of Object.entries(obj)) {
+      if (k.startsWith("$")) continue; // skip DTCG metadata
+      walk(v, pathArr.concat(k));
+    }
+  };
+
+  walk(root, []);
+  return root;
+};
+
+
+
 StyleDictionary.registerFormat({
   name: "nw/zeroheight-json",
   format: () => {
     const unified = buildZeroheightObject();
     const rebased = rebaseAliasesInPlace(unified);
-    return JSON.stringify(rebased, null, 2) + "\n";
+    const finalObj = applyNameBasedTypeHints(rebased);   // <— add this line
+    return JSON.stringify(finalObj, null, 2) + "\n";
   },
 });
 
