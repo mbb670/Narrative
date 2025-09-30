@@ -569,23 +569,33 @@ const findCanonicalAlias = (alias, index, selfPath) => {
   return best || alias;
 };
 
-// Rewrite every {…} inside $value strings to canonical, fully-qualified paths
+// Rewrite every {…} inside $value (strings, arrays, or nested objects) to canonical paths
 const rebaseAliasesInPlace = (root) => {
   const index = buildTokenIndex(root);
 
-  const rewrite = (val, selfPath) => {
-    if (typeof val !== "string" || !val.includes("{")) return val;
-    return val.replace(/\{([^}]+)\}/g, (_, raw) => {
-      const found = findCanonicalAlias(raw.trim(), index, selfPath);
-      return `{${found}}`;
-    });
+  const rewriteString = (str, selfPath) =>
+    str.replace(/\{([^}]+)\}/g, (_, raw) => `{${findCanonicalAlias(raw.trim(), index, selfPath)}}`);
+
+  const rewriteDeep = (val, selfPath) => {
+    if (typeof val === "string") return rewriteString(val, selfPath);
+    if (Array.isArray(val)) return val.map((v) => rewriteDeep(v, selfPath));
+    if (val && typeof val === "object") {
+      const out = Array.isArray(val) ? [] : {};
+      for (const [k, v] of Object.entries(val)) {
+        // don't touch DTCG metadata keys inside composite values if they exist
+        if (k.startsWith("$")) { out[k] = v; continue; }
+        out[k] = rewriteDeep(v, selfPath);
+      }
+      return out;
+    }
+    return val;
   };
 
   const walk = (obj, pathArr = []) => {
-    if (!isPlainObj(obj)) return;
+    if (!obj || typeof obj !== "object") return;
     if (Object.prototype.hasOwnProperty.call(obj, "$value")) {
       const selfPath = pathArr.join(".");
-      obj.$value = rewrite(obj.$value, selfPath);
+      obj.$value = rewriteDeep(obj.$value, selfPath);
       return;
     }
     for (const [k, v] of Object.entries(obj)) {
@@ -597,6 +607,7 @@ const rebaseAliasesInPlace = (root) => {
   walk(root, []);
   return root;
 };
+
 
 // Formatter: outputs DTCG JSON with rebased aliases
 StyleDictionary.registerFormat({
