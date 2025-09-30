@@ -133,31 +133,16 @@ const collectStyleBlocks = (stylesJson) => {
   return blocks;
 };
 
-// ---- duplicate detection (per-file + global) ----
-const SEEN_GLOBAL = new Set();
-
 // ---- make :root or selector block from a file ----
 const varsBlockFromFile = (filePath) => {
   const json = readJson(filePath);
   const vars = flattenValues(json);
   if (!vars.length) return "";
 
-  const seen = new Set();
   const body = vars
     .slice()
     .sort((a, b) => varNameFromPath(a.path).localeCompare(varNameFromPath(b.path)))
-    .map(({ path: p, value }) => {
-      const name = varNameFromPath(p);
-      if (seen.has(name)) {
-        console.warn(`[tokens] duplicate var detected within file: ${name} in ${filePath}`);
-      }
-      if (SEEN_GLOBAL.has(name)) {
-        console.warn(`[tokens] duplicate var detected across files: ${name} (also appeared earlier)`);
-      }
-      seen.add(name);
-      SEEN_GLOBAL.add(name);
-      return `  ${name}: ${refToVar(value)};`;
-    })
+    .map(({ path: p, value }) => `  ${varNameFromPath(p)}: ${refToVar(value)};`)
     .join("\n");
 
   return `:root {\n${body}\n}`;
@@ -179,12 +164,10 @@ const extractBreakpointMin = (filePath, fallbackPx) => {
     const json = readJson(filePath);
     // Use flattened tokens and look for .../min or .../minWidth
     const flat = flattenValues(json);
-    const cand = flat.find(
-      (t) => {
-        const last = String(t.path[t.path.length - 1]).toLowerCase();
-        return last === "min" || last === "minwidth";
-      }
-    );
+    const cand = flat.find((t) => {
+      const last = String(t.path[t.path.length - 1]).toLowerCase();
+      return last === "min" || last === "minwidth";
+    });
     const norm = cand ? normalizeUnit(cand.value) : null;
     return norm || fallbackPx;
   } catch {
