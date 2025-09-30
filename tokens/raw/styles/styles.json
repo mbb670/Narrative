@@ -504,7 +504,7 @@
     "fixed-bottom": {
       "value": {
         "x": "0",
-        "y": "-{unit.4}",
+        "y": "{unit.4} * -1",
         "blur": "{unit.12}",
         "spread": "0",
         "color": "{color.alpha.black.A100}",
