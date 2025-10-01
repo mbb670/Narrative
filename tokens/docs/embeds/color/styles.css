@@ -8,13 +8,54 @@
   display: none;
 }
 
-body{
-    margin: var(--spacing-x16);
-    margin-top: var(--spacing-x96);
+body {
+  margin: var(--spacing-x16);
+  margin-top: var(--spacing-x96);
 }
 
-/* .grid{
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-} */
 
-.expander .swatch * { transition: none !important; }
+
+
+
+/* styles for alternate color display */
+
+.color-sets {
+  margin-top: var(--unit-96);
+  gap: var(--layout-grid-gutter);
+  /* margin-inline: unset; */
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+
+  .grid {
+    display: flex;
+    flex-direction: column;
+
+    .description {
+      height: var(--unit-96);
+      overflow: hidden;
+
+      p {
+        color: var(--foreground-muted);
+        margin-top: var(--spacing-x4);
+      }
+    }
+  }
+
+  .card,
+  .expander {
+    display: flex;
+
+    .info {
+      width: 100%;
+      padding-bottom: var(--spacing-x8);
+    }
+
+    .swatch {
+      width: var(--spacing-x96);
+      height: unset;
+      border: unset;
+      border-right: 1px solid var(--border-subtle);
+    }
+  }
+}
