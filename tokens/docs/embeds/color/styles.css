@@ -20,7 +20,7 @@ body {
 /* styles for alternate color display */
 
 .color-sets {
-  margin-top: var(--unit-96);
+  margin-top: var(--unit-72);
   gap: var(--spacing-x72) var(--layout-grid-gutter);
   margin-inline: unset!important;
   overflow: hidden;
@@ -38,7 +38,7 @@ body {
 
       p {
         color: var(--foreground-muted);
-        margin-top: var(--spacing-x4);
+        margin-top: var(--spacing-x8);
       }
     }
   }
@@ -73,3 +73,11 @@ body {
   }
 }
 
+.token-swap{
+  margin: unset;
+}
+
+.format-switcher{
+  top:var(--spacing-x8);
+  right:0
+}
