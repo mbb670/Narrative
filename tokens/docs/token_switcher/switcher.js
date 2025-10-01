@@ -1,21 +1,5 @@
-/* Token Swap (mode-only) */
-
-// You can set any subset; all are optional.
-// It's fine if this runs AFTER the external script loads.
-//
-// window.tokenSwapDefaults = {
-//   // "auto" | "mobile" | "tablet" | "desktop"
-//   breakpoint: "auto",
-//
-//   // "light" | "dark" (prefer "mode", but "theme" is also accepted and mapped)
-//   mode: "light",
-//
-//   // "default" | "slate"
-//   colorTheme: "default",
-//
-//   // "default" | "opinion" | "lifestyle"
-//   fontTheme: "default"
-// };
+/* Token Swap (mode/colorTheme/fontTheme/breakpoint) */
+/* Full drop-in script with DOM observer + rAF batching + flicker guards */
 
 (function () {
   "use strict";
@@ -23,7 +7,6 @@
   // =======================
   // constants / config
   // =======================
-  // Canonical axes (theme → mode)
   const KEYS = ["mode", "colorTheme", "fontTheme", "breakpoint"];
   const BREAKPOINTS = [
     { label: "desktop", min: 1024 },
@@ -35,7 +18,7 @@
   const TOKEN_TEXT_RE = /^text-(display|headline|subheadline|body|system|uppercase)-(regular|semibold)-(lg|md|sm|xs)$/;
 
   // =======================
-  // defaults plumbing (works even if set later in CodePen)
+  // defaults plumbing (works even if set later)
   // =======================
   let _extDefaults = null; // last-seen defaults object (normalized)
   let _defaultsAppliedOnce = false; // guard so we don't re-apply identical defaults
@@ -45,7 +28,7 @@
   defineReactiveDefaultsProp("tokenSwapDefaults");
   defineReactiveDefaultsProp("TOKEN_SWAP_DEFAULTS");
 
-  // Public API as well
+  // Public API
   window.tokenSwap = window.tokenSwap || {};
   window.tokenSwap.setDefaults = function (def) {
     _extDefaults = sanitizeDefaults(def);
@@ -68,7 +51,7 @@
         }
       });
     } catch (_) {
-      // If defineProperty fails for any reason, we’ll fall back to polling in run()
+      // If defineProperty fails, we'll fall back to polling in run()
     }
   }
 
@@ -199,7 +182,7 @@
     });
   }
 
-  // native <select> flicker guard (scoped)
+  // native <select> flicker guard (scoped to the tray)
   const NO_TRANSITION_STYLE_ID = "token-swap-no-transitions";
   function pauseTransitions(ms = 350) {
     let styleEl = document.getElementById(NO_TRANSITION_STYLE_ID);
@@ -399,20 +382,89 @@
   }
 
   // =======================
-  // exclude / allow engine
+  // exclude / allow engine + flicker guards
   // =======================
   const pinnedExcludes = new WeakSet();
 
   let IN_APPLY = false;
-  let QUEUED = false;
-  const scheduleApply = () => {
-    if (QUEUED) return;
-    QUEUED = true;
-    queueMicrotask(() => {
-      QUEUED = false;
+
+  // Coalesce to next frame; optionally freeze transitions in content briefly
+  function scheduleApply(opts = {}) {
+    if (scheduleApply._pending) return;
+    scheduleApply._pending = true;
+
+    if (opts.freeze) freezeContentTransitions(140);
+
+    requestAnimationFrame(() => {
+      scheduleApply._pending = false;
       applyAllowsNow();
     });
-  };
+  }
+
+  const CONTENT_FREEZE_STYLE_ID = "token-swap-freeze-content";
+  function freezeContentTransitions(ms = 140) {
+    let styleEl = document.getElementById(CONTENT_FREEZE_STYLE_ID);
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = CONTENT_FREEZE_STYLE_ID;
+      styleEl.textContent = `
+:root[data-swap-freeze] [data-swap-allow],
+:root[data-swap-freeze] [data-swap-theme-bubble] {
+  transition: none !important;
+  animation: none !important;
+}`;
+      document.head.appendChild(styleEl);
+    }
+    const r = document.documentElement;
+    r.setAttribute("data-swap-freeze", "");
+    clearTimeout(freezeContentTransitions._t);
+    freezeContentTransitions._t = setTimeout(() => {
+      r.removeAttribute("data-swap-freeze");
+    }, ms);
+  }
+
+  // Watch the DOM for new/edited swap annotations and re-apply immediately
+  function watchDomForSwapAnnotations() {
+    const root = document.documentElement;
+    const mo = new MutationObserver((muts) => {
+      let sawRelevant = false;
+      let excludeAttrEdited = false;
+
+      for (const m of muts) {
+        if (m.type === "attributes") {
+          if (m.attributeName === "data-swap-exclude" || m.attributeName === "data-swap-allow") {
+            sawRelevant = true;
+            if (m.attributeName === "data-swap-exclude") {
+              // If someone changes the exclude list on an existing element,
+              // unpin so we can reinitialize its pinned values.
+              pinnedExcludes.delete(m.target);
+              excludeAttrEdited = true;
+            }
+          }
+        } else if (m.type === "childList") {
+          for (const n of m.addedNodes) {
+            if (!(n instanceof Element)) continue;
+            if (
+              n.matches?.("[data-swap-allow],[data-swap-exclude]") ||
+              n.querySelector?.("[data-swap-allow],[data-swap-exclude]")
+            ) {
+              sawRelevant = true;
+            }
+          }
+        }
+      }
+
+      if (excludeAttrEdited) applyExcludesOnce();
+      if (sawRelevant) scheduleApply({ freeze: true });
+    });
+
+    mo.observe(root, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["data-swap-allow", "data-swap-exclude"]
+    });
+  }
 
   // helper: read nearest attribute value up the tree; fallback to env
   function nearestAxisValue(el, k, env) {
@@ -487,28 +539,30 @@
           });
         }
 
-        // For each axis…
+        // Phase 1: write or clear attributes (but don't remove data-mode yet if both are allowed)
+        const deferModeRemoval = wantsMode && wantsColor;
+
         KEYS.forEach((k) => {
+          const isCompanion = (k === "mode" || k === "colorTheme" || k === "fontTheme");
+
           if (!allow.has(k)) {
-            // If not allowed, remove attribute except when breakpoint is allowed (keep companions)
-            const isCompanion =
-              k === "mode" || k === "colorTheme" || k === "fontTheme";
             if (!(wantsBreakpoint && isCompanion)) {
               if (hasAxisAttr(el, k)) removeAxisAttr(el, k);
             }
             return;
           }
 
-          // Allowed axis:
+          // Allowed axis
           let v = env[k];
-          if (k === "breakpoint") {
-            // If global is auto, use current viewport label; else use manual selection
-            v = v && v !== "auto" ? v : currentAutoBreakpointLabel();
-          }
+          if (k === "breakpoint") v = v && v !== "auto" ? v : currentAutoBreakpointLabel();
 
-          // Avoid mode/colorTheme collision on same node (only if BOTH are allowed)
-          if (k === "mode" && wantsMode && wantsColor) {
-            if (hasAxisAttr(el, k)) removeAxisAttr(el, k);
+          if (k === "mode" && deferModeRemoval) {
+            // Keep element's data-mode for now; we'll remove after bubble is set below
+            if (v) {
+              if (readAxisAttr(el, k) !== v) setAxisAttr(el, k, v);
+            } else {
+              if (hasAxisAttr(el, k)) removeAxisAttr(el, k);
+            }
           } else {
             if (!v) {
               if (hasAxisAttr(el, k)) removeAxisAttr(el, k);
@@ -518,9 +572,14 @@
           }
         });
 
-        // presentation & mode split (uses env.mode)
+        // Phase 2: presentation & bubble
         const modeVal = env.mode || "light";
         applyPresentationRebind(el, allow, modeVal);
+
+        // Phase 3: now it's safe to drop element's data-mode when both are allowed
+        if (wantsMode && wantsColor) {
+          if (hasAxisAttr(el, "mode")) removeAxisAttr(el, "mode");
+        }
       });
     } finally {
       IN_APPLY = false;
@@ -531,7 +590,7 @@
   window.tokenSwap = window.tokenSwap || {};
   window.tokenSwap.refreshScopes = function () {
     applyExcludesOnce(); // new excludes only (old ones are in WeakSet)
-    scheduleApply();
+    scheduleApply({ freeze: true });
   };
 
   // =======================
@@ -553,7 +612,7 @@
         );
         if (root.getAttribute("data-mode") !== value)
           root.setAttribute("data-mode", value);
-        scheduleApply();
+        scheduleApply({ freeze: true });
       };
 
       // initial: prefer existing attr, else "light" (defaults may re-apply later)
@@ -583,7 +642,7 @@
       setMode(initialMode);
     })();
 
-    // flicker guard
+    // flicker guard on native selects
     tray.querySelectorAll("select.token-swap-select").forEach((sel) => {
       sel.addEventListener("pointerdown", () => pauseTransitions(350));
       sel.addEventListener("focus", () => pauseTransitions(350));
@@ -605,7 +664,7 @@
           if (!val || val === "auto") removeAxisAttr(root, "breakpoint");
           else if (readAxisAttr(root, "breakpoint") !== val)
             setAxisAttr(root, "breakpoint", val);
-          scheduleApply();
+          scheduleApply({ freeze: true });
         };
         select.addEventListener("change", () => {
           setGroupAttr(group, select.value === "auto" ? "" : select.value);
@@ -617,16 +676,16 @@
       } else {
         select.addEventListener("change", () => {
           setGroupAttr(group, select.value);
-          scheduleApply();
+          scheduleApply({ freeze: true });
         });
         // initial seed (we'll override later if defaults appear)
         setGroupAttr(group, select.value);
-        scheduleApply();
+        scheduleApply({ freeze: true });
       }
     });
 
     // observe direct flips on <html> (e.g., external code)
-    const mo = new MutationObserver(() => scheduleApply());
+    const mo = new MutationObserver(() => scheduleApply({ freeze: true }));
     mo.observe(document.documentElement, {
       attributes: true,
       attributeFilter: [
@@ -639,12 +698,12 @@
 
     // initial scoping
     applyExcludesOnce();
-    scheduleApply();
+    scheduleApply({ freeze: true });
 
     // If defaults were defined earlier but UI wasn’t ready, apply now.
     if (_pendingDefaults || _extDefaults) tryApplyDefaults();
 
-    // As a last resort for CodePen, poll briefly for late defaults (e.g., set after a delay)
+    // As a last resort for late defaults, poll briefly
     let polls = 0;
     const POLL_LIMIT = 60; // ~6s at 100ms
     const t = setInterval(() => {
@@ -662,10 +721,13 @@
       () => {
         const env = getEnv();
         syncExcludedBreakpointAuto();
-        if (env.breakpoint === "auto") scheduleApply();
+        if (env.breakpoint === "auto") scheduleApply({ freeze: true });
       },
       { passive: true }
     );
+
+    // Watch DOM for new/edited swap annotations
+    watchDomForSwapAnnotations();
   }
 
   // =======================
@@ -682,3 +744,4 @@
     document.addEventListener("DOMContentLoaded", run, { once: true });
   else queueMicrotask(run);
 })();
+
