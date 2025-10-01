@@ -23,6 +23,7 @@ body {
   margin-top: var(--unit-96);
   gap: var(--spacing-x72) var(--layout-grid-gutter);
   margin-inline: unset!important;
+  overflow: hidden;
 
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
@@ -65,3 +66,10 @@ body {
     height: var(--unit-64)!important;
   }
 }
+
+.brand-colors{
+  .grid{
+    width: 260px;
+  }
+}
+
