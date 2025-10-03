@@ -21,16 +21,21 @@ body {
 
 .color-sets {
   margin-top: var(--unit-72);
-  gap: var(--spacing-x72) var(--layout-grid-gutter);
+  gap: var(--spacing-x72) var(--spacing-x32);
   margin-inline: unset!important;
   overflow: hidden;
 
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  /* grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); */
+  grid-template-columns: 1fr 1fr;
+  /* grid-template-columns: repeat(min(3, auto-fit), minmax(240px, min(480px, 1fr))); */
+
+
 
   .grid {
     display: flex;
     flex-direction: column;
+      min-width: 240px;
 
     .description {
       height: var(--unit-96);
@@ -53,7 +58,7 @@ body {
     }
 
     .swatch {
-      width: var(--spacing-x96);
+      width: var(--unit-96);
       height: unset;
       border: unset;
       border-right: 1px solid var(--border-subtle);
@@ -75,6 +80,7 @@ body {
 
 .token-swap{
   margin: unset;
+  /* background: var(--background-muted)!important; */
 }
 
 .format-switcher{
