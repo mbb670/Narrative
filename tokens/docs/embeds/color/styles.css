@@ -72,12 +72,6 @@ body {
   }
 }
 
-.brand-colors{
-  .grid{
-    width: 260px;
-  }
-}
-
 .token-swap{
   margin: unset;
   /* background: var(--background-muted)!important; */
