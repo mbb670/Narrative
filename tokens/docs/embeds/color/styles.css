@@ -92,9 +92,11 @@ body {
   flex-direction: column;
   gap: var(--spacing-x16);
 
-  --c: var(--border-default);
+  --c-primary: var(--border-default);
+  --c-secondary: var(--border-muted);
+  --c-tertiary: var(--border-subtle);
   --w: 1px;
-  --b: var(--w) solid var(--border-subtle);
+  --b: var(--w) solid var(--c-tertiary);
   --h: var(--spacing-x144);
 
   .grid {
@@ -115,6 +117,7 @@ body {
   }
 
   .raw-value {
+
     .mainline,
     .toggle,
     .arrow {
@@ -260,12 +263,13 @@ body {
 
 
 /* coloring active arrows and cards */
+/* coloring primary arrows and cards */
 
 :root[data-mode="light"] .l-2,
 :root[data-mode="dark"] .d-2,
 .a-3 {
   &::after {
-    border-color: var(--c);
+    border-color: var(--c-primary);
   }
 }
 
@@ -276,13 +280,39 @@ body {
 :root[data-mode="dark"][data-colortheme="default"] .d-d,
 :root[data-mode="dark"][data-colortheme="slate"] .d-s,
 .a-4 {
-  border-color: var(--c)!important;
+  border-color: var(--c-primary) !important;
 
   li,
   &::after,
   &::before {
 
-    border-color: var(--c);
+    border-color: var(--c-primary);
+    z-index: 1;
+  }
+}
+
+/* coloring secondary arrows and cards */
+
+:root[data-mode="light"] .d-2,
+:root[data-mode="dark"] .l-2 {
+  &::after {
+    border-color: var(--c-secondary);
+  }
+}
+
+:root[data-mode="light"] .d-3,
+:root[data-mode="dark"] .l-3,
+:root[data-mode="light"][data-colortheme="default"] .d-d,
+:root[data-mode="light"][data-colortheme="slate"] .d-s,
+:root[data-mode="dark"][data-colortheme="default"] .l-d,
+:root[data-mode="dark"][data-colortheme="slate"] .l-s {
+  border-color: var(--c-secondary) !important;
+
+  li,
+  &::after,
+  &::before {
+
+    border-color: var(--c-secondary);
     z-index: 1;
   }
 }
