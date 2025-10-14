@@ -74,7 +74,6 @@ body {
 
 .token-swap {
   margin: unset;
-  /* background: var(--background-muted)!important; */
 }
 
 .format-switcher {
@@ -92,11 +91,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-x16);
-  padding: var(--spacing-x40);
 
-  --c: var(--border-subtle);
+  --c: var(--border-default);
   --w: 1px;
-  --b: var(--w) solid var(--c);
+  --b: var(--w) solid var(--border-subtle);
   --h: var(--spacing-x144);
 
   .grid {
@@ -106,8 +104,8 @@ body {
 
   .card {
     width: 100%;
-   
-    .info{
+
+    .info {
       padding: var(--spacing-x8);
     }
   }
@@ -117,7 +115,6 @@ body {
   }
 
   .raw-value {
-
     .mainline,
     .toggle,
     .arrow {
@@ -141,12 +138,14 @@ body {
 
 }
 
-.stright-arrows{
+.stright-arrows {
   display: flex;
-  li{
+
+  li {
     flex: 1;
     height: var(--h);
-    &::before{
+
+    &::before {
       content: '';
       height: 100%;
       width: 50%;
@@ -157,10 +156,12 @@ body {
 
 }
 
-.stright-arrows li, .dual-arrow-block{
-    position: relative;
-  &::after{
-  content: '';
+.stright-arrows li,
+.dual-arrow-block {
+  position: relative;
+
+  &::after {
+    content: '';
     width: var(--spacing-x20);
     aspect-ratio: 1;
     display: block;
@@ -170,7 +171,7 @@ body {
     border-right: var(--b);
     border-bottom: var(--b);
     transform: translateX(-50%) translateY(calc(var(--spacing-x20) * -0.2)) rotate(45deg);
-}
+  }
 }
 
 
@@ -215,7 +216,7 @@ body {
   /* 2–3 */
   &>:nth-child(n+4):nth-child(-n+5) {
     border-top: var(--b);
-    
+
   }
 
   /* 4–5 */
@@ -257,17 +258,31 @@ body {
   }
 }
 
-.arrow-active{
-  li, &::after, &::before{
-  --c: var(--border-strong);
-  border-color: var(--c)!important;
-  z-index: 1;
+
+/* coloring active arrows and cards */
+
+:root[data-mode="light"] .l-2,
+:root[data-mode="dark"] .d-2,
+.a-3 {
+  &::after {
+    border-color: var(--c);
   }
 }
 
-.dual-arrow-block{
-  &::after{
-  --c: var(--border-strong);
+:root[data-mode="light"] .l-3,
+:root[data-mode="dark"] .d-3,
+:root[data-mode="light"][data-colortheme="default"] .l-d,
+:root[data-mode="light"][data-colortheme="slate"] .l-s,
+:root[data-mode="dark"][data-colortheme="default"] .d-d,
+:root[data-mode="dark"][data-colortheme="slate"] .d-s,
+.a-4 {
   border-color: var(--c)!important;
+
+  li,
+  &::after,
+  &::before {
+
+    border-color: var(--c);
+    z-index: 1;
   }
 }
