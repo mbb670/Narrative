@@ -177,7 +177,6 @@ body {
 
 .quad-arrow-block {
   display: flex;
-  --c: var(--border-strong);
 }
 
 
@@ -259,7 +258,8 @@ body {
 }
 
 .arrow-active{
-  li, &::after{
+  li, &::after, &::before{
+  --c: var(--border-strong);
   border-color: var(--c)!important;
   z-index: 1;
   }
@@ -267,6 +267,7 @@ body {
 
 .dual-arrow-block{
   &::after{
+  --c: var(--border-strong);
   border-color: var(--c)!important;
   }
 }
