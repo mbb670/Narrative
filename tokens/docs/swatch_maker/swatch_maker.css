@@ -61,28 +61,6 @@
   gap: var(--spacing-x8);
 }
 
-/* Chips */
-.token,
-.chip {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--spacing-x4) var(--spacing-x12);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-default);
-  --background-color: var(--background-muted);
-  color: var(--foreground-default);
-}
-
-.chip,
-.hex {
-  color: var(--foreground-muted);
-}
-
-.chip {
-  border: 1px dashed var(--border-subtle);
-  --background-color: transparent;
-}
-
 .arrow {
   color: var(--border-muted);
   margin-top: var(--spacing-x4);

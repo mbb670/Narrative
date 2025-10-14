@@ -37,3 +37,22 @@ import "../../swatch_maker/swatch_maker.js";
   }
 })();
 
+
+
+  // adding LIs to curved arrows
+
+(function() {
+  // Select all elements with either class.
+  const curvedArrows = document.querySelectorAll('.curved-arrow-left, .curved-arrow-right');
+
+  // Loop through each element found.
+  curvedArrows.forEach(arrowElement => {
+    // Create and append 6 new <li> elements to the current element.
+    for (let i = 0; i < 6; i++) {
+      const newLi = document.createElement('li');
+      arrowElement.appendChild(newLi);
+    }
+  });
+})(); // The final pair of parentheses immediately invokes the function.
+
+
