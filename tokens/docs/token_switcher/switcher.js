@@ -408,18 +408,19 @@
       styleEl = document.createElement("style");
       styleEl.id = CONTENT_FREEZE_STYLE_ID;
       styleEl.textContent = `
-:root[data-swap-freeze] [data-swap-allow],
-:root[data-swap-freeze] [data-swap-theme-bubble] {
+[data-swap-allow],
+[data-swap-theme-bubble] {
   transition: none !important;
   animation: none !important;
 }`;
+      styleEl.disabled = true;
       document.head.appendChild(styleEl);
     }
-    const r = document.documentElement;
-    r.setAttribute("data-swap-freeze", "");
+    // Toggle the sheet instead of a root attribute to avoid DOM churn.
+    styleEl.disabled = false;
     clearTimeout(freezeContentTransitions._t);
     freezeContentTransitions._t = setTimeout(() => {
-      r.removeAttribute("data-swap-freeze");
+      styleEl.disabled = true;
     }, ms);
   }
 
@@ -744,4 +745,3 @@
     document.addEventListener("DOMContentLoaded", run, { once: true });
   else queueMicrotask(run);
 })();
-
