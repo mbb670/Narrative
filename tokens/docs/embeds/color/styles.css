@@ -102,7 +102,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-x16);
-  padding-block: var(--spacing-x56);
+  padding: var(--spacing-x56) var(--spacing-x16);
+  padding-left: unset;
   width: 100%;
 
 
@@ -118,6 +119,7 @@ align-items: center;
   gap: var(--spacing-x4);
   border: unset!important;
   overflow: visible;
+  background: unset;
 
 
     .info {
@@ -160,13 +162,23 @@ align-items: center;
 
 }
 
+
+.compoennt{
+  button{
+   border-radius: var(--radius-slight);
+   color: var(--foreground-button-primary-default);
+   padding: var(--spacing-x8) var(--spacing-x16);
+   --background-color: var(--brand-medium);
+  }
+}
+
 .stright-arrows {
   display: flex;
 
   li {
     flex: 1;
     height: calc(var(--h) / 1.25);
-    /* height: var(--h); */
+    height: var(--h);
 
     &::before {
       content: '';
@@ -337,7 +349,7 @@ align-items: center;
 
 
 .row-info{
-  width: 240px;
+  width: 200px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -345,6 +357,7 @@ align-items: center;
   li{
   flex: 1;
   align-content: center;
+  padding-left: var(--spacing-x16);
   :nth-child(2){
     color: var(--foreground-muted);
     margin-top: var(--spacing-x4);
@@ -356,14 +369,15 @@ align-items: center;
     &::after{
       content: '';
       height: 100%;
-      width: 40px;
+      width: 100vw;
       background: var(--background-muted);
-      opacity: 0.52;
+      opacity: 0.4;
       position: absolute;
-      top: 0;
+      top:0;
       left: 0;
       z-index: -1;
-      width: 100vw;
+
+      border-radius: var(--border-default);
     }
   }
 
