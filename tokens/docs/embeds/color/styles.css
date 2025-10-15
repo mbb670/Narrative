@@ -95,7 +95,7 @@ body {
   --c-tertiary: var(--border-subtle);
   --w: 1px;
   --b: var(--w) solid var(--c-tertiary);
-  --h: var(--spacing-x96);
+  --h: var(--spacing-x80);
 }
 
 .token-demo {
@@ -349,7 +349,7 @@ align-items: center;
 
 
 .row-info{
-  width: 180px;
+  width: 190px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
