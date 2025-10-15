@@ -13,12 +13,31 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="color-sets token-demo" data-swap-exclude="mode colorTheme">
+<body class="color-sets token-demo-parent" data-swap-exclude="mode colorTheme">
+  <ul class="row-info">
+<li>
+  <p class="text-system-semibold-sm">Raw Values</p>
+  <p class="text-system-regular-sm">Raw values that are not modified</p>
+</li>
+<li>
+  <p class="text-system-semibold-sm">Global Tokens</p>
+  <p class="text-system-regular-sm">Base level tokens - only hold raw values and cannot be modified</p>
+</li>
+<li>
+  <p class="text-system-semibold-sm">Semantic Tokens</p>
+  <p class="text-system-regular-sm">Sit at the colorTheme modifier layer - change depending on the selected color theme</p>
+</li>
+<li>
+  <p class="text-system-semibold-sm">Contextual Tokens</p>
+  <p class="text-system-regular-sm">Sit at the mode modifier layer - change depending on the selected mode</p>
+</li>
+  </ul>
+  <section class="token-demo">
   <ul class="grid raw-value">
-    <li class="card l-d" data-token="--color-grey-300"></li>
-    <li class="card l-s" data-token="--color-slate-300"></li>
-    <li class="card d-d" data-token="--color-grey-700"></li>
-    <li class="card d-s" data-token="--color-slate-700"></li>
+    <li class="card l-d" data-token="--color-red-400"></li>
+    <li class="card l-s" data-token="--color-teal-400"></li>
+    <li class="card d-d" data-token="--color-red-700"></li>
+    <li class="card d-s" data-token="--color-teal-700"></li>
   </ul>
   <ul class="stright-arrows">
     <li class="l-d"></li>
@@ -27,10 +46,10 @@
     <li class="d-s"></li>
   </ul>
   <ul class="grid global-vlaue">
-    <li class="card l-d" data-token="--color-grey-300"></li>
-    <li class="card l-s" data-token="--color-slate-300"></li>
-    <li class="card d-d" data-token="--color-grey-700"></li>
-    <li class="card d-s" data-token="--color-slate-700"></li>
+    <li class="card l-d" data-token="--color-red-400"></li>
+    <li class="card l-s" data-token="--color-teal-400"></li>
+    <li class="card d-d" data-token="--color-red-700"></li>
+    <li class="card d-s" data-token="--color-teal-700"></li>
   </ul>
   <div class="quad-arrow-block">
     <div class="dual-arrow-block l-2">
@@ -43,8 +62,8 @@
     </div>
   </div>
   <ul class="grid semantic-value">
-    <li class="card l-3" data-token="--brand-neutrals-300"></li>
-    <li class="card d-3" data-token="--brand-neutrals-700"></li>
+    <li class="card l-3" data-token="--brand-primary-400"></li>
+    <li class="card d-3" data-token="--brand-primary-700"></li>
   </ul>
   <div class="dual-arrow-block a-3">
     <ul class="curved-arrow-right l-3"></ul>
@@ -52,8 +71,9 @@
   </div>
 
   <ul class="grid contextual-vlaue">
-    <li class="card a-4" data-token="--background-medium"></li>
+    <li class="card a-4" data-token="--brand-muted"></li>
   </ul>
+  </section>
   <!-- JS -->
   <script type="module" defer src="scripts.js"></script>
 </body>

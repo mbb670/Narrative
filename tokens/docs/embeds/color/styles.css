@@ -84,21 +84,28 @@ body {
 
 
 
+/* TOKEN DEMO CSS */
 
 
+.token-demo-parent{
+   display: flex;
 
-.token-demo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-x16);
-  
-
-  --c-primary: var(--border-default);
+     --c-primary: var(--border-default);
   --c-secondary: var(--border-muted);
   --c-tertiary: var(--border-subtle);
   --w: 1px;
   --b: var(--w) solid var(--c-tertiary);
   --h: var(--spacing-x96);
+}
+
+.token-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-x16);
+  padding-block: var(--spacing-x56);
+  width: 100%;
+
+
 
   .grid {
     flex-direction: row;
@@ -106,21 +113,30 @@ body {
   }
 
   .card {
-width: 240px;
-min-height: var(--spacing-x48);
+justify-content: center;
+align-items: center;
+  gap: var(--spacing-x4);
+  border: unset!important;
+  overflow: visible;
+
 
     .info {
-      padding: var(--spacing-x8);
       align-items: center;
+      padding: unset;
+      width: unset;
     }
   }
 
   .swatch {
-    width: var(--unit-40) !important;
+    width: var(--spacing-x24) !important;
+    height:  var(--spacing-x24) !important;
+    /* width: var(--unit-28) !important;
+    height:  var(--unit-28) !important; */
+    border-radius: var(--radius-slight);
+    overflow: hidden;
   }
 
   .raw-value {
-
     .mainline,
     .toggle,
     .arrow {
@@ -150,6 +166,7 @@ min-height: var(--spacing-x48);
   li {
     flex: 1;
     height: calc(var(--h) / 1.25);
+    /* height: var(--h); */
 
     &::before {
       content: '';
@@ -179,7 +196,6 @@ min-height: var(--spacing-x48);
     transform: translateX(-50%) translateY(calc(var(--spacing-x20) * -0.2)) rotate(45deg);
   }
 }
-
 
 
 .quad-arrow-block {
@@ -285,10 +301,9 @@ min-height: var(--spacing-x48);
 .a-4 {
   border-color: var(--c-primary) !important;
 
-  li,
+  li, .token,
   &::after,
   &::before {
-
     border-color: var(--c-primary);
     z-index: 2;
   }
@@ -311,11 +326,45 @@ min-height: var(--spacing-x48);
 :root[data-mode="dark"][data-colortheme="slate"] .l-s {
   border-color: var(--c-secondary) !important;
 
-  li,
+  li, .token,
   &::after,
   &::before {
 
     border-color: var(--c-secondary);
     z-index: 1;
   }
+}
+
+
+.row-info{
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  li{
+  flex: 1;
+  align-content: center;
+  :nth-child(2){
+    color: var(--foreground-muted);
+    margin-top: var(--spacing-x4);
+  }
+  }
+
+  >:nth-child(even){
+    position: relative;
+    &::after{
+      content: '';
+      height: 100%;
+      width: 40px;
+      background: var(--background-muted);
+      opacity: 0.52;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      width: 100vw;
+    }
+  }
+
 }
