@@ -197,7 +197,7 @@ align-items: center;
 
   &::after {
     content: '';
-    width: var(--spacing-x20);
+    width: var(--spacing-x12);
     aspect-ratio: 1;
     display: block;
     position: absolute;
@@ -205,7 +205,7 @@ align-items: center;
     left: 50%;
     border-right: var(--b);
     border-bottom: var(--b);
-    transform: translateX(-50%) translateY(calc(var(--spacing-x20) * -0.2)) rotate(45deg);
+    transform: translateX(-50%) translateY(calc(var(--spacing-x12) * -0.2)) rotate(45deg);
   }
 }
 
