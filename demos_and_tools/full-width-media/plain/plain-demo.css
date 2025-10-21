@@ -1,0 +1,56 @@
+/* Additional styling for the plain JS full-width media demo */
+:root {
+  color-scheme: light;
+}
+
+.drag-handle {
+  position: absolute;
+  z-index: 50;
+  background: transparent;
+}
+
+.drag-handle-vertical {
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
+}
+
+.drag-handle-horizontal {
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: ns-resize;
+}
+
+.drag-handle-left {
+  left: 0;
+}
+
+.drag-handle-right {
+  right: 0;
+}
+
+.drag-handle-top {
+  top: 0;
+}
+
+.drag-handle-bottom {
+  bottom: 0;
+}
+
+.viewport-topbar {
+  height: 40px;
+  user-select: none;
+  cursor: move;
+}
+
+body.dragging {
+  user-select: none;
+}
+
+.video-shell video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
