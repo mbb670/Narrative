@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Responsive Video Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="antialiased">
+  <div id="app"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    const { useEffect, useMemo, useRef, useState } = React;
+
+    function ResponsiveVideoDemo() {
+      const [vpWidth, setVpWidth] = useState(1200);
+      const [vpHeight, setVpHeight] = useState(800);
+      const [vpX, setVpX] = useState(0);
+      const [vpY, setVpY] = useState(0);
+      const [maxWStr, setMaxWStr] = useState("1600px");
+      const [maxHStr, setMaxHStr] = useState("85svh");
+      const [intrinsic, setIntrinsic] = useState({ w: 1280, h: 720 });
+      const [aspectKey, setAspectKey] = useState("16:9");
+
+      const minW = 320;
+      const minH = 360;
+      const maxW = 1920;
+      const maxH = 1400;
+      const topBar = 40;
+
+      const dragRef = useRef({
+        mode: null,
+        startX: 0,
+        startY: 0,
+        startW: 0,
+        startH: 0,
+        startVX: 0,
+        startVY: 0,
+      });
+
+      useEffect(() => {
+        function onMove(e) {
+          const d = dragRef.current;
+          if (!d.mode) return;
+          if (d.mode === "move") {
+            setVpX(d.startVX + (e.clientX - d.startX));
+            setVpY(d.startVY + (e.clientY - d.startY));
+          } else if (d.mode === "right") {
+            setVpWidth(clamp(d.startW + (e.clientX - d.startX), minW, maxW));
+          } else if (d.mode === "left") {
+            setVpWidth(clamp(d.startW - (e.clientX - d.startX), minW, maxW));
+          } else if (d.mode === "bottom") {
+            setVpHeight(clamp(d.startH + (e.clientY - d.startY), minH, maxH));
+          } else if (d.mode === "top") {
+            setVpHeight(clamp(d.startH - (e.clientY - d.startY), minH, maxH));
+          }
+        }
+        function onUp() { dragRef.current.mode = null; }
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onUp);
+        return () => {
+          window.removeEventListener("mousemove", onMove);
+          window.removeEventListener("mouseup", onUp);
+        };
+      }, []);
+
+      const ASPECTS = { '16:9': 16/9, '9:16': 9/16, '4:3': 4/3, '3:2': 3/2, '1:1': 1, '21:9': 21/9, '4:5': 4/5, '2:3': 2/3 };
+      const aspect = useMemo(() => ASPECTS[aspectKey] || 16/9, [aspectKey]);
+      const parsedMaxW = useMemo(() => parseUserLength(maxWStr, "w", vpWidth, vpHeight), [maxWStr, vpWidth, vpHeight]);
+      const parsedMaxH = useMemo(() => parseUserLength(maxHStr, "h", vpWidth, vpHeight), [maxHStr, vpWidth, vpHeight]);
+      const videoDims = useMemo(() => computeDims(vpWidth, vpHeight, parsedMaxW, parsedMaxH, aspect, topBar), [vpWidth, vpHeight, parsedMaxW, parsedMaxH, aspect]);
+
+      function beginDrag(e, mode) {
+        dragRef.current.mode = mode;
+        dragRef.current.startX = e.clientX;
+        dragRef.current.startY = e.clientY;
+        dragRef.current.startW = vpWidth;
+        dragRef.current.startH = vpHeight;
+        dragRef.current.startVX = vpX;
+        dragRef.current.startVY = vpY;
+      }
+
+      function resetViewport() {
+        setVpWidth(1200);
+        setVpHeight(800);
+        setVpX(0);
+        setVpY(0);
+      }
+
+      return (
+        <div className="min-h-screen w-full bg-slate-50 text-slate-900">
+          <div className="max-w-6xl mx-auto px-4 py-6 md:py-10">
+            <div className="flex items-start gap-4 flex-wrap">
+              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Responsive Video Demo</h1>
+              <span className="text-sm text-slate-500 self-center">Drag edges or the top bar to move.</span>
+            </div>
+
+            <div className="mt-6 grid md:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
+                <div className="font-medium text-slate-800 mb-3">Viewport</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <LabeledInput label="Width (px)" value={vpWidth} onChange={(v) => setVpWidth(clamp(Number(v) || minW, minW, maxW))} type="number" min={minW} max={maxW} />
+                  <LabeledInput label="Height (px)" value={vpHeight} onChange={(v) => setVpHeight(clamp(Number(v) || minH, minH, maxH))} type="number" min={minH} max={maxH} />
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <button onClick={resetViewport} className="px-3 py-2 rounded-md bg-slate-900 text-white text-sm shadow hover:opacity-90">Reset</button>
+                  <div className="text-xs text-slate-600 self-center">Min {minW}×{minH}, Max {maxW}×{maxH}</div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
+                <div className="font-medium text-slate-800 mb-3">Video Constraints</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <LabeledInputText label="Max-Width" placeholder="900px | 90vw | 80vh | 70svh | 100%" value={maxWStr} onChange={setMaxWStr} />
+                  <LabeledInputText label="Max-Height" placeholder="600px | 70vh | 60svh | 100%" value={maxHStr} onChange={setMaxHStr} />
+                  <div className="col-span-2">
+                    <LabeledSelect label="Aspect Ratio" value={aspectKey} onChange={setAspectKey} options={["16:9","9:16","4:3","3:2","1:1","21:9","4:5","2:3"]} />
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-slate-600 space-y-1">
+                  <p><span className="font-medium text-slate-700">Computed:</span> Max-W: {fmt(parsedMaxW)}px, Max-H: {fmt(parsedMaxH)}px.</p>
+                  <p>Aspect ratio: {aspectKey} ({aspect.toFixed(3)}:1)</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-slate-600">Viewport: <span className="font-medium text-slate-800">{vpWidth} × {vpHeight}px</span></div>
+                <div className="text-xs text-slate-500">Drag edges to resize</div>
+              </div>
+              <div className="relative border border-slate-300 bg-white overflow-hidden" style={{ width: vpWidth, height: vpHeight, transform: `translate(${vpX}px, ${vpY}px)` }}>
+                <div onMouseDown={(e) => beginDrag(e, "left")} className="cursor-ew-resize absolute left-0 top-0 h-full w-2 z-50" />
+                <div onMouseDown={(e) => beginDrag(e, "right")} className="cursor-ew-resize absolute right-0 top-0 h-full w-2 z-50" />
+                <div onMouseDown={(e) => beginDrag(e, "top")} className="cursor-ns-resize absolute left-0 top-0 w-full h-2 z-50" />
+                <div onMouseDown={(e) => beginDrag(e, "bottom")} className="cursor-ns-resize absolute left-0 bottom-0 w-full h-2 z-50" />
+
+                <div onMouseDown={(e) => beginDrag(e, "move")} className="absolute top-0 left-0 right-0 h-10 bg-slate-900 text-white flex items-center justify-between px-3 text-xs cursor-move select-none">
+                  <div className="font-medium tracking-wide">Demo Page</div>
+                  <div>{vpWidth} × {vpHeight}px</div>
+                </div>
+
+                <div className="absolute inset-0 overflow-auto" style={{ paddingTop: topBar }}>
+                  <div className="w-full">
+                    <div className="w-full flex items-start justify-center">
+                      <div className="flex flex-col items-center">
+                        <div className="bg-black" style={{ width: videoDims.width + "px", height: videoDims.height + "px" }}>
+                          <video
+                            controls
+                            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                            onLoadedMetadata={(e) => {
+                              const v = e.currentTarget;
+                              if (v.videoWidth && v.videoHeight) setIntrinsic({ w: v.videoWidth, h: v.videoHeight });
+                            }}
+                          >
+                            <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-600">Rendered video size: <span className="font-medium text-slate-800">{videoDims.width} × {videoDims.height}px</span></div>
+                      </div>
+                    </div>
+
+                    <article className="mt-8 space-y-5 mx-auto text-slate-800 leading-7" style={{ maxWidth: 680 }}>
+                      <h2 className="text-xl md:text-2xl font-semibold tracking-tight">Sample Article Headline</h2>
+                      <p>
+                        This demo illustrates how a media component scales within a responsive layout. Use the controls above to change the simulated viewport and to constrain the media with max-width or max-height using px, vh, or svh.
+                      </p>
+                      <p>
+                        The video preserves its intrinsic aspect ratio. When both max-width and max-height are set, the stricter constraint wins.
+                      </p>
+                      <p>
+                        The layout below the video mimics an article body with a comfortable line length so you can observe how surrounding content reflows.
+                      </p>
+                    </article>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 text-xs text-slate-500">You can also enter percentages for Max-Width and Max-Height.</div>
+          </div>
+        </div>
+      );
+    }
+
+    function LabeledInput({ label, value, onChange, ...rest }) {
+      return (
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-slate-700">{label}</span>
+          <input className="px-3 py-2 border border-slate-300 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-slate-400" value={value} onChange={(e) => onChange(e.target.value)} {...rest} />
+        </label>
+      );
+    }
+
+    function LabeledInputText({ label, value, onChange, placeholder }) {
+      return (
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-slate-700">{label}</span>
+          <input className="px-3 py-2 border border-slate-300 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-slate-400" value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+        </label>
+      );
+    }
+
+    function LabeledSelect({ label, value, onChange, options }) {
+      return (
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-slate-700">{label}</span>
+          <select className="px-3 py-2 border border-slate-300 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-slate-400" value={value} onChange={(e) => onChange(e.target.value)}>
+            {options.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </label>
+      );
+    }
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function parseUserLength(str, axis, vpW, vpH) {
+      if (!str) return null;
+      const raw = String(str).trim().toLowerCase();
+      if (raw === "none") return null;
+      const num = parseFloat(raw);
+      if (Number.isNaN(num)) return null;
+      if (raw.endsWith("px")) return num;
+      if (raw.endsWith("vh") || raw.endsWith("svh")) return (num / 100) * vpH;
+      if (raw.endsWith("vw")) return (num / 100) * vpW;
+      if (raw.endsWith("%")) return axis === "w" ? (num / 100) * vpW : (num / 100) * vpH;
+      return num;
+    }
+
+    function computeDims(vpW, vpH, maxWpx, maxHpx, aspect, topBar) {
+      const contentW = vpW;
+      const contentH = Math.max(1, vpH - topBar);
+      let allowedW = contentW;
+      if (isNum(maxWpx)) allowedW = Math.min(allowedW, maxWpx);
+      if (isNum(maxHpx)) allowedW = Math.min(allowedW, maxHpx * aspect);
+      allowedW = Math.min(allowedW, contentH * aspect);
+      const width = Math.floor(Math.max(1, allowedW));
+      const height = Math.floor(Math.max(1, width / aspect));
+      return { width, height };
+    }
+
+    function isNum(v) {
+      return typeof v === "number" && Number.isFinite(v);
+    }
+
+    function fmt(v) {
+      return isNum(v) ? Math.round(v) : "—";
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("app"));
+    root.render(<ResponsiveVideoDemo />);
+
+    function runTests() {
+      console.assert(parseUserLength('100px','w',1000,800) === 100, 'px parsing');
+      console.assert(Math.round(parseUserLength('50vh','h',1000,800)) === 400, 'vh parsing');
+      console.assert(Math.round(parseUserLength('25vw','w',1000,800)) === 250, 'vw parsing');
+      console.assert(Math.round(parseUserLength('100%','w',1200,800)) === 1200, '% width parsing');
+      const d1 = computeDims(1200,800,1600,null,16/9,40);
+      console.assert(d1.width <= 1200 && d1.height <= 760, 'dims within viewport');
+      const d2 = computeDims(800,800,null,null,1,40);
+      console.assert(d2.width === d2.height && d2.width <= 760, 'square aspect fits');
+      console.log('Tests passed');
+    }
+    runTests();
+  </script>
+</body>
+</html>
