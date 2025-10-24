@@ -87,10 +87,10 @@ body {
 /* TOKEN DEMO CSS */
 
 
-.token-demo-parent{
-   display: flex;
+.token-demo-parent {
+  display: flex;
 
-     --c-primary: var(--border-default);
+  --c-primary: var(--border-default);
   --c-secondary: var(--border-muted);
   --c-tertiary: var(--border-subtle);
   --w: 1px;
@@ -114,12 +114,12 @@ body {
   }
 
   .card {
-justify-content: center;
-align-items: center;
-  gap: var(--spacing-x4);
-  border: unset!important;
-  overflow: visible;
-  background: unset;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-x4);
+    border: unset !important;
+    overflow: visible;
+    background: unset;
 
 
     .info {
@@ -131,7 +131,7 @@ align-items: center;
 
   .swatch {
     width: var(--spacing-x24) !important;
-    height:  var(--spacing-x24) !important;
+    height: var(--spacing-x24) !important;
     /* width: var(--unit-28) !important;
     height:  var(--unit-28) !important; */
     border-radius: var(--radius-slight);
@@ -139,6 +139,7 @@ align-items: center;
   }
 
   .raw-value {
+
     .mainline,
     .toggle,
     .arrow {
@@ -163,12 +164,12 @@ align-items: center;
 }
 
 
-.compoennt{
-  button{
-   border-radius: var(--radius-slight);
-   color: var(--foreground-button-primary-default);
-   padding: var(--spacing-x8) var(--spacing-x16);
-   --background-color: var(--brand-medium);
+.compoennt {
+  button {
+    border-radius: var(--radius-slight);
+    color: var(--foreground-button-primary-default);
+    padding: var(--spacing-x8) var(--spacing-x16);
+    --background-color: var(--brand-medium);
   }
 }
 
@@ -313,7 +314,8 @@ align-items: center;
 .a-4 {
   border-color: var(--c-primary) !important;
 
-  li, .token,
+  li,
+  .token,
   &::after,
   &::before {
     border-color: var(--c-primary);
@@ -329,6 +331,7 @@ align-items: center;
     border-color: var(--c-secondary);
   }
 }
+
 /* 
 :root[data-mode="light"] .d-3,
 :root[data-mode="dark"] .l-3, */
@@ -338,7 +341,8 @@ align-items: center;
 :root[data-mode="dark"][data-colortheme="slate"] .l-s {
   border-color: var(--c-secondary) !important;
 
-  li, .token,
+  li,
+  .token,
   &::after,
   &::before {
 
@@ -348,32 +352,34 @@ align-items: center;
 }
 
 
-.row-info{
+.row-info {
   width: 190px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 
-  li{
-  flex: 1;
-  align-content: center;
-  padding-left: var(--spacing-x16);
-  :nth-child(2){
-    color: var(--foreground-muted);
-    margin-top: var(--spacing-x4);
-  }
+  li {
+    flex: 1;
+    align-content: center;
+    padding-left: var(--spacing-x16);
+
+    :nth-child(2) {
+      color: var(--foreground-muted);
+      margin-top: var(--spacing-x4);
+    }
   }
 
-  >:nth-child(even){
+  >:nth-child(even) {
     position: relative;
-    &::after{
+
+    &::after {
       content: '';
       height: 100%;
       width: 100vw;
       background: var(--background-muted);
       opacity: 0.4;
       position: absolute;
-      top:0;
+      top: 0;
       left: 0;
       z-index: -1;
 

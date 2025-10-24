@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>All Colors</title>
+
+    <!-- Reset -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.2/reset.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../styles.css">
+
+    <style>
+        .token-swap, .format-switcher{
+            margin: var(--spacing-x16);
+        }
+        body {
+            overflow: visible !important;
+            margin-inline: auto !important;
+            padding: var(--layout-grid-margin);
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+            max-width: 1080px;
+
+            .section-headline {
+                grid-column: 1/-1;
+
+                &~.section-headline {
+                    border-top: 1px solid var(--border-muted);
+                    padding-top: var(--spacing-x64);
+                }
+
+                p {
+                    max-width: 48ch;
+                    margin-top: var(--spacing-x12);
+                    color: var(--foreground-muted);
+                }
+            }
+        }
+    </style>
+</head>
+
+<body class="color-sets" data-swap-exclude="mode colorTheme">
+    <div class="section-headline">
+        <h1 class="text-display-semibold-sm">Brand Colors</h1>
+        <p class="text-system-regular-sm">Short range of tints and shades that reflect the active brand hue - used for
+            logos, promotional tags, and other identity-driven elements.</p>
+    </div>
+
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Brand</h3>
+            <p class="text-system-regular-sm">Short range of tints and shades that reflect the active brand hue - used
+                for logos, promotional tags, and other identity-driven elements.</p>
+        </li>
+        <li class="card" data-token="--brand-strong"></li>
+        <li class="card" data-token="--brand-medium"></li>
+        <li class="card" data-token="--brand-default"></li>
+        <li class="card" data-token="--brand-muted"></li>
+        <li class="card" data-token="--brand-subtle"></li>
+    </ul>
+
+    <div class="section-headline">
+        <h1 class="text-display-semibold-sm">Core Colors</h1>
+        <p class="text-system-regular-sm">Neutral foundation for the interface itself - text, surfaces, and structural
+            lines.</p>
+    </div>
+
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Foreground</h3>
+            <p class="text-system-regular-sm">Values for text and icons that sit above backgrounds.</p>
+        </li>
+        <li class="card" data-token="--foreground-default"></li>
+        <li class="card" data-token="--foreground-muted"></li>
+        <li class="card" data-token="--foreground-subtle"></li>
+        <li class="card" data-token="--foreground-disabled"></li>
+        <li class="card" data-token="--foreground-alt"></li>
+    </ul>
+
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Background</h3>
+            <p class="text-system-regular-sm">Layered neutrals for pages, cards, and panels, creating depth without
+                adding hue.</p>
+        </li>
+        <li class="card" data-token="--background-default"></li>
+        <li class="card" data-token="--background-muted"></li>
+        <li class="card" data-token="--background-subtle"></li>
+        <li class="card" data-token="--background-medium"></li>
+        <li class="card" data-token="--background-disabled"></li>
+        <li class="card" data-token="--background-strong"></li>
+    </ul>
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Border</h3>
+            <p class="text-system-regular-sm">Stroke shades that separate content and frame components.
+            </p>
+        </li>
+        <li class="card" data-token="--border-default"></li>
+        <li class="card" data-token="--border-muted"></li>
+        <li class="card" data-token="--border-subtle"></li>
+        <li class="card" data-token="--border-disabled"></li>
+        <li class="card" data-token="--border-strong"></li>
+    </ul>
+
+    <div class="section-headline">
+        <h1 class="text-display-semibold-sm">System Colors</h1>
+        <p class="text-system-regular-sm">Meaningful hues that communicate state or feedback in the product.</p>
+    </div>
+
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Action</h3>
+            <p class="text-system-regular-sm">For high-priority data.</p>
+        <li class="card" data-token="--system-action-strong"></li>
+        <li class="card" data-token="--system-action-medium"></li>
+        <li class="card" data-token="--system-action-default"></li>
+        <li class="card" data-token="--system-action-muted"></li>
+        <li class="card" data-token="--system-action-subtle"></li>
+    </ul>
+
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Critical</h3>
+            <p class="text-system-regular-sm">To mark errors, or destructive steps</p>
+        </li>
+        <li class="card" data-token="--system-critical-strong"></li>
+        <li class="card" data-token="--system-critical-medium"></li>
+        <li class="card" data-token="--system-critical-default"></li>
+        <li class="card" data-token="--system-critical-muted"></li>
+        <li class="card" data-token="--system-critical-subtle"></li>
+    </ul>
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Warning</h3>
+            <p class="text-system-regular-sm">Indicating caution or attention.</p>
+        </li>
+        <li class="card" data-token="--system-warning-strong"></li>
+        <li class="card" data-token="--system-warning-medium"></li>
+        <li class="card" data-token="--system-warning-default"></li>
+        <li class="card" data-token="--system-warning-muted"></li>
+        <li class="card" data-token="--system-warning-subtle"></li>
+    </ul>
+
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Positive</h3>
+            <p class="text-system-regular-sm">Confirm success or healthy status.</p>
+        </li>
+        <li class="card" data-token="--system-positive-strong"></li>
+        <li class="card" data-token="--system-positive-medium"></li>
+        <li class="card" data-token="--system-positive-default"></li>
+        <li class="card" data-token="--system-positive-muted"></li>
+        <li class="card" data-token="--system-positive-subtle"></li>
+    </ul>
+
+
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Informative</h3>
+            <p class="text-system-regular-sm">General updates or notices.</p>
+        </li>
+        <li class="card" data-token="--system-informative-strong"></li>
+        <li class="card" data-token="--system-informative-medium"></li>
+        <li class="card" data-token="--system-informative-default"></li>
+        <li class="card" data-token="--system-informative-muted"></li>
+        <li class="card" data-token="--system-informative-subtle"></li>
+    </ul>
+
+
+    <div class="section-headline">
+        <h1 class="text-display-semibold-sm">Opacity Colors</h1>
+        <p class="text-system-regular-sm">Transparent grays and whites applied on top of content to dim or lighten
+            without introducing new color.</p>
+    </div>
+
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Dim</h3>
+            <p class="text-system-regular-sm">Gray translucency that subtly darkens underlying content.</p>
+        <li class="card" data-token="--opacity-dimm-strong"></li>
+        <li class="card" data-token="--opacity-dimm-medium"></li>
+        <li class="card" data-token="--opacity-dimm-default"></li>
+        <li class="card" data-token="--opacity-dimm-muted"></li>
+        <li class="card" data-token="--opacity-dimm-subtle"></li>
+        <li class="card" data-token="--opacity-dimm-none"></li>
+    </ul>
+
+    <ul class="grid">
+        <li class="description">
+            <h3 class="text-subheadline-semibold-lg">Lighten</h3>
+            <p class="text-system-regular-sm">White translucency that lifts or softens what’s below.</p>
+        </li>
+        <li class="card" data-token="--opacity-lighten-strong"></li>
+        <li class="card" data-token="--opacity-lighten-medium"></li>
+        <li class="card" data-token="--opacity-lighten-default"></li>
+        <li class="card" data-token="--opacity-lighten-muted"></li>
+        <li class="card" data-token="--opacity-lighten-subtle"></li>
+        <li class="card" data-token="--opacity-lighten-none"></li>
+    </ul>
+    <!-- JS -->
+    <script type="module" defer src="../scripts.js"></script>
+</body>
+
+</html>
