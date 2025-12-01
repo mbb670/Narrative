@@ -46,14 +46,25 @@ const KEY='overlap_puzzles_v1';
   kb.type='text';
   kb.value='';
   kb.autocomplete='off';
-  kb.autocapitalize='characters';
+kb.autocapitalize='none';
+kb.setAttribute('autocapitalize','none');
   kb.spellcheck=false;
+  kb.setAttribute('autocorrect','off');
+kb.setAttribute('autocomplete','off');
+kb.setAttribute('autocapitalize','none');
   kb.inputMode='text';
   kb.setAttribute('aria-hidden','true');
   kb.tabIndex=-1;
   // keep it "real" (not display:none) so iOS/Android will show keyboard when focused
   kb.style.cssText='position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;font-size:16px;';
   (document.body||document.documentElement).appendChild(kb);
+
+  const KB_SENTINEL = '\u200B'; // zero-width space
+const kbReset = ()=>{
+  kb.value = KB_SENTINEL;
+  try{ kb.setSelectionRange(1,1); }catch{}
+};
+kbReset();
 
 const focusForTyping=()=>{
   if(!hasInteracted) return;
@@ -65,10 +76,10 @@ const focusForTyping=()=>{
     // Don't steal focus from builder inputs (or any editable element) while typing there
     if(a && a!==kb && (a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.tagName==='SELECT'||a.isContentEditable)) return;
 
-    if(IS_TOUCH){
-      try{kb.focus({preventScroll:true})}catch{kb.focus()}
-      kb.value='';
-    }else{
+ if(IS_TOUCH){
+  try{kb.focus({preventScroll:true})}catch{kb.focus()}
+  kbReset();
+}else{
       try{els.stage.focus({preventScroll:true})}catch{els.stage.focus()}
     }
   };
@@ -80,15 +91,15 @@ const focusForTyping=()=>{
     for(const ch of v){
       if(/^[a-zA-Z]$/.test(ch)) write(ch.toUpperCase());
     }
-    kb.value='';
+    kbReset();
   });
 
   kb.addEventListener('keydown',(e)=>{
   if(e.metaKey || e.ctrlKey) return;
 
-  if(e.key==='Backspace'){ e.preventDefault(); back(); return; }
-  if(e.key==='ArrowLeft'){ e.preventDefault(); move(-1); return; }
-  if(e.key==='ArrowRight'){ e.preventDefault(); move(1); return; }
+  if(e.key==='Backspace'){ e.preventDefault(); back(); kbReset(); return; }
+  if(e.key==='ArrowLeft'){ e.preventDefault(); move(-1); kbReset(); return; }
+  if(e.key==='ArrowRight'){ e.preventDefault(); move(1); kbReset(); return; }
   // letters stay handled by kb's `input` listener
 });
 
