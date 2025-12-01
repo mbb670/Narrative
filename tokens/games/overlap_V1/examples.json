@@ -704,7 +704,55 @@
           "height": "full"
         }
       ]
-    }
+    },
+      {
+    "id": "mine",
+    "title": "On the Water",
+    "words": [
+      {
+        "clue": "Chain of sea islands",
+        "answer": "ARCHIPELAGO",
+        "start": 1,
+        "color": "--c-red",
+        "height": "full"
+      },
+      {
+        "clue": "Shallow pool behind a reef",
+        "answer": "LAGOON",
+        "start": "8",
+        "color": "--c-green",
+        "height": "mid"
+      },
+      {
+        "clue": "Heading toward shore, say",
+        "answer": "ONTO",
+        "start": "12",
+        "color": "--c-cyan",
+        "height": "inner"
+      },
+      {
+        "clue": "Vast body water",
+        "answer": "OCEAN",
+        "start": "15",
+        "color": "--c-purple",
+        "height": "full"
+      },
+      {
+        "clue": "Heavy object dropped to hold a boat",
+        "answer": "ANCHOR",
+        "start": "18",
+        "color": "--c-pink",
+        "height": "mid"
+      },
+      {
+        "clue": "Where sea seems to meet sky",
+        "answer": "HORIZON",
+        "start": "21",
+        "color": "--c-mint",
+        "height": "full"
+      }
+    ]
+  }
   ]
 
 ]

@@ -200,9 +200,9 @@
 
 }
 
- .cell .letter {
+ /* .cell .letter {
      transform: translateY(2%)
- }
+ } */
 
  .num {
      position: absolute;
