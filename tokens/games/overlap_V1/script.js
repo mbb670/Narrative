@@ -383,15 +383,7 @@ function onKey(e){
 
   els.tabPlay.addEventListener('click',()=>setTab('play'));
   els.tabBuild.addEventListener('click',()=>setTab('build'));
-
-  document.addEventListener('keydown', onKey, true);
-
-kb.addEventListener('keydown',(e)=>{
-  // iOS can fire both keydown + input for letters; input handler already writes chars.
-  if(/^[a-zA-Z]$/.test(e.key)) return;
-  onKey(e);
-});
-  document.addEventListener('keydown', onKey, true);
+if(!IS_TOUCH) document.addEventListener('keydown', onKey, true);
 
 
   // Only focus typing target after user interaction (prevents VS Code editor focus stealing on reload)
