@@ -1,34 +1,47 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Overlap</title>
-<link rel="stylesheet" href="../../resolved/extended_tokens.css">
-<link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../../resolved/extended_tokens.css">
+  <link rel="stylesheet" href="../../docs/general_styling/styles.css">
+  <link rel="stylesheet" href="../../docs/token_switcher/switcher.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <main class="wrap">
     <h1 class="text-display-semibold-md">Overlap</h1>
+      <div class="credit text-uppercase-semibold-md">
+Created & designed by <span>Matthew Barnett</span>
+  </div>
 
     <div class="tabs" role="tablist" aria-label="Overlap sections">
-      <button class="tab is-active" id="tabPlay" type="button" role="tab" aria-selected="true">Play</button>
-      <button class="tab" id="tabBuild" type="button" role="tab" aria-selected="false">Builder</button>
+      <button class="tab is-active text-uppercase-semibold-md" id="tabPlay" type="button" role="tab"
+        aria-selected="true">Play</button>
+      <button class="tab text-uppercase-semibold-md" id="tabBuild" type="button" role="tab"
+        aria-selected="false">Builder</button>
     </div>
 
     <!-- PLAY -->
     <section class="panel is-active" id="panelPlay" role="tabpanel" aria-labelledby="tabPlay">
       <div class="stage" id="stage" tabindex="0" role="application" aria-label="Overlap puzzle">
         <p class="sr" id="sr">Click a square or a clue then type letters. Backspace erases. Arrow keys move.</p>
-        <div class="meta" id="meta">Puzzle</div>
-        <div class="gridScroll" id="gridScroll"><div class="grid" id="grid" aria-describedby="sr"></div></div>
+        <div class="meta text-uppercase-semibold-md" id="meta">Puzzle</div>
+        <div class="gridScroll" id="gridScroll">
+          <div class="grid" id="grid" aria-describedby="sr"></div>
+        </div>
         <div class="legend" id="legend" aria-label="Clues"></div>
         <div class="helper">
-          <button class="pill" id="prev" type="button">Prev</button>
-          <span class="sep">•</span>
-          <button class="pill" id="reset" type="button">Reset</button>
-          <span class="sep">•</span>
-          <button class="pill" id="next" type="button">Next</button>
+          <button class="pill text-uppercase-semibold-md" id="prev" type="button">Prev</button>
+          <!-- <span class="sep">•</span> -->
+          <button class="pill text-uppercase-semibold-md" id="reset" type="button">Reset</button>
+          <!-- <span class="sep">•</span> -->
+          <button class="pill text-uppercase-semibold-md" id="reveal" type="button">Reveal</button>
+          <!-- <span class="sep">•</span> -->
+          <button class="pill text-uppercase-semibold-md" id="next" type="button">Next</button>
         </div>
       </div>
     </section>
@@ -37,13 +50,13 @@
     <section class="panel" id="panelBuild" role="tabpanel" aria-labelledby="tabBuild">
       <div class="bTop">
         <select class="sel" id="pSel" aria-label="Choose puzzle"></select>
-        <button class="pill" id="pNew" type="button">New</button>
-        <button class="pill" id="pDel" type="button">Delete</button>
-        <button class="pill" id="pSave" type="button">Save</button>
+        <button class="pill text-uppercase-semibold-md" id="pNew" type="button">New</button>
+        <button class="pill text-uppercase-semibold-md" id="pDel" type="button">Delete</button>
+        <button class="pill text-uppercase-semibold-md" id="pSave" type="button">Save</button>
       </div>
 
       <div class="bBody">
-        <div class="box">
+        <div class="box puzzle_inputs">
           <h3 class="boxt">Puzzle</h3>
           <label class="lab" for="pTitle">Title</label>
           <input class="ti" id="pTitle" type="text" placeholder="e.g. Demo" />
@@ -61,7 +74,8 @@
 
           <details class="io">
             <summary>Import / Export</summary>
-            <textarea class="ioTa" id="ioTxt" spellcheck="false" placeholder="Puzzles JSON (all saved puzzles)…"></textarea>
+            <textarea class="ioTa" id="ioTxt" spellcheck="false"
+              placeholder="Puzzles JSON (all saved puzzles)…"></textarea>
             <div class="ioBtns">
               <button class="pill" id="ioExp" type="button">Export</button>
               <button class="pill" id="ioImp" type="button">Import</button>
@@ -71,21 +85,19 @@
 
         <div class="box previewBox">
           <h3 class="boxt">Preview</h3>
-          <div class="gridScroll"><div class="grid" id="bGrid"></div></div>
+          <div class="gridScroll">
+            <div class="grid" id="bGrid"></div>
+          </div>
           <div class="note" id="solution"></div>
         </div>
       </div>
     </section>
   </main>
-
-<!-- <footer>
-Created, Built, and Designed by Matthew Barnett
-</footer> -->
   <!-- Success -->
   <div class="success" id="success" role="dialog" aria-modal="true" aria-label="Solved">
     <div class="card">
-      <h2>Solved</h2>
-      <p>You completed the puzzle.</p>
+      <h2 class="text-headline-semibold-sm">Solved!</h2>
+      <p class="text-system-regular-md">You completed the puzzle.</p>
       <div class="actions">
         <button class="btn" id="sClose" type="button">Close</button>
         <button class="btn" id="sAgain" type="button">Play again</button>
@@ -93,7 +105,7 @@ Created, Built, and Designed by Matthew Barnett
       </div>
     </div>
   </div>
- <script type="module" src="script.js"></script> 
+  <script type="module" src="script.js"></script>
 </body>
-</html>
 
+</html>

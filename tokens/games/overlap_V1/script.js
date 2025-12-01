@@ -1,5 +1,6 @@
+import "../../docs/token_switcher/switcher.js";
 
-  const KEY='overlap_puzzles_v1';
+const KEY='overlap_puzzles_v1';
   const COLORS=[['Red','--c-red'],['Orange','--c-orange'],['Yellow','--c-yellow'],['Green','--c-green'],['Mint','--c-mint'],['Cyan','--c-cyan'],['Blue','--c-blue'],['Purple','--c-purple'],['Pink','--c-pink']];
   const HEIGHTS=[['Full','full'],['Mid','mid'],['Inner','inner']];
   const DEF = await (await fetch('./examples.json')).json();
@@ -10,6 +11,7 @@
     tabPlay:$('#tabPlay'),tabBuild:$('#tabBuild'),panelPlay:$('#panelPlay'),panelBuild:$('#panelBuild'),
     stage:$('#stage'),grid:$('#grid'),legend:$('#legend'),meta:$('#meta'),
     prev:$('#prev'),next:$('#next'),reset:$('#reset'),
+    reveal:$('#reveal'),
     success:$('#success'),sClose:$('#sClose'),sAgain:$('#sAgain'),sNext:$('#sNext'),
     pSel:$('#pSel'),pNew:$('#pNew'),pDel:$('#pDel'),pSave:$('#pSave'),pTitle:$('#pTitle'),rows:$('#rows'),wAdd:$('#wAdd'),ioTxt:$('#ioTxt'),ioExp:$('#ioExp'),ioImp:$('#ioImp'),
     bGrid:$('#bGrid'),status:$('#status'),solution:$('#solution')
@@ -118,7 +120,7 @@
     for(let i=0;i<model.total;i++){
       const b=document.createElement('button');
       b.type='button';
-      b.className='cell';
+      b.className='cell text-display-semibold-lg';
       b.dataset.i=i;
       b.disabled=!clickable;
       b.innerHTML='<span class="num"></span><span class="letter"></span>';
@@ -139,7 +141,7 @@
 
     renderGrid(els.grid,m,true);
     els.legend.innerHTML=m.entries.map((e,idx)=>
-      `<button class="clue" type="button" data-e="${idx}"><span class="sw" style="--color:var(${e.color})"></span><span>${escapeHtml(e.clue)}</span></button>`
+      `<div class="clue text-system-semibold-sm" data-e="${idx}"><span class="sw" style="--color:var(${e.color})"></span><span>${escapeHtml(e.clue)}</span></div>`
     ).join('');
 
     els.meta.textContent=`${p.title||'Untitled'} • ${pIdx+1} / ${puzzles.length}`;
@@ -197,6 +199,13 @@
   function closeSuccess(){els.success.classList.remove('is-open')}
 
   function resetPlay(){ play.usr=Array.from({length:play.n},()=>'' ); play.at=0; play.done=false; updatePlayUI(); closeSuccess(); }
+
+function revealPlay(){
+  play.usr = play.exp.slice();
+  play.done = true;
+  updatePlayUI();
+  closeSuccess();
+}
 
   function onKey(e){
     if(els.success.classList.contains('is-open')) return;
@@ -382,6 +391,8 @@
   els.prev.addEventListener('click',()=>loadPuzzle(pIdx-1));
   els.next.addEventListener('click',()=>loadPuzzle(pIdx+1));
   els.reset.addEventListener('click',resetPlay);
+
+  els.reveal.addEventListener('click',()=>{ markInteracted(); revealPlay(); focusForTyping(); });
 
   els.success.addEventListener('click',(e)=>{if(e.target===els.success){markInteracted();closeSuccess();focusForTyping()}});
   els.sClose.addEventListener('click',()=>{markInteracted();closeSuccess();focusForTyping()});
