@@ -36,7 +36,7 @@ const KEY='overlap_puzzles_v1';
   const tr=w=>{let v=tieR.get(w);if(v==null){v=Math.random();tieR.set(w,v)}return v};
 
   // ---- Focus/shortcut + mobile keyboard fixes ----
-  let hasInteracted=false;
+  let hasInteracted=true;
   const markInteracted=()=>{hasInteracted=true};
 
   const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints>0);
@@ -55,9 +55,11 @@ const KEY='overlap_puzzles_v1';
   kb.style.cssText='position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;font-size:16px;';
   (document.body||document.documentElement).appendChild(kb);
 
-  const focusForTyping=()=>{
-    if(!hasInteracted) return;
-    if(!els.panelPlay || !els.panelPlay.classList.contains('is-active')) return;
+const focusForTyping=()=>{
+  if(!hasInteracted) return;
+  if(!els.panelPlay || !els.panelPlay.classList.contains('is-active')) return;
+  if(!document.hasFocus()) return; // prevents VS Code editor focus stealing
+
 
     const a=document.activeElement;
     // Don't steal focus from builder inputs (or any editable element) while typing there
@@ -212,6 +214,7 @@ function revealPlay(){
 
     // Allow OS/browser shortcuts (Cmd/Ctrl + A/Z/F/R/etc)
     if(e.metaKey || e.ctrlKey) return;
+    if(e.target===kb && /^[a-zA-Z]$/.test(e.key)) return;
 
     // Don't hijack builder inputs. (But DO allow the hidden kb input.)
     const t=e.target;
@@ -368,8 +371,15 @@ function revealPlay(){
   els.tabPlay.addEventListener('click',()=>setTab('play'));
   els.tabBuild.addEventListener('click',()=>setTab('build'));
 
-  els.stage.addEventListener('keydown',onKey);
-  kb.addEventListener('keydown',onKey);
+  document.addEventListener('keydown', onKey, true);
+
+kb.addEventListener('keydown',(e)=>{
+  // iOS can fire both keydown + input for letters; input handler already writes chars.
+  if(/^[a-zA-Z]$/.test(e.key)) return;
+  onKey(e);
+});
+  document.addEventListener('keydown', onKey, true);
+
 
   // Only focus typing target after user interaction (prevents VS Code editor focus stealing on reload)
   els.stage.addEventListener('pointerdown',()=>{markInteracted();focusForTyping()});
@@ -477,3 +487,4 @@ els.wAdd.addEventListener('click',()=>{
 
   // Start (no auto-focus on load)
   loadPuzzle(0);
+  requestAnimationFrame(()=>{ setAt(0); focusForTyping(); });
