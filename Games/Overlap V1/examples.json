@@ -1,0 +1,202 @@
+[
+  {
+    "id": "p-001",
+    "title": "Under the Surface",
+    "words": [
+      { "clue": "Fury", "answer": "ANGER", "start": 1, "color": "--c-red", "height": "full" },
+      { "clue": "Tiny cause of illness", "answer": "GERM", "start": 3, "color": "--c-yellow", "height": "mid" },
+      { "clue": "Stoat in its winter coat", "answer": "ERMINE", "start": 4, "color": "--c-green", "height": "inner" },
+      { "clue": "Extracted from the ground", "answer": "MINED", "start": 6, "color": "--c-cyan", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-002",
+    "title": "Moving Parts",
+    "words": [
+      { "clue": "Representation", "answer": "MODEL", "start": 1, "color": "--c-blue", "height": "full" },
+      { "clue": "River-mouth landform", "answer": "DELTA", "start": 3, "color": "--c-orange", "height": "mid" },
+      { "clue": "Fortune-telling deck", "answer": "TAROT", "start": 6, "color": "--c-purple", "height": "inner" },
+      { "clue": "Spinning motor part", "answer": "ROTOR", "start": 8, "color": "--c-cyan", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-003",
+    "title": "Just Right",
+    "words": [
+      { "clue": "Path around a planet", "answer": "ORBIT", "start": 1, "color": "--c-mint", "height": "full" },
+      { "clue": "A small mouthful", "answer": "BITE", "start": 3, "color": "--c-pink", "height": "mid" },
+      { "clue": "Lukewarm", "answer": "TEPID", "start": 5, "color": "--c-yellow", "height": "inner" },
+      { "clue": "Perfect", "answer": "IDEAL", "start": 8, "color": "--c-blue", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-004",
+    "title": "Quiet Company",
+    "words": [
+      { "clue": "Backyard plot", "answer": "GARDEN", "start": 1, "color": "--c-green", "height": "full" },
+      { "clue": "Tooth-related", "answer": "DENTAL", "start": 4, "color": "--c-cyan", "height": "mid" },
+      { "clue": "Bird's claw", "answer": "TALON", "start": 7, "color": "--c-orange", "height": "inner" },
+      { "clue": "All alone", "answer": "LONELY", "start": 9, "color": "--c-purple", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-005",
+    "title": "Local Detail",
+    "words": [
+      { "clue": "Tiny screen dot", "answer": "PIXEL", "start": 1, "color": "--c-blue", "height": "full" },
+      { "clue": "Older adult", "answer": "ELDER", "start": 4, "color": "--c-mint", "height": "mid" },
+      { "clue": "A horse race", "answer": "DERBY", "start": 6, "color": "--c-red", "height": "inner" },
+      { "clue": "Local ordinance", "answer": "BYLAW", "start": 9, "color": "--c-yellow", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-006",
+    "title": "Hosted",
+    "words": [
+      { "clue": "Milk container", "answer": "CARTON", "start": 1, "color": "--c-orange", "height": "full" },
+      { "clue": "Taste organ", "answer": "TONGUE", "start": 4, "color": "--c-pink", "height": "mid" },
+      { "clue": "Visitor", "answer": "GUEST", "start": 7, "color": "--c-cyan", "height": "inner" },
+      { "clue": "Property (land + home)", "answer": "ESTATE", "start": 9, "color": "--c-green", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-007",
+    "title": "Edges and Origins",
+    "words": [
+      { "clue": "Safe port", "answer": "HARBOR", "start": 1, "color": "--c-cyan", "height": "full" },
+      { "clue": "Edge or boundary", "answer": "BORDER", "start": 4, "color": "--c-yellow", "height": "mid" },
+      { "clue": "Draw from", "answer": "DERIVE", "start": 7, "color": "--c-purple", "height": "inner" },
+      { "clue": "Climbing plants (plural)", "answer": "IVIES", "start": 10, "color": "--c-green", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-008",
+    "title": "Mixed Signals",
+    "words": [
+      { "clue": "Soft fiber", "answer": "COTTON", "start": 1, "color": "--c-mint", "height": "full" },
+      { "clue": "Bitter mixer", "answer": "TONIC", "start": 4, "color": "--c-blue", "height": "mid" },
+      { "clue": "Five-cent coin (or metal)", "answer": "NICKEL", "start": 6, "color": "--c-orange", "height": "inner" },
+      { "clue": "Seaweed", "answer": "KELP", "start": 9, "color": "--c-green", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-009",
+    "title": "Keep It Down",
+    "words": [
+      { "clue": "Ancient imprint", "answer": "FOSSIL", "start": 1, "color": "--c-purple", "height": "full" },
+      { "clue": "Not noisy", "answer": "SILENT", "start": 4, "color": "--c-blue", "height": "mid" },
+      { "clue": "Complete", "answer": "ENTIRE", "start": 7, "color": "--c-mint", "height": "inner" },
+      { "clue": "The Emerald Isle", "answer": "IRELAND", "start": 10, "color": "--c-green", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-010",
+    "title": "Bounce Back",
+    "words": [
+      { "clue": "Corkscrew shape", "answer": "SPIRAL", "start": 1, "color": "--c-red", "height": "full" },
+      { "clue": "Gather (or a pep talk)", "answer": "RALLY", "start": 4, "color": "--c-yellow", "height": "mid" },
+      { "clue": "Song line", "answer": "LYRIC", "start": 7, "color": "--c-pink", "height": "inner" },
+      { "clue": "Rebound", "answer": "RICOCHET", "start": 9, "color": "--c-cyan", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-011",
+    "title": "A Place for Everything",
+    "words": [
+      { "clue": "Gallery building", "answer": "MUSEUM", "start": 1, "color": "--c-blue", "height": "full" },
+      { "clue": "Short recap", "answer": "SUMMARY", "start": 4, "color": "--c-orange", "height": "mid" },
+      { "clue": "U.S. state", "answer": "MARYLAND", "start": 7, "color": "--c-green", "height": "inner" },
+      { "clue": "Scenery", "answer": "LANDSCAPE", "start": 11, "color": "--c-cyan", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-012",
+    "title": "Bad Inbox",
+    "words": [
+      { "clue": "Large body of water", "answer": "OCEAN", "start": 1, "color": "--c-cyan", "height": "full" },
+      { "clue": "Blacksmith block", "answer": "ANVIL", "start": 4, "color": "--c-yellow", "height": "mid" },
+      { "clue": "Bad guy", "answer": "VILLAIN", "start": 6, "color": "--c-red", "height": "inner" },
+      { "clue": "Email folder", "answer": "INBOX", "start": 11, "color": "--c-blue", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-013",
+    "title": "Deep Cuts",
+    "words": [
+      { "clue": "Underground chamber", "answer": "CAVERN", "start": 1, "color": "--c-purple", "height": "full" },
+      { "clue": "A boy's name meaning 'serious'", "answer": "ERNEST", "start": 4, "color": "--c-mint", "height": "mid" },
+      { "clue": "Baltic country", "answer": "ESTONIA", "start": 7, "color": "--c-blue", "height": "inner" },
+      { "clue": "Famous falls, for short", "answer": "NIAGARA", "start": 11, "color": "--c-cyan", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-014",
+    "title": "Points of Interest",
+    "words": [
+      { "clue": "Bed cushion", "answer": "PILLOW", "start": 1, "color": "--c-pink", "height": "full" },
+      { "clue": "Flat low area", "answer": "LOWLAND", "start": 4, "color": "--c-green", "height": "mid" },
+      { "clue": "Famous site", "answer": "LANDMARK", "start": 7, "color": "--c-orange", "height": "inner" },
+      { "clue": "Bazaar", "answer": "MARKET", "start": 11, "color": "--c-yellow", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-015",
+    "title": "On Target",
+    "words": [
+      { "clue": "Blue-tinted metal", "answer": "COBALT", "start": 1, "color": "--c-blue", "height": "full" },
+      { "clue": "Religious table", "answer": "ALTAR", "start": 4, "color": "--c-purple", "height": "mid" },
+      { "clue": "Pointed projectile", "answer": "ARROW", "start": 7, "color": "--c-red", "height": "inner" },
+      { "clue": "River vessel", "answer": "ROWBOAT", "start": 9, "color": "--c-cyan", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-016",
+    "title": "Night Out",
+    "words": [
+      { "clue": "Bird of prey", "answer": "FALCON", "start": 1, "color": "--c-green", "height": "full" },
+      { "clue": "Live music show", "answer": "CONCERT", "start": 4, "color": "--c-blue", "height": "mid" },
+      { "clue": "Sure", "answer": "CERTAIN", "start": 7, "color": "--c-yellow", "height": "inner" },
+      { "clue": "Stain or corrupt", "answer": "TAINT", "start": 10, "color": "--c-red", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-017",
+    "title": "At the Horizon",
+    "words": [
+      { "clue": "Distant line", "answer": "HORIZON", "start": 1, "color": "--c-orange", "height": "full" },
+      { "clue": "Layered vegetable", "answer": "ONION", "start": 6, "color": "--c-mint", "height": "mid" },
+      { "clue": "Relating to ions", "answer": "IONIC", "start": 8, "color": "--c-cyan", "height": "inner" },
+      { "clue": "Alias", "answer": "NICKNAME", "start": 10, "color": "--c-purple", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-018",
+    "title": "Morning Routine",
+    "words": [
+      { "clue": "Breakfast staple", "answer": "CEREAL", "start": 1, "color": "--c-yellow", "height": "full" },
+      { "clue": "Wake-up sound", "answer": "ALARM", "start": 5, "color": "--c-red", "height": "mid" },
+      { "clue": "Fleet of ships", "answer": "ARMADA", "start": 7, "color": "--c-blue", "height": "inner" },
+      { "clue": "A polite title", "answer": "MADAM", "start": 9, "color": "--c-pink", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-019",
+    "title": "Guided Tour",
+    "words": [
+      { "clue": "Admiration", "answer": "RESPECT", "start": 1, "color": "--c-blue", "height": "full" },
+      { "clue": "A striking display", "answer": "SPECTACLE", "start": 3, "color": "--c-cyan", "height": "mid" },
+      { "clue": "Merciful (or a name)", "answer": "CLEMENT", "start": 9, "color": "--c-green", "height": "inner" },
+      { "clue": "Guide", "answer": "MENTOR", "start": 12, "color": "--c-purple", "height": "full" }
+    ]
+  },
+  {
+    "id": "p-020",
+    "title": "Weatherproof",
+    "words": [
+      { "clue": "Wet-weather jacket", "answer": "RAINCOAT", "start": 1, "color": "--c-cyan", "height": "full" },
+      { "clue": "Layer or cover", "answer": "COATING", "start": 5, "color": "--c-orange", "height": "mid" },
+      { "clue": "Slight trace", "answer": "TINGE", "start": 8, "color": "--c-yellow", "height": "inner" },
+      { "clue": "Take in (as food)", "answer": "INGEST", "start": 9, "color": "--c-green", "height": "full" }
+    ]
+  }
+]
