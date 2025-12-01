@@ -1,21 +1,9 @@
-(()=>{
+
   const KEY='overlap_puzzles_v1';
   const COLORS=[['Red','--c-red'],['Orange','--c-orange'],['Yellow','--c-yellow'],['Green','--c-green'],['Mint','--c-mint'],['Cyan','--c-cyan'],['Blue','--c-blue'],['Purple','--c-purple'],['Pink','--c-pink']];
   const HEIGHTS=[['Full','full'],['Mid','mid'],['Inner','inner']];
-  const DEF=[
-    {id:'demo-001',title:'Overlap Demo',words:[
-      {clue:'Fury',answer:'ANGER',start:1,color:'--c-red',height:'full'},
-      {clue:'Tiny cause of illness',answer:'GERM',start:3,color:'--c-yellow',height:'mid'},
-      {clue:'Stoat in its winter coat',answer:'ERMINE',start:4,color:'--c-green',height:'inner'},
-      {clue:'Extracted from the ground',answer:'MINED',start:6,color:'--c-cyan',height:'full'},
-    ]},
-    {id:'demo-002',title:'Angelfish',words:[
-      {clue:'Winged being',answer:'ANGEL',start:1,color:'--c-red',height:'full'},
-      {clue:'Wobbly substance',answer:'GEL',start:3,color:'--c-yellow',height:'mid'},
-      {clue:'Christmas Helper',answer:'ELF',start:4,color:'--c-green',height:'inner'},
-      {clue:'Aquatic animal',answer:'FISH',start:6,color:'--c-cyan',height:'full'},
-    ]},
-  ];
+  const DEF = await (await fetch('./examples.json')).json();
+
 
   const $=s=>document.querySelector(s);
   const els={
@@ -45,15 +33,51 @@
   const tieR=new WeakMap();
   const tr=w=>{let v=tieR.get(w);if(v==null){v=Math.random();tieR.set(w,v)}return v};
 
-  // ---- Focus/shortcut fixes (VS Code Live Preview friendly) ----
+  // ---- Focus/shortcut + mobile keyboard fixes ----
   let hasInteracted=false;
   const markInteracted=()=>{hasInteracted=true};
-  const focusStage=()=>{
+
+  const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints>0);
+
+  // Hidden input to reliably summon mobile keyboard
+  const kb=document.createElement('input');
+  kb.type='text';
+  kb.value='';
+  kb.autocomplete='off';
+  kb.autocapitalize='characters';
+  kb.spellcheck=false;
+  kb.inputMode='text';
+  kb.setAttribute('aria-hidden','true');
+  kb.tabIndex=-1;
+  // keep it "real" (not display:none) so iOS/Android will show keyboard when focused
+  kb.style.cssText='position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;font-size:16px;';
+  (document.body||document.documentElement).appendChild(kb);
+
+  const focusForTyping=()=>{
     if(!hasInteracted) return;
+    if(!els.panelPlay || !els.panelPlay.classList.contains('is-active')) return;
+
     const a=document.activeElement;
-    if(a && (a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.tagName==='SELECT'||a.isContentEditable)) return;
-    try{els.stage.focus({preventScroll:true})}catch{els.stage.focus()}
+    // Don't steal focus from builder inputs (or any editable element) while typing there
+    if(a && a!==kb && (a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.tagName==='SELECT'||a.isContentEditable)) return;
+
+    if(IS_TOUCH){
+      try{kb.focus({preventScroll:true})}catch{kb.focus()}
+      kb.value='';
+    }else{
+      try{els.stage.focus({preventScroll:true})}catch{els.stage.focus()}
+    }
   };
+
+  // Fallback for mobile keyboards that prefer input events
+  kb.addEventListener('input',()=>{
+    const v=kb.value||'';
+    if(!v) return;
+    for(const ch of v){
+      if(/^[a-zA-Z]$/.test(ch)) write(ch.toUpperCase());
+    }
+    kb.value='';
+  });
 
   function computed(p){
     const entries=(p.words||[]).map(w=>{
@@ -136,7 +160,6 @@
     });
   }
 
-  // No forced focusing here (prevents stealing VS Code editor focus)
   function setAt(i){play.at=clamp(i,0,play.n-1);updatePlayUI()}
 
   function jumpToEntry(eIdx){
@@ -171,7 +194,6 @@
   }
 
   function openSuccess(){els.success.classList.add('is-open');els.sClose.focus()}
-  // No forced focusing here either
   function closeSuccess(){els.success.classList.remove('is-open')}
 
   function resetPlay(){ play.usr=Array.from({length:play.n},()=>'' ); play.at=0; play.done=false; updatePlayUI(); closeSuccess(); }
@@ -182,9 +204,9 @@
     // Allow OS/browser shortcuts (Cmd/Ctrl + A/Z/F/R/etc)
     if(e.metaKey || e.ctrlKey) return;
 
-    // If any editable thing is focused, don't hijack keystrokes
+    // Don't hijack builder inputs. (But DO allow the hidden kb input.)
     const t=e.target;
-    if(t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)) return;
+    if(t && t!==kb && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)) return;
 
     if(e.key==='Tab') return;
     if(e.key==='Backspace'){e.preventDefault();back();return;}
@@ -297,10 +319,10 @@
     els.panelBuild.classList.toggle('is-active',!play);
     els.tabPlay.setAttribute('aria-selected',play?'true':'false');
     els.tabBuild.setAttribute('aria-selected',!play?'true':'false');
-    if(play) focusStage();
+    if(play) focusForTyping();
   }
 
-  // ----- Escaping (for builder HTML strings) -----
+  // ----- Escaping -----
   function escapeHtml(s){return String(s).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]))}
   function escapeAttr(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
 
@@ -338,20 +360,22 @@
   els.tabBuild.addEventListener('click',()=>setTab('build'));
 
   els.stage.addEventListener('keydown',onKey);
-  // Only focus after the user interacts (prevents VS Code editor focus stealing)
-  els.stage.addEventListener('pointerdown',()=>{markInteracted();focusStage()});
+  kb.addEventListener('keydown',onKey);
+
+  // Only focus typing target after user interaction (prevents VS Code editor focus stealing on reload)
+  els.stage.addEventListener('pointerdown',()=>{markInteracted();focusForTyping()});
 
   els.grid.addEventListener('click',(e)=>{
     const cell=e.target.closest('.cell');
     if(!cell) return;
-    markInteracted();focusStage();
+    markInteracted();focusForTyping();
     setAt(+cell.dataset.i);
   });
 
   els.legend.addEventListener('click',(e)=>{
     const b=e.target.closest('.clue');
     if(!b) return;
-    markInteracted();focusStage();
+    markInteracted();focusForTyping();
     jumpToEntry(+b.dataset.e);
   });
 
@@ -359,9 +383,9 @@
   els.next.addEventListener('click',()=>loadPuzzle(pIdx+1));
   els.reset.addEventListener('click',resetPlay);
 
-  els.success.addEventListener('click',(e)=>{if(e.target===els.success){markInteracted();closeSuccess();focusStage()}});
-  els.sClose.addEventListener('click',()=>{markInteracted();closeSuccess();focusStage()});
-  els.sAgain.addEventListener('click',()=>{markInteracted();resetPlay();focusStage()});
+  els.success.addEventListener('click',(e)=>{if(e.target===els.success){markInteracted();closeSuccess();focusForTyping()}});
+  els.sClose.addEventListener('click',()=>{markInteracted();closeSuccess();focusForTyping()});
+  els.sAgain.addEventListener('click',()=>{markInteracted();resetPlay();focusForTyping()});
   els.sNext.addEventListener('click',()=>{markInteracted();loadPuzzle(pIdx+1)});
 
   els.pSel.addEventListener('change',()=>loadPuzzle(+els.pSel.value||0));
@@ -428,6 +452,5 @@
     renderPreview();
   });
 
-  // Start (no stage auto-focus on load)
+  // Start (no auto-focus on load)
   loadPuzzle(0);
-})();

@@ -60,16 +60,6 @@
     ]
   },
   {
-    "id": "p-007",
-    "title": "Edges and Origins",
-    "words": [
-      { "clue": "Safe port", "answer": "HARBOR", "start": 1, "color": "--c-cyan", "height": "full" },
-      { "clue": "Edge or boundary", "answer": "BORDER", "start": 4, "color": "--c-yellow", "height": "mid" },
-      { "clue": "Draw from", "answer": "DERIVE", "start": 7, "color": "--c-purple", "height": "inner" },
-      { "clue": "Climbing plants (plural)", "answer": "IVIES", "start": 10, "color": "--c-green", "height": "full" }
-    ]
-  },
-  {
     "id": "p-008",
     "title": "Mixed Signals",
     "words": [
@@ -97,16 +87,6 @@
       { "clue": "Gather (or a pep talk)", "answer": "RALLY", "start": 4, "color": "--c-yellow", "height": "mid" },
       { "clue": "Song line", "answer": "LYRIC", "start": 7, "color": "--c-pink", "height": "inner" },
       { "clue": "Rebound", "answer": "RICOCHET", "start": 9, "color": "--c-cyan", "height": "full" }
-    ]
-  },
-  {
-    "id": "p-011",
-    "title": "A Place for Everything",
-    "words": [
-      { "clue": "Gallery building", "answer": "MUSEUM", "start": 1, "color": "--c-blue", "height": "full" },
-      { "clue": "Short recap", "answer": "SUMMARY", "start": 4, "color": "--c-orange", "height": "mid" },
-      { "clue": "U.S. state", "answer": "MARYLAND", "start": 7, "color": "--c-green", "height": "inner" },
-      { "clue": "Scenery", "answer": "LANDSCAPE", "start": 11, "color": "--c-cyan", "height": "full" }
     ]
   },
   {
