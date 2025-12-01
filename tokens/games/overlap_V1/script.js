@@ -83,6 +83,16 @@ const focusForTyping=()=>{
     kb.value='';
   });
 
+  kb.addEventListener('keydown',(e)=>{
+  if(e.metaKey || e.ctrlKey) return;
+
+  if(e.key==='Backspace'){ e.preventDefault(); back(); return; }
+  if(e.key==='ArrowLeft'){ e.preventDefault(); move(-1); return; }
+  if(e.key==='ArrowRight'){ e.preventDefault(); move(1); return; }
+  // letters stay handled by kb's `input` listener
+});
+
+
   function computed(p){
     const entries=(p.words||[]).map(w=>{
       const ans=cleanA(w.answer);
@@ -209,23 +219,26 @@ function revealPlay(){
   closeSuccess();
 }
 
-  function onKey(e){
-    if(els.success.classList.contains('is-open')) return;
+function onKey(e){
+  if(els.success.classList.contains('is-open')) return;
 
-    // Allow OS/browser shortcuts (Cmd/Ctrl + A/Z/F/R/etc)
-    if(e.metaKey || e.ctrlKey) return;
-    if(e.target===kb && /^[a-zA-Z]$/.test(e.key)) return;
+  // Allow OS/browser shortcuts (Cmd/Ctrl + A/Z/F/R/etc)
+  if(e.metaKey || e.ctrlKey) return;
 
-    // Don't hijack builder inputs. (But DO allow the hidden kb input.)
-    const t=e.target;
-    if(t && t!==kb && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)) return;
+  // ⬇️ ADD THIS (prevents iOS double-delete / double-move when kb is focused)
+  if(IS_TOUCH && e.target===kb && (e.key==='Backspace' || e.key==='ArrowLeft' || e.key==='ArrowRight')) return;
 
-    if(e.key==='Tab') return;
-    if(e.key==='Backspace'){e.preventDefault();back();return;}
-    if(e.key==='ArrowLeft'){e.preventDefault();move(-1);return;}
-    if(e.key==='ArrowRight'){e.preventDefault();move(1);return;}
-    if(/^[a-zA-Z]$/.test(e.key)){e.preventDefault();write(e.key.toUpperCase());}
-  }
+  // Don't hijack builder inputs. (But DO allow the hidden kb input.)
+  const t=e.target;
+  if(t && t!==kb && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)) return;
+
+  if(e.key==='Tab') return;
+  if(e.key==='Backspace'){e.preventDefault();back();return;}
+  if(e.key==='ArrowLeft'){e.preventDefault();move(-1);return;}
+  if(e.key==='ArrowRight'){e.preventDefault();move(1);return;}
+  if(/^[a-zA-Z]$/.test(e.key)){e.preventDefault();write(e.key.toUpperCase());}
+}
+
 
   // ----- Builder -----
 
