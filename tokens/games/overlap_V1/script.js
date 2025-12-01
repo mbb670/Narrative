@@ -422,12 +422,24 @@ function revealPlay(){
     loadPuzzle(Math.max(0,pIdx-1));
   });
 
-  els.wAdd.addEventListener('click',()=>{
-    const p=puzzles[pIdx];
-    p.words=p.words||[];
-    p.words.push({clue:'Clue',answer:'WORD',start:1,color:'--c-red',height:'full'});
-    saveAndReRender();
-  });
+
+els.wAdd.addEventListener('click',()=>{
+
+  const p=puzzles[pIdx];
+  p.words=p.words||[];
+
+  const maxEnd = p.words.reduce((m,w)=>{
+    const s = Math.max(1, Math.floor(+w.start || 1));            // 1-based
+    const len = cleanA(w.answer).length || 4;                    // treat empty as 4 chars
+    return Math.max(m, s + len - 1);                             // end position (1-based)
+  }, 0);
+
+  const nextStart = Math.max(1, maxEnd + 1);
+
+  p.words.push({clue:'Clue',answer:'WORD',start:nextStart,color:'--c-red',height:'full'});
+  saveAndReRender();
+});
+
 
   els.rows.addEventListener('click',(e)=>{
     const row=e.target.closest('.row');
