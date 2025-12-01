@@ -185,7 +185,51 @@ const focusForTyping=()=>{
     });
   }
 
-  function setAt(i){play.at=clamp(i,0,play.n-1);updatePlayUI()}
+  let _keepInViewRaf = 0;
+function keepActiveCellInView(behavior = (IS_TOUCH ? 'smooth' : 'auto')){
+  const sc = $('#gridScroll');
+  if(!sc || sc.scrollWidth <= sc.clientWidth) return;
+
+  const cell = els.grid.querySelector(`.cell[data-i="${play.at}"]`);
+  if(!cell) return;
+
+  const pad = 24; // breathing room from edges
+  const scRect = sc.getBoundingClientRect();
+  const cRect  = cell.getBoundingClientRect();
+
+  const left  = cRect.left  - scRect.left;
+  const right = cRect.right - scRect.left;
+
+  let target = null;
+
+  if(left < pad){
+    target = sc.scrollLeft + (left - pad);
+  } else if(right > (sc.clientWidth - pad)){
+    target = sc.scrollLeft + (right - (sc.clientWidth - pad));
+  }
+
+  if(target == null) return;
+
+  const max = sc.scrollWidth - sc.clientWidth;
+  target = Math.max(0, Math.min(target, max));
+
+  try { sc.scrollTo({ left: target, behavior }); }
+  catch { sc.scrollLeft = target; }
+}
+
+function requestKeepActiveCellInView(behavior){
+  if(_keepInViewRaf) return;
+  _keepInViewRaf = requestAnimationFrame(()=>{
+    _keepInViewRaf = 0;
+    keepActiveCellInView(behavior);
+  });
+}
+
+function setAt(i){
+  play.at=clamp(i,0,play.n-1);
+  updatePlayUI();
+  requestKeepActiveCellInView();
+}
 
   function jumpToEntry(eIdx){
     const m=computed(puzzles[pIdx]);
@@ -202,6 +246,7 @@ const focusForTyping=()=>{
     if(play.at<play.n-1) play.at++;
     checkSolved();
     updatePlayUI();
+    requestKeepActiveCellInView();
   }
 
   function back(){
@@ -209,6 +254,7 @@ const focusForTyping=()=>{
     if(play.usr[play.at]) play.usr[play.at]='';
     else if(play.at>0){play.at--; play.usr[play.at]='';}
     updatePlayUI();
+    requestKeepActiveCellInView();
   }
 
   function move(d){setAt(play.at+d)}
