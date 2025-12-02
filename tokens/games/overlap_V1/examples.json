@@ -753,7 +753,8 @@
         "diff": "easy"
       }
     ],
-    "timeLimit": 60,
-    "lockCorrectWords": true
+    "timeLimit": 200,
+    "lockCorrectWords": true,
+    "timedMode": false
   }
 ]

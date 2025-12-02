@@ -183,8 +183,9 @@ const normPuzzle = (p) => {
 
   if (type === MODE.CHAIN) {
     out.timeLimit = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
-    // Toggle for lock/fade/hide-clue behavior
+
     out.lockCorrectWords = !!(p?.lockCorrectWords ?? true);
+    out.timedMode = !!(p?.timedMode ?? true);
   }
   return out;
 };
@@ -387,6 +388,22 @@ function renderGrid(target, model, clickable) {
 
 // ---- Horizontal keep-in-view ----
 let _keepInViewRaf = 0;
+// ---- Touch pan protection (iOS horizontal scroll) ----
+let _isUserPanning = false;
+let _panPointerId = null;
+let _panMoved = false;
+let _ignoreGridClickUntil = 0;
+
+const PAN_SLOP_PX = 8;
+let _panStartX = 0;
+let _panStartY = 0;
+
+function stopScrollFollow() {
+  if (_scrollFollowRaf) cancelAnimationFrame(_scrollFollowRaf);
+  _scrollFollowRaf = 0;
+  _scrollFollowEl = null;
+}
+
 
 // ---- Smooth scroll-follow (prevents native smooth jitter on rapid updates) ----
 const SCROLL_FOLLOW_K = 0.28;   // 0..1 (higher = faster, lower = smoother)
@@ -396,6 +413,7 @@ let _scrollFollowRaf = 0;
 let _scrollFollowEl = null;
 let _scrollFollowTarget = 0;
 
+
 function smoothFollowScrollLeft(sc, target) {
   _scrollFollowEl = sc;
   _scrollFollowTarget = target;
@@ -404,6 +422,7 @@ function smoothFollowScrollLeft(sc, target) {
 
   const tick = () => {
     const el = _scrollFollowEl;
+    if (_isUserPanning) { _scrollFollowRaf = 0; return; }
     if (!el) { _scrollFollowRaf = 0; return; }
 
     const cur = el.scrollLeft;
@@ -428,6 +447,8 @@ function smoothFollowScrollLeft(sc, target) {
 function keepCellInView(idx, behavior = IS_TOUCH ? "smooth" : "auto") {
   const sc = els.gridScroll;
   if (!sc || sc.scrollWidth <= sc.clientWidth) return;
+  if (IS_TOUCH && _isUserPanning) return;
+
 
   const cell = els.grid.querySelector(`.cell[data-i="${idx}"]`);
   if (!cell) return;
@@ -560,11 +581,15 @@ function ensureCurrentPuzzleMatchesView() {
 const chain = {
   running: false,
   started: false,
-  endsAt: 0,
-  left: 0,
+  endsAt: 0,              // used in timed mode
+  startAt: 0,             // used in untimed mode
+  left: 0,                // timed: seconds remaining
+  elapsed: 0,             // untimed: seconds elapsed
   tickId: 0,
-  lastFinishLeftSec: 0,
+  lastFinishLeftSec: 0,   // timed bonus calc
+  lastFinishElapsedSec: 0 // untimed results
 };
+
 
 let chainUI = null;
 let chainResults = null;
@@ -668,6 +693,10 @@ function chainStopTimer() {
   chain.running = false;
   chain.started = false;
   chain.endsAt = 0;
+    chain.startAt = 0;
+  chain.elapsed = 0;
+  chain.lastFinishElapsedSec = 0;
+
   chain.left = 0;
   chain.lastFinishLeftSec = 0;
   if (chain.tickId) {
@@ -679,14 +708,24 @@ function chainStopTimer() {
 function chainResetTimer() {
   const p = puzzles[pIdx];
   const ui = ensureChainUI();
-  const total = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
 
   chainStopTimer();
-  chain.left = total;
 
-  ui.timer.textContent = fmtTime(chain.left);
-  ui.bar.style.transform = "scaleX(1)";
+  const isTimed = !!(p?.timedMode ?? true);
+
+  if (isTimed) {
+    const total = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
+    chain.left = total;
+    ui.timer.textContent = fmtTime(chain.left);
+    ui.bar.style.transform = "scaleX(1)";
+  } else {
+    chain.elapsed = 0;
+    ui.timer.textContent = fmtTime(0);
+    // bar has no meaning in untimed; keep it full so UI doesn’t look “empty”
+    ui.bar.style.transform = "scaleX(1)";
+  }
 }
+
 
 function chainStartNow() {
   if (play.mode !== MODE.CHAIN) return;
@@ -709,24 +748,38 @@ function chainStartNow() {
 
   chain.started = true;
   chain.running = true;
-  chain.endsAt = Date.now() + total * 1000;
+  const isTimed = !!(p?.timedMode ?? true);
 
-  // initial render of clues
-  requestChainClues();
+  if (isTimed) {
+    chain.endsAt = Date.now() + total * 1000;
 
-  if (chain.tickId) clearInterval(chain.tickId);
-  chain.tickId = setInterval(() => {
-    if (!chain.running) return;
+    if (chain.tickId) clearInterval(chain.tickId);
+    chain.tickId = setInterval(() => {
+      if (!chain.running) return;
 
-    const left = (chain.endsAt - Date.now()) / 1000;
-    chain.left = left;
+      const left = (chain.endsAt - Date.now()) / 1000;
+      chain.left = left;
 
-    ui.timer.textContent = fmtTime(left);
-    const pct = Math.max(0, Math.min(1, left / total));
-    ui.bar.style.transform = `scaleX(${pct})`;
+      ui.timer.textContent = fmtTime(left);
+      const pct = Math.max(0, Math.min(1, left / total));
+      ui.bar.style.transform = `scaleX(${pct})`;
 
-    if (left <= 0) chainFinish("time");
-  }, 120);
+      if (left <= 0) chainFinish("time");
+    }, 120);
+  } else {
+    chain.startAt = Date.now();
+
+    if (chain.tickId) clearInterval(chain.tickId);
+    chain.tickId = setInterval(() => {
+      if (!chain.running) return;
+
+      const elapsed = (Date.now() - chain.startAt) / 1000;
+      chain.elapsed = elapsed;
+
+      ui.timer.textContent = fmtTime(elapsed);
+      ui.bar.style.transform = "scaleX(1)"; // no progress meaning in untimed
+    }, 120);
+  }
 }
 
 function isWordAttempted(e) {
@@ -764,6 +817,18 @@ function scoreChain() {
 function openChainResults(stats, reason) {
   const r = ensureChainResults();
   r.wrap.classList.add("is-open");
+  const p = puzzles[pIdx];
+  const isTimed = !!(p?.timedMode ?? true);
+
+  if (!isTimed) {
+    const tSec = Math.max(0, Math.floor(chain.lastFinishElapsedSec || 0));
+    r.title.textContent = "Solved!";
+    r.scoreLine.textContent = `Time: ${fmtTime(tSec)}`;
+    r.breakdown.innerHTML = "";
+    r.cClose.focus();
+    return;
+  }
+
 
   const didSolve = reason === "solved";
 
@@ -802,12 +867,23 @@ function openChainResults(stats, reason) {
 function chainFinish(reason = "time") {
   if (play.mode !== MODE.CHAIN) return;
   if (play.done) return;
+  const p = puzzles[pIdx];
+  const isTimed = !!(p?.timedMode ?? true);
+
 
   // capture remaining time BEFORE stopping timer
+  // capture stats BEFORE stopping timer
   if (reason === "solved" && chain.started) {
-    chain.lastFinishLeftSec = Math.max(0, (chain.endsAt - Date.now()) / 1000);
+    if (isTimed) {
+      chain.lastFinishLeftSec = Math.max(0, (chain.endsAt - Date.now()) / 1000);
+      chain.lastFinishElapsedSec = 0;
+    } else {
+      chain.lastFinishElapsedSec = Math.max(0, (Date.now() - chain.startAt) / 1000);
+      chain.lastFinishLeftSec = 0;
+    }
   } else {
     chain.lastFinishLeftSec = 0;
+    chain.lastFinishElapsedSec = 0;
   }
 
   chain.running = false;
@@ -1262,6 +1338,8 @@ function onLegendClick(e) {
 function onGridCellClick(e) {
   const cell = e.target.closest(".cell");
   if (!cell) return;
+  if (IS_TOUCH && performance.now() < _ignoreGridClickUntil) return;
+
 
   markInteracted();
   focusForTyping();
@@ -1442,6 +1520,7 @@ let bModeWrap = null;
 let bModeSel = null;
 let bTimeInp = null;
 let bLockChk = null;
+let bTimedChk = null;
 
 function ensureBuilderModeUI() {
   if (bModeWrap) return;
@@ -1467,6 +1546,12 @@ function ensureBuilderModeUI() {
         <input id="pLockCorrect" type="checkbox" />
         <span>Mark correct words (lock + fade + hide clue)</span>
       </label>
+      <div style="height:10px"></div>
+      <label class="lab" style="display:flex;gap:10px;align-items:center">
+        <input id="pTimedMode" type="checkbox" />
+        <span>Timed mode (countdown + score)</span>
+      </label>
+
     </div>
   `;
 
@@ -1476,6 +1561,8 @@ function ensureBuilderModeUI() {
   bModeSel = wrap.querySelector("#pMode");
   bTimeInp = wrap.querySelector("#pTimeLimit");
   bLockChk = wrap.querySelector("#pLockCorrect");
+    bTimedChk = wrap.querySelector("#pTimedMode");
+
   const chainFields = wrap.querySelector("#chainFields");
 
   const setVis = (isChain) => {
@@ -1489,6 +1576,7 @@ function ensureBuilderModeUI() {
     if (puzzles[pIdx].type === MODE.CHAIN) {
       puzzles[pIdx].timeLimit = Math.max(10, Math.floor(+puzzles[pIdx].timeLimit || DEFAULT_CHAIN_TIME));
       puzzles[pIdx].lockCorrectWords = !!(puzzles[pIdx].lockCorrectWords ?? true);
+      puzzles[pIdx].timedMode = !!(puzzles[pIdx].timedMode ?? true);
       puzzles[pIdx].words = (puzzles[pIdx].words || []).map((w) => normWord(w, MODE.CHAIN));
     }
 
@@ -1505,6 +1593,12 @@ function ensureBuilderModeUI() {
     puzzles[pIdx].lockCorrectWords = !!bLockChk.checked;
     setDirty(true);
   });
+
+    bTimedChk.addEventListener("change", () => {
+    puzzles[pIdx].timedMode = !!bTimedChk.checked;
+    setDirty(true);
+  });
+
 }
 
 // ---- Builder render ----
@@ -1526,6 +1620,7 @@ function syncBuilder() {
   if (bModeSel) bModeSel.value = p.type || MODE.OVERLAP;
   if (bTimeInp) bTimeInp.value = String(p.timeLimit || DEFAULT_CHAIN_TIME);
   if (bLockChk) bLockChk.checked = !!(p.lockCorrectWords ?? true);
+ if (bTimedChk) bTimedChk.checked = !!(p.timedMode ?? true);
   if (bModeWrap && bModeWrap._setVis) bModeWrap._setVis(chainMode);
 
   renderRows();
@@ -1698,10 +1793,13 @@ els.tabBuild?.addEventListener("click", () => setTab(VIEW.BUILD));
 if (!IS_TOUCH) document.addEventListener("keydown", onKey, true);
 
 // Focus gate
-els.stage.addEventListener("pointerdown", () => {
+els.stage.addEventListener("pointerdown", (e) => {
   markInteracted();
+  if (IS_TOUCH && e.target.closest("#gridScroll")) return;
+
   focusForTyping();
 });
+
 
 // Grid click
 els.grid.addEventListener("click", onGridCellClick);
@@ -1717,6 +1815,53 @@ els.gridScroll?.addEventListener(
   },
   { passive: true }
 );
+
+// ---- Touch pan detection: prevents follow-scroll + focus from fighting drag ----
+if (els.gridScroll) {
+  els.gridScroll.addEventListener(
+    "pointerdown",
+    (e) => {
+      if (e.pointerType !== "touch") return;
+
+      _isUserPanning = true;
+      _panPointerId = e.pointerId;
+      _panMoved = false;
+      _panStartX = e.clientX;
+      _panStartY = e.clientY;
+
+      stopScrollFollow();
+    },
+    { passive: true }
+  );
+
+  els.gridScroll.addEventListener(
+    "pointermove",
+    (e) => {
+      if (!_isUserPanning || e.pointerId !== _panPointerId) return;
+      if (_panMoved) return;
+
+      const dx = Math.abs(e.clientX - _panStartX);
+      const dy = Math.abs(e.clientY - _panStartY);
+      if (dx >= PAN_SLOP_PX || dy >= PAN_SLOP_PX) _panMoved = true;
+    },
+    { passive: true }
+  );
+
+  const endPan = (e) => {
+    if (e.pointerType !== "touch") return;
+    if (e.pointerId !== _panPointerId) return;
+
+    if (_panMoved) _ignoreGridClickUntil = performance.now() + 250;
+
+    _isUserPanning = false;
+    _panPointerId = null;
+    _panMoved = false;
+  };
+
+  window.addEventListener("pointerup", endPan, { passive: true });
+  window.addEventListener("pointercancel", endPan, { passive: true });
+}
+
 
 // Prev/Next
 els.prev.addEventListener("click", () => {
