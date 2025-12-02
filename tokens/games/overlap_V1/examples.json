@@ -700,6 +700,344 @@
     ]
   },
   {
+    "id": "p-20251202-sultan-chain",
+    "title": "Super Long",
+    "type": "chain",
+    "words": [
+      {
+        "clue": "Middle Eastern ruler",
+        "answer": "SULTAN",
+        "start": 1,
+        "height": "full",
+        "color": "--c-blue",
+        "diff": "medium"
+      },
+      {
+        "clue": "Off-topic aside",
+        "answer": "TANGENT",
+        "start": 4,
+        "height": "mid",
+        "color": "--c-pink",
+        "diff": "medium"
+      },
+      {
+        "clue": "Main course",
+        "answer": "ENTREE",
+        "start": 8,
+        "height": "inner",
+        "color": "--c-yellow",
+        "diff": "medium"
+      },
+      {
+        "clue": "Coral ridge",
+        "answer": "REEF",
+        "start": 11,
+        "height": "full",
+        "color": "--c-green",
+        "diff": "easy"
+      },
+      {
+        "clue": "Attempt",
+        "answer": "EFFORT",
+        "start": 13,
+        "height": "mid",
+        "color": "--c-blue",
+        "diff": "medium"
+      },
+      {
+        "clue": "Traditional; conventional",
+        "answer": "ORTHODOX",
+        "start": 16,
+        "height": "inner",
+        "color": "--c-purple",
+        "diff": "medium"
+      },
+      {
+        "clue": "Posting private info",
+        "answer": "DOXING",
+        "start": 21,
+        "height": "full",
+        "color": "--c-orange",
+        "diff": "medium"
+      },
+      {
+        "clue": "Pungent bulb",
+        "answer": "GARLIC",
+        "start": 26,
+        "height": "mid",
+        "color": "--c-blue",
+        "diff": "medium"
+      },
+      {
+        "clue": "Hanging ice spike",
+        "answer": "ICICLE",
+        "start": 30,
+        "height": "inner",
+        "color": "--c-pink",
+        "diff": "medium"
+      },
+      {
+        "clue": "Witty; smart",
+        "answer": "CLEVER",
+        "start": 33,
+        "height": "full",
+        "color": "--c-mint",
+        "diff": "medium"
+      },
+      {
+        "clue": "Jury's decision",
+        "answer": "VERDICT",
+        "start": 36,
+        "height": "mid",
+        "color": "--c-yellow",
+        "diff": "medium"
+      },
+      {
+        "clue": "Lay down orders",
+        "answer": "DICTATE",
+        "start": 39,
+        "height": "inner",
+        "color": "--c-orange",
+        "diff": "medium"
+      },
+      {
+        "clue": "Boring; tiring",
+        "answer": "TEDIOUS",
+        "start": 44,
+        "height": "full",
+        "color": "--c-blue",
+        "diff": "medium"
+      },
+      {
+        "clue": "Drive out",
+        "answer": "OUST",
+        "start": 48,
+        "height": "mid",
+        "color": "--c-mint",
+        "diff": "easy"
+      },
+      {
+        "clue": "Rock",
+        "answer": "STONE",
+        "start": 50,
+        "height": "inner",
+        "color": "--c-green",
+        "diff": "easy"
+      },
+      {
+        "clue": "Sound quality",
+        "answer": "TONE",
+        "start": 51,
+        "height": "full",
+        "color": "--c-green",
+        "diff": "easy"
+      },
+      {
+        "clue": "Single-direction",
+        "answer": "ONEWAY",
+        "start": 52,
+        "height": "mid",
+        "color": "--c-yellow",
+        "diff": "medium"
+      },
+      {
+        "clue": "Navigation aids/signage",
+        "answer": "WAYFINDING",
+        "start": 55,
+        "height": "inner",
+        "color": "--c-red",
+        "diff": "hard"
+      },
+      {
+        "clue": "Inventiveness",
+        "answer": "INGENUITY",
+        "start": 62,
+        "height": "full",
+        "color": "--c-purple",
+        "diff": "hard"
+      },
+      {
+        "clue": "Cruel ruler",
+        "answer": "TYRANT",
+        "start": 69,
+        "height": "mid",
+        "color": "--c-green",
+        "diff": "medium"
+      },
+      {
+        "clue": "Patriotic song",
+        "answer": "ANTHEM",
+        "start": 72,
+        "height": "inner",
+        "color": "--c-yellow",
+        "diff": "medium"
+      },
+      {
+        "clue": "Half a globe",
+        "answer": "HEMISPHERE",
+        "start": 75,
+        "height": "full",
+        "color": "--c-red",
+        "diff": "hard"
+      },
+      {
+        "clue": "Give a new look",
+        "answer": "RESKIN",
+        "start": 83,
+        "height": "mid",
+        "color": "--c-yellow",
+        "diff": "medium"
+      },
+      {
+        "clue": "Realm",
+        "answer": "KINGDOM",
+        "start": 86,
+        "height": "inner",
+        "color": "--c-blue",
+        "diff": "medium"
+      },
+      {
+        "clue": "Legal residence",
+        "answer": "DOMICILE",
+        "start": 90,
+        "height": "full",
+        "color": "--c-pink",
+        "diff": "medium"
+      },
+      {
+        "clue": "Small-intestine part",
+        "answer": "ILEUM",
+        "start": 95,
+        "height": "mid",
+        "color": "--c-green",
+        "diff": "easy"
+      },
+      {
+        "clue": "Rain shield",
+        "answer": "UMBRELLA",
+        "start": 98,
+        "height": "inner",
+        "color": "--c-orange",
+        "diff": "medium"
+      },
+      {
+        "clue": "Narrow road",
+        "answer": "LANE",
+        "start": 104,
+        "height": "full",
+        "color": "--c-cyan",
+        "diff": "easy"
+      },
+      {
+        "clue": "Low on iron, say",
+        "answer": "ANEMIC",
+        "start": 105,
+        "height": "mid",
+        "color": "--c-purple",
+        "diff": "medium"
+      },
+      {
+        "clue": "Tiny organisms",
+        "answer": "MICROBES",
+        "start": 108,
+        "height": "inner",
+        "color": "--c-yellow",
+        "diff": "medium"
+      },
+      {
+        "clue": "Top-notch",
+        "answer": "BEST",
+        "start": 113,
+        "height": "full",
+        "color": "--c-green",
+        "diff": "easy"
+      },
+      {
+        "clue": "Rough calculation",
+        "answer": "ESTIMATE",
+        "start": 114,
+        "height": "mid",
+        "color": "--c-blue",
+        "diff": "medium"
+      },
+      {
+        "clue": "Run-down apartment bldg.",
+        "answer": "TENEMENT",
+        "start": 120,
+        "height": "inner",
+        "color": "--c-pink",
+        "diff": "medium"
+      },
+      {
+        "clue": "Whole; complete",
+        "answer": "ENTIRE",
+        "start": 125,
+        "height": "full",
+        "color": "--c-yellow",
+        "diff": "medium"
+      },
+      {
+        "clue": "Worn out",
+        "answer": "TIRED",
+        "start": 127,
+        "height": "mid",
+        "color": "--c-cyan",
+        "diff": "easy"
+      },
+      {
+        "clue": "Giant California tree",
+        "answer": "REDWOOD",
+        "start": 129,
+        "height": "inner",
+        "color": "--c-red",
+        "diff": "medium"
+      },
+      {
+        "clue": "Stiff; not flexible",
+        "answer": "WOODEN",
+        "start": 132,
+        "height": "full",
+        "color": "--c-green",
+        "diff": "medium"
+      },
+      {
+        "clue": "Never-ending",
+        "answer": "ENDLESS",
+        "start": 136,
+        "height": "mid",
+        "color": "--c-pink",
+        "diff": "medium"
+      },
+      {
+        "clue": "Smaller; inferior",
+        "answer": "LESSER",
+        "start": 139,
+        "height": "inner",
+        "color": "--c-yellow",
+        "diff": "medium"
+      },
+      {
+        "clue": "Soil wear-away",
+        "answer": "EROSION",
+        "start": 143,
+        "height": "full",
+        "color": "--c-blue",
+        "diff": "medium"
+      },
+      {
+        "clue": "Charge (atoms)",
+        "answer": "IONIZE",
+        "start": 147,
+        "height": "mid",
+        "color": "--c-pink",
+        "diff": "medium"
+      }
+    ],
+    "timeLimit": 200,
+    "lockCorrectWords": true,
+    "timedMode": false
+  },
+  {
     "id": "p-ce92b6-19adbcb9cae",
     "title": "On the Water",
     "type": "chain",

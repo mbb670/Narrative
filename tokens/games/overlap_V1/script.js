@@ -62,7 +62,17 @@ const TIME_BONUS_FACTOR = 0.5;
 const TIME_BONUS_ROUND = "floor"; // "floor" | "round" | "ceil"
 const CHAIN_CLUE_CAP = 6;
 
-const DEF = await (await fetch("./examples.json")).json();
+// ---- Defaults loading (robust + cache-bust) ----
+const DEFAULTS_VERSION = "2025-12-02"; // <-- bump this any time you edit examples.json
+const DEFAULTS_VER_KEY = `${KEY}__defaults_version`;
+
+// Cache-bust + bypass browser HTTP cache differences
+const defaultsURL = new URL("./examples.json", import.meta.url);
+defaultsURL.searchParams.set("v", DEFAULTS_VERSION);
+
+// "no-store" helps with browser cache; the ?v= param helps across browsers + SW caches
+const DEF = await (await fetch(defaultsURL, { cache: "no-store" })).json();
+
 
 // ---- DOM ----
 const $ = (s) => document.querySelector(s);
@@ -105,17 +115,35 @@ const els = {
 const store = {
   load() {
     try {
+      const url = new URL(location.href);
+      const forceReset = url.searchParams.has("reset") || url.searchParams.has("fresh");
+
+      const savedDefaultsVer = localStorage.getItem(DEFAULTS_VER_KEY);
+
+      // If defaults changed (or you force reset), discard saved puzzles so you get fresh examples.json
+      if (forceReset || savedDefaultsVer !== DEFAULTS_VERSION) {
+        localStorage.setItem(DEFAULTS_VER_KEY, DEFAULTS_VERSION);
+        localStorage.removeItem(KEY);
+      }
+
       const raw = localStorage.getItem(KEY);
       const v = raw ? JSON.parse(raw) : null;
-      return Array.isArray(v) && v.length ? v : structuredClone(DEF);
+
+      if (Array.isArray(v) && v.length) return v;
+
+      // No saved puzzles => use shipped defaults
+      localStorage.setItem(DEFAULTS_VER_KEY, DEFAULTS_VERSION);
+      return structuredClone(DEF);
     } catch {
       return structuredClone(DEF);
     }
   },
   save() {
+    localStorage.setItem(DEFAULTS_VER_KEY, DEFAULTS_VERSION);
     localStorage.setItem(KEY, JSON.stringify(puzzles));
   },
 };
+
 
 // ---- Utils ----
 const uid = () =>
@@ -142,6 +170,10 @@ const tr = (w) => {
 
 const COLOR_LABEL = Object.fromEntries(COLORS.map(([lab, val]) => [val, lab]));
 const isChainPuzzle = (p) => String(p?.type || MODE.OVERLAP) === MODE.CHAIN;
+function chainIsTimed(p) {
+  const v = p?.chainTimed ?? p?.timed ?? p?.timedMode ?? p?.isTimed; // supports common names
+  return v == null ? true : !!v;
+}
 
 const inferDiffFromColor = (color) => {
   for (const d of Object.keys(DIFF_COLORS)) {
@@ -150,7 +182,7 @@ const inferDiffFromColor = (color) => {
   return "easy";
 };
 
-const normWord = (w, pType) => {
+const normWord = (w, pType, opts = {}) => {
   const out = {
     clue: String(w?.clue || ""),
     answer: String(w?.answer || ""),
@@ -160,19 +192,27 @@ const normWord = (w, pType) => {
   };
 
   if (pType === MODE.CHAIN) {
+    // keep diff around (harmless), but only *enforce* DIFF_COLORS when timed
     out.diff = String(w?.diff || inferDiffFromColor(out.color) || "easy");
-    const allowed = DIFF_COLORS[out.diff] || DIFF_COLORS.easy;
-    if (!allowed.includes(out.color)) out.color = allowed[0];
+
+    const timed = opts.timed !== false; // default true
+    if (timed) {
+      const allowed = DIFF_COLORS[out.diff] || DIFF_COLORS.easy;
+      if (!allowed.includes(out.color)) out.color = allowed[0];
+    }
   }
 
   return out;
 };
 
+
 const normPuzzle = (p) => {
   const type = String(p?.type || MODE.OVERLAP);
   const wordsRaw = Array.isArray(p?.words) ? p.words : [];
   const fallback = { clue: "Clue", answer: "WORD", start: 1, color: "--c-red", height: "full" };
-  const words = (wordsRaw.length ? wordsRaw : [fallback]).map((w) => normWord(w, type));
+const timed = type === MODE.CHAIN ? chainIsTimed(p) : true;
+const words = (wordsRaw.length ? wordsRaw : [fallback]).map((w) => normWord(w, type, { timed }));
+
 
   const out = {
     id: String(p?.id || uid()),
@@ -315,6 +355,7 @@ kb.addEventListener("keydown", (e) => {
 // ---- Model ----
 function computed(p) {
   const type = String(p?.type || MODE.OVERLAP);
+  const timedChain = type === MODE.CHAIN && chainIsTimed(p);
 
   const entries = (p.words || [])
     .map((w, rawIdx) => {
@@ -325,10 +366,11 @@ function computed(p) {
       let diff = type === MODE.CHAIN ? String(w.diff || inferDiffFromColor(w.color) || "easy") : null;
       let color = String(w.color || "--c-red");
 
-      if (type === MODE.CHAIN) {
-        const allowed = DIFF_COLORS[diff] || DIFF_COLORS.easy;
-        if (!allowed.includes(color)) color = allowed[0];
-      }
+     if (type === MODE.CHAIN && timedChain) {
+  const allowed = DIFF_COLORS[diff] || DIFF_COLORS.easy;
+  if (!allowed.includes(color)) color = allowed[0];
+}
+
 
       return { clue: w.clue || "", ans, start, len: ans.length, color, t, b, r: tr(w), rawIdx, diff };
     })
@@ -1630,6 +1672,8 @@ function syncBuilder() {
 function renderRows() {
   const p = puzzles[pIdx];
   const chainMode = isChainPuzzle(p);
+  const timedChain = chainMode && chainIsTimed(p);
+
 
   const ws = p.words || [];
   const order = ws.map((w, i) => ({ i, s: +w.start || 1, r: tr(w) })).sort((a, b) => a.s - b.s || a.r - b.r);
@@ -1639,17 +1683,17 @@ function renderRows() {
       const i = o.i;
       const w = ws[i];
 
-      if (chainMode) {
-        w.diff = String(w.diff || inferDiffFromColor(w.color) || "easy");
-        const allowedNow = DIFF_COLORS[w.diff] || DIFF_COLORS.easy;
-        if (!allowedNow.includes(w.color)) w.color = allowedNow[0];
-      }
+      if (timedChain) {
+  w.diff = String(w.diff || inferDiffFromColor(w.color) || "easy");
+  const allowedNow = DIFF_COLORS[w.diff] || DIFF_COLORS.easy;
+  if (!allowedNow.includes(w.color)) w.color = allowedNow[0];
+}
 
-      const diff = chainMode ? String(w.diff || "easy") : null;
+
+      const diff = timedChain ? String(w.diff || "easy") : null;
       const diffOpts = DIFFS.map(([lab, val]) => `<option value="${val}" ${diff === val ? "selected" : ""}>${lab}</option>`).join("");
 
-      const allowedColors = chainMode ? (DIFF_COLORS[diff] || DIFF_COLORS.easy) : COLORS.map((x) => x[1]);
-      const colorOpts = allowedColors
+const allowedColors = timedChain ? (DIFF_COLORS[diff] || DIFF_COLORS.easy) : COLORS.map((x) => x[1]);      const colorOpts = allowedColors
         .map((val) => {
           const lab = COLOR_LABEL[val] || val;
           return `<option value="${val}" ${String(w.color) === val ? "selected" : ""}>${lab}</option>`;
@@ -1681,12 +1725,13 @@ function renderRows() {
               <input class="mi" data-f="start" inputmode="numeric" value="${escapeAttr(String(w.start ?? 1))}" />
             </div>
 
-            ${chainMode ? `
-              <div>
-                <label class="lab">Difficulty</label>
-                <select class="ms" data-f="diff">${diffOpts}</select>
-              </div>
-            ` : ""}
+            ${timedChain ? `
+  <div>
+    <label class="lab">Difficulty</label>
+    <select class="ms" data-f="diff">${diffOpts}</select>
+  </div>
+` : ""}
+
 
             <div>
               <label class="lab">Color</label>
@@ -2010,10 +2055,11 @@ els.rows.addEventListener("change", (e) => {
 
   w[f] = e.target.value;
 
-  if (isChainPuzzle(puzzles[pIdx]) && f === "diff") {
-    const allowed = DIFF_COLORS[w.diff] || DIFF_COLORS.easy;
-    if (!allowed.includes(w.color)) w.color = allowed[0];
-  }
+ if (isChainPuzzle(puzzles[pIdx]) && chainIsTimed(puzzles[pIdx]) && f === "diff") {
+  const allowed = DIFF_COLORS[w.diff] || DIFF_COLORS.easy;
+  if (!allowed.includes(w.color)) w.color = allowed[0];
+}
+
 
   setDirty(true);
   renderRows();
