@@ -278,19 +278,6 @@
      opacity: .55;
      user-select: none
  }
-
- .sr {
-     position: absolute;
-     width: 1px;
-     height: 1px;
-     padding: 0;
-     margin: -1px;
-     overflow: hidden;
-     clip: rect(0, 0, 0, 0);
-     white-space: nowrap;
-     border: 0
- }
-
  /* Success */
  .success {
      position: fixed;
@@ -542,3 +529,149 @@
  .token-swap {
      display: none;
  }
+
+
+ /* -----------------------------
+   Word Chain / Clue Button UI
+   ----------------------------- */
+
+/* Make clue elements behave like buttons without default button styles */
+.legend button.clue {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+.legend button.clue:focus {
+  outline: none;
+}
+
+.legend button.clue:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 6px;
+  border-radius: 10px;
+}
+
+/* -----------------------------
+   Selected word highlight
+   (click clue -> select word)
+   ----------------------------- */
+.range.is-selected {
+  /* outline: 3px solid green; */
+  /* outline-offset: 3px; */
+
+  border-width: 10px;
+}
+
+/* -----------------------------
+   Locked/solved word styling (Word Chain)
+   When "Mark correct words" is enabled.
+   ----------------------------- */
+.range.is-locked {
+  opacity: 0.55;
+  /* filter: grayscale(1); */
+  /* We override the range color to a faint neutral.
+     Tweak this or remove if you want to preserve original color. */
+  --color: gray !important;
+}
+
+/* -----------------------------
+   Word Chain HUD (start + timer)
+   ----------------------------- */
+.chainHud {
+  /* display: flex; */
+  /* align-items: center; */
+  /* justify-content: center; */
+  /* gap: 12px; */
+  margin-bottom: var(--spacing-x16);
+    min-height: var(--unit-32);
+}
+
+.chainHud[hidden] {
+  display: none;
+}
+
+.chainHudRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-x16);
+  justify-content: center;
+}
+
+.chainTimer {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Progress bar */
+.chainBar {
+  /* position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  flex: 1;
+  min-width: 80px; */
+
+  display: none;
+}
+
+/* .chainBar > i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(1);
+  background: rgba(255, 255, 255, 0.35);
+} */
+
+/* Hide clues until start */
+.legend[hidden] {
+  display: none;
+}
+
+/* -----------------------------
+   Word Chain clue animation
+   (in/out as you scroll)
+   ----------------------------- */
+.legend.chainLegend {
+  margin-top: 12px;
+}
+
+.legend.chainLegend .chainClue {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  will-change: transform, opacity;
+}
+
+.legend.chainLegend .chainClue.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.legend.chainLegend .chainClue.is-out {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* Difficulty tag (E/M/H) */
+.legend.chainLegend .diffTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  margin-left: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  line-height: 1;
+}

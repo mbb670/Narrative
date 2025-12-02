@@ -14,13 +14,15 @@
 <body>
   <main class="wrap">
     <h1 class="text-display-semibold-sm">Overlap</h1>
-      <div class="credit text-uppercase-semibold-md">
-Created & designed by <span>Matthew Barnett</span> • V1.16
+      <div class="credit text-system-regular-sm">
+Created & designed by <span>Matthew Barnett</span> • V2.0
   </div>
 
     <div class="tabs" role="tablist" aria-label="Overlap sections">
       <button class="tab is-active text-uppercase-semibold-md" id="tabPlay" type="button" role="tab"
         aria-selected="true">Play</button>
+         <button class="tab text-uppercase-semibold-md" id="tabChain" type="button" role="tab"
+        aria-selected="true">Word Chain</button>
       <button class="tab text-uppercase-semibold-md" id="tabBuild" type="button" role="tab"
         aria-selected="false">Builder</button>
     </div>
@@ -28,7 +30,6 @@ Created & designed by <span>Matthew Barnett</span> • V1.16
     <!-- PLAY -->
     <section class="panel is-active" id="panelPlay" role="tabpanel" aria-labelledby="tabPlay">
       <div class="stage" id="stage" tabindex="0" role="application" aria-label="Overlap puzzle">
-        <p class="sr" id="sr">Click a square or a clue then type letters. Backspace erases. Arrow keys move.</p>
         <div class="meta text-uppercase-semibold-md" id="meta">Puzzle</div>
         <div class="gridScroll" id="gridScroll">
           <div class="grid" id="grid" aria-describedby="sr"></div>
