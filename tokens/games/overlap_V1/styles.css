@@ -606,6 +606,7 @@
 }
 
 .chainHudRight {
+margin-top: var(--spacing-x16);
   display: flex;
   align-items: center;
   gap: var(--spacing-x16);
