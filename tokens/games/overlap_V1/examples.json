@@ -1,758 +1,759 @@
-[{
+[
+  {
     "id": "p-001",
     "title": "Under the Surface",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Fury",
         "answer": "ANGER",
         "start": 1,
-        "color": "--c-red",
-        "height": "full"
+        "height": "full",
+        "color": "--c-red"
       },
       {
         "clue": "Tiny cause of illness",
         "answer": "GERM",
         "start": 3,
-        "color": "--c-yellow",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-yellow"
       },
       {
         "clue": "Stoat in its winter coat",
         "answer": "ERMINE",
         "start": 4,
-        "color": "--c-green",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-green"
       },
       {
         "clue": "Extracted from the ground",
         "answer": "MINED",
         "start": 6,
-        "color": "--c-cyan",
-        "height": "full"
+        "height": "full",
+        "color": "--c-cyan"
       }
     ]
   },
   {
     "id": "p-002",
     "title": "Moving Parts",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Representation",
         "answer": "MODEL",
         "start": 1,
-        "color": "--c-blue",
-        "height": "full"
+        "height": "full",
+        "color": "--c-blue"
       },
       {
         "clue": "River-mouth landform",
         "answer": "DELTA",
         "start": 3,
-        "color": "--c-orange",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-orange"
       },
       {
         "clue": "Fortune-telling deck",
         "answer": "TAROT",
         "start": 6,
-        "color": "--c-purple",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-purple"
       },
       {
         "clue": "Spinning motor part",
         "answer": "ROTOR",
         "start": 8,
-        "color": "--c-cyan",
-        "height": "full"
+        "height": "full",
+        "color": "--c-cyan"
       }
     ]
   },
   {
     "id": "p-003",
     "title": "Just Right",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Path around a planet",
         "answer": "ORBIT",
         "start": 1,
-        "color": "--c-mint",
-        "height": "full"
+        "height": "full",
+        "color": "--c-mint"
       },
       {
         "clue": "A small mouthful",
         "answer": "BITE",
         "start": 3,
-        "color": "--c-pink",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-pink"
       },
       {
         "clue": "Lukewarm",
         "answer": "TEPID",
         "start": 5,
-        "color": "--c-yellow",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-yellow"
       },
       {
         "clue": "Perfect",
         "answer": "IDEAL",
         "start": 8,
-        "color": "--c-blue",
-        "height": "full"
+        "height": "full",
+        "color": "--c-blue"
       }
     ]
   },
   {
     "id": "p-004",
     "title": "Quiet Company",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Backyard plot",
         "answer": "GARDEN",
         "start": 1,
-        "color": "--c-green",
-        "height": "full"
+        "height": "full",
+        "color": "--c-green"
       },
       {
         "clue": "Tooth-related",
         "answer": "DENTAL",
         "start": 4,
-        "color": "--c-cyan",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-cyan"
       },
       {
         "clue": "Bird's claw",
         "answer": "TALON",
         "start": 7,
-        "color": "--c-orange",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-orange"
       },
       {
         "clue": "All alone",
         "answer": "LONELY",
         "start": 9,
-        "color": "--c-purple",
-        "height": "full"
+        "height": "full",
+        "color": "--c-purple"
       }
     ]
   },
   {
     "id": "p-005",
     "title": "Local Detail",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Tiny screen dot",
         "answer": "PIXEL",
         "start": 1,
-        "color": "--c-blue",
-        "height": "full"
+        "height": "full",
+        "color": "--c-blue"
       },
       {
         "clue": "Older adult",
         "answer": "ELDER",
         "start": 4,
-        "color": "--c-mint",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-mint"
       },
       {
         "clue": "A horse race",
         "answer": "DERBY",
         "start": 6,
-        "color": "--c-red",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-red"
       },
       {
         "clue": "Local ordinance",
         "answer": "BYLAW",
         "start": 9,
-        "color": "--c-yellow",
-        "height": "full"
+        "height": "full",
+        "color": "--c-yellow"
       }
     ]
   },
   {
     "id": "p-006",
     "title": "Hosted",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Milk container",
         "answer": "CARTON",
         "start": 1,
-        "color": "--c-orange",
-        "height": "full"
+        "height": "full",
+        "color": "--c-orange"
       },
       {
         "clue": "Taste organ",
         "answer": "TONGUE",
         "start": 4,
-        "color": "--c-pink",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-pink"
       },
       {
         "clue": "Visitor",
         "answer": "GUEST",
         "start": 7,
-        "color": "--c-cyan",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-cyan"
       },
       {
         "clue": "Property (land + home)",
         "answer": "ESTATE",
         "start": 9,
-        "color": "--c-green",
-        "height": "full"
+        "height": "full",
+        "color": "--c-green"
+      }
+    ]
+  },
+  {
+    "id": "p-007",
+    "title": "Edges and Origins",
+    "type": "overlap",
+    "words": [
+      {
+        "clue": "Safe port",
+        "answer": "HARBOR",
+        "start": 1,
+        "height": "full",
+        "color": "--c-cyan"
+      },
+      {
+        "clue": "Edge or boundary",
+        "answer": "BORDER",
+        "start": 4,
+        "height": "mid",
+        "color": "--c-yellow"
+      },
+      {
+        "clue": "Draw from",
+        "answer": "DERIVE",
+        "start": 7,
+        "height": "inner",
+        "color": "--c-purple"
+      },
+      {
+        "clue": "Climbing plants (plural)",
+        "answer": "IVIES",
+        "start": 10,
+        "height": "full",
+        "color": "--c-green"
       }
     ]
   },
   {
     "id": "p-008",
     "title": "Mixed Signals",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Soft fiber",
         "answer": "COTTON",
         "start": 1,
-        "color": "--c-mint",
-        "height": "full"
+        "height": "full",
+        "color": "--c-mint"
       },
       {
         "clue": "Bitter mixer",
         "answer": "TONIC",
         "start": 4,
-        "color": "--c-blue",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-blue"
       },
       {
         "clue": "Five-cent coin (or metal)",
         "answer": "NICKEL",
         "start": 6,
-        "color": "--c-orange",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-orange"
       },
       {
         "clue": "Seaweed",
         "answer": "KELP",
         "start": 9,
-        "color": "--c-green",
-        "height": "full"
+        "height": "full",
+        "color": "--c-green"
       }
     ]
   },
   {
     "id": "p-009",
     "title": "Keep It Down",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Ancient imprint",
         "answer": "FOSSIL",
         "start": 1,
-        "color": "--c-purple",
-        "height": "full"
+        "height": "full",
+        "color": "--c-purple"
       },
       {
         "clue": "Not noisy",
         "answer": "SILENT",
         "start": 4,
-        "color": "--c-blue",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-blue"
       },
       {
         "clue": "Complete",
         "answer": "ENTIRE",
         "start": 7,
-        "color": "--c-mint",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-mint"
       },
       {
         "clue": "The Emerald Isle",
         "answer": "IRELAND",
         "start": 10,
-        "color": "--c-green",
-        "height": "full"
+        "height": "full",
+        "color": "--c-green"
       }
     ]
   },
   {
     "id": "p-010",
     "title": "Bounce Back",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Corkscrew shape",
         "answer": "SPIRAL",
         "start": 1,
-        "color": "--c-red",
-        "height": "full"
+        "height": "full",
+        "color": "--c-red"
       },
       {
         "clue": "Gather (or a pep talk)",
         "answer": "RALLY",
         "start": 4,
-        "color": "--c-yellow",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-yellow"
       },
       {
         "clue": "Song line",
         "answer": "LYRIC",
         "start": 7,
-        "color": "--c-pink",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-pink"
       },
       {
         "clue": "Rebound",
         "answer": "RICOCHET",
         "start": 9,
-        "color": "--c-cyan",
-        "height": "full"
+        "height": "full",
+        "color": "--c-cyan"
+      }
+    ]
+  },
+  {
+    "id": "p-011",
+    "title": "A Place for Everything",
+    "type": "overlap",
+    "words": [
+      {
+        "clue": "Gallery building",
+        "answer": "MUSEUM",
+        "start": 1,
+        "height": "full",
+        "color": "--c-blue"
+      },
+      {
+        "clue": "Short recap",
+        "answer": "SUMMARY",
+        "start": 4,
+        "height": "mid",
+        "color": "--c-orange"
+      },
+      {
+        "clue": "U.S. state",
+        "answer": "MARYLAND",
+        "start": 7,
+        "height": "inner",
+        "color": "--c-green"
+      },
+      {
+        "clue": "Scenery",
+        "answer": "LANDSCAPE",
+        "start": 11,
+        "height": "full",
+        "color": "--c-cyan"
       }
     ]
   },
   {
     "id": "p-012",
     "title": "Bad Inbox",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Large body of water",
         "answer": "OCEAN",
         "start": 1,
-        "color": "--c-cyan",
-        "height": "full"
+        "height": "full",
+        "color": "--c-cyan"
       },
       {
         "clue": "Blacksmith block",
         "answer": "ANVIL",
         "start": 4,
-        "color": "--c-yellow",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-yellow"
       },
       {
         "clue": "Bad guy",
         "answer": "VILLAIN",
         "start": 6,
-        "color": "--c-red",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-red"
       },
       {
         "clue": "Email folder",
         "answer": "INBOX",
         "start": 11,
-        "color": "--c-blue",
-        "height": "full"
+        "height": "full",
+        "color": "--c-blue"
       }
     ]
   },
   {
     "id": "p-013",
     "title": "Deep Cuts",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Underground chamber",
         "answer": "CAVERN",
         "start": 1,
-        "color": "--c-purple",
-        "height": "full"
+        "height": "full",
+        "color": "--c-purple"
       },
       {
         "clue": "A boy's name meaning 'serious'",
         "answer": "ERNEST",
         "start": 4,
-        "color": "--c-mint",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-mint"
       },
       {
         "clue": "Baltic country",
         "answer": "ESTONIA",
         "start": 7,
-        "color": "--c-blue",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-blue"
       },
       {
         "clue": "Famous falls, for short",
         "answer": "NIAGARA",
         "start": 11,
-        "color": "--c-cyan",
-        "height": "full"
+        "height": "full",
+        "color": "--c-cyan"
       }
     ]
   },
   {
     "id": "p-014",
     "title": "Points of Interest",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Bed cushion",
         "answer": "PILLOW",
         "start": 1,
-        "color": "--c-pink",
-        "height": "full"
+        "height": "full",
+        "color": "--c-pink"
       },
       {
         "clue": "Flat low area",
         "answer": "LOWLAND",
         "start": 4,
-        "color": "--c-green",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-green"
       },
       {
         "clue": "Famous site",
         "answer": "LANDMARK",
         "start": 7,
-        "color": "--c-orange",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-orange"
       },
       {
         "clue": "Bazaar",
         "answer": "MARKET",
         "start": 11,
-        "color": "--c-yellow",
-        "height": "full"
+        "height": "full",
+        "color": "--c-yellow"
       }
     ]
   },
   {
     "id": "p-015",
     "title": "On Target",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Blue-tinted metal",
         "answer": "COBALT",
         "start": 1,
-        "color": "--c-blue",
-        "height": "full"
+        "height": "full",
+        "color": "--c-blue"
       },
       {
         "clue": "Religious table",
         "answer": "ALTAR",
         "start": 4,
-        "color": "--c-purple",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-purple"
       },
       {
         "clue": "Pointed projectile",
         "answer": "ARROW",
         "start": 7,
-        "color": "--c-red",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-red"
       },
       {
         "clue": "River vessel",
         "answer": "ROWBOAT",
         "start": 9,
-        "color": "--c-cyan",
-        "height": "full"
+        "height": "full",
+        "color": "--c-cyan"
       }
     ]
   },
   {
     "id": "p-016",
     "title": "Night Out",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Bird of prey",
         "answer": "FALCON",
         "start": 1,
-        "color": "--c-green",
-        "height": "full"
+        "height": "full",
+        "color": "--c-green"
       },
       {
         "clue": "Live music show",
         "answer": "CONCERT",
         "start": 4,
-        "color": "--c-blue",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-blue"
       },
       {
         "clue": "Sure",
         "answer": "CERTAIN",
         "start": 7,
-        "color": "--c-yellow",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-yellow"
       },
       {
         "clue": "Stain or corrupt",
         "answer": "TAINT",
         "start": 10,
-        "color": "--c-red",
-        "height": "full"
+        "height": "full",
+        "color": "--c-red"
       }
     ]
   },
   {
     "id": "p-017",
     "title": "At the Horizon",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Distant line",
         "answer": "HORIZON",
         "start": 1,
-        "color": "--c-orange",
-        "height": "full"
+        "height": "full",
+        "color": "--c-orange"
       },
       {
         "clue": "Layered vegetable",
         "answer": "ONION",
         "start": 6,
-        "color": "--c-mint",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-mint"
       },
       {
         "clue": "Relating to ions",
         "answer": "IONIC",
         "start": 8,
-        "color": "--c-cyan",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-cyan"
       },
       {
         "clue": "Alias",
         "answer": "NICKNAME",
         "start": 10,
-        "color": "--c-purple",
-        "height": "full"
+        "height": "full",
+        "color": "--c-purple"
       }
     ]
   },
   {
     "id": "p-018",
     "title": "Morning Routine",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Breakfast staple",
         "answer": "CEREAL",
         "start": 1,
-        "color": "--c-yellow",
-        "height": "full"
+        "height": "full",
+        "color": "--c-yellow"
       },
       {
         "clue": "Wake-up sound",
         "answer": "ALARM",
         "start": 5,
-        "color": "--c-red",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-red"
       },
       {
         "clue": "Fleet of ships",
         "answer": "ARMADA",
         "start": 7,
-        "color": "--c-blue",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-blue"
       },
       {
         "clue": "A polite title",
         "answer": "MADAM",
         "start": 9,
-        "color": "--c-pink",
-        "height": "full"
+        "height": "full",
+        "color": "--c-pink"
       }
     ]
   },
   {
     "id": "p-019",
     "title": "Guided Tour",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Admiration",
         "answer": "RESPECT",
         "start": 1,
-        "color": "--c-blue",
-        "height": "full"
+        "height": "full",
+        "color": "--c-blue"
       },
       {
         "clue": "A striking display",
         "answer": "SPECTACLE",
         "start": 3,
-        "color": "--c-cyan",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-cyan"
       },
       {
         "clue": "Merciful (or a name)",
         "answer": "CLEMENT",
         "start": 9,
-        "color": "--c-green",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-green"
       },
       {
         "clue": "Guide",
         "answer": "MENTOR",
         "start": 12,
-        "color": "--c-purple",
-        "height": "full"
+        "height": "full",
+        "color": "--c-purple"
       }
     ]
   },
   {
     "id": "p-020",
     "title": "Weatherproof",
-    "words": [{
+    "type": "overlap",
+    "words": [
+      {
         "clue": "Wet-weather jacket",
         "answer": "RAINCOAT",
         "start": 1,
-        "color": "--c-cyan",
-        "height": "full"
+        "height": "full",
+        "color": "--c-cyan"
       },
       {
         "clue": "Layer or cover",
         "answer": "COATING",
         "start": 5,
-        "color": "--c-orange",
-        "height": "mid"
+        "height": "mid",
+        "color": "--c-orange"
       },
       {
         "clue": "Slight trace",
         "answer": "TINGE",
         "start": 8,
-        "color": "--c-yellow",
-        "height": "inner"
+        "height": "inner",
+        "color": "--c-yellow"
       },
       {
         "clue": "Take in (as food)",
         "answer": "INGEST",
         "start": 9,
-        "color": "--c-green",
-        "height": "full"
+        "height": "full",
+        "color": "--c-green"
       }
     ]
   },
-  [{
-      "id": "p-101",
-      "title": "Earth and Stone",
-      "words": [{
-          "clue": "Hard building material from the ground",
-          "answer": "STONE",
-          "start": 1,
-          "color": "--c-red",
-          "height": "full"
-        },
-        {
-          "clue": "Shade or pitch, as of a sound",
-          "answer": "TONE",
-          "start": 2,
-          "color": "--c-yellow",
-          "height": "mid"
-        },
-        {
-          "clue": "Close by",
-          "answer": "NEAR",
-          "start": 4,
-          "color": "--c-green",
-          "height": "inner"
-        },
-        {
-          "clue": "Our home planet",
-          "answer": "EARTH",
-          "start": 5,
-          "color": "--c-blue",
-          "height": "full"
-        }
-      ]
-    },
-    {
-      "id": "p-104",
-      "title": "Forest Creatures",
-      "words": [{
-          "clue": "Long-eared hopper",
-          "answer": "RABBIT",
-          "start": 1,
-          "color": "--c-brown",
-          "height": "full"
-        },
-        {
-          "clue": "Small amount",
-          "answer": "BIT",
-          "start": 4,
-          "color": "--c-orange",
-          "height": "inner"
-        },
-        {
-          "clue": "Heronlike marsh bird",
-          "answer": "BITTERN",
-          "start": 4,
-          "color": "--c-blue",
-          "height": "mid"
-        },
-        {
-          "clue": "Seabird with a forked tail",
-          "answer": "TERN",
-          "start": 7,
-          "color": "--c-green",
-          "height": "full"
-        }
-      ]
-    },
-    {
-      "id": "p-109",
-      "title": "Bound Pages",
-      "words": [{
-          "clue": "Single side of a leaf in a book",
-          "answer": "PAGE",
-          "start": 1,
-          "color": "--c-yellow",
-          "height": "full"
-        },
-        {
-          "clue": "Years gone by",
-          "answer": "AGES",
-          "start": 2,
-          "color": "--c-orange",
-          "height": "inner"
-        },
-        {
-          "clue": "Metal fastener for loose papers",
-          "answer": "STAPLE",
-          "start": 5,
-          "color": "--c-red",
-          "height": "mid"
-        },
-        {
-          "clue": "Quick hit with a finger",
-          "answer": "TAP",
-          "start": 6,
-          "color": "--c-blue",
-          "height": "inner"
-        },
-        {
-          "clue": "Provided that; on condition that",
-          "answer": "LEST",
-          "start": 9,
-          "color": "--c-green",
-          "height": "mid"
-        },
-        {
-          "clue": "Narrative with a beginning, middle, and end",
-          "answer": "STORY",
-          "start": 11,
-          "color": "--c-purple",
-          "height": "full"
-        }
-      ]
-    },
-      {
-    "id": "mine",
+  {
+    "id": "p-ce92b6-19adbcb9cae",
     "title": "On the Water",
+    "type": "chain",
     "words": [
       {
         "clue": "Chain of sea islands",
         "answer": "ARCHIPELAGO",
         "start": 1,
+        "height": "full",
         "color": "--c-red",
-        "height": "full"
+        "diff": "hard"
       },
       {
         "clue": "Shallow pool behind a reef",
         "answer": "LAGOON",
-        "start": "8",
+        "start": 8,
+        "height": "mid",
         "color": "--c-green",
-        "height": "mid"
+        "diff": "easy"
       },
       {
         "clue": "Heading toward shore, say",
         "answer": "ONTO",
-        "start": "12",
+        "start": 12,
+        "height": "inner",
         "color": "--c-cyan",
-        "height": "inner"
+        "diff": "easy"
       },
       {
         "clue": "Vast body water",
         "answer": "OCEAN",
-        "start": "15",
+        "start": 15,
+        "height": "full",
         "color": "--c-purple",
-        "height": "full"
+        "diff": "hard"
       },
       {
         "clue": "Heavy object dropped to hold a boat",
         "answer": "ANCHOR",
-        "start": "18",
+        "start": 18,
+        "height": "mid",
         "color": "--c-pink",
-        "height": "mid"
+        "diff": "hard"
       },
       {
         "clue": "Where sea seems to meet sky",
         "answer": "HORIZON",
-        "start": "21",
+        "start": 21,
+        "height": "full",
         "color": "--c-mint",
-        "height": "full"
+        "diff": "easy"
       }
-    ]
+    ],
+    "timeLimit": 60,
+    "lockCorrectWords": true
   }
-  ]
-
 ]
