@@ -233,9 +233,15 @@
      margin-top: var(--spacing-x24);
      display: flex;
      flex-wrap: wrap;
+     flex-direction: column;
      justify-content: center;
-     gap: var(--spacing-x24);
-     padding-inline: var(--layout-grid-margin)
+     align-items: center;
+     gap: var(--spacing-x20);
+     padding-inline: var(--layout-grid-margin);
+
+     button{
+      max-width: 240px!important;
+     }
  }
 
  @media (max-width:640px) {
@@ -642,7 +648,7 @@
    (in/out as you scroll)
    ----------------------------- */
 .legend.chainLegend {
-  margin-top: 12px;
+  margin-top: var(--spacing-x12);
 }
 
 .legend.chainLegend .chainClue {
@@ -674,4 +680,6 @@
   background: rgba(255, 255, 255, 0.12);
   font-size: 12px;
   line-height: 1;
+
+  display: none;
 }
