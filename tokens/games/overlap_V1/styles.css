@@ -75,9 +75,10 @@
  }
 
  @media (max-width:640px) {
-    .stage{
-        margin-top: 0px!important;
-    }
+     .stage {
+         margin-top: 0px !important;
+     }
+
      /* .tabs {
          display: none;
      } */
@@ -114,11 +115,11 @@
  .panel.is-active {
      display: block;
 
-   
+
  }
 
- #panelBuild{
-      padding: var(--layout-grid-margin);
+ #panelBuild {
+     padding: var(--layout-grid-margin);
  }
 
  .stage {
@@ -139,11 +140,13 @@
      overflow-y: hidden;
      -webkit-overflow-scrolling: touch;
      scrollbar-gutter: stable;
-    padding-inline: var(--layout-grid-margin);
-    padding-bottom: var(--unit-16);
+     overscroll-behavior: contain;
+     padding-inline: var(--layout-grid-margin);
+     padding-bottom: var(--unit-16);
  }
 
  .grid {
+     overscroll-behavior: contain;
      position: relative;
      display: grid;
      grid-template-columns: repeat(var(--cols), var(--cell));
@@ -155,7 +158,7 @@
      box-shadow: inset 0 calc(var(--border-w) * -1) 0px 0px var(--grid-line), inset 0 var(--border-w) 0px 0px var(--grid-line);
 
 
-    
+
  }
 
  .range {
@@ -194,11 +197,11 @@
      user-select: none
  }
 
-.cell + .cell {
-  /* border-left: var(--border-w) solid var(--grid-line); */
-       box-shadow:calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line);
+ .cell+.cell {
+     /* border-left: var(--border-w) solid var(--grid-line); */
+     box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line);
 
-}
+ }
 
  /* .cell .letter {
      transform: translateY(2%)
@@ -239,8 +242,8 @@
      gap: var(--spacing-x20);
      padding-inline: var(--layout-grid-margin);
 
-     button{
-      max-width: 240px!important;
+     button {
+         max-width: 240px !important;
      }
  }
 
@@ -284,6 +287,7 @@
      opacity: .55;
      user-select: none
  }
+
  /* Success */
  .success {
      position: fixed;
@@ -541,85 +545,85 @@
    Word Chain / Clue Button UI
    ----------------------------- */
 
-/* Make clue elements behave like buttons without default button styles */
-.legend button.clue {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  margin: 0;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
-}
+ /* Make clue elements behave like buttons without default button styles */
+ .legend button.clue {
+     appearance: none;
+     -webkit-appearance: none;
+     background: transparent;
+     border: 0;
+     padding: 0;
+     margin: 0;
+     color: inherit;
+     font: inherit;
+     text-align: left;
+     width: 100%;
+     cursor: pointer;
+ }
 
-.legend button.clue:focus {
-  outline: none;
-}
+ .legend button.clue:focus {
+     outline: none;
+ }
 
-.legend button.clue:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.35);
-  outline-offset: 6px;
-  border-radius: 10px;
-}
+ .legend button.clue:focus-visible {
+     outline: 2px solid rgba(255, 255, 255, 0.35);
+     outline-offset: 6px;
+     border-radius: 10px;
+ }
 
-/* -----------------------------
+ /* -----------------------------
    Selected word highlight
    (click clue -> select word)
    ----------------------------- */
-.range.is-selected {
-  /* outline: 3px solid green; */
-  /* outline-offset: 3px; */
+ .range.is-selected {
+     /* outline: 3px solid green; */
+     /* outline-offset: 3px; */
 
-  border-width: 10px;
-}
+     border-width: 10px;
+ }
 
-/* -----------------------------
+ /* -----------------------------
    Locked/solved word styling (Word Chain)
    When "Mark correct words" is enabled.
    ----------------------------- */
-.range.is-locked {
-  opacity: 0.55;
-  /* filter: grayscale(1); */
-  /* We override the range color to a faint neutral.
+ .range.is-locked {
+     opacity: 0.55;
+     /* filter: grayscale(1); */
+     /* We override the range color to a faint neutral.
      Tweak this or remove if you want to preserve original color. */
-  --color: gray !important;
-}
+     --color: gray !important;
+ }
 
-/* -----------------------------
+ /* -----------------------------
    Word Chain HUD (start + timer)
    ----------------------------- */
-.chainHud {
-  /* display: flex; */
-  /* align-items: center; */
-  /* justify-content: center; */
-  /* gap: 12px; */
-  margin-bottom: var(--spacing-x16);
-    min-height: var(--unit-32);
-}
+ .chainHud {
+     /* display: flex; */
+     /* align-items: center; */
+     /* justify-content: center; */
+     /* gap: 12px; */
+     margin-bottom: var(--spacing-x16);
+     min-height: var(--unit-32);
+ }
 
-.chainHud[hidden] {
-  display: none;
-}
+ .chainHud[hidden] {
+     display: none;
+ }
 
-.chainHudRight {
-margin-top: var(--spacing-x16);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-x16);
-  justify-content: center;
-}
+ .chainHudRight {
+     margin-top: var(--spacing-x16);
+     display: flex;
+     align-items: center;
+     gap: var(--spacing-x16);
+     justify-content: center;
+ }
 
-.chainTimer {
-  font-variant-numeric: tabular-nums;
-}
+ .chainTimer {
+     font-variant-numeric: tabular-nums;
+ }
 
-/* Progress bar */
-.chainBar {
-  /* position: relative;
+ /* Progress bar */
+ .chainBar {
+     /* position: relative;
   height: 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
@@ -627,10 +631,10 @@ margin-top: var(--spacing-x16);
   flex: 1;
   min-width: 80px; */
 
-  display: none;
-}
+     display: none;
+ }
 
-/* .chainBar > i {
+ /* .chainBar > i {
   display: block;
   height: 100%;
   width: 100%;
@@ -639,48 +643,48 @@ margin-top: var(--spacing-x16);
   background: rgba(255, 255, 255, 0.35);
 } */
 
-/* Hide clues until start */
-.legend[hidden] {
-  display: none;
-}
+ /* Hide clues until start */
+ .legend[hidden] {
+     display: none;
+ }
 
-/* -----------------------------
+ /* -----------------------------
    Word Chain clue animation
    (in/out as you scroll)
    ----------------------------- */
-.legend.chainLegend {
-  margin-top: var(--spacing-x12);
-}
+ .legend.chainLegend {
+     margin-top: var(--spacing-x12);
+ }
 
-.legend.chainLegend .chainClue {
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
-  will-change: transform, opacity;
-}
+ .legend.chainLegend .chainClue {
+     opacity: 0;
+     transform: translateY(8px);
+     transition: opacity 0.18s ease, transform 0.18s ease;
+     will-change: transform, opacity;
+ }
 
-.legend.chainLegend .chainClue.is-in {
-  opacity: 1;
-  transform: translateY(0);
-}
+ .legend.chainLegend .chainClue.is-in {
+     opacity: 1;
+     transform: translateY(0);
+ }
 
-.legend.chainLegend .chainClue.is-out {
-  opacity: 0;
-  transform: translateY(-8px);
-}
+ .legend.chainLegend .chainClue.is-out {
+     opacity: 0;
+     transform: translateY(-8px);
+ }
 
-/* Difficulty tag (E/M/H) */
-.legend.chainLegend .diffTag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  margin-left: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  font-size: 12px;
-  line-height: 1;
+ /* Difficulty tag (E/M/H) */
+ .legend.chainLegend .diffTag {
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     width: 18px;
+     height: 18px;
+     border-radius: 999px;
+     margin-left: 8px;
+     background: rgba(255, 255, 255, 0.12);
+     font-size: 12px;
+     line-height: 1;
 
-  display: none;
-}
+     display: none;
+ }

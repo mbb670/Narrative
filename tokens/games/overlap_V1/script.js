@@ -60,6 +60,7 @@ const DEFAULT_CHAIN_TIME = 60;
 // bonusPoints = floor(remainingSeconds * TIME_BONUS_FACTOR)
 const TIME_BONUS_FACTOR = 0.5;
 const TIME_BONUS_ROUND = "floor"; // "floor" | "round" | "ceil"
+const CHAIN_CLUE_CAP = 6;
 
 const DEF = await (await fetch("./examples.json")).json();
 
@@ -897,7 +898,7 @@ function chainInputAllowed() {
   return play.mode !== MODE.CHAIN || chain.started;
 }
 
-// ---- Word Chain clues (viewport + minimum 4 nearest unsolved) ----
+// ---- Word Chain clues (current word first + adjacent unsolved) ----
 let _cluesRaf = 0;
 
 function requestChainClues() {
@@ -908,75 +909,118 @@ function requestChainClues() {
   });
 }
 
-function approxVisibleCols() {
-  const sc = els.gridScroll;
-  if (!sc) return { first: 0, last: play.n - 1 };
-
-  const cells = els.grid.querySelectorAll(".cell");
-  if (!cells.length) return { first: 0, last: play.n - 1 };
-
-  const step =
-    cells.length > 1
-      ? Math.max(1, cells[1].offsetLeft - cells[0].offsetLeft)
-      : Math.max(1, cells[0].offsetWidth);
-
-  const padPx = 24;
-  const left = Math.max(0, sc.scrollLeft - padPx);
-  const right = sc.scrollLeft + sc.clientWidth + padPx;
-
-  const first = clamp(Math.floor(left / step), 0, play.n - 1);
-  const last = clamp(Math.ceil(right / step), 0, play.n - 1);
-
-  return { first, last };
-}
-
-function chainUnsolvedEntries() {
+function isEntryUnsolvedForClues(e) {
   const p = puzzles[pIdx];
   const lockOnCorrect = !!p.lockCorrectWords;
-
-  if (lockOnCorrect) return play.entries.filter((e) => !play.lockedEntries.has(e.eIdx));
-  return play.entries.filter((e) => !isWordCorrect(e));
+  // If lock behavior is on, “unsolved” == “not locked”
+  if (lockOnCorrect) return !play.lockedEntries.has(e.eIdx);
+  // Otherwise, “unsolved” means letters don’t match yet
+  return !isWordCorrect(e);
 }
 
-function pickNearestUnsolved(minCount, alreadySet) {
-  const unsolved = chainUnsolvedEntries();
+// Candidates on current cursor cell, ordered:
+// 1) earlier start first
+// 2) if same start, random (uses e.r)
+function entriesOnCursorCellSorted() {
   const i = play.at;
+  return play.entries
+    .filter((e) => entryContainsIndex(e, i))
+    .sort((a, b) => a.start - b.start || a.r - b.r);
+}
 
-  const ranked = unsolved
-    .filter((e) => !alreadySet.has(e.eIdx))
-    .map((e) => {
-      const dist = Math.min(Math.abs(e.start - i), Math.abs(e.start + e.len - 1 - i));
-      return { e, dist };
-    })
-    .sort((a, b) => a.dist - b.dist || a.e.start - b.e.start)
-    .map((x) => x.e);
+function entryDistanceToIndex(e, i) {
+  const a = e.start;
+  const b = e.start + e.len - 1;
+  return Math.min(Math.abs(a - i), Math.abs(b - i));
+}
 
-  for (const e of ranked) {
-    alreadySet.add(e.eIdx);
-    if (alreadySet.size >= minCount) break;
-  }
+function nearestUnsolvedEntryToCursor() {
+  const i = play.at;
+  const unsolved = play.entries.filter(isEntryUnsolvedForClues);
+  if (!unsolved.length) return null;
+  unsolved.sort((a, b) => {
+    const da = entryDistanceToIndex(a, i);
+    const db = entryDistanceToIndex(b, i);
+    return da - db || a.start - b.start || a.r - b.r;
+  });
+  return unsolved[0];
 }
 
 function updateChainClues() {
   if (play.mode !== MODE.CHAIN) return;
-  if (!chain.started) return; // hidden until start
+  if (!chain.started) return; // intentionally hidden until Start
 
-  const p = puzzles[pIdx];
-  const lockOnCorrect = !!p.lockCorrectWords;
+  const cap = Math.max(1, CHAIN_CLUE_CAP | 0);
 
-  const { first, last } = approxVisibleCols();
-  const visibleUnsolved = chainUnsolvedEntries().filter((e) => e.start + e.len - 1 >= first && e.start <= last);
+  // 1) Top clue: word on the current cell (if unsolved / not locked)
+  const onCell = entriesOnCursorCellSorted().filter(isEntryUnsolvedForClues);
 
-  const picked = new Set(visibleUnsolved.map((e) => e.eIdx));
-  if (picked.size < 4) pickNearestUnsolved(4, picked);
+  // If current cell word is locked/solved, we *don’t* show it at top.
+  // In that case we pivot from nearest unsolved instead.
+  const top = onCell.length ? onCell[0] : null;
 
-  const finalList = play.entries
-    .filter((e) => picked.has(e.eIdx))
-    .filter((e) => (lockOnCorrect ? !play.lockedEntries.has(e.eIdx) : true))
-    .sort((a, b) => a.start - b.start);
+  // pivot determines adjacency fill
+  const pivot = top || nearestUnsolvedEntryToCursor();
 
+  const picked = [];
+  const pickedSet = new Set();
+
+  const add = (e) => {
+    if (!e) return false;
+    if (!isEntryUnsolvedForClues(e)) return false;
+    if (pickedSet.has(e.eIdx)) return false;
+    picked.push(e);
+    pickedSet.add(e.eIdx);
+    return true;
+  };
+
+  // Add top (only if it’s the actual current-cell word & unsolved)
+  if (top) add(top);
+
+  // 2) Fill with adjacent unsolved clues around pivot (in chain order)
+  if (pivot) {
+    const ordered = play.entries; // already sorted by start, then r
+    const baseIdx = ordered.indexOf(pivot);
+
+    // If we didn’t add the top and pivot is different, include pivot first.
+    if (!top) add(pivot);
+
+    for (let step = 1; picked.length < cap && step < ordered.length; step++) {
+      const right = ordered[baseIdx + step];
+      const left = ordered[baseIdx - step];
+
+      // Prefer forward then backward, alternating outward
+      if (right) add(right);
+      if (picked.length >= cap) break;
+      if (left) add(left);
+    }
+  }
+
+  // 3) If still not full (e.g., many locked), fill by nearest remaining unsolved
+  if (picked.length < cap) {
+    const i = play.at;
+    const remaining = play.entries
+      .filter((e) => isEntryUnsolvedForClues(e) && !pickedSet.has(e.eIdx))
+      .sort((a, b) => {
+        const da = entryDistanceToIndex(a, i);
+        const db = entryDistanceToIndex(b, i);
+        return da - db || a.start - b.start || a.r - b.r;
+      });
+
+    for (const e of remaining) {
+      add(e);
+      if (picked.length >= cap) break;
+    }
+  }
+
+  const finalList = picked;
+
+  // ---- Render (same animation approach you already had) ----
   const wrap = els.legend;
-  const existing = new Map([...wrap.querySelectorAll(".chainClue")].map((el) => [Number(el.dataset.e), el]));
+
+  const existing = new Map(
+    [...wrap.querySelectorAll(".chainClue")].map((el) => [Number(el.dataset.e), el])
+  );
   const nextKeys = new Set(finalList.map((e) => e.eIdx));
 
   for (const [k, el] of existing) {
@@ -996,7 +1040,8 @@ function updateChainClues() {
   finalList.forEach((e, pos) => {
     let el = existing.get(e.eIdx);
 
-    const diffTag = e.diff === "easy" ? "E" : e.diff === "medium" ? "M" : e.diff === "hard" ? "H" : "";
+    const diffTag =
+      e.diff === "easy" ? "E" : e.diff === "medium" ? "M" : e.diff === "hard" ? "H" : "";
 
     if (!el) {
       el = document.createElement("button");
@@ -1022,6 +1067,7 @@ function updateChainClues() {
     if (cur !== el) wrap.insertBefore(el, cur || null);
   });
 }
+
 
 // ---- Play UI ----
 function updatePlayUI() {
