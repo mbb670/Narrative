@@ -443,7 +443,20 @@ function computed(p) {
 }
 
 
-      return { clue: w.clue || "", ans, start, len: ans.length, color, t, b, r: tr(w), rawIdx, diff };
+      return {
+  clue: w.clue || "",
+  ans,
+  start,
+  len: ans.length,
+  color,
+  t,
+  b,
+  h: String(w.height || "full"), // <-- ADD THIS
+  r: tr(w),
+  rawIdx,
+  diff
+};
+
     })
     .filter((e) => e.len)
     .sort((a, b) => a.start - b.start || a.r - b.r);
@@ -475,34 +488,37 @@ function setCols(n) {
 function renderGrid(target, model, clickable) {
   target.innerHTML = "";
 
-for (const e of model.entries) {
-  const d = document.createElement("div");
-  d.className = "range";
-  d.dataset.e = String(e.eIdx);
-  d.style.setProperty("--start", e.start);
-  d.style.setProperty("--len", e.len);
-  d.style.setProperty("--t", e.t);
-  d.style.setProperty("--b", e.b);
-  d.style.setProperty("--color", `var(${e.color})`);
-  d.style.setProperty("--f", getComputedStyle(document.documentElement).getPropertyValue("--fill") || ".08");
+  // Ranges (explicit grid placement)
+  for (const e of model.entries) {
+    const d = document.createElement("div");
 
-  // z-index by height (full=1, mid=2, inner=3)
-  // e.t/e.b come from insets(height): full=>0, mid=>12.5, inner=>25
-  const z = e.t === 0 ? 1 : e.t === 12.5 ? 2 : 3;
-  d.style.zIndex = String(z);
+    const h = e.h || "full";
+    d.className = `range range-${h}`;
+    d.dataset.e = String(e.eIdx);
+
+    // keep existing vars (safe if other CSS uses them)
+    d.style.setProperty("--start", e.start);
+    d.style.setProperty("--len", e.len);
+
+    // NEW: grid lines are 1-based
+    d.style.setProperty("--gs", String(e.start + 1));
+    d.style.setProperty("--ge", String(e.start + e.len + 1));
+
+    d.style.setProperty("--color", `var(${e.color})`);
+    d.style.setProperty("--f", getComputedStyle(document.documentElement).getPropertyValue("--fill") || ".08");
 
     // In-range clue (play grid only; keep builder preview clean)
-  if (target === els.grid) {
-    const rc = document.createElement("div");
-    rc.className = "rangeClue text-uppercase-semibold-md";
-    rc.textContent = e.clue || "";
-    d.appendChild(rc);
+    if (target === els.grid) {
+      const rc = document.createElement("div");
+      rc.className = "rangeClue text-uppercase-semibold-md";
+      rc.textContent = e.clue || "";
+      d.appendChild(rc);
+    }
+
+    target.appendChild(d);
   }
 
-  target.appendChild(d);
-}
-
-
+  // Cells (MUST explicitly place into columns so they don't get auto-placed after ranges)
   for (let i = 0; i < model.total; i++) {
     const b = document.createElement("button");
     b.type = "button";
@@ -510,9 +526,123 @@ for (const e of model.entries) {
     b.dataset.i = i;
     b.disabled = !clickable;
     b.innerHTML = '<span class="num"></span><span class="letter"></span>';
+
+    // Explicit column placement (1-based)
+    b.style.gridColumnStart = String(i + 1);
+
     target.appendChild(b);
   }
 }
+
+// ---- Range clue "sticky within range" (cached + less jitter) ----
+let _rangeClueStickRaf = 0;
+let _rangeClueCache = []; // { r, clue, left, width, clueW, startPad, endPad, maxX, lastX }
+
+function requestRangeClueStick() {
+  if (_rangeClueStickRaf) return;
+  _rangeClueStickRaf = requestAnimationFrame(() => {
+    _rangeClueStickRaf = 0;
+    updateRangeClueStick();
+  });
+}
+
+function rebuildRangeClueStickCache() {
+  _rangeClueCache = [];
+
+  const sc = els.gridScroll;
+  if (!sc) return;
+
+  const ranges = els.grid?.querySelectorAll?.(".range") || [];
+  for (const r of ranges) {
+    const clue = r.querySelector(".rangeClue");
+    if (!clue) continue;
+
+    const cs = getComputedStyle(clue);
+    const startPad = parseFloat(cs.getPropertyValue("--range-clue-start")) || 8;
+    const endPad = parseFloat(cs.getPropertyValue("--range-clue-end")) || 8;
+
+    // Cache geometry (avoid layout reads during scroll frames)
+    const left = r.offsetLeft;
+    const width = r.offsetWidth;
+
+    // If it’s hidden, offsetWidth is 0 — we’ll rebuild again when it becomes visible.
+    const clueW = clue.offsetWidth || 0;
+
+    const maxX = Math.max(0, width - clueW - endPad - startPad);
+
+    _rangeClueCache.push({
+      r,
+      clue,
+      left,
+      width,
+      clueW,
+      startPad,
+      endPad,
+      maxX,
+      lastX: null,
+    });
+  }
+}
+
+function updateRangeClueStick() {
+  const sc = els.gridScroll;
+  if (!sc || sc.scrollWidth <= sc.clientWidth) return;
+
+  // Hide inline clues by default in word-chain until started
+  const hideForChain = play.mode === MODE.CHAIN && !chain.started;
+
+  // Control “pin” position relative to the scroll viewport WITHOUT changing padding
+  // You can set these in CSS on #gridScroll:
+  //   --clue-pin-pad: 8px;      (how far from left to pin)
+  //   --clue-pin-offset: 0px;   (nudge; can be negative to counter padding-inline)
+  const scs = getComputedStyle(sc);
+  const pinPad = parseFloat(scs.getPropertyValue("--clue-pin-pad")) || 8;
+  const pinOffset = parseFloat(scs.getPropertyValue("--clue-pin-offset")) || 0;
+
+  // “Pinned” x coordinate in the scroll content coordinate-space
+  const pinX = sc.scrollLeft + pinPad + pinOffset;
+
+  // Only bother updating ranges near the viewport (perf)
+  const viewL = sc.scrollLeft - 80;
+  const viewR = sc.scrollLeft + sc.clientWidth + 80;
+
+  for (const it of _rangeClueCache) {
+    const { r, clue, left, width, startPad, maxX } = it;
+
+    // show/hide without reflowing everything constantly
+    const shouldHide = hideForChain;
+    if (clue.hidden !== shouldHide) {
+      clue.hidden = shouldHide;
+      // clue width changes when hidden/unhidden: we’ll need a rebuild once shown
+      if (!shouldHide) rebuildRangeClueStickCache();
+    }
+    if (shouldHide) continue;
+
+    // Skip far-away ranges
+    const rL = left;
+    const rR = left + width;
+    if (rR < viewL || rL > viewR) continue;
+
+    // desired translateX (relative to left: startPad)
+    let x = (pinX - left) - startPad;
+
+    // Clamp inside range
+    if (x < 0) x = 0;
+    else if (x > maxX) x = maxX;
+
+    // Reduce shimmer: snap to whole px (or use 0.5px if you want)
+    x = Math.round(x);
+
+    // Deadzone: don’t write style unless it changed meaningfully
+    if (it.lastX != null && Math.abs(x - it.lastX) < 1) continue;
+
+    it.lastX = x;
+    clue.style.setProperty("--stick-x", `${x}px`);
+  }
+}
+
+
+
 
 // ---- Horizontal keep-in-view ----
 let _keepInViewRaf = 0;
@@ -874,6 +1004,9 @@ function chainStartNow() {
   if (chain.started) return;
 
   chain.started = true;
+  rebuildRangeClueStickCache();
+requestRangeClueStick();
+
   chain.running = true;
   setInlineCluesHiddenUntilChainStart();
   applyClueMode();
@@ -1305,6 +1438,8 @@ function setAt(i, { behavior } = {}) {
   play.at = clamp(i, 0, play.n - 1);
   updatePlayUI();
   keepActiveCellInView(behavior || (IS_TOUCH ? "smooth" : "auto"));
+  requestRangeClueStick();
+
   maybeClearSelectionOnCursorMove();
   if (play.mode === MODE.CHAIN) requestChainClues();
 }
@@ -1526,6 +1661,9 @@ function loadPuzzle(i) {
   clearSelection();
 
   renderGrid(els.grid, m, true);
+  rebuildRangeClueStickCache();
+  requestRangeClueStick();
+
 
   // Legend mode
   if (play.mode === MODE.CHAIN) {
@@ -1962,6 +2100,7 @@ els.gridScroll?.addEventListener(
   "scroll",
   () => {
     if (play.mode === MODE.CHAIN) requestChainClues();
+    requestRangeClueStick();
   },
   { passive: true }
 );
@@ -2181,3 +2320,5 @@ requestAnimationFrame(() => {
   setAt(0);
   focusForTyping();
 });
+window.addEventListener("resize", requestRangeClueStick, { passive: true });
+

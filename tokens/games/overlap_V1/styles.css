@@ -12,19 +12,24 @@
      --c-purple: #7b46ff;
      --c-pink: #ff4fa3;
      --cols: 10;
-     /* --cell: clamp(var(--unit-96), 8.5vw, var(--unit-144));
-     --grid-h: clamp(120px, 18vw, 200px); */
      --border-w: var(--unit-2);
-     /* --fill: .08; */
      --title: clamp(48px, 7vw, 88px);
-     --letter: clamp(34px, 5.6vw, 92px);
+     /* --letter: clamp(34px, 5.6vw, 92px); */
 
-          --letter: clamp(34px, 5vw, 64px);
+     --letter: clamp(34px, 5vw, 64px);
+     --range-clue-size: clamp(14px, 1.25vw, 14px);
+    /* --range-clue-size: 14px; */
+     /* --grid-h: clamp(100px, 18vw, 200px); */
 
 
 
-     --cell: clamp(50px, 8.5vw, 100px);
-     --grid-h: clamp(100px, 18vw, 200px);
+     /* --cell: clamp(50px, 8.5vw, 100px); */
+     /* --grid-h: clamp(100px, 18vw, 200px); */
+
+     --cell: clamp(60px, 8.5vw, 100px);
+     /* --grid-h: clamp(200px, 20vw, 300px); */
+     --grid-h: clamp(180px, 30vw, 300px);
+     --grid-rows: 1fr 1fr 3fr 1fr 1fr;
  }
 
  @media (max-width:640px) {
@@ -134,10 +139,10 @@
      color: var(--foreground-muted);
  }
 
- .clueToggle{
-display: block;
-text-align: center;
-margin-bottom: var(--spacing-x16);
+ .clueToggle {
+     display: block;
+     text-align: center;
+     margin-bottom: var(--spacing-x16);
  }
 
  /* Scroller only wraps puzzle */
@@ -172,22 +177,94 @@ margin-bottom: var(--spacing-x16);
      overscroll-behavior-x: contain;
      touch-action: pan-x;
 
+     grid-template-rows: var(--grid-rows);
+
  }
 
  .range {
-     position: absolute;
+     /* position: absolute;
      left: calc(var(--start)*var(--cell));
      width: calc(var(--len)*var(--cell));
      top: calc(var(--t)*1%);
-     bottom: calc(var(--b)*1%);
+     bottom: calc(var(--b)*1%); */
      border: var(--border-w) solid var(--color);
      pointer-events: none;
      z-index: 1;
      /* background: color-mix(in srgb, var(--color) calc(var(--f)*100%), transparent); */
 
      background: color-mix(in srgb, var(--color), var(--background-default) 90%);
-
+     grid-column: var(--gs) / var(--ge);
+     position: relative;
+     pointer-events: none;
  }
+
+ .range-full {
+     grid-row: 1 / -1;
+     z-index: 1;
+ }
+
+ .range-mid {
+     grid-row: 2 / -2;
+     z-index: 2;
+ }
+
+ .range-inner {
+     grid-row: 3 / -3;
+     z-index: 3;
+ }
+
+
+ /* default OFF = in-range clues */
+ body.clues--range .rangeClue {
+     display: block;
+ }
+
+ body.clues--legend .rangeClue {
+     display: none;
+ }
+
+ #gridScroll {
+     --clue-pin-pad: 16px;
+     --clue-pin-offset: -24px;
+ }
+
+ /* position/appearance of the in-range clue */
+ .rangeClue {
+     position: absolute;
+     backface-visibility: hidden;
+     transform: translateZ(0);
+     /* compositor hint - leave these as px values */
+     --range-clue-start: 8px;
+     /* padding from range left */
+     --range-clue-end: 12px;
+     /* how far BEFORE range end it should stop */
+
+     transform: translate3d(var(--stick-x, 0px), 0, 0);
+     will-change: transform;
+
+     top: var(--unit-4);
+     left: var(--range-clue-start);
+     color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
+     /* font-size: 1.25vw; */
+     /* font-size: var(--range-clue-size); */
+     max-width: calc(100% - 16px);
+     overflow: hidden;
+     text-overflow: ellipsis;
+     white-space: nowrap;
+     pointer-events: none;
+     /* important: doesn't interfere with scrolling/taps */
+ }
+
+ .range .rangeClue.is-hidden {
+     display: none;
+ }
+
+
+ /* word chain: style clue when solved/locked */
+ .range.is-locked .rangeClue {
+     opacity: 0.3;
+ }
+
 
  @supports not (background:color-mix(in srgb, red 10%, transparent)) {
      .range {
@@ -215,6 +292,8 @@ margin-bottom: var(--spacing-x16);
 
      z-index: 10;
      mix-blend-mode: multiply;
+
+     grid-row: 1/-1;
  }
 
  .cell+.cell {
@@ -284,35 +363,6 @@ margin-bottom: var(--spacing-x16);
      color: var(--foreground-default);
      /* text-transform: uppercase */
  }
-
-
-/* default OFF = in-range clues */
-body.clues--range .rangeClue { display: block; }
-body.clues--legend .rangeClue { display: none; }
-
-/* position/appearance of the in-range clue */
-.rangeClue{
-  position:absolute;
-  top: var(--unit-4);
-  left: var(--unit-6);
-  color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
-  font-size: 1.25vw;
-  font-size: clamp(8px, 1.25vw, 14px);
-  max-width: calc(100% - 16px);
-  overflow:hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  pointer-events:none; /* important: doesn't interfere with scrolling/taps */
-}
-
-.range .rangeClue.is-hidden { display: none; }
-
-
-/* word chain: style clue when solved/locked */
-.range.is-locked .rangeClue{
-  opacity: .35; /* tweak freely */
-}
-
 
 
  .sw {
