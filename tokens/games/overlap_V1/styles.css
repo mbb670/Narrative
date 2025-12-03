@@ -1,7 +1,7 @@
  :root {
      --ink: var(--foreground-default);
      --muted: var(--foreground-muted);
-     --grid-line: var(--border-muted);
+     --grid-line: var(--border-subtle);
      --c-red: #ff2b1d;
      --c-orange: #ff7a1a;
      --c-yellow: #f5b800;
@@ -15,10 +15,11 @@
      /* --cell: clamp(var(--unit-96), 8.5vw, var(--unit-144));
      --grid-h: clamp(120px, 18vw, 200px); */
      --border-w: var(--unit-2);
-     --fill: .08;
+     /* --fill: .08; */
      --title: clamp(48px, 7vw, 88px);
      --letter: clamp(34px, 5.6vw, 92px);
 
+          --letter: clamp(34px, 5vw, 64px);
 
 
 
@@ -133,6 +134,12 @@
      color: var(--foreground-muted);
  }
 
+ .clueToggle{
+display: block;
+text-align: center;
+margin-bottom: var(--spacing-x16);
+ }
+
  /* Scroller only wraps puzzle */
  .gridScroll {
      max-width: 100%;
@@ -143,10 +150,10 @@
      padding-inline: var(--layout-grid-margin);
      padding-bottom: var(--unit-16);
 
-       overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x;
+     overflow-x: auto;
+     -webkit-overflow-scrolling: touch;
+     overscroll-behavior-x: contain;
+     touch-action: pan-x;
  }
 
  .grid {
@@ -160,10 +167,10 @@
      background: transparent;
      box-shadow: inset 0 calc(var(--border-w) * -1) 0px 0px var(--grid-line), inset 0 var(--border-w) 0px 0px var(--grid-line);
 
-       overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x;
+     overflow-x: auto;
+     -webkit-overflow-scrolling: touch;
+     overscroll-behavior-x: contain;
+     touch-action: pan-x;
 
  }
 
@@ -174,9 +181,11 @@
      top: calc(var(--t)*1%);
      bottom: calc(var(--b)*1%);
      border: var(--border-w) solid var(--color);
-     background: color-mix(in srgb, var(--color) calc(var(--f)*100%), transparent);
      pointer-events: none;
      z-index: 1;
+     /* background: color-mix(in srgb, var(--color) calc(var(--f)*100%), transparent); */
+
+     background: color-mix(in srgb, var(--color), var(--background-default) 90%);
 
  }
 
@@ -202,6 +211,10 @@
      color: var(--ink);
      user-select: none;
      touch-action: pan-x;
+     margin-block: var(--border-w);
+
+     z-index: 10;
+     mix-blend-mode: multiply;
  }
 
  .cell+.cell {
@@ -271,6 +284,36 @@
      color: var(--foreground-default);
      /* text-transform: uppercase */
  }
+
+
+/* default OFF = in-range clues */
+body.clues--range .rangeClue { display: block; }
+body.clues--legend .rangeClue { display: none; }
+
+/* position/appearance of the in-range clue */
+.rangeClue{
+  position:absolute;
+  top: var(--unit-4);
+  left: var(--unit-6);
+  color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
+  font-size: 1.25vw;
+  font-size: clamp(8px, 1.25vw, 14px);
+  max-width: calc(100% - 16px);
+  overflow:hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events:none; /* important: doesn't interfere with scrolling/taps */
+}
+
+.range .rangeClue.is-hidden { display: none; }
+
+
+/* word chain: style clue when solved/locked */
+.range.is-locked .rangeClue{
+  opacity: .35; /* tweak freely */
+}
+
+
 
  .sw {
      width: var(--spacing-x24);
@@ -585,7 +628,7 @@
      /* outline: 3px solid green; */
      /* outline-offset: 3px; */
 
-     border-width: 10px;
+     border-width: var(--unit-6);
  }
 
  /* -----------------------------

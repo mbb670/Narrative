@@ -25,6 +25,75 @@ const VIEW = { PLAY: "play", CHAIN: "chain", BUILD: "build" };
 
 // ---- Remember last tab/view ----
 const LAST_VIEW_KEY = `${KEY}__last_view`;
+const CLUE_VIEW_KEY = `${KEY}__clue_view`; // "range" | "legend"
+
+function legendCluesEnabled() {
+  return els.clueToggle ? !!els.clueToggle.checked : true;
+}
+
+function applyClueMode() {
+  const showLegend = legendCluesEnabled();
+
+  // expose to CSS for styling
+  document.body.classList.toggle("clues--legend", showLegend);
+  document.body.classList.toggle("clues--range", !showLegend);
+
+  // Word Chain: keep the "Start" gating behavior
+  if (play.mode === MODE.CHAIN) {
+    if (!chain.started) {
+      els.legend.hidden = true;
+      els.legend.innerHTML = "";
+      return;
+    }
+
+    if (showLegend) {
+      els.legend.hidden = false;
+      requestChainClues(); // uses your existing dynamic logic
+    } else {
+      els.legend.hidden = true;
+      els.legend.innerHTML = "";
+    }
+    return;
+  }
+
+  // Overlap: either render the full legend list, or hide it
+  if (showLegend) {
+    els.legend.hidden = false;
+    els.legend.classList.remove("chainLegend");
+    els.legend.innerHTML = play.entries
+      .map(
+        (e) => `
+        <button type="button" class="clue" data-e="${e.eIdx}">
+          <span class="sw" style="--color:var(${e.color})"></span>
+          <span class="text-system-semibold-sm">${escapeHtml(e.clue)}</span>
+        </button>`
+      )
+      .join("");
+  } else {
+    els.legend.hidden = true;
+    els.legend.innerHTML = "";
+  }
+}
+
+function initClueToggle() {
+  if (!els.clueToggle) return;
+
+  // restore saved preference if present
+  try {
+    const saved = localStorage.getItem(CLUE_VIEW_KEY);
+    if (saved === "legend") els.clueToggle.checked = true;
+    if (saved === "range") els.clueToggle.checked = false;
+  } catch {}
+
+  // save + apply on change
+  els.clueToggle.addEventListener("change", () => {
+    try {
+      localStorage.setItem(CLUE_VIEW_KEY, els.clueToggle.checked ? "legend" : "range");
+    } catch {}
+    applyClueMode();
+  });
+}
+
 const VALID_VIEWS = new Set(Object.values(VIEW));
 
 function loadLastView() {
@@ -109,6 +178,8 @@ const els = {
   status: $("#status"),
   solution: $("#solution"),
   helper: document.querySelector(".helper"),
+  clueToggle: $("#clueToggle"),
+
 };
 
 // ---- Storage ----
@@ -404,18 +475,33 @@ function setCols(n) {
 function renderGrid(target, model, clickable) {
   target.innerHTML = "";
 
-  for (const e of model.entries) {
-    const d = document.createElement("div");
-    d.className = "range";
-    d.dataset.e = String(e.eIdx);
-    d.style.setProperty("--start", e.start);
-    d.style.setProperty("--len", e.len);
-    d.style.setProperty("--t", e.t);
-    d.style.setProperty("--b", e.b);
-    d.style.setProperty("--color", `var(${e.color})`);
-    d.style.setProperty("--f", getComputedStyle(document.documentElement).getPropertyValue("--fill") || ".08");
-    target.appendChild(d);
+for (const e of model.entries) {
+  const d = document.createElement("div");
+  d.className = "range";
+  d.dataset.e = String(e.eIdx);
+  d.style.setProperty("--start", e.start);
+  d.style.setProperty("--len", e.len);
+  d.style.setProperty("--t", e.t);
+  d.style.setProperty("--b", e.b);
+  d.style.setProperty("--color", `var(${e.color})`);
+  d.style.setProperty("--f", getComputedStyle(document.documentElement).getPropertyValue("--fill") || ".08");
+
+  // z-index by height (full=1, mid=2, inner=3)
+  // e.t/e.b come from insets(height): full=>0, mid=>12.5, inner=>25
+  const z = e.t === 0 ? 1 : e.t === 12.5 ? 2 : 3;
+  d.style.zIndex = String(z);
+
+    // In-range clue (play grid only; keep builder preview clean)
+  if (target === els.grid) {
+    const rc = document.createElement("div");
+    rc.className = "rangeClue text-uppercase-semibold-md";
+    rc.textContent = e.clue || "";
+    d.appendChild(rc);
   }
+
+  target.appendChild(d);
+}
+
 
   for (let i = 0; i < model.total; i++) {
     const b = document.createElement("button");
@@ -778,7 +864,6 @@ function chainStartNow() {
   const total = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
 
   // Show clues, hide start button, focus at first editable cell
-  els.legend.hidden = false;
   ui.startBtn.style.display = "none";
 
   // jump to first editable cell (usually 0)
@@ -790,6 +875,8 @@ function chainStartNow() {
 
   chain.started = true;
   chain.running = true;
+  setInlineCluesHiddenUntilChainStart();
+  applyClueMode();
   const isTimed = !!(p?.timedMode ?? true);
 
   if (isTimed) {
@@ -1015,6 +1102,20 @@ function chainInputAllowed() {
   // word chain should only accept typing once started via button
   return play.mode !== MODE.CHAIN || chain.started;
 }
+function setInlineCluesHiddenUntilChainStart() {
+  const preStart = play.mode === MODE.CHAIN && !chain.started;
+
+  // toggle a class so you can also handle with CSS if you want
+  document.documentElement.classList.toggle("chain-prestart", preStart);
+
+  // hard-hide inline clues during pre-start (covers common selectors)
+  els.grid?.querySelectorAll(
+    ".range .rangeClue, .range [data-inline-clue], .range .inlineClue"
+  ).forEach((el) => {
+    el.classList.toggle("is-hidden", preStart);
+  });
+}
+
 
 // ---- Word Chain clues (current word first + adjacent unsolved) ----
 let _cluesRaf = 0;
@@ -1067,6 +1168,7 @@ function nearestUnsolvedEntryToCursor() {
 function updateChainClues() {
   if (play.mode !== MODE.CHAIN) return;
   if (!chain.started) return; // intentionally hidden until Start
+  if (!legendCluesEnabled()) return;
 
   const cap = Math.max(1, CHAIN_CLUE_CAP | 0);
 
@@ -1347,6 +1449,7 @@ function resetPlay() {
     els.legend.hidden = true;
     els.legend.innerHTML = "";
     chainResetTimer();
+    setInlineCluesHiddenUntilChainStart();
   }
 
   keepActiveCellInView("auto");
@@ -1435,6 +1538,7 @@ function loadPuzzle(i) {
     els.legend.innerHTML = "";
 
     chainResetTimer();
+    setInlineCluesHiddenUntilChainStart();
 
     // hide reveal button in chain mode
     if (els.reveal) els.reveal.style.display = "none";
@@ -1470,6 +1574,7 @@ function loadPuzzle(i) {
   els.meta.textContent = `${p.title || "Untitled"} • ${posText}`;
 
   updatePlayUI();
+  applyClueMode();
 
   if (els.gridScroll) els.gridScroll.scrollLeft = 0;
 
@@ -2069,6 +2174,8 @@ els.rows.addEventListener("change", (e) => {
 // ---- Start ----
 loadPuzzle(0);
 setTab(currentView);
+initClueToggle();
+applyClueMode();
 
 requestAnimationFrame(() => {
   setAt(0);
