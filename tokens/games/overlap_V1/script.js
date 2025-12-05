@@ -222,6 +222,8 @@ const uid = () =>
 const cleanA = (s) => (s || "").toUpperCase().replace(/[^A-Z]/g, "");
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const insets = (h) => (h === "mid" ? [12.5, 12.5] : h === "inner" ? [25, 25] : [0, 0]);
+const isEditable = (el) =>
+  !!(el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable));
 
 let dirty = false;
 const setDirty = (v = true) => {
@@ -281,8 +283,8 @@ const normPuzzle = (p) => {
   const type = String(p?.type || MODE.OVERLAP);
   const wordsRaw = Array.isArray(p?.words) ? p.words : [];
   const fallback = { clue: "Clue", answer: "WORD", start: 1, color: "--c-red", height: "full" };
-const timed = type === MODE.CHAIN ? chainIsTimed(p) : true;
-const words = (wordsRaw.length ? wordsRaw : [fallback]).map((w) => normWord(w, type, { timed }));
+  const timed = type === MODE.CHAIN ? chainIsTimed(p) : true;
+  const words = (wordsRaw.length ? wordsRaw : [fallback]).map((w) => normWord(w, type, { timed }));
 
 
   const out = {
@@ -339,13 +341,10 @@ const IS_TOUCH = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
 const kb = document.createElement("input");
 kb.type = "text";
-kb.value = "";
-kb.autocomplete = "off";
-kb.autocapitalize = "none";
+kb.setAttribute("autocomplete", "off");
 kb.setAttribute("autocapitalize", "none");
 kb.spellcheck = false;
 kb.setAttribute("autocorrect", "off");
-kb.setAttribute("autocomplete", "off");
 kb.inputMode = "text";
 kb.setAttribute("aria-hidden", "true");
 kb.tabIndex = -1;
@@ -368,12 +367,7 @@ const focusForTyping = () => {
   if (!document.hasFocus()) return;
 
   const a = document.activeElement;
-  if (
-    a &&
-    a !== kb &&
-    (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.tagName === "SELECT" || a.isContentEditable)
-  )
-    return;
+  if (a && a !== kb && isEditable(a)) return;
 
   if (IS_TOUCH) {
     try {
@@ -437,25 +431,25 @@ function computed(p) {
       let diff = type === MODE.CHAIN ? String(w.diff || inferDiffFromColor(w.color) || "easy") : null;
       let color = String(w.color || "--c-red");
 
-     if (type === MODE.CHAIN && timedChain) {
-  const allowed = DIFF_COLORS[diff] || DIFF_COLORS.easy;
-  if (!allowed.includes(color)) color = allowed[0];
-}
+      if (type === MODE.CHAIN && timedChain) {
+        const allowed = DIFF_COLORS[diff] || DIFF_COLORS.easy;
+        if (!allowed.includes(color)) color = allowed[0];
+      }
 
 
       return {
-  clue: w.clue || "",
-  ans,
-  start,
-  len: ans.length,
-  color,
-  t,
-  b,
-  h: String(w.height || "full"), // <-- ADD THIS
-  r: tr(w),
-  rawIdx,
-  diff
-};
+        clue: w.clue || "",
+        ans,
+        start,
+        len: ans.length,
+        color,
+        t,
+        b,
+        h: String(w.height || "full"),
+        r: tr(w),
+        rawIdx,
+        diff,
+      };
 
     })
     .filter((e) => e.len)
@@ -1770,12 +1764,7 @@ function onKey(e) {
   if (IS_TOUCH && e.target === kb && (e.key === "Backspace" || e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
 
   const t = e.target;
-  if (
-    t &&
-    t !== kb &&
-    (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)
-  )
-    return;
+  if (t !== kb && isEditable(t)) return;
 
   if (e.key === "Tab") return;
 
@@ -1912,6 +1901,20 @@ function syncBuilder() {
   renderPreview();
 }
 
+function setStatus(m) {
+  const gaps = m.gaps || [];
+  if (!m.ok) {
+    els.status.className = "status bad";
+    els.status.textContent = `Conflict at column ${m.conf.idx + 1}: “${m.conf.a}” vs “${m.conf.b}”.`;
+  } else if (gaps.length) {
+    els.status.className = "status bad";
+    els.status.textContent = `Uncovered columns: ${gaps.slice(0, 18).map((x) => x + 1).join(", ")}${gaps.length > 18 ? "…" : ""}`;
+  } else {
+    els.status.className = "status";
+    els.status.innerHTML = `Total columns: <strong>${m.total}</strong> • Words: <strong>${m.entries.length}</strong> • ${dirty ? "Unsaved changes" : "Saved"}`;
+  }
+}
+
 function renderRows() {
   const p = puzzles[pIdx];
   const chainMode = isChainPuzzle(p);
@@ -1927,16 +1930,16 @@ function renderRows() {
       const w = ws[i];
 
       if (timedChain) {
-  w.diff = String(w.diff || inferDiffFromColor(w.color) || "easy");
-  const allowedNow = DIFF_COLORS[w.diff] || DIFF_COLORS.easy;
-  if (!allowedNow.includes(w.color)) w.color = allowedNow[0];
-}
-
+        w.diff = String(w.diff || inferDiffFromColor(w.color) || "easy");
+        const allowedNow = DIFF_COLORS[w.diff] || DIFF_COLORS.easy;
+        if (!allowedNow.includes(w.color)) w.color = allowedNow[0];
+      }
 
       const diff = timedChain ? String(w.diff || "easy") : null;
       const diffOpts = DIFFS.map(([lab, val]) => `<option value="${val}" ${diff === val ? "selected" : ""}>${lab}</option>`).join("");
 
-const allowedColors = timedChain ? (DIFF_COLORS[diff] || DIFF_COLORS.easy) : COLORS.map((x) => x[1]);      const colorOpts = allowedColors
+      const allowedColors = timedChain ? DIFF_COLORS[diff] || DIFF_COLORS.easy : COLORS.map((x) => x[1]);
+      const colorOpts = allowedColors
         .map((val) => {
           const lab = COLOR_LABEL[val] || val;
           return `<option value="${val}" ${String(w.color) === val ? "selected" : ""}>${lab}</option>`;
@@ -1968,12 +1971,15 @@ const allowedColors = timedChain ? (DIFF_COLORS[diff] || DIFF_COLORS.easy) : COL
               <input class="mi" data-f="start" inputmode="numeric" value="${escapeAttr(String(w.start ?? 1))}" />
             </div>
 
-            ${timedChain ? `
-  <div>
-    <label class="lab">Difficulty</label>
-    <select class="ms" data-f="diff">${diffOpts}</select>
-  </div>
-` : ""}
+            ${
+              timedChain
+                ? `
+            <div>
+              <label class="lab">Difficulty</label>
+              <select class="ms" data-f="diff">${diffOpts}</select>
+            </div>`
+                : ""
+            }
 
 
             <div>
@@ -1990,16 +1996,7 @@ const allowedColors = timedChain ? (DIFF_COLORS[diff] || DIFF_COLORS.easy) : COL
     .join("");
 
   const m = computed(puzzles[pIdx]);
-  if (!m.ok) {
-    els.status.className = "status bad";
-    els.status.textContent = `Conflict at column ${m.conf.idx + 1}: “${m.conf.a}” vs “${m.conf.b}”.`;
-  } else if (m.gaps.length) {
-    els.status.className = "status bad";
-    els.status.textContent = `Uncovered columns: ${m.gaps.slice(0, 18).map((x) => x + 1).join(", ")}${m.gaps.length > 18 ? "…" : ""}`;
-  } else {
-    els.status.className = "status";
-    els.status.innerHTML = `Total columns: <strong>${m.total}</strong> • Words: <strong>${m.entries.length}</strong> • ${dirty ? "Unsaved changes" : "Saved"}`;
-  }
+  setStatus(m);
 }
 
 function renderPreview() {
@@ -2019,16 +2016,7 @@ function renderPreview() {
 
   els.solution.textContent = `Solution row: ${m.exp.map((c) => c || "·").join("")}`;
 
-  if (!m.ok) {
-    els.status.className = "status bad";
-    els.status.textContent = `Conflict at column ${m.conf.idx + 1}: “${m.conf.a}” vs “${m.conf.b}”.`;
-  } else if (m.gaps?.length) {
-    els.status.className = "status bad";
-    els.status.textContent = `Uncovered columns: ${m.gaps.slice(0, 18).map((x) => x + 1).join(", ")}${m.gaps.length > 18 ? "…" : ""}`;
-  } else {
-    els.status.className = "status";
-    els.status.innerHTML = `Total columns: <strong>${m.total}</strong> • Words: <strong>${m.entries.length}</strong> • ${dirty ? "Unsaved changes" : "Saved"}`;
-  }
+  setStatus(m);
 }
 
 function saveAndReRender() {
@@ -2321,4 +2309,3 @@ requestAnimationFrame(() => {
   focusForTyping();
 });
 window.addEventListener("resize", requestRangeClueStick, { passive: true });
-
