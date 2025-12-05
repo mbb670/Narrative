@@ -192,7 +192,8 @@
      z-index: 1;
      /* background: color-mix(in srgb, var(--color) calc(var(--f)*100%), transparent); */
 
-     background: color-mix(in srgb, var(--color), var(--background-default) 90%);
+ background: color-mix(
+  in srgb, color-mix(in srgb, var(--color), var(--background-default) 90%), transparent 20%);
      grid-column: var(--gs) / var(--ge);
      position: relative;
      pointer-events: none;
@@ -254,6 +255,17 @@
      pointer-events: none;
      /* important: doesn't interfere with scrolling/taps */
  }
+
+/* ALT STYLING */
+  /* .rangeClue {
+     background-color: color-mix(in srgb, var(--color), var(--background-default) 80%);
+     padding: 4px 8px;
+      top:2px;
+      --range-clue-start:2px;
+      --range-clue-end: 2px;
+      border-radius: 4px;
+      z-index: 10;
+  } */
 
  .range .rangeClue.is-hidden {
      display: none;
