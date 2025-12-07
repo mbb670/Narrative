@@ -534,143 +534,6 @@ function renderGrid(target, model, clickable) {
   }
 }
 
-// ---- Range clue "stick text within rangeClue" (RAF-follow; smooth iOS) ----
-let _rangeClueTicker = 0;
-let _rangeClueLastSL = 0;
-let _rangeClueStable = 0;
-
-let _rangeClueCache = []; // { r, wrap, span, left, width, padL, padR, textW, maxX, lastX }
-
-function recalcRangeClueItem(it) {
-  const { r, wrap, span } = it;
-
-  // wrap (rangeClue) position in scroll-content coords
-  it.left = r.offsetLeft + wrap.offsetLeft;
-
-  // clamp against the actual rangeClue width (not the whole .range)
-  it.width = wrap.clientWidth || wrap.offsetWidth || 0;
-
-  const ws = getComputedStyle(wrap);
-  it.padL = parseFloat(ws.paddingLeft) || 0;
-  it.padR = parseFloat(ws.paddingRight) || 0;
-
-  // real text width regardless of transforms
-  it.textW = span.scrollWidth || span.offsetWidth || 0;
-
-  const avail = Math.max(0, it.width - it.padL - it.padR);
-  it.maxX = Math.max(0, avail - it.textW);
-}
-
-
-function rebuildRangeClueStickCache() {
-  _rangeClueCache = [];
-
-  const sc = els.gridScroll;
-  if (!sc) return;
-
-  const ranges = els.grid?.querySelectorAll?.(".range") || [];
-  for (const r of ranges) {
-    const wrap = r.querySelector(".rangeClue");
-    const span = wrap?.querySelector(".rangeClue-string");
-    if (!wrap || !span) continue;
-
-    const it = {
-      r,
-      wrap,
-      span,
-      left: 0,
-      width: 0,
-      padL: 0,
-      padR: 0,
-      textW: 0,
-      maxX: 0,
-      lastX: null,
-    };
-
-    recalcRangeClueItem(it);
-    _rangeClueCache.push(it);
-  }
-}
-
-
-function startRangeClueFollow() {
-  const sc = els.gridScroll;
-  if (!sc || sc.scrollWidth <= sc.clientWidth) return;
-
-  // if inline clues aren't visible, don't do work
-  if (legendCluesEnabled()) return;
-  if (play.mode === MODE.CHAIN && !chain.started) return;
-
-  if (_rangeClueTicker) return;
-
-  _rangeClueStable = 0;
-  _rangeClueLastSL = sc.scrollLeft;
-
-  _rangeClueTicker = requestAnimationFrame(function tick() {
-    const sc = els.gridScroll;
-    if (!sc) { _rangeClueTicker = 0; return; }
-
-    const sl = sc.scrollLeft;
-
-    updateRangeClueStick(sl);
-
-    const delta = Math.abs(sl - _rangeClueLastSL);
-    _rangeClueStable = delta < 0.05 ? _rangeClueStable + 1 : 0;
-    _rangeClueLastSL = sl;
-
-    if (_rangeClueStable >= 6) {
-      _rangeClueTicker = 0;
-      return;
-    }
-
-    _rangeClueTicker = requestAnimationFrame(tick);
-  });
-}
-
-function updateRangeClueStick(scrollLeftOverride) {
-  const sc = els.gridScroll;
-  if (!sc || sc.scrollWidth <= sc.clientWidth) return;
-
-  if (legendCluesEnabled()) return;
-  if (play.mode === MODE.CHAIN && !chain.started) return;
-
-  const scs = getComputedStyle(sc);
-  const pinPad = parseFloat(scs.getPropertyValue("--clue-pin-pad")) || 8;
-  const pinOffset = parseFloat(scs.getPropertyValue("--clue-pin-offset")) || 0;
-
-  const sl = (scrollLeftOverride ?? sc.scrollLeft);
-
-  // pinned x position in scroll-content coords
-  const pinX = sl + pinPad + pinOffset;
-
-  const viewL = sl - 80;
-  const viewR = sl + sc.clientWidth + 80;
-
-  for (const it of _rangeClueCache) {
-    const { span, left, width, padL, maxX } = it;
-
-    const rL = left;
-    const rR = left + width;
-    if (rR < viewL || rL > viewR) continue;
-
-    // translate within the padded area of .rangeClue
-    if (!it.width || !it.textW) recalcRangeClueItem(it);
-let x = pinX - (it.left + it.padL);
-
-
-    if (x < 0) x = 0;
-    else if (x > maxX) x = maxX;
-
-    // NO rounding on iOS (rounding = visible stepping)
-    if (it.lastX != null && Math.abs(x - it.lastX) < 0.05) continue;
-
-    it.lastX = x;
-
-    // fastest path: set transform directly on the moving span
-    span.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
-  }
-}
-
 
 
 
@@ -1034,8 +897,6 @@ function chainStartNow() {
   if (chain.started) return;
 
   chain.started = true;
-  rebuildRangeClueStickCache();
-startRangeClueFollow();
 
   chain.running = true;
   setInlineCluesHiddenUntilChainStart();
@@ -1468,7 +1329,6 @@ function setAt(i, { behavior } = {}) {
   play.at = clamp(i, 0, play.n - 1);
   updatePlayUI();
   keepActiveCellInView(behavior || (IS_TOUCH ? "smooth" : "auto"));
-  startRangeClueFollow();
 
   maybeClearSelectionOnCursorMove();
   if (play.mode === MODE.CHAIN) requestChainClues();
@@ -1691,8 +1551,6 @@ function loadPuzzle(i) {
   clearSelection();
 
   renderGrid(els.grid, m, true);
-  rebuildRangeClueStickCache();
-  startRangeClueFollow();
 
 
   // Legend mode
@@ -2124,10 +1982,10 @@ els.gridScroll?.addEventListener(
   "scroll",
   () => {
     if (play.mode === MODE.CHAIN) requestChainClues();
-    startRangeClueFollow();
   },
   { passive: true }
 );
+
 
 // ---- Touch pan detection: prevents follow-scroll + focus from fighting drag ----
 if (els.gridScroll) {
@@ -2344,7 +2202,3 @@ requestAnimationFrame(() => {
   setAt(0);
   focusForTyping();
 });
-window.addEventListener("resize", () => {
-  rebuildRangeClueStickCache();
-  startRangeClueFollow();
-}, { passive: true });
