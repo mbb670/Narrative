@@ -14,30 +14,47 @@
      --cols: 10;
      --border-w: var(--unit-2);
      --title: clamp(48px, 7vw, 88px);
-     /* --letter: clamp(34px, 5.6vw, 92px); */
 
-     --letter: clamp(34px, 5vw, 64px);
-     --range-clue-size: clamp(14px, 1.25vw, 14px);
-    /* --range-clue-size: 14px; */
-     /* --grid-h: clamp(100px, 18vw, 200px); */
+     --letter: 60cqmin;
+     --range-clue-size: 50cqmin;
+
+     /* --grid-rows: 1fr 1fr 3fr 1fr 1fr;
+     --grid-rows: 32px 32px var(--spacing-x144) 16px 16px;
+--grid-h: clamp(144px, 33vw, 240px); */
+
+     --cell: clamp(72px, 8vw, 96px);
 
 
+     --grid-top-space: 32px;
+     --grid-letter-space: 72px;
+     --grid-bottom-space: 16px;
 
-     /* --cell: clamp(50px, 8.5vw, 100px); */
-     /* --grid-h: clamp(100px, 18vw, 200px); */
 
-     --cell: clamp(60px, 8.5vw, 100px);
-     /* --grid-h: clamp(200px, 20vw, 300px); */
-     --grid-h: clamp(180px, 30vw, 300px);
-     --grid-rows: 1fr 1fr 3fr 1fr 1fr;
+ }
+
+ .clues--legend,
+ #panelBuild {
+     --grid-top-space: 16px;
  }
 
  @media (max-width:640px) {
      :root {
          --border-w: 1px;
+
+         --grid-letter-space: 64px;
+         --grid-bottom-space: 8px;
+     }
+
+     .clues--legend,
+     #panelBuild {
+         --grid-top-space: 12px;
+         --grid-bottom-space: 12px;
      }
  }
 
+ .clues--legend {
+     --grid-rows: 16px 16px var(--spacing-x144) 16px 16px;
+ }
 
 
  * {
@@ -166,7 +183,7 @@
      display: grid;
      grid-template-columns: repeat(var(--cols), var(--cell));
      width: calc(var(--cell)*var(--cols));
-     height: var(--grid-h);
+     /* height: var(--grid-h); */
      overflow: hidden;
      margin: 0 auto;
      background: transparent;
@@ -177,7 +194,8 @@
      overscroll-behavior-x: contain;
      touch-action: pan-x;
 
-     grid-template-rows: var(--grid-rows);
+     grid-template-rows: repeat(3, var(--grid-top-space)) var(--grid-letter-space) repeat(3, var(--grid-bottom-space));
+     ;
 
  }
 
@@ -192,8 +210,7 @@
      z-index: 1;
      /* background: color-mix(in srgb, var(--color) calc(var(--f)*100%), transparent); */
 
- background: color-mix(
-  in srgb, color-mix(in srgb, var(--color), var(--background-default) 90%), transparent 20%);
+     background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 90%), transparent 20%);
      grid-column: var(--gs) / var(--ge);
      position: relative;
      pointer-events: none;
@@ -231,33 +248,65 @@
 
  /* position/appearance of the in-range clue */
  .rangeClue {
-     position: absolute;
-     backface-visibility: hidden;
-     transform: translateZ(0);
+     /* position: absolute; */
+     /* backface-visibility: hidden; */
+     /* transform: translateZ(0); */
      /* compositor hint - leave these as px values */
-     --range-clue-start: 8px;
+     /* --range-clue-start: 8px; */
      /* padding from range left */
-     --range-clue-end: 12px;
+     /* --range-clue-end: 12px; */
      /* how far BEFORE range end it should stop */
 
-     transform: translate3d(var(--stick-x, 0px), 0, 0);
-     will-change: transform;
+     /* transform: translate3d(var(--stick-x, 0px), 0, 0);
+     will-change: transform; */
 
-     top: var(--unit-4);
-     left: var(--range-clue-start);
+     /* top: var(--unit-4); */
+     /* left: var(--range-clue-start); */
      color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
      /* font-size: 1.25vw; */
-     /* font-size: var(--range-clue-size); */
-     max-width: calc(100% - 16px);
+
+     /* max-width: calc(100% - 16px); */
      overflow: hidden;
      text-overflow: ellipsis;
      white-space: nowrap;
      pointer-events: none;
-     /* important: doesn't interfere with scrolling/taps */
  }
 
-/* ALT STYLING */
-  /* .rangeClue {
+ .range {
+     display: grid;
+     grid-template-rows: subgrid;
+
+ }
+
+ .rangeClue {
+     position: unset;
+
+     grid-row: 1/2;
+     container-type: size;
+     height: 100%;
+     align-content: center;
+     width: 100%;
+     /* border: 2px solid orange; */
+
+     .rangeClue-string {
+         font-size: var(--range-clue-size);
+         padding: var(--spacing-x2) var(--spacing-x8);
+         /* position: absolute; */
+
+         display: inline-block;
+         white-space: nowrap;
+         will-change: transform;
+         transform: translate3d(0, 0, 0);
+         /* border: 2px solid green; */
+
+
+
+
+     }
+ }
+
+ /* ALT STYLING */
+ /* .rangeClue {
      background-color: color-mix(in srgb, var(--color), var(--background-default) 80%);
      padding: 4px 8px;
       top:2px;
@@ -293,11 +342,9 @@
      cursor: pointer;
      display: grid;
      place-items: center;
-     font-size: var(--letter);
-     /* font-weight: 500; */
-     /* letter-spacing: 2px; */
+     grid-template-rows: subgrid;
      text-transform: uppercase;
-     color: var(--ink);
+     color: var(--foreground-default);
      user-select: none;
      touch-action: pan-x;
      margin-block: var(--border-w);
@@ -306,27 +353,25 @@
      mix-blend-mode: multiply;
 
      grid-row: 1/-1;
+     container-type: size;
+
+     .letter {
+         grid-row: 4/-4;
+         font-size: var(--letter);
+     }
+
+     .num {
+         grid-row: 1/2;
+         justify-self: start;
+         padding-left: var(--spacing-x4);
+         color: var(--foreground-subtle);
+         display: none;
+         transform: none;
+     }
  }
 
  .cell+.cell {
-     /* border-left: var(--border-w) solid var(--grid-line); */
      box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line);
-
- }
-
- /* .cell .letter {
-     transform: translateY(2%)
- } */
-
- .num {
-     position: absolute;
-     top: 8px;
-     left: 8px;
-     display: none;
-     transform: none;
-     letter-spacing: 0;
-     color: rgba(0, 0, 0, .35);
-     font: 700 11px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial
  }
 
  .grid.showNums .num {

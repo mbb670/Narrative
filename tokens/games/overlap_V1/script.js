@@ -502,12 +502,18 @@ function renderGrid(target, model, clickable) {
     d.style.setProperty("--f", getComputedStyle(document.documentElement).getPropertyValue("--fill") || ".08");
 
     // In-range clue (play grid only; keep builder preview clean)
-    if (target === els.grid) {
-      const rc = document.createElement("div");
-      rc.className = "rangeClue text-uppercase-semibold-md";
-      rc.textContent = e.clue || "";
-      d.appendChild(rc);
-    }
+ if (target === els.grid) {
+  const rc = document.createElement("div");
+  rc.className = "rangeClue text-uppercase-semibold-md";
+
+  const clueSpan = document.createElement("span");
+  clueSpan.className = "rangeClue-string";
+  clueSpan.textContent = e.clue || "";
+
+  rc.appendChild(clueSpan);
+  d.appendChild(rc);
+}
+
 
     target.appendChild(d);
   }
@@ -519,7 +525,7 @@ function renderGrid(target, model, clickable) {
     b.className = "cell text-display-semibold-lg";
     b.dataset.i = i;
     b.disabled = !clickable;
-    b.innerHTML = '<span class="num"></span><span class="letter"></span>';
+    b.innerHTML = '<span class="num text-uppercase-semibold-md"></span><span class="letter"></span>';
 
     // Explicit column placement (1-based)
     b.style.gridColumnStart = String(i + 1);
@@ -528,17 +534,33 @@ function renderGrid(target, model, clickable) {
   }
 }
 
-// ---- Range clue "sticky within range" (cached + less jitter) ----
-let _rangeClueStickRaf = 0;
-let _rangeClueCache = []; // { r, clue, left, width, clueW, startPad, endPad, maxX, lastX }
+// ---- Range clue "stick text within rangeClue" (RAF-follow; smooth iOS) ----
+let _rangeClueTicker = 0;
+let _rangeClueLastSL = 0;
+let _rangeClueStable = 0;
 
-function requestRangeClueStick() {
-  if (_rangeClueStickRaf) return;
-  _rangeClueStickRaf = requestAnimationFrame(() => {
-    _rangeClueStickRaf = 0;
-    updateRangeClueStick();
-  });
+let _rangeClueCache = []; // { r, wrap, span, left, width, padL, padR, textW, maxX, lastX }
+
+function recalcRangeClueItem(it) {
+  const { r, wrap, span } = it;
+
+  // wrap (rangeClue) position in scroll-content coords
+  it.left = r.offsetLeft + wrap.offsetLeft;
+
+  // clamp against the actual rangeClue width (not the whole .range)
+  it.width = wrap.clientWidth || wrap.offsetWidth || 0;
+
+  const ws = getComputedStyle(wrap);
+  it.padL = parseFloat(ws.paddingLeft) || 0;
+  it.padR = parseFloat(ws.paddingRight) || 0;
+
+  // real text width regardless of transforms
+  it.textW = span.scrollWidth || span.offsetWidth || 0;
+
+  const avail = Math.max(0, it.width - it.padL - it.padR);
+  it.maxX = Math.max(0, avail - it.textW);
 }
+
 
 function rebuildRangeClueStickCache() {
   _rangeClueCache = [];
@@ -548,90 +570,104 @@ function rebuildRangeClueStickCache() {
 
   const ranges = els.grid?.querySelectorAll?.(".range") || [];
   for (const r of ranges) {
-    const clue = r.querySelector(".rangeClue");
-    if (!clue) continue;
+    const wrap = r.querySelector(".rangeClue");
+    const span = wrap?.querySelector(".rangeClue-string");
+    if (!wrap || !span) continue;
 
-    const cs = getComputedStyle(clue);
-    const startPad = parseFloat(cs.getPropertyValue("--range-clue-start")) || 8;
-    const endPad = parseFloat(cs.getPropertyValue("--range-clue-end")) || 8;
-
-    // Cache geometry (avoid layout reads during scroll frames)
-    const left = r.offsetLeft;
-    const width = r.offsetWidth;
-
-    // If it’s hidden, offsetWidth is 0 — we’ll rebuild again when it becomes visible.
-    const clueW = clue.offsetWidth || 0;
-
-    const maxX = Math.max(0, width - clueW - endPad - startPad);
-
-    _rangeClueCache.push({
+    const it = {
       r,
-      clue,
-      left,
-      width,
-      clueW,
-      startPad,
-      endPad,
-      maxX,
+      wrap,
+      span,
+      left: 0,
+      width: 0,
+      padL: 0,
+      padR: 0,
+      textW: 0,
+      maxX: 0,
       lastX: null,
-    });
+    };
+
+    recalcRangeClueItem(it);
+    _rangeClueCache.push(it);
   }
 }
 
-function updateRangeClueStick() {
+
+function startRangeClueFollow() {
   const sc = els.gridScroll;
   if (!sc || sc.scrollWidth <= sc.clientWidth) return;
 
-  // Hide inline clues by default in word-chain until started
-  const hideForChain = play.mode === MODE.CHAIN && !chain.started;
+  // if inline clues aren't visible, don't do work
+  if (legendCluesEnabled()) return;
+  if (play.mode === MODE.CHAIN && !chain.started) return;
 
-  // Control “pin” position relative to the scroll viewport WITHOUT changing padding
-  // You can set these in CSS on #gridScroll:
-  //   --clue-pin-pad: 8px;      (how far from left to pin)
-  //   --clue-pin-offset: 0px;   (nudge; can be negative to counter padding-inline)
+  if (_rangeClueTicker) return;
+
+  _rangeClueStable = 0;
+  _rangeClueLastSL = sc.scrollLeft;
+
+  _rangeClueTicker = requestAnimationFrame(function tick() {
+    const sc = els.gridScroll;
+    if (!sc) { _rangeClueTicker = 0; return; }
+
+    const sl = sc.scrollLeft;
+
+    updateRangeClueStick(sl);
+
+    const delta = Math.abs(sl - _rangeClueLastSL);
+    _rangeClueStable = delta < 0.05 ? _rangeClueStable + 1 : 0;
+    _rangeClueLastSL = sl;
+
+    if (_rangeClueStable >= 6) {
+      _rangeClueTicker = 0;
+      return;
+    }
+
+    _rangeClueTicker = requestAnimationFrame(tick);
+  });
+}
+
+function updateRangeClueStick(scrollLeftOverride) {
+  const sc = els.gridScroll;
+  if (!sc || sc.scrollWidth <= sc.clientWidth) return;
+
+  if (legendCluesEnabled()) return;
+  if (play.mode === MODE.CHAIN && !chain.started) return;
+
   const scs = getComputedStyle(sc);
   const pinPad = parseFloat(scs.getPropertyValue("--clue-pin-pad")) || 8;
   const pinOffset = parseFloat(scs.getPropertyValue("--clue-pin-offset")) || 0;
 
-  // “Pinned” x coordinate in the scroll content coordinate-space
-  const pinX = sc.scrollLeft + pinPad + pinOffset;
+  const sl = (scrollLeftOverride ?? sc.scrollLeft);
 
-  // Only bother updating ranges near the viewport (perf)
-  const viewL = sc.scrollLeft - 80;
-  const viewR = sc.scrollLeft + sc.clientWidth + 80;
+  // pinned x position in scroll-content coords
+  const pinX = sl + pinPad + pinOffset;
+
+  const viewL = sl - 80;
+  const viewR = sl + sc.clientWidth + 80;
 
   for (const it of _rangeClueCache) {
-    const { r, clue, left, width, startPad, maxX } = it;
+    const { span, left, width, padL, maxX } = it;
 
-    // show/hide without reflowing everything constantly
-    const shouldHide = hideForChain;
-    if (clue.hidden !== shouldHide) {
-      clue.hidden = shouldHide;
-      // clue width changes when hidden/unhidden: we’ll need a rebuild once shown
-      if (!shouldHide) rebuildRangeClueStickCache();
-    }
-    if (shouldHide) continue;
-
-    // Skip far-away ranges
     const rL = left;
     const rR = left + width;
     if (rR < viewL || rL > viewR) continue;
 
-    // desired translateX (relative to left: startPad)
-    let x = (pinX - left) - startPad;
+    // translate within the padded area of .rangeClue
+    if (!it.width || !it.textW) recalcRangeClueItem(it);
+let x = pinX - (it.left + it.padL);
 
-    // Clamp inside range
+
     if (x < 0) x = 0;
     else if (x > maxX) x = maxX;
 
-    // Reduce shimmer: snap to whole px (or use 0.5px if you want)
-    x = Math.round(x);
-
-    // Deadzone: don’t write style unless it changed meaningfully
-    if (it.lastX != null && Math.abs(x - it.lastX) < 1) continue;
+    // NO rounding on iOS (rounding = visible stepping)
+    if (it.lastX != null && Math.abs(x - it.lastX) < 0.05) continue;
 
     it.lastX = x;
-    clue.style.setProperty("--stick-x", `${x}px`);
+
+    // fastest path: set transform directly on the moving span
+    span.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
   }
 }
 
@@ -999,7 +1035,7 @@ function chainStartNow() {
 
   chain.started = true;
   rebuildRangeClueStickCache();
-requestRangeClueStick();
+startRangeClueFollow();
 
   chain.running = true;
   setInlineCluesHiddenUntilChainStart();
@@ -1432,7 +1468,7 @@ function setAt(i, { behavior } = {}) {
   play.at = clamp(i, 0, play.n - 1);
   updatePlayUI();
   keepActiveCellInView(behavior || (IS_TOUCH ? "smooth" : "auto"));
-  requestRangeClueStick();
+  startRangeClueFollow();
 
   maybeClearSelectionOnCursorMove();
   if (play.mode === MODE.CHAIN) requestChainClues();
@@ -1656,7 +1692,7 @@ function loadPuzzle(i) {
 
   renderGrid(els.grid, m, true);
   rebuildRangeClueStickCache();
-  requestRangeClueStick();
+  startRangeClueFollow();
 
 
   // Legend mode
@@ -2088,7 +2124,7 @@ els.gridScroll?.addEventListener(
   "scroll",
   () => {
     if (play.mode === MODE.CHAIN) requestChainClues();
-    requestRangeClueStick();
+    startRangeClueFollow();
   },
   { passive: true }
 );
@@ -2308,4 +2344,7 @@ requestAnimationFrame(() => {
   setAt(0);
   focusForTyping();
 });
-window.addEventListener("resize", requestRangeClueStick, { passive: true });
+window.addEventListener("resize", () => {
+  rebuildRangeClueStickCache();
+  startRangeClueFollow();
+}, { passive: true });
