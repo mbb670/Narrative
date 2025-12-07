@@ -177,7 +177,7 @@ const els = {
   bGrid: $("#bGrid"),
   status: $("#status"),
   solution: $("#solution"),
-  helper: document.querySelector(".helper"),
+  // helper: document.querySelector(".helper"),
   clueToggle: $("#clueToggle"),
 
 };
@@ -745,34 +745,118 @@ const chain = {
 let chainUI = null;
 let chainResults = null;
 
+const CHAIN_UI = { IDLE: "idle", RUNNING: "running", PAUSED: "paused", DONE: "done" };
+
+
+function chainSetUIState(state, ui = ensureChainUI()) {
+  // global hook for CSS
+  document.body.dataset.chainState = state;
+
+  // button hook for CSS
+  ui.startBtn.dataset.state = state;
+
+  // button label
+ui.startBtn.textContent =
+  state === CHAIN_UI.IDLE ? "Start" :
+  state === CHAIN_UI.RUNNING ? "Pause" :
+  state === CHAIN_UI.PAUSED ? "Resume" :
+  "Reset";
+
+}
+
+function chainPause() {
+  if (!chain.started || !chain.running) return;
+
+  const ui = ensureChainUI();
+
+  // snapshot time so resume is accurate
+  if (chain.isTimed) {
+    const left = Math.max(0, (chain.endsAt - Date.now()) / 1000);
+    chain.left = left;
+    ui.timer.textContent = fmtTime(left);
+  } else {
+    const elapsed = Math.max(0, (Date.now() - chain.startAt) / 1000);
+    chain.elapsed = elapsed;
+    ui.timer.textContent = fmtTime(elapsed);
+  }
+
+  chain.running = false;
+  chainSetUIState(CHAIN_UI.PAUSED, ui);
+}
+
+function chainResume() {
+  if (!chain.started || chain.running) return;
+
+  const ui = ensureChainUI();
+
+  if (chain.isTimed) {
+    const left = Math.max(0, +chain.left || 0);
+    chain.endsAt = Date.now() + left * 1000;
+  } else {
+    const elapsed = Math.max(0, +chain.elapsed || 0);
+    chain.startAt = Date.now() - elapsed * 1000;
+  }
+
+  chain.running = true;
+  chainSetUIState(CHAIN_UI.RUNNING, ui);
+  focusForTyping();
+}
+
+function chainResetFromHud() {
+  // optional: stop the tick if it's still running
+  if (chain.tickId) {
+    clearInterval(chain.tickId);
+    chain.tickId = null;
+  }
+
+  // your existing reset behavior
+  resetPlay();
+  chainSetUIState(CHAIN_UI.IDLE);
+  focusForTyping();
+}
+
+
+
 function ensureChainUI() {
   if (chainUI) return chainUI;
 
-  const hud = document.createElement("div");
-  hud.className = "chainHud";
-  hud.hidden = true;
-  hud.innerHTML = `
-    <div class="chainHudRight">
-      <button class="pill text-uppercase-semibold-md" id="chainStartBtn" type="button">Start</button>
-      <div class="chainBar" aria-hidden="true"><i></i></div>
-      <div class="chainTimer text-uppercase-semibold-lg">00:00</div>
-    </div>
-  `;
+  const hud = document.querySelector(".chainHud");
+
   els.meta.insertAdjacentElement("afterend", hud);
 
   const startBtn = hud.querySelector("#chainStartBtn");
 
-  startBtn.addEventListener("click", () => {
-    markInteracted();
-    chainStartNow();
-  });
+startBtn.addEventListener("click", () => {
+  markInteracted();
+
+  if (play.mode !== MODE.CHAIN) return;
+
+  // If completed, button becomes Reset
+  if (play.done) {
+    chainResetFromHud();
+    return;
+  }
+
+  if (!chain.started) chainStartNow();
+  else if (chain.running) chainPause();
+  else chainResume();
+});
+
+
 
   chainUI = {
     hud,
     startBtn,
-    bar: hud.querySelector(".chainBar > i"),
     timer: hud.querySelector(".chainTimer"),
   };
+chainSetUIState(
+  play?.done
+    ? CHAIN_UI.DONE
+    : (chain.started ? (chain.running ? CHAIN_UI.RUNNING : CHAIN_UI.PAUSED) : CHAIN_UI.IDLE),
+  chainUI
+);
+
+
   return chainUI;
 }
 
@@ -811,10 +895,12 @@ function ensureChainResults() {
   cAgain.addEventListener("click", () => {
     closeChainResults();
     resetPlay();
+    chainSetUIState(CHAIN_UI.IDLE);
     focusForTyping();
   });
   cNext.addEventListener("click", () => {
     closeChainResults();
+    chainSetUIState(CHAIN_UI.IDLE);
     loadByViewOffset(1);
   });
 
@@ -868,12 +954,9 @@ function chainResetTimer() {
     const total = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
     chain.left = total;
     ui.timer.textContent = fmtTime(chain.left);
-    ui.bar.style.transform = "scaleX(1)";
   } else {
     chain.elapsed = 0;
     ui.timer.textContent = fmtTime(0);
-    // bar has no meaning in untimed; keep it full so UI doesn’t look “empty”
-    ui.bar.style.transform = "scaleX(1)";
   }
 }
 
@@ -885,9 +968,6 @@ function chainStartNow() {
   const ui = ensureChainUI();
   const p = puzzles[pIdx];
   const total = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
-
-  // Show clues, hide start button, focus at first editable cell
-  ui.startBtn.style.display = "none";
 
   // jump to first editable cell (usually 0)
   const first = findNextEditable(0, +1);
@@ -902,6 +982,9 @@ function chainStartNow() {
   setInlineCluesHiddenUntilChainStart();
   applyClueMode();
   const isTimed = !!(p?.timedMode ?? true);
+  chain.isTimed = isTimed;
+chainSetUIState(CHAIN_UI.RUNNING, ui);
+
 
   if (isTimed) {
     chain.endsAt = Date.now() + total * 1000;
@@ -914,8 +997,6 @@ function chainStartNow() {
       chain.left = left;
 
       ui.timer.textContent = fmtTime(left);
-      const pct = Math.max(0, Math.min(1, left / total));
-      ui.bar.style.transform = `scaleX(${pct})`;
 
       if (left <= 0) chainFinish("time");
     }, 120);
@@ -930,7 +1011,6 @@ function chainStartNow() {
       chain.elapsed = elapsed;
 
       ui.timer.textContent = fmtTime(elapsed);
-      ui.bar.style.transform = "scaleX(1)"; // no progress meaning in untimed
     }, 120);
   }
 }
@@ -1046,6 +1126,7 @@ function chainFinish(reason = "time") {
   }
 
   play.done = true;
+  chainSetUIState(CHAIN_UI.DONE);
   updatePlayUI();
 
   try {
@@ -1568,14 +1649,14 @@ function loadPuzzle(i) {
 
     // hide reveal button in chain mode
     if (els.reveal) els.reveal.style.display = "none";
-    if (els.helper) els.helper.style.display = "none";
-    if (els.meta) els.meta.style.display = "none";
+    // if (els.helper) els.helper.style.display = "none";
+    // if (els.meta) els.meta.style.display = "none";
 
   } else {
     if (chainUI) chainUI.hud.hidden = true;
     if (els.reveal) els.reveal.style.display = "";
-    if (els.helper) els.helper.style.display = "";
-    if (els.meta) els.meta.style.display = "";
+    // if (els.helper) els.helper.style.display = "";
+    // if (els.meta) els.meta.style.display = "";
 
 
     els.legend.hidden = false;
@@ -1597,7 +1678,12 @@ function loadPuzzle(i) {
   const pos = list.indexOf(pIdx);
   const posText = list.length ? `${(pos >= 0 ? pos : 0) + 1} / ${list.length}` : `1 / ${puzzles.length}`;
 
-  els.meta.textContent = `${p.title || "Untitled"} • ${posText}`;
+  els.meta.replaceChildren(
+  document.createTextNode(p.title || "Untitled"),
+  document.createTextNode(" "),
+  Object.assign(document.createElement("span"), { textContent: `• ${posText}` })
+);
+
 
   updatePlayUI();
   applyClueMode();
@@ -1612,11 +1698,15 @@ function loadPuzzle(i) {
 function setTab(which) {
   currentView = which;
   try { localStorage.setItem(LAST_VIEW_KEY, currentView); } catch {}
+  resetPlay();
+  chainSetUIState(CHAIN_UI.IDLE);
 
+  // Global hook for CSS
+  document.body.dataset.view = which; // "play" | "chain" | "build"
 
   const isBuild = which === VIEW.BUILD;
   const isChain = which === VIEW.CHAIN;
-  const isPlay = which === VIEW.PLAY;
+  const isPlay  = which === VIEW.PLAY;
 
   els.tabPlay?.classList.toggle("is-active", isPlay);
   els.tabChain?.classList.toggle("is-active", isChain);
@@ -1636,6 +1726,7 @@ function setTab(which) {
     chainStopTimer();
   }
 }
+
 
 // ---- Escaping ----
 function escapeHtml(s) {
