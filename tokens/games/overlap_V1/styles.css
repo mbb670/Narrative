@@ -21,18 +21,17 @@
       --letter: 60cqmin;
       --range-clue-size: 45cqmin;
 
-      /* --grid-rows: 1fr 1fr 3fr 1fr 1fr;
-     --grid-rows: 32px 32px var(--spacing-x144) 16px 16px;
---grid-h: clamp(144px, 33vw, 240px); */
-
-      --cell: clamp(72px, 8vw, 96px);
+      /* --cell: clamp(72px, 8vw, 96px); */
+      --cell: clamp(56px, 8vw, 96px);
 
 
       --grid-top-space: 32px;
       --grid-letter-space: 72px;
       --grid-bottom-space: 16px;
+  }
 
-
+  * {
+      box-sizing: border-box;
   }
 
   .clues--legend,
@@ -44,8 +43,10 @@
       :root {
           --border-w: 1px;
 
-          --grid-letter-space: 64px;
+          /* --grid-letter-space: 64px; */
           --grid-bottom-space: 8px;
+
+          --grid-letter-space: 48px;
       }
 
       .clues--legend,
@@ -68,8 +69,8 @@
       position: relative;
       /* overflow-y: hidden; */
       height: 100svh;
-   
-  
+
+
   }
 
   .wrap {
@@ -77,7 +78,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-         
+
   }
 
 
@@ -220,6 +221,8 @@
 
   .panel {
       display: none;
+      flex-grow: 1;
+      flex-direction: column;
   }
 
   .panel.is-active {
@@ -233,7 +236,19 @@
 
   .stage {
       margin-inline: auto;
-      outline: none
+      height: 100%;
+      place-content: center;
+      justify-content: space-between;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-x8);
+      width: 100%;
+      overflow: hidden;
+
+      &:focus {
+          outline: none;
+      }
+
   }
 
   .game-data {
@@ -243,11 +258,16 @@
       /* margin: var(--spacing-x16) var(--layout-grid-margin) var(--spacing-x4); */
       height: var(--unit-48);
       max-width: var(--layout-content-md-max);
-      margin: var(--spacing-x8) auto;
+      gap: var(--spacing-x16);
+      width: 100%;
+      box-sizing: border-box;
+      padding-inline: var(--layout-grid-margin);
+      align-self: center;
 
       .meta {
           color: var(--foreground-muted);
           flex: 1;
+          text-wrap: nowrap;
 
           span {
               color: var(--foreground-subtle);
@@ -257,8 +277,8 @@
       .chainHud {
           align-items: center;
           gap: var(--spacing-x8);
-          justify-content: center;
-          justify-content: space-between;
+          /* justify-content: space-between; */
+          justify-content: flex-end;
           flex: 1;
 
           #chainStartBtn {
@@ -278,17 +298,20 @@
   }
 
 
-  body[data-view="play"]{ 
-    .chainHud {
+  body[data-view="play"] {
+      .game-data {
+          margin-bottom: 0;
+      }
 
-      display: none;
-      
+      .chainHud {
+          display: none;
+      }
+
+      .meta {
+          text-align: center;
+      }
   }
 
-  .meta{
-    text-align: center;
-  }
-  }
   body[data-view="chain"] .chainHud {
       display: flex !important;
   }
@@ -330,12 +353,14 @@
       overflow-y: hidden;
 
       padding-inline: var(--layout-grid-margin);
-      padding-bottom: var(--unit-16);
 
       scrollbar-gutter: stable;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
       touch-action: pan-x;
+
+      flex-grow: 1;
+      place-content: center;
   }
 
   .grid {
@@ -359,7 +384,7 @@
   .range {
       border: var(--border-w) solid var(--color);
       pointer-events: none;
-      background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 90%), transparent 20%);
+      background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 92%), transparent 10%);
       grid-column: var(--gs) / var(--ge);
       display: grid;
       grid-template-rows: subgrid;
@@ -378,7 +403,7 @@
           /* transform: translateY(-100%); */
 
           .rangeClue-string {
-              color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
+              color: color-mix(in srgb, var(--color), var(--foreground-default) 80%);
               font-size: var(--range-clue-size);
               padding: var(--spacing-x2) var(--spacing-x8);
               white-space: nowrap;
@@ -464,9 +489,10 @@
       container-type: size;
 
       .letter {
-          grid-row: 4/5;
+          grid-row: 4/6;
           font-size: var(--letter);
           height: 100%;
+          place-content: center;
       }
 
       .num {
@@ -506,6 +532,8 @@
       gap: var(--spacing-x20);
       padding-inline: var(--layout-grid-margin);
 
+      display: none !important;
+
       button {
           max-width: 240px !important;
       }
@@ -538,7 +566,7 @@
   }
 
   .helper {
-      margin: var(--spacing-x24) auto;
+      /* margin: var(--spacing-x24) auto; */
       text-align: center;
       color: var(--foreground-muted);
       display: flex;
@@ -546,11 +574,6 @@
       gap: var(--spacing-x8);
       flex-wrap: wrap;
       align-items: center;
-  }
-
-  .sep {
-      opacity: .55;
-      user-select: none
   }
 
   /* Success */
@@ -561,7 +584,7 @@
       place-items: center;
       background: var(--opacity-dimm-strong);
       padding: var(--layout-grid-margin);
-      z-index: 50
+      z-index: 50;
   }
 
   .success.is-open {
@@ -923,12 +946,10 @@
       /* width: min(920px, 100%); */
       /* margin: var(--spacing-x16) auto var(--spacing-x12); */
       padding: var(--spacing-x12);
-      border-radius: var(--radius-default);
-      /* background: var(--background-muted); */
       gap: var(--unit-6);
       box-sizing: border-box;
       /* width: 50%; */
-      flex-grow: 1;
+      /* flex-grow: 1; */
       flex-direction: column;
       justify-content: flex-end;
       max-width: var(--layout-content-md-max);
