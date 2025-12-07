@@ -179,6 +179,7 @@ const els = {
   solution: $("#solution"),
   // helper: document.querySelector(".helper"),
   clueToggle: $("#clueToggle"),
+  keyboard: $(".keyboard"),
 
 };
 
@@ -331,13 +332,23 @@ const play = {
 
 let selectedEntry = null;
 
-// ---- Touch keyboard shim ----
+// ---- Touch + on-screen keyboard ----
 let hasInteracted = true;
 const markInteracted = () => {
   hasInteracted = true;
 };
 
 const IS_TOUCH = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+const UA = navigator.userAgent || "";
+const UA_DESKTOP_HINT =
+  /(Windows NT|Macintosh|CrOS|Linux|X11)/i.test(UA) && !/(Mobile|Tablet|iPad|iPhone|Android)/i.test(UA);
+const UA_DATA_DESKTOP = navigator.userAgentData ? navigator.userAgentData.mobile === false : false;
+
+const DEFAULTS_TO_HARDWARE = UA_DESKTOP_HINT || UA_DATA_DESKTOP;
+let hasHardwareKeyboard = DEFAULTS_TO_HARDWARE;
+let lastHardwareKeyboardTs = 0;
+const HARDWARE_STALE_MS = 120000; // demote hardware flag after ~2 minutes of no keys
+const shouldUseCustomKeyboard = () => IS_TOUCH && !hasHardwareKeyboard;
 
 const kb = document.createElement("input");
 kb.type = "text";
@@ -369,23 +380,26 @@ const focusForTyping = () => {
   const a = document.activeElement;
   if (a && a !== kb && isEditable(a)) return;
 
-  if (IS_TOUCH) {
-    try {
-      kb.focus({ preventScroll: true });
-    } catch {
-      kb.focus();
-    }
-    kbReset();
-  } else {
+  if (shouldUseCustomKeyboard() || hasHardwareKeyboard || !IS_TOUCH) {
     try {
       els.stage.focus({ preventScroll: true });
     } catch {
       els.stage.focus();
     }
+    return;
   }
+
+  try {
+    kb.focus({ preventScroll: true });
+  } catch {
+    kb.focus();
+  }
+  kbReset();
 };
 
 kb.addEventListener("input", () => {
+  if (shouldUseCustomKeyboard()) return;
+
   const v = kb.value || "";
   if (!v) return;
   for (const ch of v) {
@@ -395,6 +409,7 @@ kb.addEventListener("input", () => {
 });
 
 kb.addEventListener("keydown", (e) => {
+  if (shouldUseCustomKeyboard()) return;
   if (e.metaKey || e.ctrlKey) return;
 
   if (e.key === "Backspace") {
@@ -416,6 +431,117 @@ kb.addEventListener("keydown", (e) => {
     return;
   }
 });
+
+const KB_ROWS = [
+  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+  ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACKSPACE"],
+];
+
+function initOnScreenKeyboard() {
+  const root = els.keyboard;
+  if (!root) return;
+
+  root.setAttribute("role", "region");
+  root.setAttribute("aria-label", "On-screen keyboard");
+  root.innerHTML = "";
+
+  KB_ROWS.forEach((rowKeys) => {
+    const row = document.createElement("div");
+    row.className = "keyboard-row text-system-semibold-sm";
+
+    rowKeys.forEach((key) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      const isBackspace = key === "BACKSPACE";
+      const isEnter = key === "ENTER";
+      btn.className = `keyboard-key${isBackspace ? " keyboard-key--backspace" : ""}${isEnter ? " keyboard-key--enter" : ""}`;
+      if (isBackspace) {
+        btn.dataset.action = "backspace";
+        btn.setAttribute("aria-label", "Backspace");
+        btn.textContent = "⌫";
+      } else if (isEnter) {
+        btn.dataset.action = "enter";
+        btn.setAttribute("aria-label", "Next cell");
+        btn.textContent = "↦";
+      } else {
+        btn.dataset.key = key;
+        btn.textContent = key;
+        btn.setAttribute("aria-label", key);
+      }
+      row.appendChild(btn);
+    });
+
+    root.appendChild(row);
+  });
+
+  const handlePress = (e) => {
+    const btn = e.target.closest("[data-key], [data-action]");
+    if (!btn) return;
+    e.preventDefault();
+    markInteracted();
+
+    if (btn.dataset.key) write(btn.dataset.key);
+    else if (btn.dataset.action === "backspace") back();
+    else if (btn.dataset.action === "enter") move(1);
+
+    focusForTyping();
+  };
+
+  let pressedBtn = null;
+  const clearPressed = () => {
+    if (pressedBtn) pressedBtn.classList.remove("is-pressed");
+    pressedBtn = null;
+  };
+
+  root.addEventListener("pointerdown", (e) => {
+    const btn = e.target.closest("[data-key], [data-action]");
+    if (!btn) return;
+    pressedBtn = btn;
+    btn.classList.add("is-pressed");
+    handlePress(e);
+  });
+
+  const endEvents = ["pointerup", "pointercancel", "pointerleave"];
+  endEvents.forEach((ev) => {
+    root.addEventListener(ev, (e) => {
+      if (!pressedBtn) return;
+      if (e.type === "pointerleave" && root.contains(e.target)) return;
+      clearPressed();
+    });
+  });
+}
+
+function updateKeyboardVisibility() {
+  const root = els.keyboard;
+  if (!root) return;
+
+  const show = shouldUseCustomKeyboard() && (currentView === VIEW.PLAY || currentView === VIEW.CHAIN);
+
+  root.classList.toggle("is-visible", show);
+  root.setAttribute("aria-hidden", show ? "false" : "true");
+  document.body.classList.toggle("uses-custom-keyboard", show);
+
+  if (show) kb.blur();
+}
+
+function maybeDemoteHardwareKeyboard() {
+  if (!hasHardwareKeyboard) return;
+  const stale = !lastHardwareKeyboardTs || Date.now() - lastHardwareKeyboardTs > HARDWARE_STALE_MS;
+  if (!stale) return;
+
+  hasHardwareKeyboard = false;
+  updateKeyboardVisibility();
+}
+
+function noteHardwareKeyboard() {
+  if (!IS_TOUCH) return;
+  if (hasHardwareKeyboard) return;
+  hasHardwareKeyboard = true;
+  lastHardwareKeyboardTs = Date.now();
+  updateKeyboardVisibility();
+  focusForTyping();
+}
 
 // ---- Model ----
 function computed(p) {
@@ -1719,6 +1845,8 @@ function setTab(which) {
   els.panelPlay?.classList.toggle("is-active", !isBuild);
   els.panelBuild?.classList.toggle("is-active", isBuild);
 
+  updateKeyboardVisibility();
+
   if (!isBuild) {
     ensureCurrentPuzzleMatchesView();
     focusForTyping();
@@ -2050,8 +2178,31 @@ els.tabPlay?.addEventListener("click", () => setTab(VIEW.PLAY));
 els.tabChain?.addEventListener("click", () => setTab(VIEW.CHAIN));
 els.tabBuild?.addEventListener("click", () => setTab(VIEW.BUILD));
 
-// Keyboard (desktop)
-if (!IS_TOUCH) document.addEventListener("keydown", onKey, true);
+// Keyboard (physical detection + input)
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (!IS_TOUCH || hasHardwareKeyboard) return;
+    if (e.target === kb) return;
+    if (isEditable(e.target)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === "Backspace" || e.key === "ArrowLeft" || e.key === "ArrowRight" || /^[a-zA-Z]$/.test(e.key)) {
+      noteHardwareKeyboard();
+    }
+  },
+  true
+);
+document.addEventListener(
+  "pointerdown",
+  (e) => {
+    if (e.pointerType === "touch") {
+      maybeDemoteHardwareKeyboard();
+      markInteracted();
+    }
+  },
+  { passive: true }
+);
+document.addEventListener("keydown", onKey, true);
 
 // Focus gate
 els.stage.addEventListener("pointerdown", (e) => {
@@ -2284,6 +2435,7 @@ els.rows.addEventListener("change", (e) => {
 });
 
 // ---- Start ----
+initOnScreenKeyboard();
 loadPuzzle(0);
 setTab(currentView);
 initClueToggle();
@@ -2293,4 +2445,3 @@ requestAnimationFrame(() => {
   setAt(0);
   focusForTyping();
 });
-

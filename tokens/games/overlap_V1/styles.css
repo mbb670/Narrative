@@ -59,49 +59,26 @@
       --grid-rows: 16px 16px var(--spacing-x144) 16px 16px;
   }
 
-
   body {
-      margin: 0;
+      margin: 0 auto;
       background: var(--background-default);
       color: var(--foreground-default);
 
       /* border: 1px solid red; */
       position: relative;
       /* overflow-y: hidden; */
-      height: 100dvh;
+      height: 100svh;
+   
+  
   }
 
   .wrap {
-      /* width: min(1180px, 100%); */
       margin: 0 auto;
-      /* padding-block: var(--layout-grid-margin); */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+         
   }
-
-
-html, body {
-  /* margin: 0;
-  height: 100%;
-  overflow: hidden; */
-}
-
-.wrap{
-  /* position: fixed; */
-  /* inset: 0; */
-  /* width: 100%; */
-  /* height: var(--vvh, 100svh); */
-  /* overflow: hidden; */
-  /* transform: translate3d(0, calc(var(--vvo, 0px) + var(--ptr, 0px)), 0); */
-}
-
-/* your horizontal scroller */
-.gridScroll{
-  /* overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x; ok if supported; harmless otherwise */
-}
-
-
 
 
   h1 {
@@ -110,14 +87,14 @@ html, body {
 
   .credit {
       /* margin-block: var(--spacing-x16); */
-      position: absolute;
+      /* position: absolute;
       bottom: var(--layout-grid-margin);
       left: 50%;
       transform: translate(-50%);
-      z-index: -20;
+      z-index: -20; */
       text-align: center;
       color: var(--foreground-muted);
-      width: 100vw;
+      padding: var(--layout-grid-margin);
 
 
       a {
@@ -128,6 +105,10 @@ html, body {
               text-decoration: none;
           }
       }
+  }
+
+  body.uses-custom-keyboard .credit {
+      display: none;
   }
 
   header {
@@ -259,8 +240,10 @@ html, body {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: var(--spacing-x16) var(--layout-grid-margin) var(--spacing-x4);
+      /* margin: var(--spacing-x16) var(--layout-grid-margin) var(--spacing-x4); */
       height: var(--unit-48);
+      max-width: var(--layout-content-md-max);
+      margin: var(--spacing-x8) auto;
 
       .meta {
           color: var(--foreground-muted);
@@ -295,10 +278,17 @@ html, body {
   }
 
 
-  body[data-view="play"] .chainHud {
+  body[data-view="play"]{ 
+    .chainHud {
+
       display: none;
+      
   }
 
+  .meta{
+    text-align: center;
+  }
+  }
   body[data-view="chain"] .chainHud {
       display: flex !important;
   }
@@ -379,7 +369,7 @@ html, body {
       }
 
       .rangeClue {
-          
+
           grid-row: 1/2;
           container-type: size;
           height: 100%;
@@ -388,13 +378,13 @@ html, body {
           /* transform: translateY(-100%); */
 
           .rangeClue-string {
-            color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
+              color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
               font-size: var(--range-clue-size);
               padding: var(--spacing-x2) var(--spacing-x8);
               white-space: nowrap;
               text-overflow: ellipsis;
               position: sticky;
-              left:0;
+              left: 0;
 
               background-color: color-mix(in srgb, var(--color), var(--background-default) 70%);
 
@@ -406,7 +396,7 @@ html, body {
               background-color: var(--color);
               color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
               padding-bottom: 4px; */
-              
+
           }
 
           &.is-hidden {
@@ -921,4 +911,89 @@ html, body {
       line-height: 1;
 
       display: none;
+  }
+
+  /* -----------------------------
+   On-screen keyboard (touch)
+   ----------------------------- */
+
+
+  .keyboard {
+      display: none;
+      /* width: min(920px, 100%); */
+      /* margin: var(--spacing-x16) auto var(--spacing-x12); */
+      padding: var(--spacing-x12);
+      border-radius: var(--radius-default);
+      /* background: var(--background-muted); */
+      gap: var(--unit-6);
+      box-sizing: border-box;
+      /* width: 50%; */
+      flex-grow: 1;
+      flex-direction: column;
+      justify-content: flex-end;
+      max-width: var(--layout-content-md-max);
+      width: 100%;
+      margin: 0 auto;
+
+  }
+
+  .keyboard.is-visible {
+      display: flex;
+  }
+
+  .keyboard-row {
+      display: flex;
+      gap: inherit;
+      width: 100%;
+      flex-wrap: nowrap;
+      justify-content: center;
+      box-sizing: border-box;
+      height: var(--unit-56);
+      container-type: size;
+
+      &:nth-of-type(2) {
+          padding-inline: 5%;
+      }
+  }
+
+  .keyboard,
+  .keyboard * {
+      -webkit-user-select: none;
+      user-select: none;
+  }
+
+  .keyboard-key {
+      appearance: none;
+      /* border: 1px solid var(--border-subtle); */
+      /* --background-color: var(--background-subtle); */
+      background: var(--background-subtle) !important;
+      color: var(--foreground-default);
+      border-radius: var(--radius-slight);
+      padding: var(--spacing-x8) var(--spacing-x4);
+      font: inherit;
+      text-transform: uppercase;
+      cursor: pointer;
+      /* box-shadow: 0 2px 0 var(--border-subtle); */
+      touch-action: manipulation;
+      user-select: none;
+      flex: 1 1 0;
+      min-width: var(--unit-24);
+      font-size: 35cqmin;
+
+  }
+
+  .keyboard-key:focus-visible {
+      outline: 2px solid var(--foreground-default);
+      outline-offset: 2px;
+  }
+
+  .keyboard-key.is-pressed,
+  .keyboard-key:active {
+      /* transform: translateY(2px); */
+      filter: brightness(0.92);
+  }
+
+  .keyboard-key--backspace,
+  .keyboard-key--enter {
+      flex: 1.75 1 0;
   }
