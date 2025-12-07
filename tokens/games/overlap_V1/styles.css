@@ -19,7 +19,7 @@
       --title: clamp(48px, 7vw, 88px);
 
       --letter: 60cqmin;
-      --range-clue-size: 50cqmin;
+      --range-clue-size: 45cqmin;
 
       /* --grid-rows: 1fr 1fr 3fr 1fr 1fr;
      --grid-rows: 32px 32px var(--spacing-x144) 16px 16px;
@@ -60,16 +60,15 @@
   }
 
 
-  * {
-      box-sizing: border-box
-  }
-
   body {
       margin: 0;
-      min-height: 100vh;
       background: var(--background-default);
       color: var(--foreground-default);
-      /* font-family: ui-serif, Georgia, "Times New Roman", Times, serif */
+
+      /* border: 1px solid red; */
+      position: relative;
+      /* overflow-y: hidden; */
+      height: 100dvh;
   }
 
   .wrap {
@@ -78,14 +77,48 @@
       /* padding-block: var(--layout-grid-margin); */
   }
 
+
+html, body {
+  /* margin: 0;
+  height: 100%;
+  overflow: hidden; */
+}
+
+.wrap{
+  /* position: fixed; */
+  /* inset: 0; */
+  /* width: 100%; */
+  /* height: var(--vvh, 100svh); */
+  /* overflow: hidden; */
+  /* transform: translate3d(0, calc(var(--vvo, 0px) + var(--ptr, 0px)), 0); */
+}
+
+/* your horizontal scroller */
+.gridScroll{
+  /* overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x; ok if supported; harmless otherwise */
+}
+
+
+
+
   h1 {
       text-align: center;
   }
 
   .credit {
       /* margin-block: var(--spacing-x16); */
+      position: absolute;
+      bottom: var(--layout-grid-margin);
+      left: 50%;
+      transform: translate(-50%);
+      z-index: -20;
       text-align: center;
       color: var(--foreground-muted);
+      width: 100vw;
+
 
       a {
           color: var(--foreground-default);
@@ -226,11 +259,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin:var(--spacing-x16) var(--layout-grid-margin);
+      margin: var(--spacing-x16) var(--layout-grid-margin) var(--spacing-x4);
       height: var(--unit-48);
 
       .meta {
           color: var(--foreground-muted);
+          flex: 1;
+
           span {
               color: var(--foreground-subtle);
           }
@@ -240,10 +275,13 @@
           align-items: center;
           gap: var(--spacing-x8);
           justify-content: center;
-          #chainStartBtn{
-            --background-color: var(--background-strong);
-            color: var(--foreground-alt);
-            border: unset;
+          justify-content: space-between;
+          flex: 1;
+
+          #chainStartBtn {
+              --background-color: var(--background-strong);
+              color: var(--foreground-alt);
+              border: unset;
           }
 
           .chainTimer {
@@ -262,7 +300,7 @@
   }
 
   body[data-view="chain"] .chainHud {
-      display: flex!important;
+      display: flex !important;
   }
 
   /* -----------------------------
@@ -271,16 +309,16 @@
 
 
 
-body[data-chain-state="paused"] .rangeClue{
-  display: none!important;
-}
+  body[data-chain-state="paused"] .rangeClue {
+      display: none !important;
+  }
 
-#chainStartBtn[data-state="running"] { 
-    --background-color: var(--background-default)!important;
-    color: var(--foreground-muted)!important;
-    border: 1px solid var(--border-subtle)!important;
+  #chainStartBtn[data-state="running"] {
+      --background-color: var(--background-default) !important;
+      color: var(--foreground-muted) !important;
+      border: 1px solid var(--border-subtle) !important;
 
- }
+  }
 
 
 
@@ -341,20 +379,34 @@ body[data-chain-state="paused"] .rangeClue{
       }
 
       .rangeClue {
-          color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
+          
           grid-row: 1/2;
           container-type: size;
           height: 100%;
           align-content: center;
           width: 100%;
+          /* transform: translateY(-100%); */
 
           .rangeClue-string {
+            color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
               font-size: var(--range-clue-size);
               padding: var(--spacing-x2) var(--spacing-x8);
               white-space: nowrap;
               text-overflow: ellipsis;
               position: sticky;
-              left: 0;
+              left:0;
+
+              background-color: color-mix(in srgb, var(--color), var(--background-default) 70%);
+
+              border-radius: var(--radius-slight);
+              margin: 10cqmin;
+
+              /* margin-left: calc(var(--border-w) * -1);
+              border-radius: var(--radius-slight) var(--radius-slight) 0 0;
+              background-color: var(--color);
+              color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
+              padding-bottom: 4px; */
+              
           }
 
           &.is-hidden {
@@ -387,17 +439,6 @@ body[data-chain-state="paused"] .rangeClue{
   body.clues--legend .rangeClue {
       display: none;
   }
-
-  /* ALT STYLING */
-  /* .rangeClue {
-     background-color: color-mix(in srgb, var(--color), var(--background-default) 80%);
-     padding: 4px 8px;
-      top:2px;
-      --range-clue-start:2px;
-      --range-clue-end: 2px;
-      border-radius: 4px;
-      z-index: 10;
-  } */
 
 
 

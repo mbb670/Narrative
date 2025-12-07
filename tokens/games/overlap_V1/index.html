@@ -13,7 +13,10 @@
 </head>
 
 <body>
-  <main class="wrap">
+      <div class="credit text-system-regular-sm">
+      Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.71
+    </div>
+  <main class="wrap" id="app">
 
     <header>
       <h1 class="text-display-semibold-sm">Overlap</h1>
@@ -34,8 +37,8 @@
         <div class="game-data">
           <div class="meta text-system-semibold-sm" id="meta"></div>
           <div class="chainHud" hidden>
+            <div class="chainTimer text-system-semibold-sm">00:00</div>
               <button class="btn text-system-semibold-sm" id="chainStartBtn" type="button">Start</button>
-              <div class="chainTimer text-system-semibold-sm">00:00</div>
           </div>
         </div>
 
@@ -57,6 +60,7 @@
           <button class="pill text-uppercase-semibold-md" id="next" type="button">Next</button>
         </div>
       </div>
+      <div class="keyboard"></div>
     </section>
 
     <!-- BUILDER -->
@@ -105,9 +109,7 @@
         </div>
       </div>
     </section>
-    <div class="credit text-system-regular-sm">
-      Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.7
-    </div>
+
   </main>
   <!-- Success -->
   <div class="success" id="success" role="dialog" aria-modal="true" aria-label="Solved">
