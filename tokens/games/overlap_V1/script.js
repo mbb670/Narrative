@@ -1767,7 +1767,7 @@ function shareResult({ mode }) {
   const dateStr = now.toLocaleDateString(undefined, {
     weekday: "long",
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
   });
   const baseUrl =
@@ -1796,7 +1796,7 @@ function shareResult({ mode }) {
       const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
       timeText = fmtTime(elapsed);
     }
-    if (timeText) msg += `\nI solved todays Word Chain in ${timeText}`;
+    if (timeText) msg += `\nI solved today's puzzle in ${timeText}`;
   }
 
   const payload = { title: "Overlap", text: msg, url: baseUrl };
