@@ -1,6 +1,7 @@
 import "../../docs/token_switcher/switcher.js";
 
 const KEY = "overlap_puzzles_v1";
+const SHARE_URL_OVERRIDE = ""; // leave blank to use current page URL; update if you want a fixed share link
 
 const COLORS = [
   ["Red", "--c-red"],
@@ -247,6 +248,7 @@ const els = {
   sClose: $("#sClose"),
   sAgain: $("#sAgain"),
   sNext: $("#sNext"),
+  sShare: $("#sShare"),
   pSel: $("#pSel"),
   pNew: $("#pNew"),
   pDel: $("#pDel"),
@@ -1071,6 +1073,7 @@ function ensureChainResults() {
         <button class="btn" id="cClose" type="button">Close</button>
         <button class="btn" id="cAgain" type="button">Play again</button>
         <button class="btn primary" id="cNext" type="button">Next puzzle</button>
+        <button class="btn" id="cShare" type="button">Share</button>
       </div>
     </div>
   `;
@@ -1079,6 +1082,7 @@ function ensureChainResults() {
   const cClose = wrap.querySelector("#cClose");
   const cAgain = wrap.querySelector("#cAgain");
   const cNext = wrap.querySelector("#cNext");
+  const cShare = wrap.querySelector("#cShare");
 
   wrap.addEventListener("click", (e) => {
     if (e.target === wrap) closeChainResults();
@@ -1095,6 +1099,9 @@ function ensureChainResults() {
     chainSetUIState(CHAIN_UI.IDLE);
     loadByViewOffset(1);
   });
+  cShare.addEventListener("click", () => {
+    shareResult({ mode: MODE.CHAIN });
+  });
 
   chainResults = {
     wrap,
@@ -1102,6 +1109,7 @@ function ensureChainResults() {
     scoreLine: wrap.querySelector("#chainScoreLine"),
     breakdown: wrap.querySelector("#chainBreakdown"),
     cClose,
+    cShare,
   };
   return chainResults;
 }
@@ -1752,6 +1760,53 @@ function openSuccess() {
 
 function closeSuccess() {
   els.success.classList.remove("is-open");
+}
+
+function shareResult({ mode }) {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const baseUrl =
+    SHARE_URL_OVERRIDE && SHARE_URL_OVERRIDE.trim()
+      ? SHARE_URL_OVERRIDE.trim()
+      : (() => {
+          try {
+            return location.href;
+          } catch {
+            return "https://mbb670.github.io/Narrative/tokens/games/overlap_V1/";
+          }
+        })();
+
+  let msg = `Overlap ${dateStr}`;
+
+  if (mode === MODE.CHAIN) {
+    const p = puzzles[pIdx];
+    const isTimed = !!(p?.timedMode ?? true);
+    const limit = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
+    let timeText = "";
+    if (isTimed) {
+      const left = Math.max(0, +chain.lastFinishLeftSec || 0);
+      const used = Math.max(0, limit - left);
+      timeText = fmtTime(used);
+    } else {
+      const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
+      timeText = fmtTime(elapsed);
+    }
+    if (timeText) msg += ` — ${timeText}`;
+  }
+
+  const payload = { title: "Overlap", text: msg, url: baseUrl };
+
+  if (navigator.share) {
+    navigator.share(payload).catch(() => {});
+    return;
+  }
+
+  // Fallback: copy to clipboard
+  const full = `${msg}\n${baseUrl}`;
+  navigator.clipboard?.writeText(full).then(
+    () => alert("Share text copied!"),
+    () => alert(full)
+  );
 }
 
 // ---- Reset / reveal ----
@@ -2427,6 +2482,11 @@ els.sNext.addEventListener("click", () => {
   markInteracted();
   loadByViewOffset(1);
 });
+if (els.sShare) {
+  els.sShare.addEventListener("click", () => {
+    shareResult({ mode: play.mode });
+  });
+}
 
 // Builder
 els.pSel.addEventListener("change", () => {
