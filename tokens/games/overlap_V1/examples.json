@@ -35,7 +35,7 @@
     "id": "p-002",
     "title": "Moving Parts",
     "type": "overlap",
-    "palette": "classic",
+    "palette": "greens",
     "words": [
       {
         "clue": "Representation",
@@ -131,7 +131,7 @@
     "id": "p-005",
     "title": "Local Detail",
     "type": "overlap",
-    "palette": "classic",
+    "palette": "greens",
     "words": [
       {
         "clue": "Tiny screen dot",
@@ -227,7 +227,7 @@
     "id": "p-008",
     "title": "Mixed Signals",
     "type": "overlap",
-    "palette": "classic",
+    "palette": "greens",
     "words": [
       {
         "clue": "Soft fiber",
@@ -291,7 +291,7 @@
     "id": "p-010",
     "title": "Bounce Back",
     "type": "overlap",
-    "palette": "classic",
+    "palette": "sunrise",
     "words": [
       {
         "clue": "Corkscrew shape",
@@ -387,7 +387,7 @@
     "id": "p-013",
     "title": "Deep Cuts",
     "type": "overlap",
-    "palette": "classic",
+    "palette": "greens",
     "words": [
       {
         "clue": "Underground chamber",
@@ -483,7 +483,7 @@
     "id": "p-016",
     "title": "Night Out",
     "type": "overlap",
-    "palette": "classic",
+    "palette": "sunrise",
     "words": [
       {
         "clue": "Bird of prey",
@@ -579,7 +579,7 @@
     "id": "p-019",
     "title": "Guided Tour",
     "type": "overlap",
-    "palette": "classic",
+    "palette": "greens",
     "words": [
       {
         "clue": "Admiration",
@@ -643,7 +643,7 @@
     "id": "p-20251202-sultan-chain-1",
     "title": "Super Long (Part 1/3)",
     "type": "chain",
-    "palette": "classic",
+    "palette": "greens",
     "words": [
       {
         "clue": "Middle Eastern ruler",
@@ -752,7 +752,7 @@
     "id": "p-20251202-sultan-chain-2",
     "title": "Super Long (Part 2/3)",
     "type": "chain",
-    "palette": "classic",
+    "palette": "sunrise",
     "words": [
       {
         "clue": "Rock",
