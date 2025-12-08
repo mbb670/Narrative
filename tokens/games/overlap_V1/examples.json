@@ -3,34 +3,31 @@
     "id": "p-001",
     "title": "Under the Surface",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Fury",
         "answer": "ANGER",
         "start": 1,
-        "height": "full",
-        "color": "--c-red"
+        "height": "full"
       },
       {
         "clue": "Tiny cause of illness",
         "answer": "GERM",
         "start": 3,
-        "height": "mid",
-        "color": "--c-yellow"
+        "height": "mid"
       },
       {
         "clue": "Stoat in its winter coat",
         "answer": "ERMINE",
         "start": 4,
-        "height": "inner",
-        "color": "--c-green"
+        "height": "inner"
       },
       {
         "clue": "Extracted from the ground",
         "answer": "MINED",
         "start": 6,
-        "height": "full",
-        "color": "--c-cyan"
+        "height": "full"
       }
     ]
   },
@@ -38,34 +35,31 @@
     "id": "p-002",
     "title": "Moving Parts",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Representation",
         "answer": "MODEL",
         "start": 1,
-        "height": "full",
-        "color": "--c-blue"
+        "height": "full"
       },
       {
         "clue": "River-mouth landform",
         "answer": "DELTA",
         "start": 3,
-        "height": "mid",
-        "color": "--c-orange"
+        "height": "mid"
       },
       {
         "clue": "Fortune-telling deck",
         "answer": "TAROT",
         "start": 6,
-        "height": "inner",
-        "color": "--c-purple"
+        "height": "inner"
       },
       {
         "clue": "Spinning motor part",
         "answer": "ROTOR",
         "start": 8,
-        "height": "full",
-        "color": "--c-cyan"
+        "height": "full"
       }
     ]
   },
@@ -73,34 +67,31 @@
     "id": "p-003",
     "title": "Just Right",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Path around a planet",
         "answer": "ORBIT",
         "start": 1,
-        "height": "full",
-        "color": "--c-mint"
+        "height": "full"
       },
       {
         "clue": "A small mouthful",
         "answer": "BITE",
         "start": 3,
-        "height": "mid",
-        "color": "--c-pink"
+        "height": "mid"
       },
       {
         "clue": "Lukewarm",
         "answer": "TEPID",
         "start": 5,
-        "height": "inner",
-        "color": "--c-yellow"
+        "height": "inner"
       },
       {
         "clue": "Perfect",
         "answer": "IDEAL",
         "start": 8,
-        "height": "full",
-        "color": "--c-blue"
+        "height": "full"
       }
     ]
   },
@@ -108,34 +99,31 @@
     "id": "p-004",
     "title": "Quiet Company",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Backyard plot",
         "answer": "GARDEN",
         "start": 1,
-        "height": "full",
-        "color": "--c-green"
+        "height": "full"
       },
       {
         "clue": "Tooth-related",
         "answer": "DENTAL",
         "start": 4,
-        "height": "mid",
-        "color": "--c-cyan"
+        "height": "mid"
       },
       {
         "clue": "Bird's claw",
         "answer": "TALON",
         "start": 7,
-        "height": "inner",
-        "color": "--c-orange"
+        "height": "inner"
       },
       {
         "clue": "All alone",
         "answer": "LONELY",
         "start": 9,
-        "height": "full",
-        "color": "--c-purple"
+        "height": "full"
       }
     ]
   },
@@ -143,34 +131,31 @@
     "id": "p-005",
     "title": "Local Detail",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Tiny screen dot",
         "answer": "PIXEL",
         "start": 1,
-        "height": "full",
-        "color": "--c-blue"
+        "height": "full"
       },
       {
         "clue": "Older adult",
         "answer": "ELDER",
         "start": 4,
-        "height": "mid",
-        "color": "--c-mint"
+        "height": "mid"
       },
       {
         "clue": "A horse race",
         "answer": "DERBY",
         "start": 6,
-        "height": "inner",
-        "color": "--c-red"
+        "height": "inner"
       },
       {
         "clue": "Local ordinance",
         "answer": "BYLAW",
         "start": 9,
-        "height": "full",
-        "color": "--c-yellow"
+        "height": "full"
       }
     ]
   },
@@ -178,34 +163,31 @@
     "id": "p-006",
     "title": "Hosted",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Milk container",
         "answer": "CARTON",
         "start": 1,
-        "height": "full",
-        "color": "--c-orange"
+        "height": "full"
       },
       {
         "clue": "Taste organ",
         "answer": "TONGUE",
         "start": 4,
-        "height": "mid",
-        "color": "--c-pink"
+        "height": "mid"
       },
       {
         "clue": "Visitor",
         "answer": "GUEST",
         "start": 7,
-        "height": "inner",
-        "color": "--c-cyan"
+        "height": "inner"
       },
       {
         "clue": "Property (land + home)",
         "answer": "ESTATE",
         "start": 9,
-        "height": "full",
-        "color": "--c-green"
+        "height": "full"
       }
     ]
   },
@@ -213,34 +195,31 @@
     "id": "p-007",
     "title": "Edges and Origins",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Safe port",
         "answer": "HARBOR",
         "start": 1,
-        "height": "full",
-        "color": "--c-cyan"
+        "height": "full"
       },
       {
         "clue": "Edge or boundary",
         "answer": "BORDER",
         "start": 4,
-        "height": "mid",
-        "color": "--c-yellow"
+        "height": "mid"
       },
       {
         "clue": "Draw from",
         "answer": "DERIVE",
         "start": 7,
-        "height": "inner",
-        "color": "--c-purple"
+        "height": "inner"
       },
       {
         "clue": "Climbing plants (plural)",
         "answer": "IVIES",
         "start": 10,
-        "height": "full",
-        "color": "--c-green"
+        "height": "full"
       }
     ]
   },
@@ -248,34 +227,31 @@
     "id": "p-008",
     "title": "Mixed Signals",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Soft fiber",
         "answer": "COTTON",
         "start": 1,
-        "height": "full",
-        "color": "--c-mint"
+        "height": "full"
       },
       {
         "clue": "Bitter mixer",
         "answer": "TONIC",
         "start": 4,
-        "height": "mid",
-        "color": "--c-blue"
+        "height": "mid"
       },
       {
         "clue": "Five-cent coin (or metal)",
         "answer": "NICKEL",
         "start": 6,
-        "height": "inner",
-        "color": "--c-orange"
+        "height": "inner"
       },
       {
         "clue": "Seaweed",
         "answer": "KELP",
         "start": 9,
-        "height": "full",
-        "color": "--c-green"
+        "height": "full"
       }
     ]
   },
@@ -283,34 +259,31 @@
     "id": "p-009",
     "title": "Keep It Down",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Ancient imprint",
         "answer": "FOSSIL",
         "start": 1,
-        "height": "full",
-        "color": "--c-purple"
+        "height": "full"
       },
       {
         "clue": "Not noisy",
         "answer": "SILENT",
         "start": 4,
-        "height": "mid",
-        "color": "--c-blue"
+        "height": "mid"
       },
       {
         "clue": "Complete",
         "answer": "ENTIRE",
         "start": 7,
-        "height": "inner",
-        "color": "--c-mint"
+        "height": "inner"
       },
       {
         "clue": "The Emerald Isle",
         "answer": "IRELAND",
         "start": 10,
-        "height": "full",
-        "color": "--c-green"
+        "height": "full"
       }
     ]
   },
@@ -318,34 +291,31 @@
     "id": "p-010",
     "title": "Bounce Back",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Corkscrew shape",
         "answer": "SPIRAL",
         "start": 1,
-        "height": "full",
-        "color": "--c-red"
+        "height": "full"
       },
       {
         "clue": "Gather (or a pep talk)",
         "answer": "RALLY",
         "start": 4,
-        "height": "mid",
-        "color": "--c-yellow"
+        "height": "mid"
       },
       {
         "clue": "Song line",
         "answer": "LYRIC",
         "start": 7,
-        "height": "inner",
-        "color": "--c-pink"
+        "height": "inner"
       },
       {
         "clue": "Rebound",
         "answer": "RICOCHET",
         "start": 9,
-        "height": "full",
-        "color": "--c-cyan"
+        "height": "full"
       }
     ]
   },
@@ -353,34 +323,31 @@
     "id": "p-011",
     "title": "A Place for Everything",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Gallery building",
         "answer": "MUSEUM",
         "start": 1,
-        "height": "full",
-        "color": "--c-blue"
+        "height": "full"
       },
       {
         "clue": "Short recap",
         "answer": "SUMMARY",
         "start": 4,
-        "height": "mid",
-        "color": "--c-orange"
+        "height": "mid"
       },
       {
         "clue": "U.S. state",
         "answer": "MARYLAND",
         "start": 7,
-        "height": "inner",
-        "color": "--c-green"
+        "height": "inner"
       },
       {
         "clue": "Scenery",
         "answer": "LANDSCAPE",
         "start": 11,
-        "height": "full",
-        "color": "--c-cyan"
+        "height": "full"
       }
     ]
   },
@@ -388,34 +355,31 @@
     "id": "p-012",
     "title": "Bad Inbox",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Large body of water",
         "answer": "OCEAN",
         "start": 1,
-        "height": "full",
-        "color": "--c-cyan"
+        "height": "full"
       },
       {
         "clue": "Blacksmith block",
         "answer": "ANVIL",
         "start": 4,
-        "height": "mid",
-        "color": "--c-yellow"
+        "height": "mid"
       },
       {
         "clue": "Bad guy",
         "answer": "VILLAIN",
         "start": 6,
-        "height": "inner",
-        "color": "--c-red"
+        "height": "inner"
       },
       {
         "clue": "Email folder",
         "answer": "INBOX",
         "start": 11,
-        "height": "full",
-        "color": "--c-blue"
+        "height": "full"
       }
     ]
   },
@@ -423,34 +387,31 @@
     "id": "p-013",
     "title": "Deep Cuts",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Underground chamber",
         "answer": "CAVERN",
         "start": 1,
-        "height": "full",
-        "color": "--c-purple"
+        "height": "full"
       },
       {
         "clue": "A boy's name meaning 'serious'",
         "answer": "ERNEST",
         "start": 4,
-        "height": "mid",
-        "color": "--c-mint"
+        "height": "mid"
       },
       {
         "clue": "Baltic country",
         "answer": "ESTONIA",
         "start": 7,
-        "height": "inner",
-        "color": "--c-blue"
+        "height": "inner"
       },
       {
         "clue": "Famous falls, for short",
         "answer": "NIAGARA",
         "start": 11,
-        "height": "full",
-        "color": "--c-cyan"
+        "height": "full"
       }
     ]
   },
@@ -458,34 +419,31 @@
     "id": "p-014",
     "title": "Points of Interest",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Bed cushion",
         "answer": "PILLOW",
         "start": 1,
-        "height": "full",
-        "color": "--c-pink"
+        "height": "full"
       },
       {
         "clue": "Flat low area",
         "answer": "LOWLAND",
         "start": 4,
-        "height": "mid",
-        "color": "--c-green"
+        "height": "mid"
       },
       {
         "clue": "Famous site",
         "answer": "LANDMARK",
         "start": 7,
-        "height": "inner",
-        "color": "--c-orange"
+        "height": "inner"
       },
       {
         "clue": "Bazaar",
         "answer": "MARKET",
         "start": 11,
-        "height": "full",
-        "color": "--c-yellow"
+        "height": "full"
       }
     ]
   },
@@ -493,34 +451,31 @@
     "id": "p-015",
     "title": "On Target",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Blue-tinted metal",
         "answer": "COBALT",
         "start": 1,
-        "height": "full",
-        "color": "--c-blue"
+        "height": "full"
       },
       {
         "clue": "Religious table",
         "answer": "ALTAR",
         "start": 4,
-        "height": "mid",
-        "color": "--c-purple"
+        "height": "mid"
       },
       {
         "clue": "Pointed projectile",
         "answer": "ARROW",
         "start": 7,
-        "height": "inner",
-        "color": "--c-red"
+        "height": "inner"
       },
       {
         "clue": "River vessel",
         "answer": "ROWBOAT",
         "start": 9,
-        "height": "full",
-        "color": "--c-cyan"
+        "height": "full"
       }
     ]
   },
@@ -528,34 +483,31 @@
     "id": "p-016",
     "title": "Night Out",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Bird of prey",
         "answer": "FALCON",
         "start": 1,
-        "height": "full",
-        "color": "--c-green"
+        "height": "full"
       },
       {
         "clue": "Live music show",
         "answer": "CONCERT",
         "start": 4,
-        "height": "mid",
-        "color": "--c-blue"
+        "height": "mid"
       },
       {
         "clue": "Sure",
         "answer": "CERTAIN",
         "start": 7,
-        "height": "inner",
-        "color": "--c-yellow"
+        "height": "inner"
       },
       {
         "clue": "Stain or corrupt",
         "answer": "TAINT",
         "start": 10,
-        "height": "full",
-        "color": "--c-red"
+        "height": "full"
       }
     ]
   },
@@ -563,34 +515,31 @@
     "id": "p-017",
     "title": "At the Horizon",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Distant line",
         "answer": "HORIZON",
         "start": 1,
-        "height": "full",
-        "color": "--c-orange"
+        "height": "full"
       },
       {
         "clue": "Layered vegetable",
         "answer": "ONION",
         "start": 6,
-        "height": "mid",
-        "color": "--c-mint"
+        "height": "mid"
       },
       {
         "clue": "Relating to ions",
         "answer": "IONIC",
         "start": 8,
-        "height": "inner",
-        "color": "--c-cyan"
+        "height": "inner"
       },
       {
         "clue": "Alias",
         "answer": "NICKNAME",
         "start": 10,
-        "height": "full",
-        "color": "--c-purple"
+        "height": "full"
       }
     ]
   },
@@ -598,34 +547,31 @@
     "id": "p-018",
     "title": "Morning Routine",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Breakfast staple",
         "answer": "CEREAL",
         "start": 1,
-        "height": "full",
-        "color": "--c-yellow"
+        "height": "full"
       },
       {
         "clue": "Wake-up sound",
         "answer": "ALARM",
         "start": 5,
-        "height": "mid",
-        "color": "--c-red"
+        "height": "mid"
       },
       {
         "clue": "Fleet of ships",
         "answer": "ARMADA",
         "start": 7,
-        "height": "inner",
-        "color": "--c-blue"
+        "height": "inner"
       },
       {
         "clue": "A polite title",
         "answer": "MADAM",
         "start": 9,
-        "height": "full",
-        "color": "--c-pink"
+        "height": "full"
       }
     ]
   },
@@ -633,34 +579,31 @@
     "id": "p-019",
     "title": "Guided Tour",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Admiration",
         "answer": "RESPECT",
         "start": 1,
-        "height": "full",
-        "color": "--c-blue"
+        "height": "full"
       },
       {
         "clue": "A striking display",
         "answer": "SPECTACLE",
         "start": 3,
-        "height": "mid",
-        "color": "--c-cyan"
+        "height": "mid"
       },
       {
         "clue": "Merciful (or a name)",
         "answer": "CLEMENT",
         "start": 9,
-        "height": "inner",
-        "color": "--c-green"
+        "height": "inner"
       },
       {
         "clue": "Guide",
         "answer": "MENTOR",
         "start": 12,
-        "height": "full",
-        "color": "--c-purple"
+        "height": "full"
       }
     ]
   },
@@ -668,81 +611,247 @@
     "id": "p-020",
     "title": "Weatherproof",
     "type": "overlap",
+    "palette": "classic",
     "words": [
       {
         "clue": "Wet-weather jacket",
         "answer": "RAINCOAT",
         "start": 1,
-        "height": "full",
-        "color": "--c-cyan"
+        "height": "full"
       },
       {
         "clue": "Layer or cover",
         "answer": "COATING",
         "start": 5,
-        "height": "mid",
-        "color": "--c-orange"
+        "height": "mid"
       },
       {
         "clue": "Slight trace",
         "answer": "TINGE",
         "start": 8,
-        "height": "inner",
-        "color": "--c-yellow"
+        "height": "inner"
       },
       {
         "clue": "Take in (as food)",
         "answer": "INGEST",
         "start": 9,
-        "height": "full",
-        "color": "--c-green"
+        "height": "full"
       }
     ]
   },
-
-    {
+  {
     "id": "p-20251202-sultan-chain-1",
     "title": "Super Long (Part 1/3)",
     "type": "chain",
+    "palette": "classic",
     "words": [
-      { "clue": "Middle Eastern ruler", "answer": "SULTAN", "start": 1, "height": "full", "color": "--c-blue", "diff": "medium" },
-      { "clue": "Off-topic aside", "answer": "TANGENT", "start": 4, "height": "mid", "color": "--c-pink", "diff": "medium" },
-      { "clue": "Main course", "answer": "ENTREE", "start": 8, "height": "inner", "color": "--c-yellow", "diff": "medium" },
-      { "clue": "Coral ridge", "answer": "REEF", "start": 11, "height": "full", "color": "--c-green", "diff": "easy" },
-      { "clue": "Attempt", "answer": "EFFORT", "start": 13, "height": "mid", "color": "--c-blue", "diff": "medium" },
-      { "clue": "Traditional; conventional", "answer": "ORTHODOX", "start": 16, "height": "inner", "color": "--c-purple", "diff": "medium" },
-      { "clue": "Posting private info", "answer": "DOXING", "start": 21, "height": "full", "color": "--c-orange", "diff": "medium" },
-      { "clue": "Pungent bulb", "answer": "GARLIC", "start": 26, "height": "mid", "color": "--c-blue", "diff": "medium" },
-      { "clue": "Hanging ice spike", "answer": "ICICLE", "start": 30, "height": "inner", "color": "--c-pink", "diff": "medium" },
-      { "clue": "Witty; smart", "answer": "CLEVER", "start": 33, "height": "full", "color": "--c-mint", "diff": "medium" },
-      { "clue": "Jury's decision", "answer": "VERDICT", "start": 36, "height": "mid", "color": "--c-yellow", "diff": "medium" },
-      { "clue": "Lay down orders", "answer": "DICTATE", "start": 39, "height": "inner", "color": "--c-orange", "diff": "medium" },
-      { "clue": "Boring; tiring", "answer": "TEDIOUS", "start": 44, "height": "full", "color": "--c-blue", "diff": "medium" },
-      { "clue": "Drive out", "answer": "OUST", "start": 48, "height": "mid", "color": "--c-mint", "diff": "easy" }
+      {
+        "clue": "Middle Eastern ruler",
+        "answer": "SULTAN",
+        "start": 1,
+        "height": "full",
+        "diff": "medium"
+      },
+      {
+        "clue": "Off-topic aside",
+        "answer": "TANGENT",
+        "start": 4,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Main course",
+        "answer": "ENTREE",
+        "start": 8,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Coral ridge",
+        "answer": "REEF",
+        "start": 11,
+        "height": "full",
+        "diff": "easy"
+      },
+      {
+        "clue": "Attempt",
+        "answer": "EFFORT",
+        "start": 13,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Traditional; conventional",
+        "answer": "ORTHODOX",
+        "start": 16,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Posting private info",
+        "answer": "DOXING",
+        "start": 21,
+        "height": "full",
+        "diff": "medium"
+      },
+      {
+        "clue": "Pungent bulb",
+        "answer": "GARLIC",
+        "start": 26,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Hanging ice spike",
+        "answer": "ICICLE",
+        "start": 30,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Witty; smart",
+        "answer": "CLEVER",
+        "start": 33,
+        "height": "full",
+        "diff": "medium"
+      },
+      {
+        "clue": "Jury's decision",
+        "answer": "VERDICT",
+        "start": 36,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Lay down orders",
+        "answer": "DICTATE",
+        "start": 39,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Boring; tiring",
+        "answer": "TEDIOUS",
+        "start": 44,
+        "height": "full",
+        "diff": "medium"
+      },
+      {
+        "clue": "Drive out",
+        "answer": "OUST",
+        "start": 48,
+        "height": "mid",
+        "diff": "easy"
+      }
     ],
     "timeLimit": 200,
     "lockCorrectWords": true,
-    "timedMode": false
+    "timedMode": true
   },
   {
     "id": "p-20251202-sultan-chain-2",
     "title": "Super Long (Part 2/3)",
     "type": "chain",
+    "palette": "classic",
     "words": [
-      { "clue": "Rock", "answer": "STONE", "start": 1, "height": "inner", "color": "--c-purple", "diff": "easy" },
-      { "clue": "Sound quality", "answer": "TONE", "start": 2, "height": "full", "color": "--c-green", "diff": "easy" },
-      { "clue": "Single-direction", "answer": "ONEWAY", "start": 3, "height": "mid", "color": "--c-yellow", "diff": "medium" },
-      { "clue": "Navigation aids/signage", "answer": "WAYFINDING", "start": 6, "height": "inner", "color": "--c-red", "diff": "hard" },
-      { "clue": "Inventiveness", "answer": "INGENUITY", "start": 13, "height": "full", "color": "--c-purple", "diff": "hard" },
-      { "clue": "Cruel ruler", "answer": "TYRANT", "start": 20, "height": "mid", "color": "--c-green", "diff": "medium" },
-      { "clue": "Patriotic song", "answer": "ANTHEM", "start": 23, "height": "inner", "color": "--c-yellow", "diff": "medium" },
-      { "clue": "Half a globe", "answer": "HEMISPHERE", "start": 26, "height": "full", "color": "--c-red", "diff": "hard" },
-      { "clue": "Give a new look", "answer": "RESKIN", "start": 34, "height": "mid", "color": "--c-yellow", "diff": "medium" },
-      { "clue": "Realm", "answer": "KINGDOM", "start": 37, "height": "inner", "color": "--c-blue", "diff": "medium" },
-      { "clue": "Legal residence", "answer": "DOMICILE", "start": 41, "height": "full", "color": "--c-pink", "diff": "medium" },
-      { "clue": "Small-intestine part", "answer": "ILEUM", "start": 46, "height": "mid", "color": "--c-green", "diff": "easy" },
-      { "clue": "Rain shield", "answer": "UMBRELLA", "start": 49, "height": "inner", "color": "--c-orange", "diff": "medium" },
-      { "clue": "Narrow road", "answer": "LANE", "start": 55, "height": "full", "color": "--c-cyan", "diff": "easy" }
+      {
+        "clue": "Rock",
+        "answer": "STONE",
+        "start": 1,
+        "height": "inner",
+        "diff": "easy"
+      },
+      {
+        "clue": "Sound quality",
+        "answer": "TONE",
+        "start": 2,
+        "height": "full",
+        "diff": "easy"
+      },
+      {
+        "clue": "Single-direction",
+        "answer": "ONEWAY",
+        "start": 3,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Navigation aids/signage",
+        "answer": "WAYFINDING",
+        "start": 6,
+        "height": "inner",
+        "diff": "hard"
+      },
+      {
+        "clue": "Inventiveness",
+        "answer": "INGENUITY",
+        "start": 13,
+        "height": "full",
+        "diff": "hard"
+      },
+      {
+        "clue": "Cruel ruler",
+        "answer": "TYRANT",
+        "start": 20,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Patriotic song",
+        "answer": "ANTHEM",
+        "start": 23,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Half a globe",
+        "answer": "HEMISPHERE",
+        "start": 26,
+        "height": "full",
+        "diff": "hard"
+      },
+      {
+        "clue": "Give a new look",
+        "answer": "RESKIN",
+        "start": 34,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Realm",
+        "answer": "KINGDOM",
+        "start": 37,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Legal residence",
+        "answer": "DOMICILE",
+        "start": 41,
+        "height": "full",
+        "diff": "medium"
+      },
+      {
+        "clue": "Small-intestine part",
+        "answer": "ILEUM",
+        "start": 46,
+        "height": "mid",
+        "diff": "easy"
+      },
+      {
+        "clue": "Rain shield",
+        "answer": "UMBRELLA",
+        "start": 49,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Narrow road",
+        "answer": "LANE",
+        "start": 55,
+        "height": "full",
+        "diff": "easy"
+      }
     ],
     "timeLimit": 200,
     "lockCorrectWords": true,
@@ -752,20 +861,99 @@
     "id": "p-20251202-sultan-chain-3",
     "title": "Super Long (Part 3/3)",
     "type": "chain",
+    "palette": "classic",
     "words": [
-      { "clue": "Low on iron, say", "answer": "ANEMIC", "start": 1, "height": "mid", "color": "--c-purple", "diff": "medium" },
-      { "clue": "Tiny organisms", "answer": "MICROBES", "start": 4, "height": "inner", "color": "--c-yellow", "diff": "medium" },
-      { "clue": "Top-notch", "answer": "BEST", "start": 9, "height": "full", "color": "--c-green", "diff": "easy" },
-      { "clue": "Rough calculation", "answer": "ESTIMATE", "start": 10, "height": "mid", "color": "--c-blue", "diff": "medium" },
-      { "clue": "Run-down apartment bldg.", "answer": "TENEMENT", "start": 16, "height": "inner", "color": "--c-pink", "diff": "medium" },
-      { "clue": "Whole; complete", "answer": "ENTIRE", "start": 21, "height": "full", "color": "--c-yellow", "diff": "medium" },
-      { "clue": "Worn out", "answer": "TIRED", "start": 23, "height": "mid", "color": "--c-cyan", "diff": "easy" },
-      { "clue": "Giant California tree", "answer": "REDWOOD", "start": 25, "height": "inner", "color": "--c-red", "diff": "medium" },
-      { "clue": "Stiff; not flexible", "answer": "WOODEN", "start": 28, "height": "full", "color": "--c-green", "diff": "medium" },
-      { "clue": "Never-ending", "answer": "ENDLESS", "start": 32, "height": "mid", "color": "--c-pink", "diff": "medium" },
-      { "clue": "Smaller; inferior", "answer": "LESSER", "start": 35, "height": "inner", "color": "--c-yellow", "diff": "medium" },
-      { "clue": "Soil wear-away", "answer": "EROSION", "start": 39, "height": "full", "color": "--c-blue", "diff": "medium" },
-      { "clue": "Charge (atoms)", "answer": "IONIZE", "start": 43, "height": "mid", "color": "--c-pink", "diff": "medium" }
+      {
+        "clue": "Low on iron, say",
+        "answer": "ANEMIC",
+        "start": 1,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Tiny organisms",
+        "answer": "MICROBES",
+        "start": 4,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Top-notch",
+        "answer": "BEST",
+        "start": 9,
+        "height": "full",
+        "diff": "easy"
+      },
+      {
+        "clue": "Rough calculation",
+        "answer": "ESTIMATE",
+        "start": 10,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Run-down apartment bldg.",
+        "answer": "TENEMENT",
+        "start": 16,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Whole; complete",
+        "answer": "ENTIRE",
+        "start": 21,
+        "height": "full",
+        "diff": "medium"
+      },
+      {
+        "clue": "Worn out",
+        "answer": "TIRED",
+        "start": 23,
+        "height": "mid",
+        "diff": "easy"
+      },
+      {
+        "clue": "Giant California tree",
+        "answer": "REDWOOD",
+        "start": 25,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Stiff; not flexible",
+        "answer": "WOODEN",
+        "start": 28,
+        "height": "full",
+        "diff": "medium"
+      },
+      {
+        "clue": "Never-ending",
+        "answer": "ENDLESS",
+        "start": 32,
+        "height": "mid",
+        "diff": "medium"
+      },
+      {
+        "clue": "Smaller; inferior",
+        "answer": "LESSER",
+        "start": 35,
+        "height": "inner",
+        "diff": "medium"
+      },
+      {
+        "clue": "Soil wear-away",
+        "answer": "EROSION",
+        "start": 39,
+        "height": "full",
+        "diff": "medium"
+      },
+      {
+        "clue": "Charge (atoms)",
+        "answer": "IONIZE",
+        "start": 43,
+        "height": "mid",
+        "diff": "medium"
+      }
     ],
     "timeLimit": 200,
     "lockCorrectWords": true,
@@ -775,13 +963,13 @@
     "id": "p-20251202-sultan-chain",
     "title": "Super Long",
     "type": "chain",
+    "palette": "classic",
     "words": [
       {
         "clue": "Middle Eastern ruler",
         "answer": "SULTAN",
         "start": 1,
         "height": "full",
-        "color": "--c-blue",
         "diff": "medium"
       },
       {
@@ -789,7 +977,6 @@
         "answer": "TANGENT",
         "start": 4,
         "height": "mid",
-        "color": "--c-pink",
         "diff": "medium"
       },
       {
@@ -797,7 +984,6 @@
         "answer": "ENTREE",
         "start": 8,
         "height": "inner",
-        "color": "--c-yellow",
         "diff": "medium"
       },
       {
@@ -805,7 +991,6 @@
         "answer": "REEF",
         "start": 11,
         "height": "full",
-        "color": "--c-green",
         "diff": "easy"
       },
       {
@@ -813,7 +998,6 @@
         "answer": "EFFORT",
         "start": 13,
         "height": "mid",
-        "color": "--c-blue",
         "diff": "medium"
       },
       {
@@ -821,7 +1005,6 @@
         "answer": "ORTHODOX",
         "start": 16,
         "height": "inner",
-        "color": "--c-purple",
         "diff": "medium"
       },
       {
@@ -829,7 +1012,6 @@
         "answer": "DOXING",
         "start": 21,
         "height": "full",
-        "color": "--c-orange",
         "diff": "medium"
       },
       {
@@ -837,7 +1019,6 @@
         "answer": "GARLIC",
         "start": 26,
         "height": "mid",
-        "color": "--c-blue",
         "diff": "medium"
       },
       {
@@ -845,7 +1026,6 @@
         "answer": "ICICLE",
         "start": 30,
         "height": "inner",
-        "color": "--c-pink",
         "diff": "medium"
       },
       {
@@ -853,7 +1033,6 @@
         "answer": "CLEVER",
         "start": 33,
         "height": "full",
-        "color": "--c-mint",
         "diff": "medium"
       },
       {
@@ -861,7 +1040,6 @@
         "answer": "VERDICT",
         "start": 36,
         "height": "mid",
-        "color": "--c-yellow",
         "diff": "medium"
       },
       {
@@ -869,7 +1047,6 @@
         "answer": "DICTATE",
         "start": 39,
         "height": "inner",
-        "color": "--c-orange",
         "diff": "medium"
       },
       {
@@ -877,7 +1054,6 @@
         "answer": "TEDIOUS",
         "start": 44,
         "height": "full",
-        "color": "--c-blue",
         "diff": "medium"
       },
       {
@@ -885,7 +1061,6 @@
         "answer": "OUST",
         "start": 48,
         "height": "mid",
-        "color": "--c-mint",
         "diff": "easy"
       },
       {
@@ -893,7 +1068,6 @@
         "answer": "STONE",
         "start": 50,
         "height": "inner",
-        "color": "--c-green",
         "diff": "easy"
       },
       {
@@ -901,7 +1075,6 @@
         "answer": "TONE",
         "start": 51,
         "height": "full",
-        "color": "--c-green",
         "diff": "easy"
       },
       {
@@ -909,7 +1082,6 @@
         "answer": "ONEWAY",
         "start": 52,
         "height": "mid",
-        "color": "--c-yellow",
         "diff": "medium"
       },
       {
@@ -917,7 +1089,6 @@
         "answer": "WAYFINDING",
         "start": 55,
         "height": "inner",
-        "color": "--c-red",
         "diff": "hard"
       },
       {
@@ -925,7 +1096,6 @@
         "answer": "INGENUITY",
         "start": 62,
         "height": "full",
-        "color": "--c-purple",
         "diff": "hard"
       },
       {
@@ -933,7 +1103,6 @@
         "answer": "TYRANT",
         "start": 69,
         "height": "mid",
-        "color": "--c-green",
         "diff": "medium"
       },
       {
@@ -941,7 +1110,6 @@
         "answer": "ANTHEM",
         "start": 72,
         "height": "inner",
-        "color": "--c-yellow",
         "diff": "medium"
       },
       {
@@ -949,7 +1117,6 @@
         "answer": "HEMISPHERE",
         "start": 75,
         "height": "full",
-        "color": "--c-red",
         "diff": "hard"
       },
       {
@@ -957,7 +1124,6 @@
         "answer": "RESKIN",
         "start": 83,
         "height": "mid",
-        "color": "--c-yellow",
         "diff": "medium"
       },
       {
@@ -965,7 +1131,6 @@
         "answer": "KINGDOM",
         "start": 86,
         "height": "inner",
-        "color": "--c-blue",
         "diff": "medium"
       },
       {
@@ -973,7 +1138,6 @@
         "answer": "DOMICILE",
         "start": 90,
         "height": "full",
-        "color": "--c-pink",
         "diff": "medium"
       },
       {
@@ -981,7 +1145,6 @@
         "answer": "ILEUM",
         "start": 95,
         "height": "mid",
-        "color": "--c-green",
         "diff": "easy"
       },
       {
@@ -989,7 +1152,6 @@
         "answer": "UMBRELLA",
         "start": 98,
         "height": "inner",
-        "color": "--c-orange",
         "diff": "medium"
       },
       {
@@ -997,7 +1159,6 @@
         "answer": "LANE",
         "start": 104,
         "height": "full",
-        "color": "--c-cyan",
         "diff": "easy"
       },
       {
@@ -1005,7 +1166,6 @@
         "answer": "ANEMIC",
         "start": 105,
         "height": "mid",
-        "color": "--c-purple",
         "diff": "medium"
       },
       {
@@ -1013,7 +1173,6 @@
         "answer": "MICROBES",
         "start": 108,
         "height": "inner",
-        "color": "--c-yellow",
         "diff": "medium"
       },
       {
@@ -1021,7 +1180,6 @@
         "answer": "BEST",
         "start": 113,
         "height": "full",
-        "color": "--c-green",
         "diff": "easy"
       },
       {
@@ -1029,7 +1187,6 @@
         "answer": "ESTIMATE",
         "start": 114,
         "height": "mid",
-        "color": "--c-blue",
         "diff": "medium"
       },
       {
@@ -1037,7 +1194,6 @@
         "answer": "TENEMENT",
         "start": 120,
         "height": "inner",
-        "color": "--c-pink",
         "diff": "medium"
       },
       {
@@ -1045,7 +1201,6 @@
         "answer": "ENTIRE",
         "start": 125,
         "height": "full",
-        "color": "--c-yellow",
         "diff": "medium"
       },
       {
@@ -1053,7 +1208,6 @@
         "answer": "TIRED",
         "start": 127,
         "height": "mid",
-        "color": "--c-cyan",
         "diff": "easy"
       },
       {
@@ -1061,7 +1215,6 @@
         "answer": "REDWOOD",
         "start": 129,
         "height": "inner",
-        "color": "--c-red",
         "diff": "medium"
       },
       {
@@ -1069,7 +1222,6 @@
         "answer": "WOODEN",
         "start": 132,
         "height": "full",
-        "color": "--c-green",
         "diff": "medium"
       },
       {
@@ -1077,7 +1229,6 @@
         "answer": "ENDLESS",
         "start": 136,
         "height": "mid",
-        "color": "--c-pink",
         "diff": "medium"
       },
       {
@@ -1085,7 +1236,6 @@
         "answer": "LESSER",
         "start": 139,
         "height": "inner",
-        "color": "--c-yellow",
         "diff": "medium"
       },
       {
@@ -1093,7 +1243,6 @@
         "answer": "EROSION",
         "start": 143,
         "height": "full",
-        "color": "--c-blue",
         "diff": "medium"
       },
       {
@@ -1101,7 +1250,6 @@
         "answer": "IONIZE",
         "start": 147,
         "height": "mid",
-        "color": "--c-pink",
         "diff": "medium"
       }
     ],
@@ -1113,13 +1261,13 @@
     "id": "p-ce92b6-19adbcb9cae",
     "title": "On the Water",
     "type": "chain",
+    "palette": "classic",
     "words": [
       {
         "clue": "Chain of sea islands",
         "answer": "ARCHIPELAGO",
         "start": 1,
         "height": "full",
-        "color": "--c-red",
         "diff": "hard"
       },
       {
@@ -1127,7 +1275,6 @@
         "answer": "LAGOON",
         "start": 8,
         "height": "mid",
-        "color": "--c-green",
         "diff": "easy"
       },
       {
@@ -1135,7 +1282,6 @@
         "answer": "ONTO",
         "start": 12,
         "height": "inner",
-        "color": "--c-cyan",
         "diff": "easy"
       },
       {
@@ -1143,7 +1289,6 @@
         "answer": "OCEAN",
         "start": 15,
         "height": "full",
-        "color": "--c-purple",
         "diff": "hard"
       },
       {
@@ -1151,7 +1296,6 @@
         "answer": "ANCHOR",
         "start": 18,
         "height": "mid",
-        "color": "--c-pink",
         "diff": "hard"
       },
       {
@@ -1159,7 +1303,6 @@
         "answer": "HORIZON",
         "start": 21,
         "height": "full",
-        "color": "--c-mint",
         "diff": "easy"
       }
     ],

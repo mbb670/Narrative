@@ -1,19 +1,13 @@
   /* body[data-view="play"] */
   /* body[data-view="chain"]  */
   /* body[data-view="build"] */
+
+    * {
+      box-sizing: border-box;
+  }
+
   :root {
-      --ink: var(--foreground-default);
-      --muted: var(--foreground-muted);
       --grid-line: var(--border-subtle);
-      --c-red: #ff2b1d;
-      --c-orange: #ff7a1a;
-      --c-yellow: #f5b800;
-      --c-green: #2f8f1d;
-      --c-mint: #1fbf9a;
-      --c-cyan: #24b9c7;
-      --c-blue: #2b74ff;
-      --c-purple: #7b46ff;
-      --c-pink: #ff4fa3;
       --cols: 10;
       --border-w: var(--unit-2);
       --title: clamp(48px, 7vw, 88px);
@@ -27,16 +21,15 @@
 
       --grid-top-space: 32px;
       --grid-letter-space: 72px;
-      --grid-bottom-space: 16px;
-  }
-
-  * {
-      box-sizing: border-box;
+      /* --grid-bottom-space: 16px; */
+      --grid-bottom-space: 32px;
+      --cell-letter-placement: 4/6;
   }
 
   .clues--legend,
   #panelBuild {
-      --grid-top-space: 16px;
+      --grid-top-space: var(--grid-bottom-space);
+      --cell-letter-placement: 4/5;
   }
 
   @media (max-width:640px) {
@@ -46,7 +39,9 @@
           /* --grid-letter-space: 64px; */
           --grid-bottom-space: 8px;
 
+          --grid-top-space: 32px;
           --grid-letter-space: 48px;
+          --grid-bottom-space: 32px;
       }
 
       .clues--legend,
@@ -59,6 +54,42 @@
   .clues--legend {
       --grid-rows: 16px 16px var(--spacing-x144) 16px 16px;
   }
+
+
+
+  :root{
+/* Default puzzle colors (overridden by palette attribute) */
+      --puzzle-color-1: #ff2b1d;
+      --puzzle-color-2: #ff7a1a;
+      --puzzle-color-3: #f5b800;
+      --puzzle-color-4: #2f8f1d;
+      --puzzle-color-5: #2b74ff;
+  }
+
+  [data-puzzle-palette="classic"] {
+      --puzzle-color-1: #ff2b1d;
+      --puzzle-color-2: #ff7a1a;
+      --puzzle-color-3: #f5b800;
+      --puzzle-color-4: #2f8f1d;
+      --puzzle-color-5: #2b74ff;
+  }
+
+  [data-puzzle-palette="sunrise"] {
+      --puzzle-color-1: #ff5f6d;
+      --puzzle-color-2: #ffc371;
+      --puzzle-color-3: #ffe29f;
+      --puzzle-color-4: #c4f1be;
+      --puzzle-color-5: #7aa2ff;
+  }
+
+ [data-puzzle-palette="greens"] {
+      --puzzle-color-1: #59D3FF;
+      --puzzle-color-2: #313A73;
+      --puzzle-color-3: #61A87D;
+      --puzzle-color-4: #7EE081;
+      --puzzle-color-5: #C2F3C0;
+  }
+
 
   body {
       margin: 0 auto;
@@ -411,7 +442,7 @@
   .range {
       border: var(--border-w) solid var(--color);
       pointer-events: none;
-      background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 92%), transparent 10%);
+      background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 85%), transparent 0%);
       grid-column: var(--gs) / var(--ge);
       display: grid;
       grid-template-rows: subgrid;
@@ -516,7 +547,7 @@
       container-type: size;
 
       .letter {
-          grid-row: 4/6;
+          grid-row: var(--cell-letter-placement);
           font-size: var(--letter);
           height: 100%;
           place-content: center;
@@ -686,7 +717,7 @@
       padding: 10px 12px;
       border-radius: 12px;
       font: 600 13px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color: var(--ink)
+      color: var(--foreground-default)
   }
 
   .sel {
@@ -772,7 +803,7 @@
 
   .boxt {
       margin: 0 0 10px;
-      color: var(--muted);
+      color: var(--foreground-muted);
       font: 800 12px/1.1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       letter-spacing: .10em;
       text-transform: uppercase
@@ -831,7 +862,7 @@
   .lab {
       display: block;
       margin: 0 0 6px;
-      color: var(--muted);
+      color: var(--foreground-muted);
       font: 700 11px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       letter-spacing: .08em;
       text-transform: uppercase
@@ -846,12 +877,12 @@
       padding: 10px;
       border-radius: 10px;
       font: 600 13px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color: var(--ink)
+      color: var(--foreground-default)
   }
 
   .status {
       margin-top: 8px;
-      color: var(--muted);
+      color: var(--foreground-muted);
       font: 600 12px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial
   }
 
@@ -865,7 +896,7 @@
 
   .io>summary {
       cursor: pointer;
-      color: var(--muted);
+      color: var(--foreground-muted);
       font: 800 12px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       letter-spacing: .10em;
       text-transform: uppercase
@@ -877,7 +908,7 @@
       resize: vertical;
       margin-top: 10px;
       font: 600 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      color: var(--ink);
+      color: var(--foreground-default);
       background: rgba(255, 255, 255, .20);
       border: 1px solid rgba(0, 0, 0, .14);
       padding: 10px

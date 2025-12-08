@@ -4,14 +4,10 @@ const KEY = "overlap_puzzles_v1";
 
 const COLORS = [
   ["Red", "--c-red"],
-  ["Orange", "--c-orange"],
   ["Yellow", "--c-yellow"],
   ["Green", "--c-green"],
-  ["Mint", "--c-mint"],
-  ["Cyan", "--c-cyan"],
   ["Blue", "--c-blue"],
   ["Purple", "--c-purple"],
-  ["Pink", "--c-pink"],
 ];
 
 const HEIGHTS = [
@@ -124,6 +120,93 @@ const DIFF_POINTS = { easy: 1, medium: 2, hard: 3 };
 
 // Word Chain defaults
 const DEFAULT_CHAIN_TIME = 60;
+
+// ---- Palettes (5 colors, from CSS) ----
+const PALETTE_SIZE = 5;
+const FALLBACK_PALETTE_ID = "classic";
+const FALLBACK_PALETTE_COLORS = ["var(--c-red)", "var(--c-orange)", "var(--c-yellow)", "var(--c-green)", "var(--c-blue)"];
+
+function readCssPalettes() {
+  const css = getComputedStyle(document.documentElement);
+
+  const discoverIdsFromRules = () => {
+    const ids = new Set();
+    const re = /\[data-puzzle-palette\s*=\s*["']?([^"'\]]+)["']?\]/gi;
+
+    for (const sheet of Array.from(document.styleSheets || [])) {
+      let rules;
+      try {
+        rules = sheet.cssRules || [];
+      } catch {
+        continue; // cross-origin or inaccessible
+      }
+      for (const rule of Array.from(rules)) {
+        if (!rule.selectorText) continue;
+        let m;
+        while ((m = re.exec(rule.selectorText))) {
+          if (m[1]) ids.add(m[1].trim());
+        }
+      }
+    }
+    return Array.from(ids);
+  };
+
+  const names = discoverIdsFromRules();
+  if (!names.length) names.push(FALLBACK_PALETTE_ID);
+
+  const probe = document.createElement("div");
+  probe.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:0;height:0;pointer-events:none;";
+  document.documentElement.appendChild(probe);
+
+  const palettes = names.map((name) => {
+    const labelRaw = css.getPropertyValue(`--palette-${name}-label`) || name;
+    const cleanLabel =
+      (labelRaw || "")
+        .replace(/^["']|["']$/g, "")
+        .trim() ||
+      name;
+
+    probe.setAttribute("data-puzzle-palette", name);
+    const pcss = getComputedStyle(probe);
+
+    const colors = [];
+    for (let i = 1; i <= PALETTE_SIZE; i++) {
+      const v = pcss.getPropertyValue(`--puzzle-color-${i}`).trim();
+      if (v) colors.push(v);
+    }
+
+    return {
+      id: name,
+      label: cleanLabel,
+      colors: colors.length ? colors : FALLBACK_PALETTE_COLORS,
+    };
+  });
+
+  probe.remove();
+
+  if (!palettes.length) {
+    return [{ id: FALLBACK_PALETTE_ID, label: "Default", colors: FALLBACK_PALETTE_COLORS }];
+  }
+  return palettes;
+}
+
+const PALETTES = readCssPalettes();
+const PALETTE_ID_SET = new Set(PALETTES.map((p) => p.id));
+const FIRST_PALETTE_ID = PALETTES[0]?.id || FALLBACK_PALETTE_ID;
+
+const normalizePaletteId = (id) => {
+  const v = String(id || "");
+  return PALETTE_ID_SET.has(v) ? v : FIRST_PALETTE_ID;
+};
+const getPaletteById = (id) => PALETTES.find((p) => p.id === id) || PALETTES[0];
+const paletteColorForWord = (puzzle, wordIdx) => {
+  const pal = getPaletteById(normalizePaletteId(puzzle?.palette));
+  const colors = pal?.colors?.length ? pal.colors : FALLBACK_PALETTE_COLORS;
+  return colors[wordIdx % colors.length] || FALLBACK_PALETTE_COLORS[0];
+};
+const applyPaletteToDom = (paletteId) => {
+  document.documentElement.setAttribute("data-puzzle-palette", normalizePaletteId(paletteId));
+};
 
 // ✅ Time bonus config (edit freely)
 // bonusPoints = floor(remainingSeconds * TIME_BONUS_FACTOR)
@@ -242,19 +325,13 @@ const tr = (w) => {
   return v;
 };
 
-const COLOR_LABEL = Object.fromEntries(COLORS.map(([lab, val]) => [val, lab]));
 const isChainPuzzle = (p) => String(p?.type || MODE.OVERLAP) === MODE.CHAIN;
 function chainIsTimed(p) {
   const v = p?.chainTimed ?? p?.timed ?? p?.timedMode ?? p?.isTimed; // supports common names
   return v == null ? true : !!v;
 }
 
-const inferDiffFromColor = (color) => {
-  for (const d of Object.keys(DIFF_COLORS)) {
-    if ((DIFF_COLORS[d] || []).includes(color)) return d;
-  }
-  return "easy";
-};
+const inferDiffFromColor = () => "easy";
 
 const normWord = (w, pType, opts = {}) => {
   const out = {
@@ -262,18 +339,10 @@ const normWord = (w, pType, opts = {}) => {
     answer: String(w?.answer || ""),
     start: +w?.start || 1,
     height: String(w?.height || "full"),
-    color: String(w?.color || "--c-red"),
   };
 
   if (pType === MODE.CHAIN) {
-    // keep diff around (harmless), but only *enforce* DIFF_COLORS when timed
-    out.diff = String(w?.diff || inferDiffFromColor(out.color) || "easy");
-
-    const timed = opts.timed !== false; // default true
-    if (timed) {
-      const allowed = DIFF_COLORS[out.diff] || DIFF_COLORS.easy;
-      if (!allowed.includes(out.color)) out.color = allowed[0];
-    }
+    out.diff = String(w?.diff || "easy");
   }
 
   return out;
@@ -283,7 +352,7 @@ const normWord = (w, pType, opts = {}) => {
 const normPuzzle = (p) => {
   const type = String(p?.type || MODE.OVERLAP);
   const wordsRaw = Array.isArray(p?.words) ? p.words : [];
-  const fallback = { clue: "Clue", answer: "WORD", start: 1, color: "--c-red", height: "full" };
+  const fallback = { clue: "Clue", answer: "WORD", start: 1, height: "full" };
   const timed = type === MODE.CHAIN ? chainIsTimed(p) : true;
   const words = (wordsRaw.length ? wordsRaw : [fallback]).map((w) => normWord(w, type, { timed }));
 
@@ -292,6 +361,7 @@ const normPuzzle = (p) => {
     id: String(p?.id || uid()),
     title: String(p?.title || "Untitled"),
     type,
+    palette: normalizePaletteId(p?.palette),
     words,
   };
 
@@ -554,13 +624,8 @@ function computed(p) {
       const start = Math.max(0, Math.floor(+w.start || 1) - 1);
       const [t, b] = insets(w.height || "full");
 
-      let diff = type === MODE.CHAIN ? String(w.diff || inferDiffFromColor(w.color) || "easy") : null;
-      let color = String(w.color || "--c-red");
-
-      if (type === MODE.CHAIN && timedChain) {
-        const allowed = DIFF_COLORS[diff] || DIFF_COLORS.easy;
-        if (!allowed.includes(color)) color = allowed[0];
-      }
+      let diff = type === MODE.CHAIN ? String(w.diff || "easy") : null;
+      const color = paletteColorForWord(p, rawIdx);
 
 
       return {
@@ -624,7 +689,7 @@ function renderGrid(target, model, clickable) {
     d.style.setProperty("--gs", String(e.start + 1));
     d.style.setProperty("--ge", String(e.start + e.len + 1));
 
-    d.style.setProperty("--color", `var(${e.color})`);
+    d.style.setProperty("--color", e.color || "var(--c-red)");
     d.style.setProperty("--f", getComputedStyle(document.documentElement).getPropertyValue("--fill") || ".08");
 
     // In-range clue (play grid only; keep builder preview clean)
@@ -1774,6 +1839,7 @@ function loadPuzzle(i) {
   puzzles[pIdx] = normPuzzle(puzzles[pIdx]);
 
   const p = puzzles[pIdx];
+  applyPaletteToDom(p.palette);
   const m = computed(p);
 
   play.mode = isChainPuzzle(p) ? MODE.CHAIN : MODE.OVERLAP;
@@ -1942,6 +2008,7 @@ let bModeSel = null;
 let bTimeInp = null;
 let bLockChk = null;
 let bTimedChk = null;
+let bPaletteSel = null;
 
 function ensureBuilderModeUI() {
   if (bModeWrap) return;
@@ -1957,6 +2024,11 @@ function ensureBuilderModeUI() {
       <option value="${MODE.OVERLAP}">Overlap</option>
       <option value="${MODE.CHAIN}">Word Chain</option>
     </select>
+
+    <div style="margin-top:10px">
+      <label class="lab" for="pPalette">Palette</label>
+      <select class="sel" id="pPalette"></select>
+    </div>
 
     <div id="chainFields" style="margin-top:10px">
       <label class="lab" for="pTimeLimit">Time limit (seconds)</label>
@@ -1983,6 +2055,7 @@ function ensureBuilderModeUI() {
   bTimeInp = wrap.querySelector("#pTimeLimit");
   bLockChk = wrap.querySelector("#pLockCorrect");
     bTimedChk = wrap.querySelector("#pTimedMode");
+  bPaletteSel = wrap.querySelector("#pPalette");
 
   const chainFields = wrap.querySelector("#chainFields");
 
@@ -2020,6 +2093,14 @@ function ensureBuilderModeUI() {
     setDirty(true);
   });
 
+  bPaletteSel.addEventListener("change", () => {
+    puzzles[pIdx].palette = normalizePaletteId(bPaletteSel.value);
+    setDirty(true);
+    applyPaletteToDom(puzzles[pIdx].palette);
+    renderPreview();
+    renderRows();
+  });
+
 }
 
 // ---- Builder render ----
@@ -2042,6 +2123,13 @@ function syncBuilder() {
   if (bTimeInp) bTimeInp.value = String(p.timeLimit || DEFAULT_CHAIN_TIME);
   if (bLockChk) bLockChk.checked = !!(p.lockCorrectWords ?? true);
  if (bTimedChk) bTimedChk.checked = !!(p.timedMode ?? true);
+  if (bPaletteSel) {
+    const opts = PALETTES.map(
+      (pal) => `<option value="${pal.id}" ${pal.id === p.palette ? "selected" : ""}>${escapeHtml(pal.label)}</option>`
+    ).join("");
+    bPaletteSel.innerHTML = opts;
+    bPaletteSel.value = p.palette;
+  }
   if (bModeWrap && bModeWrap._setVis) bModeWrap._setVis(chainMode);
 
   renderRows();
@@ -2076,30 +2164,17 @@ function renderRows() {
       const i = o.i;
       const w = ws[i];
 
-      if (timedChain) {
-        w.diff = String(w.diff || inferDiffFromColor(w.color) || "easy");
-        const allowedNow = DIFF_COLORS[w.diff] || DIFF_COLORS.easy;
-        if (!allowedNow.includes(w.color)) w.color = allowedNow[0];
-      }
-
       const diff = timedChain ? String(w.diff || "easy") : null;
       const diffOpts = DIFFS.map(([lab, val]) => `<option value="${val}" ${diff === val ? "selected" : ""}>${lab}</option>`).join("");
 
-      const allowedColors = timedChain ? DIFF_COLORS[diff] || DIFF_COLORS.easy : COLORS.map((x) => x[1]);
-      const colorOpts = allowedColors
-        .map((val) => {
-          const lab = COLOR_LABEL[val] || val;
-          return `<option value="${val}" ${String(w.color) === val ? "selected" : ""}>${lab}</option>`;
-        })
-        .join("");
-
       const heightOpts = HEIGHTS.map(([lab, val]) => `<option value="${val}" ${w.height === val ? "selected" : ""}>${lab}</option>`).join("");
+      const swColor = paletteColorForWord(p, i);
 
       return `
         <div class="row" data-i="${i}">
           <div class="rowTop">
             <div class="left">
-              <span class="sw" style="--color:var(${w.color || "--c-red"})"></span>
+              <span class="sw" style="--color:${swColor}"></span>
               <span>Word ${pos + 1}</span>
             </div>
             <div class="right"><button class="pill" type="button" data-act="rm">Remove</button></div>
@@ -2129,10 +2204,6 @@ function renderRows() {
             }
 
 
-            <div>
-              <label class="lab">Color</label>
-              <select class="ms" data-f="color">${colorOpts}</select>
-            </div>
             <div>
               <label class="lab">Height</label>
               <select class="ms" data-f="height">${heightOpts}</select>
@@ -2379,7 +2450,8 @@ els.pNew.addEventListener("click", () => {
       id: uid(),
       title: "Untitled",
       type: MODE.OVERLAP,
-      words: [{ clue: "Clue", answer: "WORD", start: 1, color: "--c-red", height: "full" }],
+      palette: FIRST_PALETTE_ID,
+      words: [{ clue: "Clue", answer: "WORD", start: 1, height: "full" }],
     })
   );
   store.save();
@@ -2460,12 +2532,6 @@ els.rows.addEventListener("change", (e) => {
   if (!w) return;
 
   w[f] = e.target.value;
-
- if (isChainPuzzle(puzzles[pIdx]) && chainIsTimed(puzzles[pIdx]) && f === "diff") {
-  const allowed = DIFF_COLORS[w.diff] || DIFF_COLORS.easy;
-  if (!allowed.includes(w.color)) w.color = allowed[0];
-}
-
 
   setDirty(true);
   renderRows();
