@@ -1764,7 +1764,12 @@ function closeSuccess() {
 
 function shareResult({ mode }) {
   const now = new Date();
-  const dateStr = now.toISOString().slice(0, 10);
+  const dateStr = now.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   const baseUrl =
     SHARE_URL_OVERRIDE && SHARE_URL_OVERRIDE.trim()
       ? SHARE_URL_OVERRIDE.trim()
@@ -1776,7 +1781,7 @@ function shareResult({ mode }) {
           }
         })();
 
-  let msg = `Overlap ${dateStr}`;
+  let msg = `Overlap | ${dateStr}`;
 
   if (mode === MODE.CHAIN) {
     const p = puzzles[pIdx];
@@ -1791,7 +1796,7 @@ function shareResult({ mode }) {
       const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
       timeText = fmtTime(elapsed);
     }
-    if (timeText) msg += ` — ${timeText}`;
+    if (timeText) msg += `\nI solved todays Word Chain in ${timeText}`;
   }
 
   const payload = { title: "Overlap", text: msg, url: baseUrl };

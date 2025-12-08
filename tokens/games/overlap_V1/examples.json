@@ -3,7 +3,7 @@
     "id": "p-001",
     "title": "Under the Surface",
     "type": "overlap",
-    "palette": "classic",
+    "palette": "greens",
     "words": [
       {
         "clue": "Fury",
@@ -746,7 +746,7 @@
     ],
     "timeLimit": 200,
     "lockCorrectWords": true,
-    "timedMode": true
+    "timedMode": false
   },
   {
     "id": "p-20251202-sultan-chain-2",
