@@ -141,41 +141,36 @@
      } */
   }
 
-
-  .tab,
-  .pill,
-  .btn {
-      border: 1px solid var(--border-subtle);
+  /* Base (shared) */
+  :is(.tab, .pill, .btn) {
       --background-color: transparent;
+      border: 1px solid var(--border-subtle);
       padding: var(--spacing-x8) var(--spacing-x12);
       border-radius: var(--radius-full);
       cursor: pointer;
       color: var(--foreground-default);
   }
 
+  /* Button */
   .btn {
       border-radius: var(--radius-default);
+
+      &.primary {
+          border-color: var(--border-strong);
+          --background-color: var(--background-strong);
+          color: var(--foreground-alt);
+      }
   }
 
-  .tab.is-active,
-  .pill.is-hot,
-  .btn.primary {
-      border-color: var(--border-strong);
-      --background-color: var(--background-strong);
-      color: var(--foreground-alt);
-  }
-
-
-
-  .tab {
-      padding-block: unset;
-      border: unset;
-
-
+  /* Tabs + pills */
+  .tab,
+  .pill {
+      border: 0;
       height: var(--unit-32);
       padding-inline: var(--spacing-x8);
+      padding-block: 0;
+      border-radius: var(--radius-default);
       color: var(--foreground-disabled);
-      border-radius: var(--radius-slight);
 
       &.is-active {
           --background-color: unset;
@@ -184,13 +179,58 @@
           outline: 1px solid var(--border-subtle);
           box-shadow: 0 var(--unit-2) var(--unit-8) 0 var(--color-alpha-black-A100);
 
+          &::before,
           &::after {
               background-color: var(--foreground-default) !important;
           }
-
       }
   }
 
+  .pill {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border-subtle);
+      color: var(--foreground-muted);
+
+      &.is-hot {
+          border-color: var(--border-strong);
+          --background-color: var(--background-strong);
+          color: var(--foreground-alt);
+      }
+  }
+
+  /* Prev / Next arrows */
+  #prev,
+  #next {
+      span {
+          display: none;
+      }
+
+      &::before,
+      &::after {
+          display: block;
+          width: 16px;
+          aspect-ratio: 1;
+          background-color: var(--foreground-disabled);
+          -webkit-mask: url("images/arrow.svg") center / contain no-repeat;
+          mask: url("images/arrow.svg") center / contain no-repeat;
+      }
+  }
+
+  #prev {
+      &::before {
+          content: "";
+          rotate: 180deg;
+      }
+  }
+
+  #next {
+      &::after {
+          content: "";
+      }
+  }
+
+  /* Build tab icon */
   #tabBuild {
       span {
           display: block;
@@ -205,6 +245,8 @@
           mask: url("images/builder-icon.svg") center / contain no-repeat;
       }
   }
+
+
 
   @media (max-width:640px) {
       #tabBuild {
@@ -264,6 +306,13 @@
       padding-inline: var(--layout-grid-margin);
       align-self: center;
 
+      .puzzle-cycle {
+          display: flex;
+          place-items: center;
+          gap: var(--spacing-x12);
+          margin: 0 auto;
+      }
+
       .meta {
           color: var(--foreground-muted);
           flex: 1;
@@ -271,28 +320,6 @@
 
           span {
               color: var(--foreground-subtle);
-          }
-      }
-
-      .chainHud {
-          align-items: center;
-          gap: var(--spacing-x8);
-          /* justify-content: space-between; */
-          justify-content: flex-end;
-          flex: 1;
-
-          #chainStartBtn {
-              --background-color: var(--background-strong);
-              color: var(--foreground-alt);
-              border: unset;
-          }
-
-          .chainTimer {
-              font-variant-numeric: tabular-nums;
-              background: var(--background-subtle);
-              color: var(--foreground-muted);
-              padding: var(--spacing-x2) var(--spacing-x4);
-              border-radius: var(--radius-slight);
           }
       }
   }
@@ -574,6 +601,32 @@
       gap: var(--spacing-x8);
       flex-wrap: wrap;
       align-items: center;
+      padding-inline: var(--layout-grid-margin);
+      width: 100%;
+      max-width: var(--layout-content-md-max);
+      margin: 0 auto;
+
+      .chainHud {
+          align-items: center;
+          gap: var(--spacing-x8);
+          /* justify-content: space-between; */
+          /* justify-content: flex-end; */
+          flex: 1;
+
+          #chainStartBtn {
+              --background-color: var(--background-strong);
+              color: var(--foreground-alt);
+              border: unset;
+          }
+
+          .chainTimer {
+              font-variant-numeric: tabular-nums;
+              background: var(--background-subtle);
+              color: var(--foreground-muted);
+              padding: var(--spacing-x2) var(--spacing-x4);
+              border-radius: var(--radius-slight);
+          }
+      }
   }
 
   /* Success */

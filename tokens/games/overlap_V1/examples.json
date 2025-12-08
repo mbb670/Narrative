@@ -699,6 +699,78 @@
       }
     ]
   },
+
+    {
+    "id": "p-20251202-sultan-chain-1",
+    "title": "Super Long (Part 1/3)",
+    "type": "chain",
+    "words": [
+      { "clue": "Middle Eastern ruler", "answer": "SULTAN", "start": 1, "height": "full", "color": "--c-blue", "diff": "medium" },
+      { "clue": "Off-topic aside", "answer": "TANGENT", "start": 4, "height": "mid", "color": "--c-pink", "diff": "medium" },
+      { "clue": "Main course", "answer": "ENTREE", "start": 8, "height": "inner", "color": "--c-yellow", "diff": "medium" },
+      { "clue": "Coral ridge", "answer": "REEF", "start": 11, "height": "full", "color": "--c-green", "diff": "easy" },
+      { "clue": "Attempt", "answer": "EFFORT", "start": 13, "height": "mid", "color": "--c-blue", "diff": "medium" },
+      { "clue": "Traditional; conventional", "answer": "ORTHODOX", "start": 16, "height": "inner", "color": "--c-purple", "diff": "medium" },
+      { "clue": "Posting private info", "answer": "DOXING", "start": 21, "height": "full", "color": "--c-orange", "diff": "medium" },
+      { "clue": "Pungent bulb", "answer": "GARLIC", "start": 26, "height": "mid", "color": "--c-blue", "diff": "medium" },
+      { "clue": "Hanging ice spike", "answer": "ICICLE", "start": 30, "height": "inner", "color": "--c-pink", "diff": "medium" },
+      { "clue": "Witty; smart", "answer": "CLEVER", "start": 33, "height": "full", "color": "--c-mint", "diff": "medium" },
+      { "clue": "Jury's decision", "answer": "VERDICT", "start": 36, "height": "mid", "color": "--c-yellow", "diff": "medium" },
+      { "clue": "Lay down orders", "answer": "DICTATE", "start": 39, "height": "inner", "color": "--c-orange", "diff": "medium" },
+      { "clue": "Boring; tiring", "answer": "TEDIOUS", "start": 44, "height": "full", "color": "--c-blue", "diff": "medium" },
+      { "clue": "Drive out", "answer": "OUST", "start": 48, "height": "mid", "color": "--c-mint", "diff": "easy" }
+    ],
+    "timeLimit": 200,
+    "lockCorrectWords": true,
+    "timedMode": false
+  },
+  {
+    "id": "p-20251202-sultan-chain-2",
+    "title": "Super Long (Part 2/3)",
+    "type": "chain",
+    "words": [
+      { "clue": "Rock", "answer": "STONE", "start": 1, "height": "inner", "color": "--c-purple", "diff": "easy" },
+      { "clue": "Sound quality", "answer": "TONE", "start": 2, "height": "full", "color": "--c-green", "diff": "easy" },
+      { "clue": "Single-direction", "answer": "ONEWAY", "start": 3, "height": "mid", "color": "--c-yellow", "diff": "medium" },
+      { "clue": "Navigation aids/signage", "answer": "WAYFINDING", "start": 6, "height": "inner", "color": "--c-red", "diff": "hard" },
+      { "clue": "Inventiveness", "answer": "INGENUITY", "start": 13, "height": "full", "color": "--c-purple", "diff": "hard" },
+      { "clue": "Cruel ruler", "answer": "TYRANT", "start": 20, "height": "mid", "color": "--c-green", "diff": "medium" },
+      { "clue": "Patriotic song", "answer": "ANTHEM", "start": 23, "height": "inner", "color": "--c-yellow", "diff": "medium" },
+      { "clue": "Half a globe", "answer": "HEMISPHERE", "start": 26, "height": "full", "color": "--c-red", "diff": "hard" },
+      { "clue": "Give a new look", "answer": "RESKIN", "start": 34, "height": "mid", "color": "--c-yellow", "diff": "medium" },
+      { "clue": "Realm", "answer": "KINGDOM", "start": 37, "height": "inner", "color": "--c-blue", "diff": "medium" },
+      { "clue": "Legal residence", "answer": "DOMICILE", "start": 41, "height": "full", "color": "--c-pink", "diff": "medium" },
+      { "clue": "Small-intestine part", "answer": "ILEUM", "start": 46, "height": "mid", "color": "--c-green", "diff": "easy" },
+      { "clue": "Rain shield", "answer": "UMBRELLA", "start": 49, "height": "inner", "color": "--c-orange", "diff": "medium" },
+      { "clue": "Narrow road", "answer": "LANE", "start": 55, "height": "full", "color": "--c-cyan", "diff": "easy" }
+    ],
+    "timeLimit": 200,
+    "lockCorrectWords": true,
+    "timedMode": false
+  },
+  {
+    "id": "p-20251202-sultan-chain-3",
+    "title": "Super Long (Part 3/3)",
+    "type": "chain",
+    "words": [
+      { "clue": "Low on iron, say", "answer": "ANEMIC", "start": 1, "height": "mid", "color": "--c-purple", "diff": "medium" },
+      { "clue": "Tiny organisms", "answer": "MICROBES", "start": 4, "height": "inner", "color": "--c-yellow", "diff": "medium" },
+      { "clue": "Top-notch", "answer": "BEST", "start": 9, "height": "full", "color": "--c-green", "diff": "easy" },
+      { "clue": "Rough calculation", "answer": "ESTIMATE", "start": 10, "height": "mid", "color": "--c-blue", "diff": "medium" },
+      { "clue": "Run-down apartment bldg.", "answer": "TENEMENT", "start": 16, "height": "inner", "color": "--c-pink", "diff": "medium" },
+      { "clue": "Whole; complete", "answer": "ENTIRE", "start": 21, "height": "full", "color": "--c-yellow", "diff": "medium" },
+      { "clue": "Worn out", "answer": "TIRED", "start": 23, "height": "mid", "color": "--c-cyan", "diff": "easy" },
+      { "clue": "Giant California tree", "answer": "REDWOOD", "start": 25, "height": "inner", "color": "--c-red", "diff": "medium" },
+      { "clue": "Stiff; not flexible", "answer": "WOODEN", "start": 28, "height": "full", "color": "--c-green", "diff": "medium" },
+      { "clue": "Never-ending", "answer": "ENDLESS", "start": 32, "height": "mid", "color": "--c-pink", "diff": "medium" },
+      { "clue": "Smaller; inferior", "answer": "LESSER", "start": 35, "height": "inner", "color": "--c-yellow", "diff": "medium" },
+      { "clue": "Soil wear-away", "answer": "EROSION", "start": 39, "height": "full", "color": "--c-blue", "diff": "medium" },
+      { "clue": "Charge (atoms)", "answer": "IONIZE", "start": 43, "height": "mid", "color": "--c-pink", "diff": "medium" }
+    ],
+    "timeLimit": 200,
+    "lockCorrectWords": true,
+    "timedMode": false
+  },
   {
     "id": "p-20251202-sultan-chain",
     "title": "Super Long",

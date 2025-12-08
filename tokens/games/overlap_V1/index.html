@@ -32,10 +32,11 @@
   <section class="panel is-active" id="panelPlay" role="tabpanel" aria-labelledby="tabPlay">
     <div class="stage" id="stage" tabindex="0" role="application" aria-label="Overlap puzzle">
       <div class="game-data">
+        <div class="puzzle-cycle">
+            <button class="pill text-system-semibold-sm" id="prev" type="button"><span>Prev</span></button>
         <div class="meta text-system-semibold-sm" id="meta"></div>
-        <div class="chainHud" hidden>
-          <div class="chainTimer text-system-semibold-sm">00:00</div>
-          <button class="btn text-system-semibold-sm" id="chainStartBtn" type="button">Start</button>
+
+        <button class="pill text-system-semibold-sm" id="next" type="button"><span>Next</span></button>
         </div>
       </div>
 
@@ -48,10 +49,15 @@
       </div>
       <div class="legend" id="legend" aria-label="Clues"></div>
       <div class="helper">
-        <button class="pill text-uppercase-semibold-md" id="prev" type="button">Prev</button>
-        <button class="pill text-uppercase-semibold-md" id="reset" type="button">Reset</button>
-        <button class="pill text-uppercase-semibold-md" id="reveal" type="button">Reveal</button>
-        <button class="pill text-uppercase-semibold-md" id="next" type="button">Next</button>
+                 <div class="chainHud" hidden>
+          <button class="btn text-system-semibold-sm" id="chainStartBtn" type="button">Start</button>
+          <div class="chainTimer text-system-semibold-sm">00:00</div>
+        </div>
+
+        <button class="btn text-system-semibold-sm" id="reset" type="button">Reset</button>
+        <button class="btn text-system-semibold-sm" id="reveal" type="button">Reveal</button>
+
+
       </div>
     </div>
   </section>
@@ -105,7 +111,7 @@
 
   <div class="keyboard"></div>
   <div class="credit text-system-regular-sm">
-    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.82
+    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.85
   </div>
   </main>
   <!-- Success -->

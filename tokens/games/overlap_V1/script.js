@@ -177,7 +177,7 @@ const els = {
   bGrid: $("#bGrid"),
   status: $("#status"),
   solution: $("#solution"),
-  // helper: document.querySelector(".helper"),
+  helper: $(".helper"),
   clueToggle: $("#clueToggle"),
   keyboard: $(".keyboard"),
 
@@ -948,7 +948,8 @@ function ensureChainUI() {
 
   const hud = document.querySelector(".chainHud");
 
-  els.meta.insertAdjacentElement("afterend", hud);
+  const host = els.helper || els.meta?.parentElement || document.body;
+  if (hud && host && hud.parentElement !== host) host.appendChild(hud);
 
   const startBtn = hud.querySelector("#chainStartBtn");
 
@@ -1084,6 +1085,33 @@ function chainResetTimer() {
     chain.elapsed = 0;
     ui.timer.textContent = fmtTime(0);
   }
+}
+
+function chainForceIdleZero() {
+  if (play.mode !== MODE.CHAIN) return;
+  chainStopTimer();
+  chain.started = false;
+  chain.running = false;
+  chain.left = 0;
+  chain.elapsed = 0;
+  const ui = ensureChainUI();
+  ui.timer.textContent = fmtTime(0);
+  chainSetUIState(CHAIN_UI.IDLE, ui);
+  setInlineCluesHiddenUntilChainStart();
+}
+
+function chainShowResetWithClues() {
+  if (play.mode !== MODE.CHAIN) return;
+  chainStopTimer();
+  chain.started = true; // mark started so clues render
+  chain.running = false;
+  chain.left = 0;
+  chain.elapsed = 0;
+  const ui = ensureChainUI();
+  ui.timer.textContent = fmtTime(0);
+  chainSetUIState(CHAIN_UI.DONE, ui);
+  setInlineCluesHiddenUntilChainStart(); // will unhide since started=true
+  applyClueMode();
 }
 
 
@@ -1330,8 +1358,10 @@ function findNextEditable(from, dir) {
 }
 
 function chainInputAllowed() {
-  // word chain should only accept typing once started via button
-  return play.mode !== MODE.CHAIN || chain.started;
+  if (play.mode !== MODE.CHAIN) return true;
+  if (!chain.started && !play.done) chainStartNow();
+  else if (chain.started && !chain.running && !play.done) chainResume();
+  return chain.started;
 }
 function setInlineCluesHiddenUntilChainStart() {
   const preStart = play.mode === MODE.CHAIN && !chain.started;
@@ -1722,6 +1752,10 @@ function onGridCellClick(e) {
   focusForTyping();
 
   const i = +cell.dataset.i;
+  if (play.mode === MODE.CHAIN && !chain.started && !play.done) {
+    chainStartNow();
+  }
+
   setAt(i);
 
   // const maybe = entryAtIndex(i);
@@ -1774,7 +1808,7 @@ function loadPuzzle(i) {
     setInlineCluesHiddenUntilChainStart();
 
     // hide reveal button in chain mode
-    if (els.reveal) els.reveal.style.display = "none";
+    // if (els.reveal) els.reveal.style.display = "none";
     // if (els.helper) els.helper.style.display = "none";
     // if (els.meta) els.meta.style.display = "none";
 
@@ -2278,22 +2312,26 @@ if (els.gridScroll) {
 
 // Prev/Next
 els.prev.addEventListener("click", () => {
-  if (play.mode === MODE.CHAIN) return;
+  if (play.mode === MODE.CHAIN) chainForceIdleZero();
   loadByViewOffset(-1);
 });
 
 els.next.addEventListener("click", () => {
-  if (play.mode === MODE.CHAIN) return;
+  if (play.mode === MODE.CHAIN) chainForceIdleZero();
   loadByViewOffset(1);
 });
 
 
 // Reset / Reveal
-els.reset.addEventListener("click", resetPlay);
+els.reset.addEventListener("click", () => {
+  resetPlay();
+  if (play.mode === MODE.CHAIN) chainForceIdleZero();
+});
 els.reveal.addEventListener("click", () => {
   markInteracted();
   revealPlay();
   focusForTyping();
+  if (play.mode === MODE.CHAIN) chainShowResetWithClues();
 });
 
 // Success modal (Overlap)
