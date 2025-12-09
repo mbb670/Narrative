@@ -209,6 +209,474 @@ const applyPaletteToDom = (paletteId) => {
   document.documentElement.setAttribute("data-puzzle-palette", normalizePaletteId(paletteId));
 };
 
+// ---- Slider (scroll surrogate, squish-style) ----
+const SLIDER_CFG = {
+  viewH: 100,
+  unit: 8, // px per cell in the viewBox space
+  thickH: 76,
+  thinH: 26,
+  curve: 14,
+};
+
+const slider = {
+  root: null,
+  track: null,
+  thumb: null,
+  grabbing: false,
+  pointerDown: false,
+  dragging: false,
+  startX: 0,
+  clickSlop: 4,
+};
+
+function getSliderMixSettings() {
+  const css = getComputedStyle(document.documentElement);
+  const base = css.getPropertyValue("--slider-color-mix-base").trim() || "var(--background-default)";
+  const amtRaw = css.getPropertyValue("--slider-color-mix-amount").trim();
+  const amtNum = parseFloat(amtRaw);
+  const amount = Number.isFinite(amtNum) ? clamp(amtNum, 0, 100) : 0;
+  return { base, amount };
+}
+
+function sliderScrollMetrics() {
+  const sc = els.gridScroll;
+  if (!sc) return { max: 0, padL: 0, padR: 0, eff: 0 };
+  const cs = getComputedStyle(sc);
+  const padL = parseFloat(cs.paddingLeft) || 0;
+  const padR = parseFloat(cs.paddingRight) || 0;
+  const effWidth = Math.max(0, sc.scrollWidth - padL - padR);
+  const max = Math.max(0, effWidth - sc.clientWidth);
+  return { max, padL, padR, eff: effWidth };
+}
+
+function initSlider() {
+  slider.root = els.slider;
+  if (!slider.root) return;
+  slider.root.innerHTML = "";
+  slider.root.classList.add("slider");
+  slider.track = document.createElement("div");
+  slider.track.className = "slider-track";
+  slider.thumb = document.createElement("div");
+  slider.thumb.className = "slider-thumb";
+
+  slider.root.append(slider.track, slider.thumb);
+
+  const onPointerMove = (clientX, smooth = false) => {
+    if (!slider.root || !els.gridScroll) return;
+    const rect = slider.root.getBoundingClientRect();
+    const pct = clamp((clientX - rect.left) / rect.width, 0, 1);
+    setScrollFromSliderPct(pct, { smooth });
+    updateThumbFromScroll(true);
+  };
+
+  const endInteraction = (e) => {
+    slider.pointerDown = false;
+    slider.dragging = false;
+    slider.grabbing = false;
+    slider.root.classList.remove("is-grabbing");
+    if (e?.pointerId != null && slider.root.hasPointerCapture(e.pointerId)) {
+      slider.root.releasePointerCapture(e.pointerId);
+    }
+  };
+
+  slider.root.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    slider.pointerDown = true;
+    slider.dragging = false;
+    slider.startX = e.clientX;
+    slider.root.setPointerCapture(e.pointerId);
+    // cancel any ongoing smooth follow to avoid jitter
+    cancelSmoothFollow();
+  });
+
+  slider.root.addEventListener("pointermove", (e) => {
+    if (!slider.pointerDown) return;
+    const dx = Math.abs(e.clientX - slider.startX);
+    if (!slider.dragging && dx > slider.clickSlop) {
+      slider.dragging = true;
+      slider.grabbing = true;
+      slider.root.classList.add("is-grabbing");
+    }
+    if (slider.dragging) {
+      onPointerMove(e.clientX, false);
+    }
+  });
+
+  slider.root.addEventListener("pointerup", (e) => {
+    if (!slider.pointerDown) return;
+    if (!slider.dragging) {
+      // treated as click: jump thumb, smooth scroll content
+      const rect = slider.root.getBoundingClientRect();
+      const pct = clamp((slider.startX - rect.left) / rect.width, 0, 1);
+      if (slider.thumb) slider.thumb.style.left = `${pct * 100}%`;
+      setScrollFromSliderPct(pct, { smooth: true });
+    }
+    endInteraction(e);
+  });
+
+  slider.root.addEventListener("pointercancel", endInteraction);
+}
+
+function setScrollFromSliderPct(pct, { smooth = false } = {}) {
+  if (!els.gridScroll) return;
+  const sc = els.gridScroll;
+  const { max, padL } = sliderScrollMetrics();
+  const target = padL + pct * max;
+  const clamped = clamp(target, 0, padL + max);
+  if (smooth) {
+    smoothFollowScrollLeft(sc, clamped);
+  } else {
+    sc.scrollLeft = clamped;
+  }
+  if (slider.thumb) slider.thumb.style.left = `${pct * 100}%`;
+}
+
+function updateThumbFromScroll(force = false) {
+  if (!slider.root || !slider.thumb) return;
+  if (slider.grabbing && !force) return;
+  if (!els.gridScroll) return;
+  const sc = els.gridScroll;
+  const { max, padL } = sliderScrollMetrics();
+  const pct = max > 0 ? clamp((sc.scrollLeft - padL) / max, 0, 1) : 0;
+  slider.thumb.style.left = `${pct * 100}%`;
+}
+
+// Build thick/thin runs from solved cells (not just locked words)
+function computeSolvedCells() {
+  if (play.mode !== MODE.CHAIN || !play.n) return [];
+
+  const total = play.n;
+  const solved = Array.from({ length: total }, () => false);
+
+  // Map cells to covering entries
+  const covers = Array.from({ length: total }, () => []);
+  for (const e of play.entries || []) {
+    for (let i = e.start; i < e.start + e.len && i < total; i++) {
+      covers[i].push(e);
+    }
+  }
+
+  // Precompute which words are correct
+  const wordCorrect = new Map();
+  for (const e of play.entries || []) {
+    wordCorrect.set(e.eIdx, isWordCorrect(e));
+  }
+
+  for (let i = 0; i < total; i++) {
+    const entriesHere = covers[i];
+    if (!entriesHere.length) {
+      // Fallback: only mark solved if the cell exactly matches expected
+      solved[i] = play.usr?.[i] && play.exp?.[i] && play.usr[i] === play.exp[i];
+      continue;
+    }
+    solved[i] = entriesHere.every((e) => wordCorrect.get(e.eIdx));
+  }
+
+  return solved;
+}
+
+function sliderSegments(solvedCellsOverride) {
+  const total = play.n || 0;
+  if (!total) return [{ start: 0, len: 1, type: "thick" }];
+
+  const solvedCells = Array.isArray(solvedCellsOverride) ? solvedCellsOverride : computeSolvedCells();
+  if (play.mode !== MODE.CHAIN || solvedCells.length !== total) {
+    return [{ start: 0, len: total, type: "thick" }];
+  }
+
+  const runs = [];
+  let i = 0;
+  while (i < total) {
+    const solved = !!solvedCells[i];
+    const start = i;
+    while (i < total && !!solvedCells[i] === solved) i++;
+    runs.push({ start, len: i - start, type: solved ? "thin" : "thick" });
+  }
+  return runs;
+}
+
+const sliderHeightFor = (t) => (t === "thin" ? SLIDER_CFG.thinH : SLIDER_CFG.thickH);
+const sliderTopFor = (t) => (SLIDER_CFG.viewH - sliderHeightFor(t)) / 2;
+const sliderBottomFor = (t) => sliderTopFor(t) + sliderHeightFor(t);
+
+function sliderCurveLen(prevLenPx, nextLenPx) {
+  const base = SLIDER_CFG.curve;
+  const lim = Math.min(prevLenPx * 0.5, nextLenPx * 0.5);
+  return Math.max(2, Math.min(base, Math.max(0, lim)));
+}
+
+function buildSliderGeometry(runs) {
+  if (!runs?.length) return { path: "", totalWidth: 100, segments: [], maskStops: [] };
+
+  const segments = [];
+  let x = 0;
+
+  for (let i = 0; i < runs.length; i++) {
+    const r = runs[i];
+    const lenPx = Math.max(1, r.len * SLIDER_CFG.unit);
+    const curveIn =
+      i > 0 && runs[i - 1].type !== r.type ? sliderCurveLen(runs[i - 1].len * SLIDER_CFG.unit, lenPx) : 0;
+    const startPx = x;
+    const endPx = startPx + lenPx;
+
+    segments.push({ ...r, startCell: r.start, lenPx, start: startPx, end: endPx, curveIn });
+    x = endPx;
+  }
+
+  const totalWidth = Math.max(1, x);
+
+  // Build the squished capsule path
+  let d = `M ${segments[0].start} ${sliderTopFor(segments[0].type)} `;
+
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    const prev = segments[i - 1];
+    const top = sliderTopFor(seg.type);
+
+    if (i > 0 && seg.curveIn > 0 && prev && prev.type !== seg.type) {
+      const curve = seg.curveIn;
+      const startCurve = Math.max(0, seg.start - curve);
+      const mid = curve * 0.5;
+      d += `L ${startCurve} ${sliderTopFor(prev.type)} `;
+      d += `C ${startCurve + mid} ${sliderTopFor(prev.type)} ${seg.start - mid} ${top} ${seg.start} ${top} `;
+    }
+
+    d += `L ${seg.end} ${top} `;
+  }
+
+  const last = segments[segments.length - 1];
+  const lastH = sliderHeightFor(last.type);
+  d += `A ${lastH / 2} ${lastH / 2} 0 0 1 ${last.end} ${sliderBottomFor(last.type)} `;
+
+  for (let i = segments.length - 1; i >= 0; i--) {
+    const seg = segments[i];
+    const prev = segments[i - 1];
+    const bottom = sliderBottomFor(seg.type);
+
+    d += `L ${seg.start} ${bottom} `;
+
+    if (i > 0 && seg.curveIn > 0 && prev && prev.type !== seg.type) {
+      const curve = seg.curveIn;
+      const startCurve = Math.max(0, seg.start - curve);
+      const mid = curve * 0.5;
+      d += `C ${seg.start - mid} ${bottom} ${startCurve + mid} ${sliderBottomFor(prev.type)} ${startCurve} ${sliderBottomFor(prev.type)} `;
+    }
+  }
+
+  const first = segments[0];
+  const firstH = sliderHeightFor(first.type);
+  d += `A ${firstH / 2} ${firstH / 2} 0 0 1 0 ${sliderTopFor(first.type)} Z`;
+
+  // Mask stops (opaque where thick, transparent where thin) with feathered transitions
+  const FEATHER_L = Math.max(2, SLIDER_CFG.unit * 1.4); // earlier gray on entry
+  const FEATHER_R = Math.max(2, SLIDER_CFG.unit * 0.8); // shorter gray bleed exiting
+  const maskStops = [];
+  const pushStop = (pos, opacity) => {
+    const p = clamp(pos, 0, totalWidth);
+    maskStops.push({ pos: p, opacity });
+  };
+
+  pushStop(0, segments[0].type === "thin" ? 0 : 1);
+
+  for (let i = 1; i < segments.length; i++) {
+    const prev = segments[i - 1];
+    const seg = segments[i];
+    if (prev.type === seg.type) continue;
+
+    const boundary = seg.start;
+    const opPrev = prev.type === "thin" ? 0 : 1;
+    const opCurr = seg.type === "thin" ? 0 : 1;
+
+    pushStop(boundary - FEATHER_L, opPrev);
+    pushStop(boundary, opPrev * 0.4 + opCurr * 0.6);
+    pushStop(boundary + FEATHER_R, opCurr);
+  }
+
+  const lastSeg = segments[segments.length - 1];
+  pushStop(lastSeg.end - FEATHER_R, lastSeg.type === "thin" ? 0 : 1);
+  pushStop(lastSeg.end, lastSeg.type === "thin" ? 0 : 1);
+
+  return { path: d, totalWidth, segments, maskStops };
+}
+
+function sliderBoundaryX(idx, segments, totalCells) {
+  if (idx <= 0) return 0;
+  if (idx >= totalCells) return segments.length ? segments[segments.length - 1].end : 0;
+
+  const targetCell = idx - 1;
+  for (const seg of segments) {
+    if (targetCell >= seg.startCell && targetCell < seg.startCell + seg.len) {
+      const offsetCells = idx - seg.startCell;
+      return seg.start + offsetCells * SLIDER_CFG.unit;
+    }
+  }
+
+  return (idx / Math.max(1, totalCells)) * (segments[segments.length - 1]?.end || 0);
+}
+
+function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride) {
+  const total = play.n || 0;
+  if (!entries?.length || !total || !geometry?.segments?.length) return [];
+
+  const solvedCells = Array.isArray(solvedCellsOverride) ? solvedCellsOverride : computeSolvedCells();
+  const solvedColor =
+    getComputedStyle(document.documentElement).getPropertyValue("--slider-solved").trim() ||
+    "rgba(0,0,0,0.35)";
+
+  const covers = Array.from({ length: total }, () => []);
+  for (const e of entries) {
+    for (let i = e.start; i < e.start + e.len && i < total; i++) covers[i].push(e);
+  }
+
+  const wordCorrect = new Map();
+  for (const e of entries) wordCorrect.set(e.eIdx, isWordCorrect(e));
+
+  const colors = Array.from({ length: total }, () => null);
+  for (let i = 0; i < total; i++) {
+    if (solvedCells?.[i]) {
+      colors[i] = solvedColor;
+      continue;
+    }
+
+    const firstUnsolved = covers[i].find((e) => !wordCorrect.get(e.eIdx));
+    if (firstUnsolved) {
+      colors[i] = paletteColorForWord(puzzle, firstUnsolved.rawIdx ?? firstUnsolved.eIdx ?? 0);
+      continue;
+    }
+
+    if (covers[i].length) {
+      const e = covers[i][0];
+      colors[i] = paletteColorForWord(puzzle, e.rawIdx ?? e.eIdx ?? 0);
+      continue;
+    }
+  }
+
+  const fallbackColor =
+    colors.find(Boolean) ||
+    paletteColorForWord(puzzle, 0) ||
+    getComputedStyle(document.documentElement).getPropertyValue("--puzzle-color-1").trim() ||
+    "#999";
+  for (let i = 0; i < colors.length; i++) {
+    if (!colors[i]) colors[i] = fallbackColor;
+  }
+
+  const runs = [];
+  let i = 0;
+  while (i < total) {
+    const c = colors[i];
+    const start = i;
+    while (i < total && colors[i] === c) i++;
+    runs.push({ color: c, start, end: i });
+  }
+
+  const stops = [];
+  const mix = (a, b) => (b ? `color-mix(in srgb, ${a} 45%, ${b} 55%)` : a);
+  const totalWidth = geometry.totalWidth;
+  const mixSettings = getSliderMixSettings();
+  const mixColor = (c) => {
+    if (!mixSettings.amount) return c;
+    const keep = Math.max(0, 100 - mixSettings.amount);
+    return `color-mix(in srgb, ${c} ${keep}%, ${mixSettings.base} ${mixSettings.amount}%)`;
+  };
+
+  const xForBoundary = (idx) => {
+    if (idx <= 0) return 0;
+    if (idx >= total) return totalWidth;
+    const targetCell = idx - 1;
+    for (const seg of geometry.segments) {
+      if (targetCell >= seg.startCell && targetCell < seg.startCell + seg.len) {
+        const offsetCells = idx - seg.startCell;
+        return seg.start + offsetCells * SLIDER_CFG.unit;
+      }
+    }
+    return (idx / total) * totalWidth;
+  };
+
+  for (let r = 0; r < runs.length; r++) {
+    const seg = runs[r];
+    const prev = runs[r - 1]?.color || seg.color;
+    const next = runs[r + 1]?.color || seg.color;
+
+    const startX = xForBoundary(seg.start);
+    const endX = xForBoundary(seg.end);
+    const span = Math.max(0, endX - startX);
+    const blend = Math.min(span * 0.5, SLIDER_CFG.unit * 2);
+
+    const a0 = startX;
+    const a1 = Math.min(endX, startX + blend);
+    const b0 = Math.max(startX, endX - blend);
+    const b1 = endX;
+
+    const mixStart = mix(prev, seg.color);
+    const mixEnd = mix(seg.color, next);
+
+    stops.push(
+      { offset: (a0 / totalWidth) * 100, color: mixStart },
+      { offset: (a1 / totalWidth) * 100, color: seg.color },
+      { offset: (b0 / totalWidth) * 100, color: seg.color },
+      { offset: (b1 / totalWidth) * 100, color: mixEnd }
+    );
+  }
+
+  return stops.map((s) => ({ ...s, color: mixColor(s.color) }));
+}
+
+function renderSliderSvg() {
+  if (!slider.track) return;
+
+  const solvedCells = computeSolvedCells();
+  const runs = sliderSegments(solvedCells);
+  const geometry = buildSliderGeometry(runs);
+  const baseStops = sliderColorStops(play.entries, puzzles[pIdx], geometry, solvedCells);
+  const maskStops = geometry.maskStops;
+
+  const id = `slider-${Math.random().toString(16).slice(2, 8)}`;
+  const fallbackA = paletteColorForWord(puzzles[pIdx], 0);
+  const fallbackB = paletteColorForWord(puzzles[pIdx], 1) || fallbackA;
+  const stopsToUse = baseStops.length ? baseStops : [
+    { offset: 0, color: fallbackA },
+    { offset: 100, color: fallbackB },
+  ];
+
+  const baseStopsStr = stopsToUse
+    .map((s) => `<stop offset="${s.offset}%" stop-color="${s.color}" />`)
+    .join("");
+  const maskStopsStr = maskStops
+    .map((s) => `<stop offset="${(s.pos / geometry.totalWidth) * 100}%" stop-color="white" stop-opacity="${s.opacity}" />`)
+    .join("");
+
+  const svg = `
+    <svg class="slider-svg" viewBox="0 0 ${geometry.totalWidth} ${SLIDER_CFG.viewH}" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="${id}-base" x1="0" x2="1" y1="0" y2="0">
+          ${baseStopsStr}
+        </linearGradient>
+        <linearGradient id="${id}-mask" x1="0" x2="1" y1="0" y2="0">
+          ${maskStopsStr}
+        </linearGradient>
+        <mask id="${id}-mask-use">
+          <rect x="0" y="0" width="${geometry.totalWidth}" height="${SLIDER_CFG.viewH}" fill="url(#${id}-mask)" />
+        </mask>
+      </defs>
+      <path d="${geometry.path}" fill="var(--slider-base-bg, var(--slider-solved, #c2c5cb))" />
+      <path d="${geometry.path}" fill="url(#${id}-base)" mask="url(#${id}-mask-use)" />
+    </svg>
+  `;
+
+  slider.track.innerHTML = svg;
+}
+
+function updateSliderUI() {
+  if (!slider.root || !slider.track) return;
+  const isPlayableView = currentView === VIEW.CHAIN || currentView === VIEW.PLAY;
+  const overflow = isPlayableView && els.gridScroll && els.gridScroll.scrollWidth > els.gridScroll.clientWidth + 4;
+  slider.root.style.display = overflow ? "" : "none";
+  if (!overflow) return;
+
+  renderSliderSvg();
+  updateThumbFromScroll();
+}
+
 // ✅ Time bonus config (edit freely)
 // bonusPoints = floor(remainingSeconds * TIME_BONUS_FACTOR)
 const TIME_BONUS_FACTOR = 0.5;
@@ -249,6 +717,7 @@ const els = {
   sAgain: $("#sAgain"),
   sNext: $("#sNext"),
   sShare: $("#sShare"),
+  slider: $(".game-slider"),
   pSel: $("#pSel"),
   pNew: $("#pNew"),
   pDel: $("#pDel"),
@@ -785,6 +1254,14 @@ function smoothFollowScrollLeft(sc, target) {
   };
 
   _scrollFollowRaf = requestAnimationFrame(tick);
+}
+
+function cancelSmoothFollow() {
+  if (_scrollFollowRaf) {
+    cancelAnimationFrame(_scrollFollowRaf);
+    _scrollFollowRaf = 0;
+  }
+  _scrollFollowEl = null;
 }
 
 
@@ -1396,6 +1873,7 @@ function updateLockedWordUI() {
     const locked = play.mode === MODE.CHAIN && play.lockedEntries.has(eIdx);
     r.classList.toggle("is-locked", locked);
   });
+  updateSliderUI();
 }
 
 function chainApplyLocksIfEnabled() {
@@ -1633,6 +2111,7 @@ function updatePlayUI() {
     c.classList.toggle("is-active", i === play.at && !play.done);
   });
   updateSelectedWordUI();
+  updateSliderUI();
 }
 
 function setAt(i, { behavior } = {}) {
@@ -1918,6 +2397,7 @@ function loadPuzzle(i) {
   clearSelection();
 
   renderGrid(els.grid, m, true);
+  updateSliderUI();
 
 
   // Legend mode
@@ -2009,6 +2489,7 @@ function setTab(which) {
 
   if (!isBuild) {
     ensureCurrentPuzzleMatchesView();
+    updateSliderUI();
     focusForTyping();
   } else {
     chainStopTimer();
@@ -2368,6 +2849,7 @@ document.addEventListener(
   { passive: true }
 );
 document.addEventListener("keydown", onKey, true);
+window.addEventListener("resize", () => updateSliderUI());
 
 // Focus gate
 els.stage.addEventListener("pointerdown", (e) => {
@@ -2389,6 +2871,7 @@ els.gridScroll?.addEventListener(
   "scroll",
   () => {
     if (play.mode === MODE.CHAIN) requestChainClues();
+    updateThumbFromScroll();
   },
   { passive: true }
 );
@@ -2605,6 +3088,7 @@ els.rows.addEventListener("change", (e) => {
 
 // ---- Start ----
 initOnScreenKeyboard();
+initSlider();
 loadPuzzle(0);
 setTab(currentView);
 initClueToggle();

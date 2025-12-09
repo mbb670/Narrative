@@ -6,6 +6,12 @@
       box-sizing: border-box;
   }
 
+  .game-slider * {
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+  }
+
   :root {
       --grid-line: var(--border-subtle);
       --cols: 10;
@@ -20,15 +26,23 @@
 
 
       --grid-top-space: 32px;
-      --grid-letter-space: 72px;
+      --grid-letter-space: 96px;
       /* --grid-bottom-space: 16px; */
-      --grid-bottom-space: 32px;
+      --grid-bottom-space: 0px;
       --cell-letter-placement: 4/6;
+
+      --slider-track-h: var(--spacing-x16);
+      --slider-thumb-w: var(--spacing-x8);
+      --slider-thumb-h: var(--spacing-x24);
+      --slider-thumb-color: var(--foreground-muted);
+      --slider-solved: var(--background-medium);
+      --slider-color-mix-base: var(--background-default);
+      --slider-color-mix-amount: 50; /* 0-100 (%) */
   }
 
   .clues--legend,
   #panelBuild {
-      --grid-top-space: var(--grid-bottom-space);
+      /* --grid-top-space: var(--grid-bottom-space); */
       --cell-letter-placement: 4/5;
   }
 
@@ -40,8 +54,8 @@
           --grid-bottom-space: 8px;
 
           --grid-top-space: 32px;
-          --grid-letter-space: 48px;
-          --grid-bottom-space: 32px;
+          --grid-letter-space: 80px;
+          --grid-bottom-space: 0px;
       }
 
       .clues--legend,
@@ -415,10 +429,15 @@
       scrollbar-gutter: stable;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
-      touch-action: pan-x;
+      touch-action: pan-x pan-y;
 
       flex-grow: 1;
       place-content: center;
+      scrollbar-width: none;
+  }
+
+  .gridScroll::-webkit-scrollbar {
+      display: none;
   }
 
   .grid {
@@ -435,7 +454,7 @@
 
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
-      touch-action: pan-x;
+      touch-action: pan-x pan-y;
 
 
 
@@ -450,6 +469,7 @@
       grid-column: var(--gs) / var(--ge);
       display: grid;
       grid-template-rows: subgrid;
+      border-radius: var(--radius-relaxed) var(--radius-relaxed) 0 0;
 
       &.is-locked .rangeClue {
           opacity: 0.3;
@@ -670,6 +690,64 @@
               border-radius: var(--radius-slight);
           }
       }
+  }
+
+  /* Slider (word chain scroll) */
+  .game-slider {
+      position: relative;
+      width: min(1080px, 100%);
+      /* height: var(--unit-48); */
+      margin: var(--spacing-x24) auto;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      /* border: 1px solid red; */
+      width: calc(100% - (var(--layout-grid-margin) * 2));
+      max-width: var(--layout-content-md-max);
+
+  }
+
+  .slider-track {
+      position: absolute;
+      inset: 50% 0 auto 0;
+      height: var(--slider-track-h);
+      transform: translateY(-50%);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      cursor: pointer;
+      mask-repeat: no-repeat;
+      -webkit-mask-repeat: no-repeat;
+  }
+
+  .slider-track .slider-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: block;
+  }
+
+  .slider-thumb {
+      position: absolute;
+      top: 50%;
+      width: var(--slider-thumb-w);
+      height: var(--slider-thumb-h);
+      transform: translate(-50%, -50%);
+      background: var(--slider-thumb-color);
+      border-radius: var(--radius-full);
+      box-shadow: 0 0 0 2px var(--background-default);
+      cursor: pointer;
+      touch-action: none;
+      z-index: 2;
+      cursor: grab;
+  }
+
+  .game-slider.is-grabbing .slider-thumb {
+      filter: brightness(0.8);
+      cursor: grabbing;
+      background: var(--foreground-default);
   }
 
   /* Success */
