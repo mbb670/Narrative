@@ -649,104 +649,88 @@
         "clue": "Middle Eastern ruler",
         "answer": "SULTAN",
         "start": 1,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Off-topic aside",
         "answer": "TANGENT",
         "start": 4,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Main course",
         "answer": "ENTREE",
         "start": 8,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Coral ridge",
         "answer": "REEF",
         "start": 11,
-        "height": "full",
-        "diff": "easy"
-      },
+        "height": "full"
+    },
       {
         "clue": "Attempt",
         "answer": "EFFORT",
         "start": 13,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Traditional; conventional",
         "answer": "ORTHODOX",
         "start": 16,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Posting private info",
         "answer": "DOXING",
         "start": 21,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Pungent bulb",
         "answer": "GARLIC",
         "start": 26,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Hanging ice spike",
         "answer": "ICICLE",
         "start": 30,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Witty; smart",
         "answer": "CLEVER",
         "start": 33,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Jury's decision",
         "answer": "VERDICT",
         "start": 36,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Lay down orders",
         "answer": "DICTATE",
         "start": 39,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Boring; tiring",
         "answer": "TEDIOUS",
         "start": 44,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Drive out",
         "answer": "OUST",
         "start": 48,
-        "height": "mid",
-        "diff": "easy"
-      }
+        "height": "mid"
+    }
     ],
-    "timeLimit": 200,
-    "lockCorrectWords": true,
-    "timedMode": false
+    "lockCorrectWords": true
   },
   {
     "id": "p-20251202-sultan-chain-2",
@@ -758,104 +742,88 @@
         "clue": "Rock",
         "answer": "STONE",
         "start": 1,
-        "height": "inner",
-        "diff": "easy"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Sound quality",
         "answer": "TONE",
         "start": 2,
-        "height": "full",
-        "diff": "easy"
-      },
+        "height": "full"
+    },
       {
         "clue": "Single-direction",
         "answer": "ONEWAY",
         "start": 3,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Navigation aids/signage",
         "answer": "WAYFINDING",
         "start": 6,
-        "height": "inner",
-        "diff": "hard"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Inventiveness",
         "answer": "INGENUITY",
         "start": 13,
-        "height": "full",
-        "diff": "hard"
-      },
+        "height": "full"
+    },
       {
         "clue": "Cruel ruler",
         "answer": "TYRANT",
         "start": 20,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Patriotic song",
         "answer": "ANTHEM",
         "start": 23,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Half a globe",
         "answer": "HEMISPHERE",
         "start": 26,
-        "height": "full",
-        "diff": "hard"
-      },
+        "height": "full"
+    },
       {
         "clue": "Give a new look",
         "answer": "RESKIN",
         "start": 34,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Realm",
         "answer": "KINGDOM",
         "start": 37,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Legal residence",
         "answer": "DOMICILE",
         "start": 41,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Small-intestine part",
         "answer": "ILEUM",
         "start": 46,
-        "height": "mid",
-        "diff": "easy"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Rain shield",
         "answer": "UMBRELLA",
         "start": 49,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Narrow road",
         "answer": "LANE",
         "start": 55,
-        "height": "full",
-        "diff": "easy"
+        "height": "full"
       }
     ],
-    "timeLimit": 200,
-    "lockCorrectWords": true,
-    "timedMode": false
+    "lockCorrectWords": true
   },
   {
     "id": "p-20251202-sultan-chain-3",
@@ -867,97 +835,82 @@
         "clue": "Low on iron, say",
         "answer": "ANEMIC",
         "start": 1,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Tiny organisms",
         "answer": "MICROBES",
         "start": 4,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Top-notch",
         "answer": "BEST",
         "start": 9,
-        "height": "full",
-        "diff": "easy"
-      },
+        "height": "full"
+    },
       {
         "clue": "Rough calculation",
         "answer": "ESTIMATE",
         "start": 10,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Run-down apartment bldg.",
         "answer": "TENEMENT",
         "start": 16,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Whole; complete",
         "answer": "ENTIRE",
         "start": 21,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Worn out",
         "answer": "TIRED",
         "start": 23,
-        "height": "mid",
-        "diff": "easy"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Giant California tree",
         "answer": "REDWOOD",
         "start": 25,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Stiff; not flexible",
         "answer": "WOODEN",
         "start": 28,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Never-ending",
         "answer": "ENDLESS",
         "start": 32,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Smaller; inferior",
         "answer": "LESSER",
         "start": 35,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Soil wear-away",
         "answer": "EROSION",
         "start": 39,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Charge (atoms)",
         "answer": "IONIZE",
         "start": 43,
-        "height": "mid",
-        "diff": "medium"
-      }
+        "height": "mid"
+    }
     ],
-    "timeLimit": 200,
-    "lockCorrectWords": true,
-    "timedMode": false
+    "lockCorrectWords": true
   },
   {
     "id": "p-20251202-sultan-chain",
@@ -969,293 +922,250 @@
         "clue": "Middle Eastern ruler",
         "answer": "SULTAN",
         "start": 1,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Off-topic aside",
         "answer": "TANGENT",
         "start": 4,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Main course",
         "answer": "ENTREE",
         "start": 8,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Coral ridge",
         "answer": "REEF",
         "start": 11,
-        "height": "full",
-        "diff": "easy"
-      },
+        "height": "full"
+    },
       {
         "clue": "Attempt",
         "answer": "EFFORT",
         "start": 13,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Traditional; conventional",
         "answer": "ORTHODOX",
         "start": 16,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Posting private info",
         "answer": "DOXING",
         "start": 21,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Pungent bulb",
         "answer": "GARLIC",
         "start": 26,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Hanging ice spike",
         "answer": "ICICLE",
         "start": 30,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Witty; smart",
         "answer": "CLEVER",
         "start": 33,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Jury's decision",
         "answer": "VERDICT",
         "start": 36,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Lay down orders",
         "answer": "DICTATE",
         "start": 39,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Boring; tiring",
         "answer": "TEDIOUS",
         "start": 44,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Drive out",
         "answer": "OUST",
         "start": 48,
-        "height": "mid",
-        "diff": "easy"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Rock",
         "answer": "STONE",
         "start": 50,
-        "height": "inner",
-        "diff": "easy"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Sound quality",
         "answer": "TONE",
         "start": 51,
-        "height": "full",
-        "diff": "easy"
-      },
+        "height": "full"
+    },
       {
         "clue": "Single-direction",
         "answer": "ONEWAY",
         "start": 52,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Navigation aids/signage",
         "answer": "WAYFINDING",
         "start": 55,
-        "height": "inner",
-        "diff": "hard"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Inventiveness",
         "answer": "INGENUITY",
         "start": 62,
-        "height": "full",
-        "diff": "hard"
-      },
+        "height": "full"
+    },
       {
         "clue": "Cruel ruler",
         "answer": "TYRANT",
         "start": 69,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Patriotic song",
         "answer": "ANTHEM",
         "start": 72,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Half a globe",
         "answer": "HEMISPHERE",
         "start": 75,
-        "height": "full",
-        "diff": "hard"
-      },
+        "height": "full"
+    },
       {
         "clue": "Give a new look",
         "answer": "RESKIN",
         "start": 83,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Realm",
         "answer": "KINGDOM",
         "start": 86,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Legal residence",
         "answer": "DOMICILE",
         "start": 90,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Small-intestine part",
         "answer": "ILEUM",
         "start": 95,
-        "height": "mid",
-        "diff": "easy"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Rain shield",
         "answer": "UMBRELLA",
         "start": 98,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Narrow road",
         "answer": "LANE",
         "start": 104,
-        "height": "full",
-        "diff": "easy"
-      },
+        "height": "full"
+    },
       {
         "clue": "Low on iron, say",
         "answer": "ANEMIC",
         "start": 105,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Tiny organisms",
         "answer": "MICROBES",
         "start": 108,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Top-notch",
         "answer": "BEST",
         "start": 113,
-        "height": "full",
-        "diff": "easy"
-      },
+        "height": "full"
+    },
       {
         "clue": "Rough calculation",
         "answer": "ESTIMATE",
         "start": 114,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Run-down apartment bldg.",
         "answer": "TENEMENT",
         "start": 120,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Whole; complete",
         "answer": "ENTIRE",
         "start": 125,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Worn out",
         "answer": "TIRED",
         "start": 127,
-        "height": "mid",
-        "diff": "easy"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Giant California tree",
         "answer": "REDWOOD",
         "start": 129,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Stiff; not flexible",
         "answer": "WOODEN",
         "start": 132,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Never-ending",
         "answer": "ENDLESS",
         "start": 136,
-        "height": "mid",
-        "diff": "medium"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Smaller; inferior",
         "answer": "LESSER",
         "start": 139,
-        "height": "inner",
-        "diff": "medium"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Soil wear-away",
         "answer": "EROSION",
         "start": 143,
-        "height": "full",
-        "diff": "medium"
-      },
+        "height": "full"
+    },
       {
         "clue": "Charge (atoms)",
         "answer": "IONIZE",
         "start": 147,
-        "height": "mid",
-        "diff": "medium"
-      }
+        "height": "mid"
+    }
     ],
-    "timeLimit": 200,
-    "lockCorrectWords": true,
-    "timedMode": false
+    "lockCorrectWords": true
   },
   {
     "id": "p-ce92b6-19adbcb9cae",
@@ -1267,48 +1177,40 @@
         "clue": "Chain of sea islands",
         "answer": "ARCHIPELAGO",
         "start": 1,
-        "height": "full",
-        "diff": "hard"
-      },
+        "height": "full"
+    },
       {
         "clue": "Shallow pool behind a reef",
         "answer": "LAGOON",
         "start": 8,
-        "height": "mid",
-        "diff": "easy"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Heading toward shore, say",
         "answer": "ONTO",
         "start": 12,
-        "height": "inner",
-        "diff": "easy"
-      },
+        "height": "inner"
+    },
       {
         "clue": "Vast body water",
         "answer": "OCEAN",
         "start": 15,
-        "height": "full",
-        "diff": "hard"
-      },
+        "height": "full"
+    },
       {
         "clue": "Heavy object dropped to hold a boat",
         "answer": "ANCHOR",
         "start": 18,
-        "height": "mid",
-        "diff": "hard"
-      },
+        "height": "mid"
+    },
       {
         "clue": "Where sea seems to meet sky",
         "answer": "HORIZON",
         "start": 21,
-        "height": "full",
-        "diff": "easy"
-      }
+        "height": "full"
+    }
     ],
-    "timeLimit": 200,
-    "lockCorrectWords": true,
-    "timedMode": false
+    "lockCorrectWords": true
   },
   {
   "id": "p-20251211-lancuch-pl-v2",
@@ -1320,111 +1222,94 @@
       "clue": "Ręczna lampa",
       "answer": "LATARKA",
       "start": 1,
-      "height": "full",
-      "diff": "medium"
+      "height": "full"
     },
     {
       "clue": "Przewód elektryczny",
       "answer": "KABEL",
       "start": 6,
-      "height": "mid",
-      "diff": "easy"
+      "height": "mid"
     },
     {
       "clue": "Poziomy element konstrukcji",
       "answer": "BELKA",
       "start": 8,
-      "height": "inner",
-      "diff": "easy"
+      "height": "inner"
     },
     {
       "clue": "Napój z palonych ziaren",
       "answer": "KAWA",
       "start": 11,
-      "height": "full",
-      "diff": "easy"
+      "height": "full"
     },
     {
       "clue": "Naczynie na zupę",
       "answer": "WAZA",
       "start": 13,
-      "height": "mid",
-      "diff": "easy"
+      "height": "mid"
     },
     {
       "clue": "Warowna siedziba króla",
       "answer": "ZAMEK",
       "start": 15,
-      "height": "inner",
-      "diff": "easy"
+      "height": "inner"
     },
     {
       "clue": "Powierzchnia do wyświetlania obrazu",
       "answer": "EKRAN",
       "start": 18,
-      "height": "full",
-      "diff": "easy"
+      "height": "full"
     },
     {
       "clue": "Egzotyczny owoc o kolczastej skórce",
       "answer": "ANANAS",
       "start": 21,
-      "height": "mid",
-      "diff": "easy"
+      "height": "mid"
     },
     {
       "clue": "Przewlekła choroba układu oddechowego",
       "answer": "ASTMA",
       "start": 25,
-      "height": "inner",
-      "diff": "medium"
+      "height": "inner"
     },
     {
       "clue": "Graficzny obraz terytorium",
       "answer": "MAPA",
       "start": 28,
-      "height": "full",
-      "diff": "easy"
+      "height": "full"
     },
     {
       "clue": "Czarno-biały niedźwiedź z Chin",
       "answer": "PANDA",
       "start": 30,
-      "height": "mid",
-      "diff": "easy"
+      "height": "mid"
     },
     {
       "clue": "Elegancka pani",
       "answer": "DAMA",
       "start": 33,
-      "height": "inner",
-      "diff": "easy"
+      "height": "inner"
     },
     {
       "clue": "Osoba malująca obrazy",
       "answer": "MALARZ",
       "start": 35,
-      "height": "full",
-      "diff": "medium"
+      "height": "full"
     },
     {
       "clue": "Przedmiot lub sprawa",
       "answer": "RZECZ",
       "start": 39,
-      "height": "mid",
-      "diff": "medium"
+      "height": "mid"
     },
     {
       "clue": "Nakrycie głowy na zimę",
       "answer": "CZAPKA",
       "start": 42,
-      "height": "inner",
-      "diff": "easy"
+      "height": "inner"
     }
   ],
-  "timeLimit": 200,
-  "lockCorrectWords": true,
-  "timedMode": false
-}
+  "lockCorrectWords": true
+  }
 
 ]

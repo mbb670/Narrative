@@ -103,25 +103,6 @@ function loadLastView() {
 }
 
 
-const DIFFS = [
-  ["Easy", "easy"],
-  ["Medium", "medium"],
-  ["Hard", "hard"],
-];
-
-// Difficulty-to-color mapping (edit freely)
-const DIFF_COLORS = {
-  easy: ["--c-green", "--c-mint", "--c-cyan"],
-  medium: ["--c-yellow", "--c-orange", "--c-blue"],
-  hard: ["--c-red", "--c-pink", "--c-purple"],
-};
-
-// Points per correct word by difficulty (edit freely)
-const DIFF_POINTS = { easy: 1, medium: 2, hard: 3 };
-
-// Word Chain defaults
-const DEFAULT_CHAIN_TIME = 60;
-
 // ---- Palettes (5 colors, from CSS) ----
 const PALETTE_SIZE = 5;
 const FALLBACK_PALETTE_ID = "classic";
@@ -227,6 +208,7 @@ const slider = {
   dragging: false,
   startX: 0,
   clickSlop: 4,
+  cache: null, // { key, stops, segments }
 };
 
 function getSliderMixSettings() {
@@ -379,8 +361,8 @@ function sliderSegments(solvedCellsOverride) {
   const total = play.n || 0;
   if (!total) return [{ start: 0, len: 1, type: "thick" }];
 
-  const solvedCells = Array.isArray(solvedCellsOverride) ? solvedCellsOverride : computeSolvedCells();
-  if (play.mode !== MODE.CHAIN || solvedCells.length !== total) {
+  const solvedCells = Array.isArray(solvedCellsOverride) ? solvedCellsOverride : null;
+  if (!solvedCells || play.mode !== MODE.CHAIN || solvedCells.length !== total) {
     return [{ start: 0, len: total, type: "thick" }];
   }
 
@@ -514,11 +496,12 @@ function sliderBoundaryX(idx, segments, totalCells) {
   return (idx / Math.max(1, totalCells)) * (segments[segments.length - 1]?.end || 0);
 }
 
-function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride) {
+function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride, allowSolved = false) {
   const total = play.n || 0;
   if (!entries?.length || !total || !geometry?.segments?.length) return [];
 
-  const solvedCells = Array.isArray(solvedCellsOverride) ? solvedCellsOverride : computeSolvedCells();
+  const useSolved = allowSolved && Array.isArray(solvedCellsOverride);
+  const solvedCells = useSolved ? solvedCellsOverride : null;
   const solvedColor =
     getComputedStyle(document.documentElement).getPropertyValue("--slider-solved").trim() ||
     "rgba(0,0,0,0.35)";
@@ -533,7 +516,7 @@ function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride) {
 
   const colors = Array.from({ length: total }, () => null);
   for (let i = 0; i < total; i++) {
-    if (solvedCells?.[i]) {
+    if (useSolved && solvedCells?.[i]) {
       colors[i] = solvedColor;
       continue;
     }
@@ -624,10 +607,25 @@ function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride) {
 function renderSliderSvg() {
   if (!slider.track) return;
 
-  const solvedCells = computeSolvedCells();
-  const runs = sliderSegments(solvedCells);
-  const geometry = buildSliderGeometry(runs);
-  const baseStops = sliderColorStops(play.entries, puzzles[pIdx], geometry, solvedCells);
+  const allowSolved = play.mode === MODE.CHAIN && currentView === VIEW.CHAIN;
+  const solvedCells = allowSolved ? computeSolvedCells() : null;
+
+  let runs;
+  let baseStops;
+  let geometry;
+
+  const cacheKey = currentView === VIEW.PLAY ? `play-${pIdx}-${play.mode}` : null;
+
+  if (cacheKey && slider.cache?.key === cacheKey) {
+    ({ runs, baseStops, geometry } = slider.cache);
+  } else {
+    runs = sliderSegments(solvedCells);
+    geometry = buildSliderGeometry(runs);
+    baseStops = sliderColorStops(play.entries, puzzles[pIdx], geometry, solvedCells, allowSolved);
+    if (cacheKey) {
+      slider.cache = { key: cacheKey, runs, baseStops, geometry };
+    }
+  }
   const maskStops = geometry.maskStops;
 
   const id = `slider-${Math.random().toString(16).slice(2, 8)}`;
@@ -797,10 +795,7 @@ const tr = (w) => {
 };
 
 const isChainPuzzle = (p) => String(p?.type || MODE.OVERLAP) === MODE.CHAIN;
-function chainIsTimed(p) {
-  const v = p?.chainTimed ?? p?.timed ?? p?.timedMode ?? p?.isTimed; // supports common names
-  return v == null ? true : !!v;
-}
+const chainIsTimed = () => false;
 
 const inferDiffFromColor = () => "easy";
 
@@ -812,10 +807,6 @@ const normWord = (w, pType, opts = {}) => {
     height: String(w?.height || "full"),
   };
 
-  if (pType === MODE.CHAIN) {
-    out.diff = String(w?.diff || "easy");
-  }
-
   return out;
 };
 
@@ -824,7 +815,7 @@ const normPuzzle = (p) => {
   const type = String(p?.type || MODE.OVERLAP);
   const wordsRaw = Array.isArray(p?.words) ? p.words : [];
   const fallback = { clue: "Clue", answer: "WORD", start: 1, height: "full" };
-  const timed = type === MODE.CHAIN ? chainIsTimed(p) : true;
+  const timed = type === MODE.CHAIN ? false : true;
   const words = (wordsRaw.length ? wordsRaw : [fallback]).map((w) => normWord(w, type, { timed }));
 
 
@@ -837,10 +828,7 @@ const normPuzzle = (p) => {
   };
 
   if (type === MODE.CHAIN) {
-    out.timeLimit = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
-
-    out.lockCorrectWords = !!(p?.lockCorrectWords ?? true);
-    out.timedMode = !!(p?.timedMode ?? true);
+    out.lockCorrectWords = true;
   }
   return out;
 };
@@ -1087,7 +1075,7 @@ function noteHardwareKeyboard() {
 // ---- Model ----
 function computed(p) {
   const type = String(p?.type || MODE.OVERLAP);
-  const timedChain = type === MODE.CHAIN && chainIsTimed(p);
+  const timedChain = false;
 
   const entries = (p.words || [])
     .map((w, rawIdx) => {
@@ -1095,7 +1083,7 @@ function computed(p) {
       const start = Math.max(0, Math.floor(+w.start || 1) - 1);
       const [t, b] = insets(w.height || "full");
 
-      let diff = type === MODE.CHAIN ? String(w.diff || "easy") : null;
+      let diff = null;
       const color = paletteColorForWord(p, rawIdx);
 
 
@@ -1440,15 +1428,9 @@ function chainPause() {
   const ui = ensureChainUI();
 
   // snapshot time so resume is accurate
-  if (chain.isTimed) {
-    const left = Math.max(0, (chain.endsAt - Date.now()) / 1000);
-    chain.left = left;
-    ui.timer.textContent = fmtTime(left);
-  } else {
-    const elapsed = Math.max(0, (Date.now() - chain.startAt) / 1000);
-    chain.elapsed = elapsed;
-    ui.timer.textContent = fmtTime(elapsed);
-  }
+  const elapsed = Math.max(0, (Date.now() - chain.startAt) / 1000);
+  chain.elapsed = elapsed;
+  ui.timer.textContent = fmtTime(elapsed);
 
   chain.running = false;
   chainSetUIState(CHAIN_UI.PAUSED, ui);
@@ -1459,13 +1441,8 @@ function chainResume() {
 
   const ui = ensureChainUI();
 
-  if (chain.isTimed) {
-    const left = Math.max(0, +chain.left || 0);
-    chain.endsAt = Date.now() + left * 1000;
-  } else {
-    const elapsed = Math.max(0, +chain.elapsed || 0);
-    chain.startAt = Date.now() - elapsed * 1000;
-  }
+  const elapsed = Math.max(0, +chain.elapsed || 0);
+  chain.startAt = Date.now() - elapsed * 1000;
 
   chain.running = true;
   chainSetUIState(CHAIN_UI.RUNNING, ui);
@@ -1625,16 +1602,8 @@ function chainResetTimer() {
 
   chainStopTimer();
 
-  const isTimed = !!(p?.timedMode ?? true);
-
-  if (isTimed) {
-    const total = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
-    chain.left = total;
-    ui.timer.textContent = fmtTime(chain.left);
-  } else {
-    chain.elapsed = 0;
-    ui.timer.textContent = fmtTime(0);
-  }
+  chain.elapsed = 0;
+  ui.timer.textContent = fmtTime(0);
 }
 
 function chainForceIdleZero() {
@@ -1670,8 +1639,6 @@ function chainStartNow() {
   if (play.done) return;
 
   const ui = ensureChainUI();
-  const p = puzzles[pIdx];
-  const total = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
 
   // jump to first editable cell (usually 0)
   const first = findNextEditable(0, +1);
@@ -1685,38 +1652,20 @@ function chainStartNow() {
   chain.running = true;
   setInlineCluesHiddenUntilChainStart();
   applyClueMode();
-  const isTimed = !!(p?.timedMode ?? true);
-  chain.isTimed = isTimed;
-chainSetUIState(CHAIN_UI.RUNNING, ui);
+  chain.isTimed = false;
+  chainSetUIState(CHAIN_UI.RUNNING, ui);
 
+  chain.startAt = Date.now();
 
-  if (isTimed) {
-    chain.endsAt = Date.now() + total * 1000;
+  if (chain.tickId) clearInterval(chain.tickId);
+  chain.tickId = setInterval(() => {
+    if (!chain.running) return;
 
-    if (chain.tickId) clearInterval(chain.tickId);
-    chain.tickId = setInterval(() => {
-      if (!chain.running) return;
+    const elapsed = (Date.now() - chain.startAt) / 1000;
+    chain.elapsed = elapsed;
 
-      const left = (chain.endsAt - Date.now()) / 1000;
-      chain.left = left;
-
-      ui.timer.textContent = fmtTime(left);
-
-      if (left <= 0) chainFinish("time");
-    }, 120);
-  } else {
-    chain.startAt = Date.now();
-
-    if (chain.tickId) clearInterval(chain.tickId);
-    chain.tickId = setInterval(() => {
-      if (!chain.running) return;
-
-      const elapsed = (Date.now() - chain.startAt) / 1000;
-      chain.elapsed = elapsed;
-
-      ui.timer.textContent = fmtTime(elapsed);
-    }, 120);
-  }
+    ui.timer.textContent = fmtTime(elapsed);
+  }, 120);
 }
 
 function isWordAttempted(e) {
@@ -1735,89 +1684,27 @@ function isWordCorrect(e) {
 
 function scoreChain() {
   const entries = play.entries || [];
-  const correct = { easy: 0, medium: 0, hard: 0 };
-  const attempted = { easy: 0, medium: 0, hard: 0 };
-
-  for (const e of entries) {
-    const d = e.diff || "easy";
-    if (isWordAttempted(e)) attempted[d] = (attempted[d] || 0) + 1;
-    if (isWordCorrect(e)) correct[d] = (correct[d] || 0) + 1;
-  }
-
-  const ptsEasy = (correct.easy || 0) * (DIFF_POINTS.easy || 0);
-  const ptsMed = (correct.medium || 0) * (DIFF_POINTS.medium || 0);
-  const ptsHard = (correct.hard || 0) * (DIFF_POINTS.hard || 0);
-
-  return { correct, attempted, ptsEasy, ptsMed, ptsHard, baseScore: ptsEasy + ptsMed + ptsHard };
+  const correct = entries.filter(isWordCorrect).length;
+  const attempted = entries.filter(isWordAttempted).length;
+  return { correct, attempted };
 }
 
 function openChainResults(stats, reason) {
   const r = ensureChainResults();
   r.wrap.classList.add("is-open");
-  const p = puzzles[pIdx];
-  const isTimed = !!(p?.timedMode ?? true);
-
-  if (!isTimed) {
-    const tSec = Math.max(0, Math.floor(chain.lastFinishElapsedSec || 0));
-    r.title.textContent = "Solved!";
-    r.scoreLine.textContent = `Time: ${fmtTime(tSec)}`;
-    r.breakdown.innerHTML = "";
-    r.cClose.focus();
-    return;
-  }
-
-
-  const didSolve = reason === "solved";
-
-  // time bonus only if solved early
-  let bonusSec = 0;
-  let bonusPts = 0;
-  if (didSolve) {
-    bonusSec = Math.max(0, Math.floor(chain.lastFinishLeftSec || 0));
-    bonusPts = roundBonus(bonusSec * TIME_BONUS_FACTOR);
-  }
-
-  const totalScore = stats.baseScore + bonusPts;
-
-  r.title.textContent = didSolve ? "Solved!" : "Time!";
-  r.scoreLine.textContent = `Score: ${totalScore}pts`;
-
-  // formatted “addition table” style
-  // (uses your current DIFF_POINTS so it always matches reality)
-  const lines = [
-    `Easy: ${stats.correct.easy || 0} -- ${stats.ptsEasy}pts`,
-    `Medium: ${stats.correct.medium || 0} -- ${stats.ptsMed}pts`,
-    `Hard: ${stats.correct.hard || 0} -- ${stats.ptsHard}pts`,
-  ];
-
-  if (didSolve) {
-    lines.push(`time bonus: -${bonusSec}s -- ${bonusPts}pts`);
-  }
-
-  lines.push(`---`);
-  lines.push(`Total score: ${totalScore}pts`);
-
-  r.breakdown.innerHTML = `<div style="white-space:pre-line">${lines.join("\n")}</div>`;
+  const tSec = Math.max(0, Math.floor(chain.lastFinishElapsedSec || 0));
+  r.title.textContent = "Solved!";
+  r.scoreLine.textContent = `Time: ${fmtTime(tSec)}`;
+  r.breakdown.innerHTML = "";
   r.cClose.focus();
 }
 
 function chainFinish(reason = "time") {
   if (play.mode !== MODE.CHAIN) return;
   if (play.done) return;
-  const p = puzzles[pIdx];
-  const isTimed = !!(p?.timedMode ?? true);
-
-
-  // capture remaining time BEFORE stopping timer
-  // capture stats BEFORE stopping timer
   if (reason === "solved" && chain.started) {
-    if (isTimed) {
-      chain.lastFinishLeftSec = Math.max(0, (chain.endsAt - Date.now()) / 1000);
-      chain.lastFinishElapsedSec = 0;
-    } else {
-      chain.lastFinishElapsedSec = Math.max(0, (Date.now() - chain.startAt) / 1000);
-      chain.lastFinishLeftSec = 0;
-    }
+    chain.lastFinishElapsedSec = Math.max(0, (Date.now() - chain.startAt) / 1000);
+    chain.lastFinishLeftSec = 0;
   } else {
     chain.lastFinishLeftSec = 0;
     chain.lastFinishElapsedSec = 0;
@@ -1878,9 +1765,7 @@ function updateLockedWordUI() {
 
 function chainApplyLocksIfEnabled() {
   const p = puzzles[pIdx];
-  const lockOnCorrect = !!p.lockCorrectWords;
-
-  if (play.mode !== MODE.CHAIN || !lockOnCorrect) return;
+  if (play.mode !== MODE.CHAIN) return;
 
   let changed = false;
 
@@ -1941,12 +1826,8 @@ function requestChainClues() {
 }
 
 function isEntryUnsolvedForClues(e) {
-  const p = puzzles[pIdx];
-  const lockOnCorrect = !!p.lockCorrectWords;
-  // If lock behavior is on, “unsolved” == “not locked”
-  if (lockOnCorrect) return !play.lockedEntries.has(e.eIdx);
-  // Otherwise, “unsolved” means letters don’t match yet
-  return !isWordCorrect(e);
+  // Lock is always on in chain mode; unsolved == not locked
+  return !play.lockedEntries.has(e.eIdx);
 }
 
 // Candidates on current cursor cell, ordered:
@@ -2072,8 +1953,7 @@ function updateChainClues() {
   finalList.forEach((e, pos) => {
     let el = existing.get(e.eIdx);
 
-    const diffTag =
-      e.diff === "easy" ? "E" : e.diff === "medium" ? "M" : e.diff === "hard" ? "H" : "";
+    const diffTag = "";
 
     if (!el) {
       el = document.createElement("button");
@@ -2083,7 +1963,7 @@ function updateChainClues() {
       el.innerHTML = `
         <span class="sw" style="--color:var(${e.color})"></span>
         <span class="text-system-semibold-sm">${escapeHtml(e.clue)}</span>
-        ${diffTag ? `<span class="diffTag">${diffTag}</span>` : ``}
+        
       `;
       wrap.appendChild(el);
       requestAnimationFrame(() => el.classList.add("is-in"));
@@ -2091,7 +1971,7 @@ function updateChainClues() {
       el.innerHTML = `
         <span class="sw" style="--color:var(${e.color})"></span>
         <span class="text-system-semibold-sm">${escapeHtml(e.clue)}</span>
-        ${diffTag ? `<span class="diffTag">${diffTag}</span>` : ``}
+        
       `;
     }
 
@@ -2263,18 +2143,8 @@ function shareResult({ mode }) {
   let msg = `Overlap | ${dateStr}`;
 
   if (mode === MODE.CHAIN) {
-    const p = puzzles[pIdx];
-    const isTimed = !!(p?.timedMode ?? true);
-    const limit = Math.max(10, Math.floor(+p?.timeLimit || DEFAULT_CHAIN_TIME));
-    let timeText = "";
-    if (isTimed) {
-      const left = Math.max(0, +chain.lastFinishLeftSec || 0);
-      const used = Math.max(0, limit - left);
-      timeText = fmtTime(used);
-    } else {
-      const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
-      timeText = fmtTime(elapsed);
-    }
+    const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
+    const timeText = fmtTime(elapsed);
     if (timeText) msg += `\nI solved today's puzzle in ${timeText}`;
   }
 
@@ -2546,9 +2416,6 @@ function onKey(e) {
 // ---- Builder UI injection (mode + chain fields) ----
 let bModeWrap = null;
 let bModeSel = null;
-let bTimeInp = null;
-let bLockChk = null;
-let bTimedChk = null;
 let bPaletteSel = null;
 
 function ensureBuilderModeUI() {
@@ -2570,68 +2437,24 @@ function ensureBuilderModeUI() {
       <label class="lab" for="pPalette">Palette</label>
       <select class="sel" id="pPalette"></select>
     </div>
-
-    <div id="chainFields" style="margin-top:10px">
-      <label class="lab" for="pTimeLimit">Time limit (seconds)</label>
-      <input class="ti" id="pTimeLimit" type="number" inputmode="numeric" min="10" step="5" />
-
-      <div style="height:10px"></div>
-      <label class="lab" style="display:flex;gap:10px;align-items:center">
-        <input id="pLockCorrect" type="checkbox" />
-        <span>Mark correct words (lock + fade + hide clue)</span>
-      </label>
-      <div style="height:10px"></div>
-      <label class="lab" style="display:flex;gap:10px;align-items:center">
-        <input id="pTimedMode" type="checkbox" />
-        <span>Timed mode (countdown + score)</span>
-      </label>
-
-    </div>
   `;
 
   els.pTitle.insertAdjacentElement("afterend", wrap);
 
   bModeWrap = wrap;
   bModeSel = wrap.querySelector("#pMode");
-  bTimeInp = wrap.querySelector("#pTimeLimit");
-  bLockChk = wrap.querySelector("#pLockCorrect");
-    bTimedChk = wrap.querySelector("#pTimedMode");
   bPaletteSel = wrap.querySelector("#pPalette");
-
-  const chainFields = wrap.querySelector("#chainFields");
-
-  const setVis = (isChain) => {
-    chainFields.style.display = isChain ? "" : "none";
-  };
-  wrap._setVis = setVis;
 
   bModeSel.addEventListener("change", () => {
     puzzles[pIdx].type = bModeSel.value;
 
     if (puzzles[pIdx].type === MODE.CHAIN) {
-      puzzles[pIdx].timeLimit = Math.max(10, Math.floor(+puzzles[pIdx].timeLimit || DEFAULT_CHAIN_TIME));
-      puzzles[pIdx].lockCorrectWords = !!(puzzles[pIdx].lockCorrectWords ?? true);
-      puzzles[pIdx].timedMode = !!(puzzles[pIdx].timedMode ?? true);
+      puzzles[pIdx].lockCorrectWords = true;
       puzzles[pIdx].words = (puzzles[pIdx].words || []).map((w) => normWord(w, MODE.CHAIN));
     }
 
     setDirty(true);
     syncBuilder();
-  });
-
-  bTimeInp.addEventListener("input", () => {
-    puzzles[pIdx].timeLimit = Math.max(10, Math.floor(+bTimeInp.value || DEFAULT_CHAIN_TIME));
-    setDirty(true);
-  });
-
-  bLockChk.addEventListener("change", () => {
-    puzzles[pIdx].lockCorrectWords = !!bLockChk.checked;
-    setDirty(true);
-  });
-
-    bTimedChk.addEventListener("change", () => {
-    puzzles[pIdx].timedMode = !!bTimedChk.checked;
-    setDirty(true);
   });
 
   bPaletteSel.addEventListener("change", () => {
@@ -2661,9 +2484,6 @@ function syncBuilder() {
   const chainMode = isChainPuzzle(p);
 
   if (bModeSel) bModeSel.value = p.type || MODE.OVERLAP;
-  if (bTimeInp) bTimeInp.value = String(p.timeLimit || DEFAULT_CHAIN_TIME);
-  if (bLockChk) bLockChk.checked = !!(p.lockCorrectWords ?? true);
- if (bTimedChk) bTimedChk.checked = !!(p.timedMode ?? true);
   if (bPaletteSel) {
     const opts = PALETTES.map(
       (pal) => `<option value="${pal.id}" ${pal.id === p.palette ? "selected" : ""}>${escapeHtml(pal.label)}</option>`
@@ -2671,7 +2491,6 @@ function syncBuilder() {
     bPaletteSel.innerHTML = opts;
     bPaletteSel.value = p.palette;
   }
-  if (bModeWrap && bModeWrap._setVis) bModeWrap._setVis(chainMode);
 
   renderRows();
   renderPreview();
@@ -2694,7 +2513,7 @@ function setStatus(m) {
 function renderRows() {
   const p = puzzles[pIdx];
   const chainMode = isChainPuzzle(p);
-  const timedChain = chainMode && chainIsTimed(p);
+  const timedChain = false;
 
 
   const ws = p.words || [];
@@ -2704,9 +2523,6 @@ function renderRows() {
     .map((o, pos) => {
       const i = o.i;
       const w = ws[i];
-
-      const diff = timedChain ? String(w.diff || "easy") : null;
-      const diffOpts = DIFFS.map(([lab, val]) => `<option value="${val}" ${diff === val ? "selected" : ""}>${lab}</option>`).join("");
 
       const heightOpts = HEIGHTS.map(([lab, val]) => `<option value="${val}" ${w.height === val ? "selected" : ""}>${lab}</option>`).join("");
       const swColor = paletteColorForWord(p, i);
@@ -2720,12 +2536,12 @@ function renderRows() {
             </div>
             <div class="right"><button class="pill" type="button" data-act="rm">Remove</button></div>
           </div>
-          <div class="grid5">
-            <div class="full">
-              <label class="lab">Clue</label>
-              <input class="mi" data-f="clue" value="${escapeAttr(w.clue || "")}" />
-            </div>
-            <div class="full">
+            <div class="grid5">
+              <div class="full">
+                <label class="lab">Clue</label>
+                <input class="mi" data-f="clue" value="${escapeAttr(w.clue || "")}" />
+              </div>
+              <div class="full">
               <label class="lab">Answer</label>
               <input class="mi" data-f="answer" value="${escapeAttr(w.answer || "")}" />
             </div>
@@ -3032,7 +2848,7 @@ els.wAdd.addEventListener("click", () => {
     clue: "Clue",
     answer: "WORD",
     start: nextStart,
-    color: chainMode ? DIFF_COLORS.easy[0] : "--c-red",
+    color: "--c-red",
     height: "full",
     ...(chainMode ? { diff: "easy" } : {}),
   });
