@@ -675,10 +675,6 @@ function updateSliderUI() {
   updateThumbFromScroll();
 }
 
-// ✅ Time bonus config (edit freely)
-// bonusPoints = floor(remainingSeconds * TIME_BONUS_FACTOR)
-const TIME_BONUS_FACTOR = 0.5;
-const TIME_BONUS_ROUND = "floor"; // "floor" | "round" | "ceil"
 const CHAIN_CLUE_CAP = 6;
 
 // ---- Defaults loading (robust + cache-bust) ----
@@ -716,6 +712,8 @@ const els = {
   sNext: $("#sNext"),
   sShare: $("#sShare"),
   slider: $(".game-slider"),
+  nextPuzzleBtn: $("#nextPuzzleBtn"),
+  puzzleActions: document.querySelector(".puzzle-actions"),
   pSel: $("#pSel"),
   pNew: $("#pNew"),
   pDel: $("#pDel"),
@@ -807,7 +805,6 @@ const tr = (w) => {
 };
 
 const isChainPuzzle = (p) => String(p?.type || MODE.OVERLAP) === MODE.CHAIN;
-const chainIsTimed = () => false;
 
 const inferDiffFromColor = () => "easy";
 
@@ -843,13 +840,6 @@ const normPuzzle = (p) => {
     out.lockCorrectWords = true;
   }
   return out;
-};
-
-const roundBonus = (n) => {
-  const v = Math.max(0, n);
-  if (TIME_BONUS_ROUND === "ceil") return Math.ceil(v);
-  if (TIME_BONUS_ROUND === "round") return Math.round(v);
-  return Math.floor(v);
 };
 
 // ---- State ----
@@ -1087,7 +1077,6 @@ function noteHardwareKeyboard() {
 // ---- Model ----
 function computed(p) {
   const type = String(p?.type || MODE.OVERLAP);
-  const timedChain = false;
 
   const entries = (p.words || [])
     .map((w, rawIdx) => {
@@ -1391,6 +1380,27 @@ function clearSelection() {
   updateSelectedWordUI();
 }
 
+// ---- UI visibility helpers ----
+function updatePlayControlsVisibility() {
+  if (!els.reset || !els.reveal) return;
+  // Only gate in play/overlap mode; otherwise leave visible.
+  if (play.mode !== MODE.OVERLAP || currentView !== VIEW.PLAY) {
+    els.reset.style.display = "";
+    els.reveal.style.display = "";
+    if (els.nextPuzzleBtn) els.nextPuzzleBtn.style.display = "none";
+    return;
+  }
+
+  const hasInput = Array.isArray(play.usr) && play.usr.some(Boolean);
+  const solved = !!play.done;
+
+  els.reveal.style.display = solved ? "none" : "";
+  els.reset.style.display = solved || (hasInput && !solved) ? "" : "none";
+  if (els.nextPuzzleBtn) {
+    els.nextPuzzleBtn.style.display = solved ? "" : "none";
+  }
+}
+
 function maybeClearSelectionOnCursorMove() {
   if (selectedEntry == null) return;
   const e = play.entries.find((x) => x.eIdx === selectedEntry);
@@ -1449,7 +1459,9 @@ const chain = {
   elapsed: 0,             // untimed: seconds elapsed
   tickId: 0,
   lastFinishLeftSec: 0,   // timed bonus calc
-  lastFinishElapsedSec: 0 // untimed results
+  lastFinishElapsedSec: 0, // untimed results
+  unsolvedCount: 0,
+  lastFinishReason: "idle",
 };
 
 
@@ -1457,6 +1469,32 @@ let chainUI = null;
 let chainResults = null;
 
 const CHAIN_UI = { IDLE: "idle", RUNNING: "running", PAUSED: "paused", DONE: "done" };
+
+// Button/controls visibility
+function updateResetRevealVisibility(stateOverride) {
+  if (!els.reset || !els.reveal) return;
+  if (play.mode !== MODE.CHAIN) {
+    els.reset.style.display = "";
+    els.reveal.style.display = "";
+    return;
+  }
+  const state = stateOverride || document.body.dataset.chainState || CHAIN_UI.IDLE;
+  const show = state === CHAIN_UI.RUNNING || state === CHAIN_UI.PAUSED;
+  els.reset.style.display = show ? "" : "none";
+  els.reveal.style.display = show ? "" : "none";
+}
+
+function updatePuzzleActionsVisibility(stateOverride) {
+  const wrap = els.puzzleActions;
+  if (!wrap) return;
+  if (play.mode !== MODE.CHAIN) {
+    wrap.style.display = "";
+    return;
+  }
+  const state = stateOverride || document.body.dataset.chainState || CHAIN_UI.IDLE;
+  const show = state === CHAIN_UI.RUNNING || state === CHAIN_UI.PAUSED;
+  wrap.style.display = show ? "" : "none";
+}
 
 
 function chainSetUIState(state, ui = ensureChainUI()) {
@@ -1473,6 +1511,9 @@ ui.startBtn.textContent =
   state === CHAIN_UI.PAUSED ? "Resume" :
   "Reset";
 
+  // toggle reset/reveal visibility in chain mode
+  updateResetRevealVisibility(state);
+  updatePuzzleActionsVisibility(state);
 }
 
 function chainPause() {
@@ -1643,6 +1684,8 @@ function chainStopTimer() {
 
   chain.left = 0;
   chain.lastFinishLeftSec = 0;
+  chain.unsolvedCount = 0;
+  chain.lastFinishReason = "idle";
   if (chain.tickId) {
     clearInterval(chain.tickId);
     chain.tickId = 0;
@@ -1748,19 +1791,21 @@ function openChainResults(stats, reason) {
   const tSec = Math.max(0, Math.floor(chain.lastFinishElapsedSec || 0));
   r.title.textContent = "Solved!";
   r.scoreLine.textContent = `Time: ${fmtTime(tSec)}`;
-  r.breakdown.innerHTML = "";
+  r.breakdown.textContent = chain.unsolvedCount > 0 ? `Unsolved words: ${chain.unsolvedCount}` : "";
   r.cClose.focus();
 }
 
-function chainFinish(reason = "time") {
+function chainFinish(reason = "time", opts = {}) {
   if (play.mode !== MODE.CHAIN) return;
   if (play.done) return;
+  const unsolved = Math.max(0, opts.unsolved ?? 0);
   if (reason === "solved" && chain.started) {
     chain.lastFinishElapsedSec = Math.max(0, (Date.now() - chain.startAt) / 1000);
     chain.lastFinishLeftSec = 0;
   } else {
     chain.lastFinishLeftSec = 0;
-    chain.lastFinishElapsedSec = 0;
+    const elapsed = chain.startAt ? (Date.now() - chain.startAt) / 1000 : chain.elapsed || 0;
+    chain.lastFinishElapsedSec = Math.max(0, elapsed);
   }
 
   chain.running = false;
@@ -1770,6 +1815,8 @@ function chainFinish(reason = "time") {
   }
 
   play.done = true;
+  chain.unsolvedCount = unsolved;
+  chain.lastFinishReason = reason;
   chainSetUIState(CHAIN_UI.DONE);
   updatePlayUI();
 
@@ -2046,16 +2093,19 @@ function updatePlayUI() {
   });
   updateSelectedWordUI();
   updateSliderUI();
+  updatePlayControlsVisibility();
 }
 
-function setAt(i, { behavior } = {}) {
+function setAt(i, { behavior, noScroll } = {}) {
   play.at = clamp(i, 0, play.n - 1);
   updatePlayUI();
-  const bh = behavior || (IS_TOUCH ? "smooth" : "auto");
-  keepActiveCellInView(
-    typeof bh === "object" ? bh :
-    bh === "smooth" ? { behavior: "smooth", delta: 1 } : bh
-  );
+  if (!noScroll) {
+    const bh = behavior || (IS_TOUCH ? "smooth" : "auto");
+    keepActiveCellInView(
+      typeof bh === "object" ? bh :
+      bh === "smooth" ? { behavior: "smooth", delta: 1 } : bh
+    );
+  }
 
   maybeClearSelectionOnCursorMove();
   if (play.mode === MODE.CHAIN) requestChainClues();
@@ -2084,6 +2134,7 @@ function checkSolvedOverlapOnly() {
   if (play.usr.every((ch, i) => ch === play.exp[i])) {
     play.done = true;
     openSuccess();
+    updatePlayControlsVisibility();
   }
 }
 
@@ -2157,6 +2208,11 @@ function back() {
   requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(play.at - prevAt) || 1 });
 }
 
+function countUnsolvedWords() {
+  if (!play.entries?.length) return 0;
+  return play.entries.filter((e) => !isWordCorrect(e)).length;
+}
+
 function move(d, opts = {}) {
   if (!chainInputAllowed()) return;
 
@@ -2208,6 +2264,9 @@ function shareResult({ mode }) {
     const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
     const timeText = fmtTime(elapsed);
     if (timeText) msg += `\nI solved today's puzzle in ${timeText}`;
+    if (chain.unsolvedCount > 0 && chain.lastFinishReason !== "solved") {
+      msg += ` with ${chain.unsolvedCount} unsolved words.`;
+    }
   }
 
   const payload = { title: "Overlap", text: msg, url: baseUrl };
@@ -2250,14 +2309,24 @@ function resetPlay() {
     setInlineCluesHiddenUntilChainStart();
   }
 
-  keepActiveCellInView("auto");
+  cancelSmoothFollow();
+  if (els.gridScroll) els.gridScroll.scrollLeft = 0;
+  setAt(0, { behavior: "none", noScroll: true });
 }
 
 function revealPlay() {
+  if (play.mode === MODE.CHAIN) {
+    const unsolved = countUnsolvedWords();
+    play.usr = play.exp.slice();
+    chainFinish("reveal", { unsolved });
+    return;
+  }
+
   play.usr = play.exp.slice();
   play.done = true;
   updatePlayUI();
   closeSuccess();
+  updatePlayControlsVisibility();
 }
 
 // ---- Clue click behavior (both modes) ----
@@ -2293,9 +2362,6 @@ function onGridCellClick(e) {
   }
 
   setAt(i, { behavior: "smooth" });
-
-  // const maybe = entryAtIndex(i);
-  // if (maybe) selectEntry(maybe.eIdx);
 }
 
 // ---- Load puzzle ----
@@ -2304,6 +2370,7 @@ function loadPuzzle(i) {
   closeChainResults();
   chainStopTimer();
   bindGridScrollCancels();
+  cancelSmoothFollow();
 
   if (!puzzles.length) return;
 
@@ -2346,16 +2413,9 @@ function loadPuzzle(i) {
     chainResetTimer();
     setInlineCluesHiddenUntilChainStart();
 
-    // hide reveal button in chain mode
-    // if (els.reveal) els.reveal.style.display = "none";
-    // if (els.helper) els.helper.style.display = "none";
-    // if (els.meta) els.meta.style.display = "none";
-
   } else {
     if (chainUI) chainUI.hud.hidden = true;
     if (els.reveal) els.reveal.style.display = "";
-    // if (els.helper) els.helper.style.display = "";
-    // if (els.meta) els.meta.style.display = "";
 
 
     els.legend.hidden = false;
@@ -2370,6 +2430,7 @@ function loadPuzzle(i) {
       )
       .join("");
   }
+  updateResetRevealVisibility();
 
   // meta count should reflect current view list
   const viewForMeta = currentView === VIEW.BUILD ? (isChainPuzzle(p) ? VIEW.CHAIN : VIEW.PLAY) : currentView;
@@ -2386,11 +2447,14 @@ function loadPuzzle(i) {
 
   updatePlayUI();
   applyClueMode();
+  updatePlayControlsVisibility();
+  updatePuzzleActionsVisibility();
 
   if (els.gridScroll) els.gridScroll.scrollLeft = 0;
 
   syncBuilder();
   setDirty(false);
+  setAt(0, { behavior: "none", noScroll: true });
 }
 
 // ---- Tabs ----
@@ -2427,6 +2491,10 @@ function setTab(which) {
   } else {
     chainStopTimer();
   }
+
+  updateResetRevealVisibility();
+  updatePlayControlsVisibility();
+  updatePuzzleActionsVisibility();
 }
 
 
@@ -2585,7 +2653,6 @@ function setStatus(m) {
 function renderRows() {
   const p = puzzles[pIdx];
   const chainMode = isChainPuzzle(p);
-  const timedChain = false;
 
 
   const ws = p.words || [];
@@ -2621,17 +2688,6 @@ function renderRows() {
               <label class="lab">Start</label>
               <input class="mi" data-f="start" inputmode="numeric" value="${escapeAttr(String(w.start ?? 1))}" />
             </div>
-
-            ${
-              timedChain
-                ? `
-            <div>
-              <label class="lab">Difficulty</label>
-              <select class="ms" data-f="diff">${diffOpts}</select>
-            </div>`
-                : ""
-            }
-
 
             <div>
               <label class="lab">Height</label>
@@ -2829,12 +2885,15 @@ els.reset.addEventListener("click", () => {
   resetPlay();
   if (play.mode === MODE.CHAIN) chainForceIdleZero();
 });
-els.reveal.addEventListener("click", () => {
-  markInteracted();
-  revealPlay();
-  focusForTyping();
-  if (play.mode === MODE.CHAIN) chainShowResetWithClues();
-});
+  els.reveal.addEventListener("click", () => {
+    markInteracted();
+    revealPlay();
+    focusForTyping();
+  });
+  els.nextPuzzleBtn?.addEventListener("click", () => {
+    markInteracted();
+    loadByViewOffset(1);
+  });
 
 // Success modal (Overlap)
 els.success.addEventListener("click", (e) => {

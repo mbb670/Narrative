@@ -33,10 +33,10 @@
     <div class="stage" id="stage" tabindex="0" role="application" aria-label="Overlap puzzle">
       <div class="game-data">
         <div class="puzzle-cycle">
-            <button class="pill text-system-semibold-sm" id="prev" type="button"><span>Prev</span></button>
-        <div class="meta text-system-semibold-sm" id="meta"></div>
+          <button class="pill text-system-semibold-sm" id="prev" type="button"><span>Prev</span></button>
+          <div class="meta text-system-semibold-sm" id="meta"></div>
 
-        <button class="pill text-system-semibold-sm" id="next" type="button"><span>Next</span></button>
+          <button class="pill text-system-semibold-sm" id="next" type="button"><span>Next</span></button>
         </div>
       </div>
 
@@ -50,15 +50,17 @@
       <div class="legend" id="legend" aria-label="Clues"></div>
       <div class="game-slider"></div>
       <div class="helper">
-                 <div class="chainHud" hidden>
+        <div class="chainHud" hidden>
           <button class="btn text-system-semibold-sm" id="chainStartBtn" type="button">Start</button>
           <div class="chainTimer text-system-semibold-sm">00:00</div>
         </div>
+        <div class="puzzle-actions">
+          <button class="btn text-system-semibold-sm" id="reset" type="button">Reset</button>
+          <button class="btn text-system-semibold-sm" id="reveal" type="button">Reveal</button>
+          <button class="btn primary text-system-semibold-sm" id="nextPuzzleBtn" type="button" style="display:none">Next
+            puzzle</button>
 
-        <button class="btn text-system-semibold-sm" id="reset" type="button">Reset</button>
-        <button class="btn text-system-semibold-sm" id="reveal" type="button">Reveal</button>
-
-
+        </div>
       </div>
     </div>
   </section>
@@ -112,7 +114,7 @@
 
   <div class="keyboard"></div>
   <div class="credit text-system-regular-sm">
-    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.93
+    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.94
   </div>
   </main>
   <!-- Success -->
