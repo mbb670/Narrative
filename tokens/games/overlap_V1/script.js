@@ -735,6 +735,18 @@ const els = {
 
 };
 
+let _gridScrollBound = false;
+
+function bindGridScrollCancels() {
+  if (_gridScrollBound || !els.gridScroll) return;
+  _gridScrollBound = true;
+  const cancel = () => cancelSmoothFollow();
+  const sc = els.gridScroll;
+  ["pointerdown", "wheel", "touchstart"].forEach((ev) => {
+    sc.addEventListener(ev, cancel, { passive: true });
+  });
+}
+
 // ---- Storage ----
 const store = {
   load() {
@@ -1132,6 +1144,9 @@ function setCols(n) {
 function renderGrid(target, model, clickable) {
   target.innerHTML = "";
 
+  // Track which entries cover each cell (for ARIA + sizing)
+  const cellWords = Array.from({ length: model.total }, () => []);
+
   // Ranges (explicit grid placement)
   for (const e of model.entries) {
     const d = document.createElement("div");
@@ -1143,6 +1158,10 @@ function renderGrid(target, model, clickable) {
     // keep existing vars (safe if other CSS uses them)
     d.style.setProperty("--start", e.start);
     d.style.setProperty("--len", e.len);
+
+    for (let i = e.start; i < e.start + e.len && i < model.total; i++) {
+      cellWords[i].push(e);
+    }
 
     // NEW: grid lines are 1-based
     d.style.setProperty("--gs", String(e.start + 1));
@@ -1176,11 +1195,16 @@ function renderGrid(target, model, clickable) {
     b.dataset.i = i;
     b.disabled = !clickable;
     b.innerHTML = '<span class="num text-uppercase-semibold-md"></span><span class="letter"></span>';
+    b.setAttribute("aria-label", cellAriaLabel(i, cellWords[i]));
 
     // Explicit column placement (1-based)
     b.style.gridColumnStart = String(i + 1);
 
     target.appendChild(b);
+  }
+
+  if (target === els.grid) {
+    play.cellWords = cellWords;
   }
 }
 
@@ -1213,11 +1237,15 @@ const SCROLL_FOLLOW_EPS = 0.75; // stop threshold (px)
 let _scrollFollowRaf = 0;
 let _scrollFollowEl = null;
 let _scrollFollowTarget = 0;
+let _scrollFollowK = SCROLL_FOLLOW_K;
+let _scrollFollowEps = SCROLL_FOLLOW_EPS;
 
 
-function smoothFollowScrollLeft(sc, target) {
+function smoothFollowScrollLeft(sc, target, opts = {}) {
   _scrollFollowEl = sc;
   _scrollFollowTarget = target;
+  _scrollFollowK = opts.k ?? SCROLL_FOLLOW_K;
+  _scrollFollowEps = opts.eps ?? SCROLL_FOLLOW_EPS;
 
   if (_scrollFollowRaf) return;
 
@@ -1230,14 +1258,14 @@ function smoothFollowScrollLeft(sc, target) {
     const delta = _scrollFollowTarget - cur;
 
     // close enough: snap + stop
-    if (Math.abs(delta) <= SCROLL_FOLLOW_EPS) {
+    if (Math.abs(delta) <= _scrollFollowEps) {
       el.scrollLeft = _scrollFollowTarget;
       _scrollFollowRaf = 0;
       return;
     }
 
     // critically-damped-ish follow
-    el.scrollLeft = cur + delta * SCROLL_FOLLOW_K;
+    el.scrollLeft = cur + delta * _scrollFollowK;
     _scrollFollowRaf = requestAnimationFrame(tick);
   };
 
@@ -1258,6 +1286,12 @@ function keepCellInView(idx, behavior = IS_TOUCH ? "smooth" : "auto") {
   if (!sc || sc.scrollWidth <= sc.clientWidth) return;
   if (IS_TOUCH && _isUserPanning) return;
 
+  let beh = behavior;
+  let delta = 1;
+  if (typeof behavior === "object") {
+    beh = behavior.behavior ?? (IS_TOUCH ? "smooth" : "auto");
+    delta = behavior.delta ?? 1;
+  }
 
   const cell = els.grid.querySelector(`.cell[data-i="${idx}"]`);
   if (!cell) return;
@@ -1273,8 +1307,10 @@ function keepCellInView(idx, behavior = IS_TOUCH ? "smooth" : "auto") {
   if (Math.abs(sc.scrollLeft - target) < 1.5) return;
 
   // Avoid native smooth jitter on rapid calls
-  if (behavior === "smooth") {
-    smoothFollowScrollLeft(sc, target);
+  if (beh === "smooth") {
+    const k = delta > 1 ? 0.1 : 0.18; // slower ease on single and multi
+    const eps = delta > 1 ? 0.5 : SCROLL_FOLLOW_EPS;
+    smoothFollowScrollLeft(sc, target, { k, eps });
   } else {
     sc.scrollLeft = target;
   }
@@ -1320,6 +1356,23 @@ function scrollToWordStart(e, behavior = IS_TOUCH ? "smooth" : "auto") {
 // ---- Selection highlight ----
 function entryContainsIndex(e, i) {
   return i >= e.start && i < e.start + e.len;
+}
+
+function cellAriaLabel(idx, words = []) {
+  if (!words || !words.length) return `Cell ${idx + 1}`;
+
+  const sorted = [...words].sort((a, b) => a.start - b.start || a.eIdx - b.eIdx);
+  const parts = [];
+
+  for (const w of sorted) {
+    const pos = idx - w.start + 1;
+    const status =
+      play.mode === MODE.CHAIN ? (play.lockedEntries.has(w.eIdx) ? "solved" : "unsolved") : "";
+    const clue = w.clue || "Clue";
+    parts.push(`${clue}, cell ${pos} of ${w.len}${status ? `, ${status}` : ""}`);
+  }
+
+  return parts.join("; ");
 }
 
 function updateSelectedWordUI() {
@@ -1989,6 +2042,7 @@ function updatePlayUI() {
     c.querySelector(".num").textContent = i + 1;
     c.querySelector(".letter").textContent = play.usr[i] || "";
     c.classList.toggle("is-active", i === play.at && !play.done);
+    c.setAttribute("aria-label", cellAriaLabel(i, play.cellWords?.[i]));
   });
   updateSelectedWordUI();
   updateSliderUI();
@@ -1997,7 +2051,11 @@ function updatePlayUI() {
 function setAt(i, { behavior } = {}) {
   play.at = clamp(i, 0, play.n - 1);
   updatePlayUI();
-  keepActiveCellInView(behavior || (IS_TOUCH ? "smooth" : "auto"));
+  const bh = behavior || (IS_TOUCH ? "smooth" : "auto");
+  keepActiveCellInView(
+    typeof bh === "object" ? bh :
+    bh === "smooth" ? { behavior: "smooth", delta: 1 } : bh
+  );
 
   maybeClearSelectionOnCursorMove();
   if (play.mode === MODE.CHAIN) requestChainClues();
@@ -2039,6 +2097,7 @@ function write(ch) {
     play.at = next;
   }
 
+  const prevAt = play.at;
   play.usr[play.at] = ch;
 
   // auto-advance (skip locked)
@@ -2052,14 +2111,14 @@ function write(ch) {
   if (play.mode === MODE.CHAIN) {
     chainApplyLocksIfEnabled();
     updatePlayUI();
-    requestKeepActiveCellInView();
+    requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(nextAt - prevAt) || 1 });
     requestChainClues();
     chainMaybeFinishIfSolved();
     return;
   }
 
   updatePlayUI();
-  requestKeepActiveCellInView();
+  requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(nextAt - prevAt) || 1 });
   checkSolvedOverlapOnly();
 }
 
@@ -2073,6 +2132,7 @@ function back() {
     play.at = prev;
   }
 
+  const prevAt = play.at;
   if (play.usr[play.at]) {
     play.usr[play.at] = "";
   } else {
@@ -2088,16 +2148,16 @@ function back() {
 
   if (play.mode === MODE.CHAIN) {
     updatePlayUI();
-    requestKeepActiveCellInView();
+    requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(play.at - prevAt) || 1 });
     requestChainClues();
     return;
   }
 
   updatePlayUI();
-  requestKeepActiveCellInView();
+  requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(play.at - prevAt) || 1 });
 }
 
-function move(d) {
+function move(d, opts = {}) {
   if (!chainInputAllowed()) return;
 
   let target = clamp(play.at + d, 0, play.n - 1);
@@ -2108,7 +2168,9 @@ function move(d) {
     if (nxt != null) target = nxt;
   }
 
-  setAt(target);
+  const delta = Math.abs(target - play.at) || 1;
+  const bh = opts.behavior || { behavior: "smooth", delta };
+  setAt(target, { behavior: bh });
 }
 
 // ---- Modals (Overlap) ----
@@ -2230,7 +2292,7 @@ function onGridCellClick(e) {
     chainStartNow();
   }
 
-  setAt(i);
+  setAt(i, { behavior: "smooth" });
 
   // const maybe = entryAtIndex(i);
   // if (maybe) selectEntry(maybe.eIdx);
@@ -2241,6 +2303,7 @@ function loadPuzzle(i) {
   closeSuccess();
   closeChainResults();
   chainStopTimer();
+  bindGridScrollCancels();
 
   if (!puzzles.length) return;
 
@@ -2390,8 +2453,6 @@ function onKey(e) {
   const t = e.target;
   if (t !== kb && isEditable(t)) return;
 
-  if (e.key === "Tab") return;
-
   if (e.key === "Backspace") {
     e.preventDefault();
     back();
@@ -2399,12 +2460,23 @@ function onKey(e) {
   }
   if (e.key === "ArrowLeft") {
     e.preventDefault();
-    move(-1);
+    move(-1, { behavior: { behavior: "smooth", delta: 1 } });
     return;
   }
   if (e.key === "ArrowRight") {
     e.preventDefault();
-    move(1);
+    move(1, { behavior: { behavior: "smooth", delta: 1 } });
+    return;
+  }
+  if (e.key === " " || e.code === "Space") {
+    e.preventDefault();
+    move(1, { behavior: { behavior: "smooth", delta: 1 } });
+    return;
+  }
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const dir = e.shiftKey ? -1 : 1;
+    move(dir, { behavior: { behavior: "smooth", delta: 1 } });
     return;
   }
   if (/^[a-zA-Z]$/.test(e.key)) {
