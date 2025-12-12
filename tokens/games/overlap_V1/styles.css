@@ -23,10 +23,11 @@
 
       /* --cell: clamp(72px, 8vw, 96px); */
       --cell: clamp(56px, 8vw, 96px);
+    --range-radius: var(--radius-relaxed) var(--radius-relaxed) 0 0;
 
 
       --grid-top-space: 32px;
-      --grid-letter-space: 96px;
+      --grid-letter-space: 120px;
       /* --grid-bottom-space: 16px; */
       --grid-bottom-space: 0px;
       --cell-letter-placement: 4/6;
@@ -434,6 +435,7 @@
       flex-grow: 1;
       place-content: center;
       scrollbar-width: none;
+      contain: paint;
   }
 
   .gridScroll::-webkit-scrollbar {
@@ -449,12 +451,18 @@
       width: calc(var(--cell)*var(--cols));
       margin: 0 auto;
       background: transparent;
-      box-shadow: inset 0 calc(var(--border-w) * -1) 0px 0px var(--grid-line), inset 0 var(--border-w) 0px 0px var(--grid-line);
+      box-shadow: 
+      inset 0 calc(var(--border-w) * -1) 0 0 var(--grid-line), 
+      inset 0 var(--border-w) 0 0 var(--grid-line), 
+      inset calc(var(--border-w) * -1) 0 0 0 var(--grid-line), 
+      inset var(--border-w) 0 0 0 var(--grid-line);
+      border-radius: var(--range-radius);
 
 
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
       touch-action: pan-x pan-y;
+      overflow: clip;
 
 
 
@@ -469,7 +477,7 @@
       grid-column: var(--gs) / var(--ge);
       display: grid;
       grid-template-rows: subgrid;
-      border-radius: var(--radius-relaxed) var(--radius-relaxed) 0 0;
+      border-radius:var(--range-radius);
 
       &.is-locked .rangeClue {
           opacity: 0.3;
@@ -482,7 +490,6 @@
           height: 100%;
           align-content: center;
           width: 100%;
-          /* transform: translateY(-100%); */
 
           .rangeClue-string {
               color: color-mix(in srgb, var(--color), var(--foreground-default) 80%);
@@ -495,7 +502,7 @@
 
               background-color: color-mix(in srgb, var(--color), var(--background-default) 70%);
 
-              border-radius: var(--radius-slight);
+              border-radius: var(--radius-full);
               margin: 10cqmin;
 
               /* margin-left: calc(var(--border-w) * -1);
@@ -569,6 +576,9 @@
 
       grid-row: 1/-1;
       container-type: size;
+     /* &:last-of-type {
+    box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(--border-w) * 0.5) 0px 0px 0px var(--grid-line)!important;
+  } */
 
 
       .letter {

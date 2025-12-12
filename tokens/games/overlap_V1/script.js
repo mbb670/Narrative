@@ -468,8 +468,8 @@ function buildSliderGeometry(runs) {
   d += `A ${firstH / 2} ${firstH / 2} 0 0 1 0 ${sliderTopFor(first.type)} Z`;
 
   // Mask stops (opaque where thick, transparent where thin) with feathered transitions
-  const FEATHER_L = Math.max(2, SLIDER_CFG.unit * 1.4); // earlier gray on entry
-  const FEATHER_R = Math.max(2, SLIDER_CFG.unit * 0.8); // shorter gray bleed exiting
+  const FEATHER_L = Math.max(1, SLIDER_CFG.unit * 2); // earlier gray on entry
+  const FEATHER_R = Math.max(2, SLIDER_CFG.unit * 1); // shorter gray bleed exiting
   const maskStops = [];
   const pushStop = (pos, opacity) => {
     const p = clamp(pos, 0, totalWidth);
