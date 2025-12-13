@@ -418,10 +418,10 @@
       align-items: center;
       gap: var(--spacing-x8);
       margin-top: var(--spacing-x12);
-  
+
       pointer-events: none;
-          position: sticky;
-          left:0;
+      position: sticky;
+      left: 0;
   }
 
   .toast {
@@ -438,7 +438,7 @@
       border-color: transparent;
       color: var(--foreground-alt);
       background: var(--background-strong);
-  
+
   }
 
   .toast.is-showing {
@@ -450,7 +450,7 @@
       border-color: var(--system-positive-default);
       color: var(--system-positive-strong);
       background: var(--system-positive-subtle);
-      
+
   }
 
   /* .toast-warning {
@@ -502,46 +502,93 @@
       display: grid;
       grid-template-rows: subgrid;
       border-radius: var(--range-radius);
+  }
 
-      &.is-locked .rangeClue {
-          opacity: 0.3;
-      }
+  .range.is-locked,
+  .range.is-locked+.rangeClue .rangeClue-string {
+      opacity: 0.35;
+      --color: var(--foreground-muted) !important;
+      pointer-events: none;
+  }
 
-      .rangeClue {
+  .rangeClue {
 
-          grid-row: 1/2;
-          container-type: size;
-          height: 100%;
-          align-content: center;
-          width: 100%;
+      grid-row: 1/2;
+      container-type: size;
+      height: 100%;
+      align-content: center;
+      width: 100%;
+      grid-column: var(--gs) / var(--ge);
+      z-index: 20;
+      pointer-events: none;
 
-          .rangeClue-string {
-              color: color-mix(in srgb, var(--color), var(--foreground-default) 80%);
-              font-size: var(--range-clue-size);
-              padding: var(--spacing-x2) var(--spacing-x8);
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              position: sticky;
-              left: 0;
+      .rangeClue-string {
+          color: color-mix(in srgb, var(--color), var(--foreground-default) 85%) !important;
+          font-size: var(--range-clue-size);
+          padding: var(--spacing-x2) var(--spacing-x8);
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          position: sticky;
+          left: 0;
+          pointer-events: all;
+          display: flex;
+          --background-color: color-mix(in srgb, var(--color), var(--background-default) 70%);
 
-              background-color: color-mix(in srgb, var(--color), var(--background-default) 70%);
+          border-radius: var(--radius-full);
+          margin: 20cqmin;
+          border: 0.5px solid var(--color);
 
-              border-radius: var(--radius-full);
-              margin: 10cqmin;
-
-              /* margin-left: calc(var(--border-w) * -1);
+          /* margin-left: calc(var(--border-w) * -1);
               border-radius: var(--radius-slight) var(--radius-slight) 0 0;
               background-color: var(--color);
               color: color-mix(in srgb, var(--color), var(--foreground-default) 70%);
               padding-bottom: 4px; */
 
+
+
+          &:after {
+              content: 'Hint';
+              /* margin-left: var(--spacing-x4); */
+              /* transition: transform 180ms ease; */
+              /* opacity: 0; */
+              /* display: none; */
+              position: absolute;
+              right: -8px;
+              transform: translateX(100%);
+              background-color: inherit;
+              padding: inherit;
+              border-radius: inherit;
+              border: inherit;
+              box-shadow: inherit;
+              color: inherit;
+              top: 0;
+
+              visibility: hidden;
+              transition: visibility 0s;
+              transition-delay: 1s;
           }
 
-          &.is-hidden {
-              display: none;
+          &:hover {
+
+              &::after {
+                  /* content: 'Hint'; */
+                  transition-delay: 0s;
+                  visibility: visible;
+                  /* display: block; */
+
+              }
           }
+
+      }
+
+
+
+      &.is-hidden {
+          display: none;
       }
   }
+
+
 
   .range-full {
       grid-row: 1 / -1;
@@ -589,7 +636,7 @@
 
       grid-row: 1/-1;
       container-type: size;
-      
+
       /* &:last-of-type {
     box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(--border-w) * 0.5) 0px 0px 0px var(--grid-line)!important;
   } */
@@ -653,7 +700,7 @@
   }
 
   .cell.is-select-all {
-      background: var(--opacity-dimm-subtle)!important;
+      background: var(--opacity-dimm-subtle) !important;
   }
 
   .cell.is-bad {
@@ -1084,100 +1131,6 @@
   }
 
   .token-swap {
-      display: none;
-  }
-
-
-  /* -----------------------------
-   Word Chain / Clue Button UI
-   ----------------------------- */
-
-  /* Make clue elements behave like buttons without default button styles */
-  .legend button.clue {
-      appearance: none;
-      -webkit-appearance: none;
-      background: transparent;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      color: inherit;
-      font: inherit;
-      text-align: left;
-      width: 100%;
-      cursor: pointer;
-  }
-
-  .legend button.clue:focus {
-      outline: none;
-  }
-
-  .legend button.clue:focus-visible {
-      outline: 2px solid rgba(255, 255, 255, 0.35);
-      outline-offset: 6px;
-      border-radius: 10px;
-  }
-
-  /* -----------------------------
-   Selected word highlight
-   (click clue -> select word)
-   ----------------------------- */
-  .range.is-selected {
-      /* outline: 3px solid green; */
-      /* outline-offset: 3px; */
-
-      border-width: var(--unit-6);
-  }
-
-  /* -----------------------------
-   Locked/solved word styling (Word Chain)
-   When "Mark correct words" is enabled.
-   ----------------------------- */
-  .range.is-locked {
-      opacity: 0.55;
-      /* filter: grayscale(1); */
-      /* We override the range color to a faint neutral.
-     Tweak this or remove if you want to preserve original color. */
-      --color: gray !important;
-  }
-
-  /* -----------------------------
-   Word Chain clue animation
-   (in/out as you scroll)
-   ----------------------------- */
-  .legend.chainLegend {
-      margin-top: var(--spacing-x12);
-  }
-
-  .legend.chainLegend .chainClue {
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.18s ease, transform 0.18s ease;
-      will-change: transform, opacity;
-  }
-
-  .legend.chainLegend .chainClue.is-in {
-      opacity: 1;
-      transform: translateY(0);
-  }
-
-  .legend.chainLegend .chainClue.is-out {
-      opacity: 0;
-      transform: translateY(-8px);
-  }
-
-  /* Difficulty tag (E/M/H) */
-  .legend.chainLegend .diffTag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      margin-left: 8px;
-      background: rgba(255, 255, 255, 0.12);
-      font-size: 12px;
-      line-height: 1;
-
       display: none;
   }
 

@@ -1221,19 +1221,31 @@ function renderGrid(target, model, clickable) {
     d.style.setProperty("--color", e.color || "var(--c-red)");
     d.style.setProperty("--f", getComputedStyle(document.documentElement).getPropertyValue("--fill") || ".08");
 
-    // In-range clue (shown in both play grid and builder preview)
-    const rc = document.createElement("div");
-    rc.className = "rangeClue text-uppercase-semibold-md";
-
-    const clueSpan = document.createElement("span");
-    clueSpan.className = "rangeClue-string";
-    clueSpan.textContent = e.clue || "";
-
-    rc.appendChild(clueSpan);
-    d.appendChild(rc);
-
 
     target.appendChild(d);
+
+    // Range clue rendered directly in grid
+    const rc = document.createElement("div");
+    rc.className = "rangeClue";
+    rc.dataset.e = String(e.eIdx);
+    rc.style.setProperty("--gs", String(e.start + 1));
+    rc.style.setProperty("--ge", String(e.start + e.len + 1));
+    rc.style.setProperty("--color", e.color || "var(--c-red)");
+
+    const row =
+      h === "full" ? "1 / 2" :
+      h === "mid" ? "2 / 3" :
+      h === "inner" ? "3 / 4" : "1 / 2";
+    rc.style.gridRow = row;
+
+    const clueBtn = document.createElement("button");
+    clueBtn.type = "button";
+    clueBtn.className = "rangeClue-string text-uppercase-semibold-md elevation-active";
+    clueBtn.dataset.e = String(e.eIdx);
+    clueBtn.textContent = e.clue || "";
+
+    rc.appendChild(clueBtn);
+    target.appendChild(rc);
   }
 
   // Cells (MUST explicitly place into columns so they don't get auto-placed after ranges)
@@ -1581,6 +1593,53 @@ function cellAriaLabel(idx, words = []) {
   return parts.join("; ");
 }
 
+// ---- Hints ----
+function firstHintIndex(entry) {
+  if (!entry) return null;
+  for (let i = entry.start; i < entry.start + entry.len && i < play.n; i++) {
+    if (play.mode === MODE.CHAIN) {
+      if (!isCellLocked(i)) return i;
+    } else {
+      if ((play.usr[i] || "") !== (play.exp[i] || "")) return i;
+    }
+  }
+  return null;
+}
+
+function applyHintForEntry(eIdx) {
+  clearSelectAll();
+  const entry = play.entries.find((x) => x.eIdx === eIdx);
+  if (!entry) return;
+  const idx = firstHintIndex(entry);
+  if (idx == null) return;
+
+  const expected = play.exp[idx] || "";
+  play.usr[idx] = expected;
+
+  if (play.mode === MODE.CHAIN) {
+    if (!chain.started && !play.done) chainStartNow();
+    chain.hintsUsed += 1;
+    play.lockedCells[idx] = true;
+
+    if (isWordCorrect(entry)) {
+      play.lockedEntries.add(entry.eIdx);
+      rebuildLockedCells();
+    }
+
+    updateLockedWordUI();
+    updatePlayUI();
+    requestChainClues();
+    chainMaybeFinishIfSolved();
+  } else {
+    updatePlayUI();
+    checkSolvedOverlapOnly();
+  }
+
+  updateResetRevealVisibility();
+  updatePlayControlsVisibility();
+  updatePuzzleActionsVisibility();
+}
+
 function updateSelectedWordUI() {
   els.grid.querySelectorAll(".range").forEach((r) => {
     r.classList.toggle("is-selected", selectedEntry != null && r.dataset.e === String(selectedEntry));
@@ -1704,6 +1763,7 @@ const chain = {
   lastFinishElapsedSec: 0, // untimed results
   unsolvedCount: 0,
   lastFinishReason: "idle",
+  hintsUsed: 0,
 };
 
 
@@ -1928,6 +1988,7 @@ function chainStopTimer() {
   chain.lastFinishLeftSec = 0;
   chain.unsolvedCount = 0;
   chain.lastFinishReason = "idle";
+  chain.hintsUsed = 0;
   if (chain.tickId) {
     clearInterval(chain.tickId);
     chain.tickId = 0;
@@ -2031,7 +2092,11 @@ function openChainResults(stats, reason) {
   const tSec = Math.max(0, Math.floor(chain.lastFinishElapsedSec || 0));
   r.title.textContent = "Solved!";
   r.scoreLine.textContent = `Time: ${fmtTime(tSec)}`;
-  r.breakdown.textContent = chain.unsolvedCount > 0 ? `Unsolved words: ${chain.unsolvedCount}` : "";
+  const lines = [];
+  if (chain.unsolvedCount > 0) lines.push(`Unsolved words: ${chain.unsolvedCount}`);
+  if (chain.hintsUsed > 0) lines.push(`Hints used: ${chain.hintsUsed}`);
+  r.breakdown.innerHTML = lines.join("<br>");
+  if (!lines.length) r.breakdown.textContent = "";
   r.cClose.focus();
 }
 
@@ -2084,13 +2149,22 @@ function isCellLocked(i) {
 }
 
 function rebuildLockedCells() {
+  const prev = Array.isArray(play.lockedCells) ? play.lockedCells.slice() : [];
   play.lockedCells = Array.from({ length: play.n }, () => false);
-  if (play.mode !== MODE.CHAIN) return;
-
+  if (play.mode !== MODE.CHAIN) {
+    for (let i = 0; i < Math.min(play.n, prev.length); i++) {
+      if (prev[i]) play.lockedCells[i] = true;
+    }
+    return;
+  }
   for (const eIdx of play.lockedEntries) {
     const e = play.entries.find((x) => x.eIdx === eIdx);
     if (!e) continue;
     for (let i = e.start; i < e.start + e.len; i++) play.lockedCells[i] = true;
+  }
+  // preserve individually locked cells (e.g., via hints)
+  for (let i = 0; i < Math.min(play.n, prev.length); i++) {
+    if (prev[i]) play.lockedCells[i] = true;
   }
 }
 
@@ -2396,8 +2470,12 @@ function shareResult({ mode }) {
     const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
     const timeText = fmtTime(elapsed);
     if (timeText) msg += `\nI solved today's puzzle in ${timeText}`;
+    const hints = Math.max(0, chain.hintsUsed || 0);
     if (chain.unsolvedCount > 0 && chain.lastFinishReason !== "solved") {
-      msg += ` with ${chain.unsolvedCount} unsolved words.`;
+      msg += ` with ${chain.unsolvedCount} unsolved words`;
+      msg += ` and ${hints} hints.`;
+    } else if (hints > 0) {
+      msg += ` with ${hints} hints.`;
     }
   }
 
@@ -2466,6 +2544,17 @@ function revealPlay() {
 }
 
 function onGridCellClick(e) {
+  const clueBtn = e.target.closest(".rangeClue-string");
+  if (clueBtn) {
+    const eIdx = Number(clueBtn.dataset.e || clueBtn.closest(".rangeClue")?.dataset.e);
+    if (!Number.isNaN(eIdx)) {
+      markInteracted();
+      focusForTyping();
+      applyHintForEntry(eIdx);
+    }
+    return;
+  }
+
   const cell = e.target.closest(".cell");
   if (!cell) return;
   if (IS_TOUCH && performance.now() < _ignoreGridClickUntil) return;
