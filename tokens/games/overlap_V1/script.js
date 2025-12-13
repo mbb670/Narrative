@@ -640,7 +640,6 @@ const els = {
   sClose: $("#sClose"),
   sAgain: $("#sAgain"),
   sNext: $("#sNext"),
-  sShare: $("#sShare"),
   slider: $(".game-slider"),
   nextPuzzleBtn: $("#nextPuzzleBtn"),
   puzzleActions: document.querySelector(".puzzle-actions"),
@@ -663,12 +662,138 @@ const els = {
   solution: $("#solution"),
   helper: $(".helper"),
   keyboard: $(".keyboard"),
+  toastSuccess: $("#toastSuccess"),
+  toastWarning: $("#toastWarning"),
+  toastError: $("#toastError"),
+  shareInline: $("#shareInline"),
 
 };
 
 let _gridScrollBound = false;
 const NAV_DEBUG = false;
 const logNav = () => {};
+
+// ---- Toasts ----
+const toastTimers = { success: 0, warning: 0, error: 0 };
+let lastPlayWarningKey = "";
+let lastChainWarningKey = "";
+
+function parseMsVar(val, fallback) {
+  if (!val) return fallback;
+  const n = parseInt(String(val).trim(), 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function toastDuration(type) {
+  const css = getComputedStyle(document.documentElement);
+  const raw =
+    css.getPropertyValue(`--toast-${type}-duration`) ||
+    css.getPropertyValue(`--toast-${type}-duration-ms`);
+  return parseMsVar(raw, type === "error" ? 2200 : 2600);
+}
+
+function showToast(type, message, duration) {
+  const map = {
+    success: els.toastSuccess,
+    warning: els.toastWarning,
+    error: els.toastError,
+  };
+  const el = map[type];
+  if (!el) return;
+  if (message) el.textContent = message;
+  const dur = duration ?? toastDuration(type);
+  if (toastTimers[type]) clearTimeout(toastTimers[type]);
+  el.classList.remove("is-showing");
+  void el.offsetWidth; // restart transition
+  el.classList.add("is-showing");
+  toastTimers[type] = setTimeout(() => el.classList.remove("is-showing"), dur);
+}
+
+function clearToasts() {
+  ["success", "warning", "error"].forEach((type) => {
+    if (toastTimers[type]) {
+      clearTimeout(toastTimers[type]);
+      toastTimers[type] = 0;
+    }
+    const el =
+      type === "success" ? els.toastSuccess : type === "warning" ? els.toastWarning : els.toastError;
+    if (el) el.classList.remove("is-showing");
+  });
+}
+
+const userKey = () => (Array.isArray(play.usr) ? play.usr.join("") : "");
+
+function resetToastGuards() {
+  lastPlayWarningKey = "";
+  lastChainWarningKey = "";
+}
+
+function clearAllUnlockedCells() {
+  if (play.done) return;
+  if (play.mode === MODE.CHAIN && !chainInputAllowed()) return;
+
+  let changed = false;
+  const isLocked = (i) => play.mode === MODE.CHAIN && isCellLocked(i);
+  for (let i = 0; i < play.n; i++) {
+    if (isLocked(i)) continue;
+    if (play.usr[i]) {
+      play.usr[i] = "";
+      changed = true;
+    }
+  }
+  clearSelectAll();
+
+  const target =
+    play.mode === MODE.CHAIN ? findNextEditable(0, +1) ?? 0 : 0;
+  setAt(target, { behavior: "smooth" });
+
+  if (changed) {
+    if (play.mode === MODE.CHAIN) {
+      updatePlayUI();
+      requestChainClues();
+    } else {
+      updatePlayUI();
+      checkSolvedOverlapOnly();
+    }
+    updateResetRevealVisibility();
+    updatePlayControlsVisibility();
+    updatePuzzleActionsVisibility();
+  } else {
+    updatePlayUI();
+  }
+}
+
+function maybeToastPlayFilledWrong() {
+  if (play.mode !== MODE.OVERLAP || play.done) return;
+  const filled = play.usr.every(Boolean);
+  if (!filled) {
+    lastPlayWarningKey = "";
+    return;
+  }
+  const key = userKey();
+  const allCorrect = play.usr.every((ch, i) => ch === play.exp[i]);
+  if (allCorrect) return;
+  if (key !== lastPlayWarningKey) {
+    showToast("warning", "Not quite: Some or all words are incorrect");
+    lastPlayWarningKey = key;
+  }
+}
+
+function maybeToastChainFilledWrong() {
+  if (play.mode !== MODE.CHAIN || play.done) return;
+  const filled = play.usr.every(Boolean);
+  if (!filled) {
+    lastChainWarningKey = "";
+    return;
+  }
+  const key = userKey();
+  const unsolved = countUnsolvedWords();
+  if (unsolved <= 0) return;
+  if (key !== lastChainWarningKey) {
+    showToast("warning", `Not quite: ${unsolved} words are incomplete or incorrect`);
+    lastChainWarningKey = key;
+  }
+}
 
 function bindGridScrollCancels() {
   if (_gridScrollBound || !els.gridScroll) return;
@@ -791,12 +916,14 @@ const play = {
   n: 0,
   at: 0,
   done: false,
+  revealed: false,
 
   lockedCells: [],
   lockedEntries: new Set(), // eIdx
 };
 
 let selectedEntry = null;
+let selectAllUnlocked = false;
 
 // ---- Touch + on-screen keyboard ----
 let hasInteracted = true;
@@ -1460,6 +1587,15 @@ function updateSelectedWordUI() {
   });
 }
 
+function updateSelectAllUI() {
+  if (!els.grid) return;
+  els.grid.querySelectorAll(".cell").forEach((c) => {
+    const i = +c.dataset.i;
+    const locked = play.mode === MODE.CHAIN && isCellLocked(i);
+    c.classList.toggle("is-select-all", selectAllUnlocked && !locked);
+  });
+}
+
 function selectEntry(eIdx) {
   selectedEntry = eIdx;
   updateSelectedWordUI();
@@ -1470,6 +1606,17 @@ function clearSelection() {
   updateSelectedWordUI();
 }
 
+function clearSelectAll() {
+  if (!selectAllUnlocked) return;
+  selectAllUnlocked = false;
+  updateSelectAllUI();
+}
+
+function selectAllUnlockedCells() {
+  selectAllUnlocked = true;
+  updateSelectAllUI();
+}
+
 // ---- UI visibility helpers ----
 function updatePlayControlsVisibility() {
   if (!els.reset || !els.reveal) return;
@@ -1478,6 +1625,7 @@ function updatePlayControlsVisibility() {
     els.reset.style.display = "";
     els.reveal.style.display = "";
     if (els.nextPuzzleBtn) els.nextPuzzleBtn.style.display = "none";
+    if (els.shareInline) els.shareInline.style.display = "none";
     return;
   }
 
@@ -1488,6 +1636,10 @@ function updatePlayControlsVisibility() {
   els.reset.style.display = solved || (hasInput && !solved) ? "" : "none";
   if (els.nextPuzzleBtn) {
     els.nextPuzzleBtn.style.display = solved ? "" : "none";
+  }
+  if (els.shareInline) {
+    const showShare = solved && !play.revealed;
+    els.shareInline.style.display = showShare ? "inline-flex" : "none";
   }
 }
 
@@ -2068,9 +2220,11 @@ function updatePlayUI() {
   updateSelectedWordUI();
   updateSliderUI();
   updatePlayControlsVisibility();
+  updateSelectAllUI();
 }
 
 function setAt(i, { behavior, noScroll } = {}) {
+  clearSelectAll();
   play.at = clamp(i, 0, play.n - 1);
   updatePlayUI();
   if (!noScroll) {
@@ -2107,7 +2261,8 @@ function checkSolvedOverlapOnly() {
   if (!play.usr.every(Boolean)) return;
   if (play.usr.every((ch, i) => ch === play.exp[i])) {
     play.done = true;
-    openSuccess();
+    play.revealed = false;
+    showToast("success", "Success! You solved the puzzle!");
     updatePlayControlsVisibility();
   }
 }
@@ -2136,6 +2291,7 @@ function write(ch) {
   if (play.mode === MODE.CHAIN) {
     chainApplyLocksIfEnabled();
     updatePlayUI();
+    maybeToastChainFilledWrong();
     requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(nextAt - prevAt) || 1 });
     requestChainClues();
     chainMaybeFinishIfSolved();
@@ -2143,6 +2299,7 @@ function write(ch) {
   }
 
   updatePlayUI();
+  maybeToastPlayFilledWrong();
   requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(nextAt - prevAt) || 1 });
   checkSolvedOverlapOnly();
 }
@@ -2173,12 +2330,14 @@ function back() {
 
   if (play.mode === MODE.CHAIN) {
     updatePlayUI();
+    maybeToastChainFilledWrong();
     requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(play.at - prevAt) || 1 });
     requestChainClues();
     return;
   }
 
   updatePlayUI();
+  maybeToastPlayFilledWrong();
   requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(play.at - prevAt) || 1 });
 }
 
@@ -2205,8 +2364,7 @@ function move(d, opts = {}) {
 
 // ---- Modals (Overlap) ----
 function openSuccess() {
-  els.success.classList.add("is-open");
-  els.sClose.focus();
+  // Success overlay disabled for play mode; toast handles feedback.
 }
 
 function closeSuccess() {
@@ -2263,6 +2421,10 @@ function resetPlay() {
   play.usr = Array.from({ length: play.n }, () => "");
   play.at = 0;
   play.done = false;
+  play.revealed = false;
+  resetToastGuards();
+  clearToasts();
+  clearSelectAll();
 
   play.lockedEntries.clear();
   play.lockedCells = Array.from({ length: play.n }, () => false);
@@ -2298,8 +2460,8 @@ function revealPlay() {
 
   play.usr = play.exp.slice();
   play.done = true;
+  play.revealed = true;
   updatePlayUI();
-  closeSuccess();
   updatePlayControlsVisibility();
 }
 
@@ -2308,7 +2470,7 @@ function onGridCellClick(e) {
   if (!cell) return;
   if (IS_TOUCH && performance.now() < _ignoreGridClickUntil) return;
 
-
+  clearSelectAll();
   markInteracted();
   focusForTyping();
 
@@ -2347,6 +2509,10 @@ function loadPuzzle(i) {
   play.usr = Array.from({ length: play.n }, () => "");
   play.at = 0;
   play.done = false;
+  play.revealed = false;
+  resetToastGuards();
+  clearToasts();
+  clearSelectAll();
 
   play.lockedEntries.clear();
   play.lockedCells = Array.from({ length: play.n }, () => false);
@@ -2460,10 +2626,47 @@ function escapeAttr(s) {
   );
 }
 
+function handleEnterKey() {
+  if (play.mode === MODE.OVERLAP) {
+    if (play.done) return;
+    const filled = play.usr.every(Boolean);
+    if (!filled) {
+      showToast("error", "Puzzle not complete!");
+      return;
+    }
+    const allCorrect = play.usr.every((ch, i) => ch === play.exp[i]);
+    if (allCorrect) {
+      checkSolvedOverlapOnly();
+      showToast("success", "Success! You solved the puzzle!");
+    } else {
+      showToast("warning", "Not quite: Some or all words are incorrect");
+      lastPlayWarningKey = userKey();
+    }
+    return;
+  }
+
+  // Word chain
+  if (play.done) return;
+  const hasInput = play.usr.some(Boolean);
+  if (!hasInput) return;
+  const unsolved = countUnsolvedWords();
+  if (unsolved > 0) {
+    showToast("warning", `Not quite: ${unsolved} words are incomplete or incorrect`);
+    lastChainWarningKey = userKey();
+  } else {
+    chainMaybeFinishIfSolved();
+  }
+}
+
 // ---- Global key handler (desktop) ----
 function onKey(e) {
   if (els.success.classList.contains("is-open")) return;
   if (chainResults?.wrap?.classList.contains("is-open")) return;
+  if (e.metaKey && e.key.toLowerCase() === "a") {
+    e.preventDefault();
+    selectAllUnlockedCells();
+    return;
+  }
   if (e.metaKey || e.ctrlKey) return;
 
   if (IS_TOUCH && e.target === kb && (e.key === "Backspace" || e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
@@ -2471,9 +2674,31 @@ function onKey(e) {
   const t = e.target;
   if (t !== kb && isEditable(t)) return;
 
+  if (selectAllUnlocked && e.key !== "Backspace" && e.key !== "Delete") {
+    clearSelectAll();
+  }
+
   if (e.key === "Backspace") {
     e.preventDefault();
+    if (selectAllUnlocked) {
+      clearAllUnlockedCells();
+      return;
+    }
     back();
+    return;
+  }
+  if (e.key === "Delete") {
+    e.preventDefault();
+    if (selectAllUnlocked) {
+      clearAllUnlockedCells();
+      return;
+    }
+    back();
+    return;
+  }
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleEnterKey();
     return;
   }
   if (e.key === "ArrowLeft") {
@@ -2630,7 +2855,7 @@ function renderRows() {
         <div class="row" data-i="${i}">
           <div class="rowTop">
             <div class="left">
-              <span class="sw" style="--color:${swColor}"></span>
+              <span class="range-swatch" style="--color:${swColor}"></span>
               <span>Word ${pos + 1}</span>
             </div>
             <div class="right"><button class="pill" type="button" data-act="rm">Remove</button></div>
@@ -2851,6 +3076,10 @@ els.nextPuzzleBtn?.addEventListener("click", () => {
   markInteracted();
   loadByViewOffset(1);
 });
+els.shareInline?.addEventListener("click", () => {
+  markInteracted();
+  shareResult({ mode: play.mode });
+});
 els.navCellPrev?.addEventListener("click", () => {
   let tgt = null;
   if (play.done || play.mode === MODE.OVERLAP) {
@@ -2894,11 +3123,6 @@ els.sNext.addEventListener("click", () => {
   markInteracted();
   loadByViewOffset(1);
 });
-if (els.sShare) {
-  els.sShare.addEventListener("click", () => {
-    shareResult({ mode: play.mode });
-  });
-}
 
 // Builder
 els.pSel.addEventListener("change", () => {

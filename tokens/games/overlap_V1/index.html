@@ -41,15 +41,21 @@
       </div>
       <div class="gridScroll" id="gridScroll">
         <div class="grid" id="grid" aria-describedby="sr"></div>
+      
+      <div class="toast-stack text-system-semibold-sm" aria-live="polite" aria-atomic="true">
+        <div class="toast toast-success elevation-fixed-top" id="toastSuccess" role="status">🎉 Success! You solved the puzzle!</div>
+        <div class="toast toast-warning elevation-fixed-top" id="toastWarning" role="status">Not quite! Some or all words are incorrect</div>
+        <div class="toast toast-error elevation-fixed-top" id="toastError" role="status">Puzzle not complete!</div>
+      </div>
       </div>
       <div class="puzzle-nav" aria-label="Navigation">
         <div class="puzzle-nav-prev">
-        <button class="btn icon" id="navWordPrev" type="button" aria-label="Previous unresolved word">«</button>
-        <button class="btn icon" id="navCellPrev" type="button" aria-label="Previous unresolved cell">‹</button>
+        <button class="btn icon" id="navWordPrev" type="button" aria-label="Previous unresolved word" title="Previous word">«</button>
+        <button class="btn icon" id="navCellPrev" type="button" aria-label="Previous unresolved cell" title="Previous letter">‹</button>
         </div>
         <div class="puzzle-nav-next">
-        <button class="btn icon" id="navCellNext" type="button" aria-label="Next unresolved cell">›</button>
-        <button class="btn icon" id="navWordNext" type="button" aria-label="Next unresolved word">»</button>
+        <button class="btn icon" id="navCellNext" type="button" aria-label="Next unresolved cell" title="Next letter">›</button>
+        <button class="btn icon" id="navWordNext" type="button" aria-label="Next unresolved word" title="Next word">»</button>
         </div>
       </div>
       <div class="legend" id="legend" aria-label="Clues"></div>
@@ -61,6 +67,7 @@
         </div>
         <div class="puzzle-actions">
           <button class="btn text-system-semibold-sm" id="reset" type="button">Reset</button>
+          <button class="btn text-system-semibold-sm" id="shareInline" type="button" style="display:none">Share</button>
           <button class="btn text-system-semibold-sm" id="reveal" type="button">Reveal</button>
           <button class="btn primary text-system-semibold-sm" id="nextPuzzleBtn" type="button" style="display:none">Next
             puzzle</button>
@@ -119,7 +126,7 @@
 
   <div class="keyboard"></div>
   <div class="credit text-system-regular-sm">
-    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.96
+    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.965
   </div>
   </main>
   <!-- Success -->
@@ -131,7 +138,6 @@
         <button class="btn" id="sClose" type="button">Close</button>
         <button class="btn" id="sAgain" type="button">Play again</button>
         <button class="btn" id="sNext" type="button">Next puzzle</button>
-        <button class="btn primary" id="sShare" type="button">Share</button>
       </div>
     </div>
   </div>
