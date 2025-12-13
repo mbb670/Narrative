@@ -22,74 +22,6 @@ const VIEW = { PLAY: "play", CHAIN: "chain", BUILD: "build" };
 
 // ---- Remember last tab/view ----
 const LAST_VIEW_KEY = `${KEY}__last_view`;
-const CLUE_VIEW_KEY = `${KEY}__clue_view`; // "range" | "legend"
-
-function legendCluesEnabled() {
-  return els.clueToggle ? !!els.clueToggle.checked : true;
-}
-
-function applyClueMode() {
-  const showLegend = legendCluesEnabled();
-
-  // expose to CSS for styling
-  document.body.classList.toggle("clues--legend", showLegend);
-  document.body.classList.toggle("clues--range", !showLegend);
-
-  // Word Chain: keep the "Start" gating behavior
-  if (play.mode === MODE.CHAIN) {
-    if (!chain.started) {
-      els.legend.hidden = true;
-      els.legend.innerHTML = "";
-      return;
-    }
-
-    if (showLegend) {
-      els.legend.hidden = false;
-      requestChainClues(); // uses your existing dynamic logic
-    } else {
-      els.legend.hidden = true;
-      els.legend.innerHTML = "";
-    }
-    return;
-  }
-
-  // Overlap: either render the full legend list, or hide it
-  if (showLegend) {
-    els.legend.hidden = false;
-    els.legend.classList.remove("chainLegend");
-    els.legend.innerHTML = play.entries
-      .map(
-        (e) => `
-        <button type="button" class="clue" data-e="${e.eIdx}">
-          <span class="sw" style="--color:var(${e.color})"></span>
-          <span class="text-system-semibold-sm">${escapeHtml(e.clue)}</span>
-        </button>`
-      )
-      .join("");
-  } else {
-    els.legend.hidden = true;
-    els.legend.innerHTML = "";
-  }
-}
-
-function initClueToggle() {
-  if (!els.clueToggle) return;
-
-  // restore saved preference if present
-  try {
-    const saved = localStorage.getItem(CLUE_VIEW_KEY);
-    if (saved === "legend") els.clueToggle.checked = true;
-    if (saved === "range") els.clueToggle.checked = false;
-  } catch {}
-
-  // save + apply on change
-  els.clueToggle.addEventListener("change", () => {
-    try {
-      localStorage.setItem(CLUE_VIEW_KEY, els.clueToggle.checked ? "legend" : "range");
-    } catch {}
-    applyClueMode();
-  });
-}
 
 const VALID_VIEWS = new Set(Object.values(VIEW));
 
@@ -675,8 +607,6 @@ function updateSliderUI() {
   updateThumbFromScroll();
 }
 
-const CHAIN_CLUE_CAP = 6;
-
 // ---- Defaults loading (robust + cache-bust) ----
 const DEFAULTS_VERSION = "2025-12-02"; // <-- bump this any time you edit examples.json
 const DEFAULTS_VER_KEY = `${KEY}__defaults_version`;
@@ -732,7 +662,6 @@ const els = {
   status: $("#status"),
   solution: $("#solution"),
   helper: $(".helper"),
-  clueToggle: $("#clueToggle"),
   keyboard: $(".keyboard"),
 
 };
@@ -1165,18 +1094,16 @@ function renderGrid(target, model, clickable) {
     d.style.setProperty("--color", e.color || "var(--c-red)");
     d.style.setProperty("--f", getComputedStyle(document.documentElement).getPropertyValue("--fill") || ".08");
 
-    // In-range clue (play grid only; keep builder preview clean)
- if (target === els.grid) {
-  const rc = document.createElement("div");
-  rc.className = "rangeClue text-uppercase-semibold-md";
+    // In-range clue (shown in both play grid and builder preview)
+    const rc = document.createElement("div");
+    rc.className = "rangeClue text-uppercase-semibold-md";
 
-  const clueSpan = document.createElement("span");
-  clueSpan.className = "rangeClue-string";
-  clueSpan.textContent = e.clue || "";
+    const clueSpan = document.createElement("span");
+    clueSpan.className = "rangeClue-string";
+    clueSpan.textContent = e.clue || "";
 
-  rc.appendChild(clueSpan);
-  d.appendChild(rc);
-}
+    rc.appendChild(clueSpan);
+    d.appendChild(rc);
 
 
     target.appendChild(d);
@@ -1889,7 +1816,6 @@ function chainShowResetWithClues() {
   ui.timer.textContent = fmtTime(0);
   chainSetUIState(CHAIN_UI.DONE, ui);
   setInlineCluesHiddenUntilChainStart(); // will unhide since started=true
-  applyClueMode();
 }
 
 
@@ -1910,7 +1836,6 @@ function chainStartNow() {
 
   chain.running = true;
   setInlineCluesHiddenUntilChainStart();
-  applyClueMode();
   chain.isTimed = false;
   chainSetUIState(CHAIN_UI.RUNNING, ui);
 
@@ -2122,125 +2047,11 @@ function nearestUnsolvedEntryToCursor() {
 }
 
 function updateChainClues() {
-  if (play.mode !== MODE.CHAIN) return;
-  if (!chain.started) return; // intentionally hidden until Start
-  if (!legendCluesEnabled()) return;
-
-  const cap = Math.max(1, CHAIN_CLUE_CAP | 0);
-
-  // 1) Top clue: word on the current cell (if unsolved / not locked)
-  const onCell = entriesOnCursorCellSorted().filter(isEntryUnsolvedForClues);
-
-  // If current cell word is locked/solved, we *don’t* show it at top.
-  // In that case we pivot from nearest unsolved instead.
-  const top = onCell.length ? onCell[0] : null;
-
-  // pivot determines adjacency fill
-  const pivot = top || nearestUnsolvedEntryToCursor();
-
-  const picked = [];
-  const pickedSet = new Set();
-
-  const add = (e) => {
-    if (!e) return false;
-    if (!isEntryUnsolvedForClues(e)) return false;
-    if (pickedSet.has(e.eIdx)) return false;
-    picked.push(e);
-    pickedSet.add(e.eIdx);
-    return true;
-  };
-
-  // Add top (only if it’s the actual current-cell word & unsolved)
-  if (top) add(top);
-
-  // 2) Fill with adjacent unsolved clues around pivot (in chain order)
-  if (pivot) {
-    const ordered = play.entries; // already sorted by start, then r
-    const baseIdx = ordered.indexOf(pivot);
-
-    // If we didn’t add the top and pivot is different, include pivot first.
-    if (!top) add(pivot);
-
-    for (let step = 1; picked.length < cap && step < ordered.length; step++) {
-      const right = ordered[baseIdx + step];
-      const left = ordered[baseIdx - step];
-
-      // Prefer forward then backward, alternating outward
-      if (right) add(right);
-      if (picked.length >= cap) break;
-      if (left) add(left);
-    }
+  // Legend clues removed; rely on inline range clues only.
+  if (els.legend) {
+    els.legend.hidden = true;
+    els.legend.innerHTML = "";
   }
-
-  // 3) If still not full (e.g., many locked), fill by nearest remaining unsolved
-  if (picked.length < cap) {
-    const i = play.at;
-    const remaining = play.entries
-      .filter((e) => isEntryUnsolvedForClues(e) && !pickedSet.has(e.eIdx))
-      .sort((a, b) => {
-        const da = entryDistanceToIndex(a, i);
-        const db = entryDistanceToIndex(b, i);
-        return da - db || a.start - b.start || a.r - b.r;
-      });
-
-    for (const e of remaining) {
-      add(e);
-      if (picked.length >= cap) break;
-    }
-  }
-
-  const finalList = picked;
-
-  // ---- Render (same animation approach you already had) ----
-  const wrap = els.legend;
-
-  const existing = new Map(
-    [...wrap.querySelectorAll(".chainClue")].map((el) => [Number(el.dataset.e), el])
-  );
-  const nextKeys = new Set(finalList.map((e) => e.eIdx));
-
-  for (const [k, el] of existing) {
-    if (!nextKeys.has(k)) {
-      el.classList.remove("is-in");
-      el.classList.add("is-out");
-      el.addEventListener(
-        "transitionend",
-        () => {
-          if (el.parentNode) el.parentNode.removeChild(el);
-        },
-        { once: true }
-      );
-    }
-  }
-
-  finalList.forEach((e, pos) => {
-    let el = existing.get(e.eIdx);
-
-    const diffTag = "";
-
-    if (!el) {
-      el = document.createElement("button");
-      el.type = "button";
-      el.className = "clue chainClue";
-      el.dataset.e = String(e.eIdx);
-      el.innerHTML = `
-        <span class="sw" style="--color:var(${e.color})"></span>
-        <span class="text-system-semibold-sm">${escapeHtml(e.clue)}</span>
-        
-      `;
-      wrap.appendChild(el);
-      requestAnimationFrame(() => el.classList.add("is-in"));
-    } else {
-      el.innerHTML = `
-        <span class="sw" style="--color:var(${e.color})"></span>
-        <span class="text-system-semibold-sm">${escapeHtml(e.clue)}</span>
-        
-      `;
-    }
-
-    const cur = wrap.children[pos];
-    if (cur !== el) wrap.insertBefore(el, cur || null);
-  });
 }
 
 
@@ -2492,24 +2303,6 @@ function revealPlay() {
   updatePlayControlsVisibility();
 }
 
-// ---- Clue click behavior (both modes) ----
-function onLegendClick(e) {
-  const btn = e.target.closest(".clue");
-  if (!btn) return;
-
-  // chain clues hidden until start, so this should only fire after start
-  const eIdx = +btn.dataset.e;
-  const entry = play.entries.find((x) => x.eIdx === eIdx);
-  if (!entry) return;
-
-  markInteracted();
-  focusForTyping();
-
-  jumpToEntry(eIdx);
-  selectEntry(eIdx);
-  scrollToWordStart(entry, "smooth");
-}
-
 function onGridCellClick(e) {
   const cell = e.target.closest(".cell");
   if (!cell) return;
@@ -2569,9 +2362,11 @@ function loadPuzzle(i) {
     ui.hud.hidden = false;
     ui.startBtn.style.display = ""; // show Start
 
-    els.legend.classList.add("chainLegend");
-    els.legend.hidden = true; // ✅ hide clues by default
-    els.legend.innerHTML = "";
+    if (els.legend) {
+      els.legend.classList.add("chainLegend");
+      els.legend.hidden = true; // hide unused legend
+      els.legend.innerHTML = "";
+    }
 
     chainResetTimer();
     setInlineCluesHiddenUntilChainStart();
@@ -2580,18 +2375,11 @@ function loadPuzzle(i) {
     if (chainUI) chainUI.hud.hidden = true;
     if (els.reveal) els.reveal.style.display = "";
 
-
-    els.legend.hidden = false;
-    els.legend.classList.remove("chainLegend");
-    els.legend.innerHTML = m.entries
-      .map(
-        (e) => `
-        <button type="button" class="clue" data-e="${e.eIdx}">
-          <span class="sw" style="--color:var(${e.color})"></span>
-          <span class="text-system-semibold-sm">${escapeHtml(e.clue)}</span>
-        </button>`
-      )
-      .join("");
+    if (els.legend) {
+      els.legend.hidden = true;
+      els.legend.classList.remove("chainLegend");
+      els.legend.innerHTML = "";
+    }
   }
   updateResetRevealVisibility();
 
@@ -2609,7 +2397,6 @@ function loadPuzzle(i) {
 
 
   updatePlayUI();
-  applyClueMode();
   updatePlayControlsVisibility();
   updatePuzzleActionsVisibility();
 
@@ -2980,9 +2767,6 @@ els.stage.addEventListener("pointerdown", (e) => {
 // Grid click
 els.grid.addEventListener("click", onGridCellClick);
 
-// Legend click
-els.legend.addEventListener("click", onLegendClick);
-
 // Chain clue updates on scroll
 els.gridScroll?.addEventListener(
   "scroll",
@@ -3231,8 +3015,6 @@ initOnScreenKeyboard();
 initSlider();
 loadPuzzle(0);
 setTab(currentView);
-initClueToggle();
-applyClueMode();
 
 requestAnimationFrame(() => {
   setAt(0);

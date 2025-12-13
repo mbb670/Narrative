@@ -21,56 +21,21 @@
       --letter: 60cqmin;
       --range-clue-size: 45cqmin;
 
-      /* --cell: clamp(72px, 8vw, 96px); */
       --cell: clamp(56px, 8vw, 96px);
-    --range-radius: var(--radius-relaxed) var(--radius-relaxed) 0 0;
+      --range-radius: var(--radius-relaxed) var(--radius-relaxed) 0 0;
 
 
       --grid-top-space: 32px;
       --grid-letter-space: 120px;
-      /* --grid-bottom-space: 16px; */
       --grid-bottom-space: 0px;
+
       --cell-letter-placement: 4/6;
 
-      --slider-track-h: var(--spacing-x16);
-      --slider-thumb-w: var(--spacing-x8);
-      --slider-thumb-h: var(--spacing-x24);
-      --slider-thumb-color: var(--foreground-muted);
       --slider-solved: var(--background-medium);
       --slider-color-mix-base: var(--background-default);
-      --slider-color-mix-amount: 50; /* 0-100 (%) */
+      --slider-color-mix-amount: 50;
+      /* 0-100 (%) */
   }
-
-  .clues--legend,
-  #panelBuild {
-      /* --grid-top-space: var(--grid-bottom-space); */
-      --cell-letter-placement: 4/5;
-  }
-
-  @media (max-width:640px) {
-      :root {
-          --border-w: 1px;
-
-          /* --grid-letter-space: 64px; */
-          --grid-bottom-space: 8px;
-
-          --grid-top-space: 32px;
-          --grid-letter-space: 80px;
-          --grid-bottom-space: 0px;
-      }
-
-      .clues--legend,
-      #panelBuild {
-          --grid-top-space: 12px;
-          --grid-bottom-space: 12px;
-      }
-  }
-
-  .clues--legend {
-      --grid-rows: 16px 16px var(--spacing-x144) 16px 16px;
-  }
-
-
 
   :root {
       /* Default puzzle colors (overridden by palette attribute) */
@@ -79,6 +44,13 @@
       --puzzle-color-3: #f5b800;
       --puzzle-color-4: #2f8f1d;
       --puzzle-color-5: #2b74ff;
+  }
+
+  @media (max-width:640px) {
+      :root {
+          --border-w: 1px;
+          --grid-letter-space: 80px;
+      }
   }
 
   [data-puzzle-palette="classic"] {
@@ -110,13 +82,8 @@
       margin: 0 auto;
       background: var(--background-default);
       color: var(--foreground-default);
-
-      /* border: 1px solid red; */
       position: relative;
-      /* overflow-y: hidden; */
       height: 100svh;
-
-
   }
 
   .wrap {
@@ -124,7 +91,6 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-
   }
 
 
@@ -346,7 +312,7 @@
       /* margin: var(--spacing-x16) var(--layout-grid-margin) var(--spacing-x4); */
       height: var(--unit-48);
       max-width: var(--layout-content-md-max);
-            /* width: 100%; */
+      /* width: 100%; */
       gap: var(--spacing-x16);
 
       /* box-sizing: border-box; */
@@ -408,25 +374,16 @@
   }
 
 
-.puzzle-nav{
-    display: flex;
-    justify-content: space-between;
-    margin-inline: var(--layout-grid-margin);
-    max-width: var(--layout-content-md-max);
-     align-self: center;
-     width: 100%;
-}
-
-
-
-  .clueToggle {
-      display: block;
-      text-align: center;
-      margin-bottom: var(--spacing-x16);
-
-
-      display: none;
+  .puzzle-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-inline: var(--layout-grid-margin);
+      max-width: var(--layout-content-md-max);
+      align-self: center;
+      width: 100%;
   }
+
+
 
   /* Scroller only wraps puzzle */
   .gridScroll {
@@ -454,16 +411,16 @@
       display: grid;
       grid-template-columns: repeat(var(--cols), var(--cell));
       --grid-rows: repeat(3, var(--grid-top-space)) var(--grid-letter-space) repeat(3, var(--grid-bottom-space));
-      
+
       grid-template-rows: var(--grid-rows);
       width: calc(var(--cell)*var(--cols));
       margin: 0 auto;
       background: transparent;
-      box-shadow: 
-      inset 0 calc(var(--border-w) * -1) 0 0 var(--grid-line), 
-      inset 0 var(--border-w) 0 0 var(--grid-line), 
-      inset calc(var(--border-w) * -1) 0 0 0 var(--grid-line), 
-      inset var(--border-w) 0 0 0 var(--grid-line);
+      box-shadow:
+          inset 0 calc(var(--border-w) * -1) 0 0 var(--grid-line),
+          inset 0 var(--border-w) 0 0 var(--grid-line),
+          inset calc(var(--border-w) * -1) 0 0 0 var(--grid-line),
+          inset var(--border-w) 0 0 0 var(--grid-line);
       border-radius: var(--range-radius);
 
 
@@ -485,7 +442,7 @@
       grid-column: var(--gs) / var(--ge);
       display: grid;
       grid-template-rows: subgrid;
-      border-radius:var(--range-radius);
+      border-radius: var(--range-radius);
 
       &.is-locked .rangeClue {
           opacity: 0.3;
@@ -543,17 +500,6 @@
   }
 
 
-  /* default OFF = in-range clues */
-  body.clues--range .rangeClue {
-      display: block;
-  }
-
-  body.clues--legend .rangeClue {
-      display: none;
-  }
-
-
-
   /* word chain: style clue when solved/locked */
 
 
@@ -584,7 +530,7 @@
 
       grid-row: 1/-1;
       container-type: size;
-     /* &:last-of-type {
+      /* &:last-of-type {
     box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(--border-w) * 0.5) 0px 0px 0px var(--grid-line)!important;
   } */
 
@@ -597,9 +543,10 @@
       }
 
       .num {
-          grid-row: 1/2;
+          grid-row: -2/-1;
           justify-self: start;
-          padding-left: var(--spacing-x4);
+          align-self: flex-end;
+          padding: var(--spacing-x4);
           color: var(--foreground-subtle);
           display: none;
       }
@@ -609,12 +556,12 @@
       box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line);
   }
 
-      @supports (font: -apple-system-body) {
-        .cell{
-          grid-template-rows:var(--grid-rows)!important;
-        }
-
+  @supports (font: -apple-system-body) {
+      .cell {
+          grid-template-rows: var(--grid-rows) !important;
       }
+
+  }
 
   .grid.showNums .num {
       display: block
@@ -729,7 +676,7 @@
   .slider-track {
       position: absolute;
       inset: 50% 0 auto 0;
-      height: var(--slider-track-h);
+      height: var(--spacing-x16);
       transform: translateY(-50%);
       border-radius: var(--radius-full);
       overflow: hidden;
@@ -750,10 +697,10 @@
   .slider-thumb {
       position: absolute;
       top: 50%;
-      width: var(--slider-thumb-w);
-      height: var(--slider-thumb-h);
+      width: var(--spacing-x8);
+      height: var(--spacing-x24);
       transform: translate(-50%, -50%);
-      background: var(--slider-thumb-color);
+      background: var(--foreground-muted);
       border-radius: var(--radius-full);
       box-shadow: 0 0 0 2px var(--background-default);
       cursor: pointer;
