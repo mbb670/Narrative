@@ -714,6 +714,10 @@ const els = {
   slider: $(".game-slider"),
   nextPuzzleBtn: $("#nextPuzzleBtn"),
   puzzleActions: document.querySelector(".puzzle-actions"),
+  navWordPrev: $("#navWordPrev"),
+  navCellPrev: $("#navCellPrev"),
+  navCellNext: $("#navCellNext"),
+  navWordNext: $("#navWordNext"),
   pSel: $("#pSel"),
   pNew: $("#pNew"),
   pDel: $("#pDel"),
@@ -734,6 +738,8 @@ const els = {
 };
 
 let _gridScrollBound = false;
+const NAV_DEBUG = false;
+const logNav = () => {};
 
 function bindGridScrollCancels() {
   if (_gridScrollBound || !els.gridScroll) return;
@@ -1347,6 +1353,163 @@ function entryContainsIndex(e, i) {
   return i >= e.start && i < e.start + e.len;
 }
 
+function isCellUnresolved(i) {
+  if (play.done) return false;
+  if (play.mode === MODE.CHAIN) {
+    return !isCellLocked(i);
+  }
+  const exp = play.exp?.[i] || "";
+  const usr = play.usr?.[i] || "";
+  return exp !== usr;
+}
+
+function findUnresolvedCell(from, dir) {
+  if (!play.exp?.length) return null;
+  let i = clamp(from + dir, 0, play.n - 1);
+  while (i >= 0 && i < play.n) {
+    if (isCellUnresolved(i)) {
+      logNav("findUnresolvedCell hit", { from, dir, i });
+      return i;
+    }
+    i += dir;
+  }
+  logNav("findUnresolvedCell none", { from, dir });
+  return null;
+}
+
+function unresolvedEntries() {
+  return (play.entries || []).filter((e) => !isWordCorrect(e));
+}
+
+function firstUnresolvedCellInEntry(e) {
+  if (!e) return null;
+  for (let i = 0; i < e.len; i++) {
+    const idx = e.start + i;
+    if (isCellUnresolved(idx)) return idx;
+  }
+  return e.start; // fallback
+}
+
+function jumpToUnresolvedWord(delta) {
+  logNav("jumpToUnresolvedWord start", {
+    delta,
+    at: play.at,
+    currentEntry: entryAtIndex(play.at),
+    usr: play.usr?.join(""),
+    locked: [...play.lockedEntries],
+  });
+
+  // Overlap mode: always jump by word starts, ignoring correctness/locks (done or not).
+  if (play.mode === MODE.OVERLAP) {
+    const entries = (play.entries || []).slice().sort((a, b) => a.start - b.start);
+    if (!entries.length) return;
+    const idx = play.at;
+    const containing = entryAtIndex(idx);
+    const before = entries.filter((e) => e.start <= idx);
+    const cur = containing || (before.length ? before[before.length - 1] : entries[0]);
+
+    let targetEntry = null;
+    if (delta > 0) {
+      targetEntry = entries.find((e) => e.start > idx) || entries[0];
+    } else {
+      if (idx !== cur.start) {
+        targetEntry = cur;
+      } else {
+        const prev = [...entries].reverse().find((e) => e.start < idx);
+        targetEntry = prev || entries[entries.length - 1];
+      }
+    }
+
+    const targetCell = targetEntry.start;
+    const deltaCells = Math.abs(targetCell - play.at) || 1;
+    logNav("jumpToUnresolvedWord overlap-target", {
+      targetCell,
+      deltaCells,
+      curStart: cur.start,
+      targetStart: targetEntry.start,
+    });
+    setAt(targetCell, { behavior: { behavior: "smooth", delta: deltaCells } });
+    return;
+  }
+
+  // In a finished puzzle, allow word navigation across all entries, including locked/solved.
+  if (play.done) {
+    const entries = (play.entries || []).slice().sort((a, b) => a.start - b.start);
+    if (!entries.length) return;
+    const idx = play.at;
+    const cur = entryAtIndex(idx) || entries[0];
+    const curIdx = entries.findIndex((e) => e === cur);
+    const targetEntry =
+      delta > 0
+        ? entries[(curIdx + 1) % entries.length]
+        : entries[(curIdx - 1 + entries.length) % entries.length];
+
+    const targetCell = targetEntry.start;
+    const deltaCells = Math.abs(targetCell - play.at) || 1;
+    logNav("jumpToUnresolvedWord done-target", {
+      targetCell,
+      deltaCells,
+      playAt: play.at,
+      curStart: cur.start,
+      targetStart: targetEntry.start,
+    });
+    setAt(targetCell, { behavior: { behavior: "smooth", delta: deltaCells } });
+    return;
+  }
+
+  const unsolved = unresolvedEntries().sort((a, b) => a.start - b.start);
+  if (!unsolved.length) return;
+  const idx = play.at;
+  const current = entryAtIndex(idx);
+
+  const targets = unsolved
+    .map((entry) => ({ entry, cell: firstUnresolvedCellInEntry(entry) }))
+    .filter((t) => t.cell != null)
+    .sort((a, b) => a.cell - b.cell);
+
+  if (!targets.length) return;
+
+  const curIdx =
+    current && !isWordCorrect(current)
+      ? targets.findIndex((t) => t.entry.eIdx === current.eIdx)
+      : -1;
+  const curFirst = curIdx >= 0 ? targets[curIdx].cell : null;
+
+  logNav("jumpToUnresolvedWord map", {
+    targets: targets.map((t) => ({ eIdx: t.entry.eIdx, start: t.entry.start, cell: t.cell })),
+    curIdx,
+    curFirst,
+  });
+
+  let targetCell = null;
+  const len = targets.length;
+
+  if (delta > 0) {
+    // Always move to the first unresolved cell of the next unresolved word
+    const next = targets.find((t) => t.cell > idx);
+    targetCell = (next || targets[0]).cell;
+  } else {
+    // Backward: if we're mid-word, go to this word's first unresolved; otherwise go to previous unresolved word
+    if (curIdx >= 0 && idx !== curFirst) {
+      targetCell = curFirst;
+    } else {
+      const prev = [...targets].reverse().find((t) => t.cell < idx);
+      targetCell = (prev || targets[len - 1]).cell;
+    }
+  }
+
+  if (targetCell == null) return;
+  if (targetCell === play.at) return;
+  const deltaCells = Math.abs(targetCell - play.at) || 1;
+  logNav("jumpToUnresolvedWord target", {
+    targetCell,
+    deltaCells,
+    curFirst,
+    targets: targets.map((t) => ({ eIdx: t.entry.eIdx, start: t.entry.start, cell: t.cell })),
+    playAt: play.at,
+  });
+  setAt(targetCell, { behavior: { behavior: "smooth", delta: deltaCells } });
+}
 function cellAriaLabel(idx, words = []) {
   if (!words || !words.length) return `Cell ${idx + 1}`;
 
@@ -2218,7 +2381,7 @@ function move(d, opts = {}) {
 
   let target = clamp(play.at + d, 0, play.n - 1);
 
-  if (play.mode === MODE.CHAIN) {
+  if (play.mode === MODE.CHAIN && !play.done) {
     const dir = d >= 0 ? +1 : -1;
     const nxt = findNextEditable(target, dir);
     if (nxt != null) target = nxt;
@@ -2527,11 +2690,21 @@ function onKey(e) {
     return;
   }
   if (e.key === "ArrowLeft") {
+    if (e.shiftKey) {
+      e.preventDefault();
+      jumpToUnresolvedWord(-1);
+      return;
+    }
     e.preventDefault();
     move(-1, { behavior: { behavior: "smooth", delta: 1 } });
     return;
   }
   if (e.key === "ArrowRight") {
+    if (e.shiftKey) {
+      e.preventDefault();
+      jumpToUnresolvedWord(1);
+      return;
+    }
     e.preventDefault();
     move(1, { behavior: { behavior: "smooth", delta: 1 } });
     return;
@@ -2885,15 +3058,35 @@ els.reset.addEventListener("click", () => {
   resetPlay();
   if (play.mode === MODE.CHAIN) chainForceIdleZero();
 });
-  els.reveal.addEventListener("click", () => {
-    markInteracted();
-    revealPlay();
-    focusForTyping();
-  });
-  els.nextPuzzleBtn?.addEventListener("click", () => {
-    markInteracted();
-    loadByViewOffset(1);
-  });
+els.reveal.addEventListener("click", () => {
+  markInteracted();
+  revealPlay();
+  focusForTyping();
+});
+els.nextPuzzleBtn?.addEventListener("click", () => {
+  markInteracted();
+  loadByViewOffset(1);
+});
+els.navCellPrev?.addEventListener("click", () => {
+  let tgt = null;
+  if (play.done || play.mode === MODE.OVERLAP) {
+    tgt = clamp(play.at - 1, 0, play.n - 1);
+  } else {
+    tgt = findUnresolvedCell(play.at, -1);
+  }
+  if (tgt != null) setAt(tgt, { behavior: { behavior: "smooth", delta: Math.abs(play.at - tgt) || 1 } });
+});
+els.navCellNext?.addEventListener("click", () => {
+  let tgt = null;
+  if (play.done || play.mode === MODE.OVERLAP) {
+    tgt = clamp(play.at + 1, 0, play.n - 1);
+  } else {
+    tgt = findUnresolvedCell(play.at, +1);
+  }
+  if (tgt != null) setAt(tgt, { behavior: { behavior: "smooth", delta: Math.abs(play.at - tgt) || 1 } });
+});
+els.navWordPrev?.addEventListener("click", () => jumpToUnresolvedWord(-1));
+els.navWordNext?.addEventListener("click", () => jumpToUnresolvedWord(1));
 
 // Success modal (Overlap)
 els.success.addEventListener("click", (e) => {

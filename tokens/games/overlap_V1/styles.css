@@ -346,9 +346,10 @@
       /* margin: var(--spacing-x16) var(--layout-grid-margin) var(--spacing-x4); */
       height: var(--unit-48);
       max-width: var(--layout-content-md-max);
+            /* width: 100%; */
       gap: var(--spacing-x16);
-      width: 100%;
-      box-sizing: border-box;
+
+      /* box-sizing: border-box; */
       padding-inline: var(--layout-grid-margin);
       align-self: center;
 
@@ -407,7 +408,14 @@
   }
 
 
-
+.puzzle-nav{
+    display: flex;
+    justify-content: space-between;
+    margin-inline: var(--layout-grid-margin);
+    max-width: var(--layout-content-md-max);
+     align-self: center;
+     width: 100%;
+}
 
 
 
