@@ -546,6 +546,10 @@ body[data-chain-state="done"] .rangeClue-content {
     pointer-events: none;
 }
 
+.range.is-locked + .rangeClue .rangeClue-content {
+    pointer-events: none;
+}
+
 .rangeClue {
 
     grid-row: 1/2;
@@ -640,15 +644,23 @@ body[data-chain-state="done"] .rangeClue-content {
 }
 
 .rangeClue.is-hint-visible .rangeClue-hint,
-.rangeClue .rangeClue-content:hover .rangeClue-hint,
 .rangeClue .rangeClue-content:focus-within .rangeClue-hint,
-.rangeClue .rangeClue-string:hover ~ .rangeClue-hint,
 .rangeClue .rangeClue-string:focus-visible ~ .rangeClue-hint,
 .rangeClue.is-hint-intro .rangeClue-hint {
     display: inline-flex;
     opacity: 1;
     transform: translateX(0);
     pointer-events: auto;
+}
+
+@media (hover: hover) {
+    .rangeClue .rangeClue-content:hover .rangeClue-hint,
+    .rangeClue .rangeClue-string:hover ~ .rangeClue-hint {
+        display: inline-flex;
+        opacity: 1;
+        transform: translateX(0);
+        pointer-events: auto;
+    }
 }
 
 .rangeClue.is-hidden .rangeClue-hint {

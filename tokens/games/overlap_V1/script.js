@@ -1714,8 +1714,12 @@ function showRangeClueHint(eIdx) {
 
   clearRangeHintHideTimer();
   const hint = rc.querySelector(".rangeClue-hint");
-  hint && (hint.style.display = "inline-flex");
-  rc.classList.add("is-hint-visible");
+  if (hint) {
+    hint.style.display = "inline-flex";
+    rc.classList.remove("is-hint-visible", "is-hint-intro");
+    void hint.offsetWidth; // ensure transition starts from hidden state
+    requestAnimationFrame(() => rc.classList.add("is-hint-visible"));
+  }
   _rangeHintOpen = eIdx;
 }
 
@@ -1756,6 +1760,7 @@ function showRangeFocusForEntry(entry) {
 }
 
 function onRangeClueContentOver(e) {
+  if (IS_TOUCH || e.pointerType === "touch") return;
   const content = e.target.closest(".rangeClue-content");
   if (!content) return;
   const rc = content.closest(".rangeClue");
@@ -1767,6 +1772,7 @@ function onRangeClueContentOver(e) {
 }
 
 function onRangeClueContentOut(e) {
+  if (IS_TOUCH || e.pointerType === "touch") return;
   const content = e.target.closest(".rangeClue-content");
   if (!content) return;
   const rc = content.closest(".rangeClue");
