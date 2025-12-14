@@ -1193,6 +1193,7 @@ function setCols(n) {
 }
 
 function renderGrid(target, model, clickable) {
+  if (target === els.grid) resetRangeClueHints();
   target.innerHTML = "";
 
   // Track which entries cover each cell (for ARIA + sizing)
@@ -1238,14 +1239,38 @@ function renderGrid(target, model, clickable) {
       h === "inner" ? "3 / 4" : "1 / 2";
     rc.style.gridRow = row;
 
+    const rcContent = document.createElement("div");
+    rcContent.className = "rangeClue-content";
+
     const clueBtn = document.createElement("button");
     clueBtn.type = "button";
     clueBtn.className = "rangeClue-string text-uppercase-semibold-md elevation-active";
     clueBtn.dataset.e = String(e.eIdx);
     clueBtn.textContent = e.clue || "";
+    clueBtn.setAttribute("aria-label", `${e.clue || "Clue"} (${e.len} letters)`);
 
-    rc.appendChild(clueBtn);
+    const hintBtn = document.createElement("button");
+    hintBtn.type = "button";
+    hintBtn.className = "rangeClue-hint text-uppercase-semibold-md elevation-active";
+    hintBtn.dataset.e = String(e.eIdx);
+    hintBtn.textContent = "Hint";
+    hintBtn.setAttribute("aria-label", `Get a hint for ${e.clue || "this word"}`);
+
+    rcContent.append(clueBtn, hintBtn);
+    rc.appendChild(rcContent);
     target.appendChild(rc);
+  }
+
+  if (target === els.grid) {
+    const focus = ensureRangeFocusEl();
+    focus.hidden = true;
+    focus.style.removeProperty("--gs");
+    focus.style.removeProperty("--ge");
+    focus.style.removeProperty("--color");
+    focus.classList.remove("range-full", "range-mid", "range-inner");
+    focus.classList.remove("is-active");
+    focus.style.gridRow = "";
+    target.appendChild(focus);
   }
 
   // Cells (MUST explicitly place into columns so they don't get auto-placed after ranges)
@@ -1495,6 +1520,7 @@ function jumpToUnresolvedWord(delta) {
       targetStart: targetEntry.start,
     });
     setAt(targetCell, { behavior: { behavior: "smooth", delta: deltaCells } });
+    showRangeFocusForEntry(targetEntry);
     return;
   }
 
@@ -1520,6 +1546,7 @@ function jumpToUnresolvedWord(delta) {
       targetStart: targetEntry.start,
     });
     setAt(targetCell, { behavior: { behavior: "smooth", delta: deltaCells } });
+    showRangeFocusForEntry(targetEntry);
     return;
   }
 
@@ -1548,19 +1575,25 @@ function jumpToUnresolvedWord(delta) {
   });
 
   let targetCell = null;
+  let targetEntry = null;
   const len = targets.length;
 
   if (delta > 0) {
     // Always move to the first unresolved cell of the next unresolved word
     const next = targets.find((t) => t.cell > idx);
-    targetCell = (next || targets[0]).cell;
+    const tgt = next || targets[0];
+    targetCell = tgt.cell;
+    targetEntry = tgt.entry;
   } else {
     // Backward: if we're mid-word, go to this word's first unresolved; otherwise go to previous unresolved word
     if (curIdx >= 0 && idx !== curFirst) {
       targetCell = curFirst;
+      targetEntry = targets[curIdx].entry;
     } else {
       const prev = [...targets].reverse().find((t) => t.cell < idx);
-      targetCell = (prev || targets[len - 1]).cell;
+      const tgt = prev || targets[len - 1];
+      targetCell = tgt.cell;
+      targetEntry = tgt.entry;
     }
   }
 
@@ -1575,6 +1608,7 @@ function jumpToUnresolvedWord(delta) {
     playAt: play.at,
   });
   setAt(targetCell, { behavior: { behavior: "smooth", delta: deltaCells } });
+  if (targetEntry) showRangeFocusForEntry(targetEntry);
 }
 function cellAriaLabel(idx, words = []) {
   if (!words || !words.length) return `Cell ${idx + 1}`;
@@ -1594,6 +1628,201 @@ function cellAriaLabel(idx, words = []) {
 }
 
 // ---- Hints ----
+let _rangeHintOpen = null;
+let _rangeHintHideTimer = 0;
+let _rangeHintIntroTimer = 0;
+let _rangeHintIntroClearTimer = 0;
+let rangeFocusEl = null;
+const HINT_OUT_MS = 180;
+let _initialHintIntroQueued = false;
+let _rangeHintPinned = null;
+
+const focusedRangeEntry = () => {
+  const eIdx = Number(rangeFocusEl?.dataset.e);
+  if (Number.isNaN(eIdx)) return null;
+  return play.entries.find((x) => x.eIdx === eIdx) || null;
+};
+
+const isCellInFocusedRange = (i) => {
+  const e = focusedRangeEntry();
+  if (!e) return false;
+  return i >= e.start && i < e.start + e.len;
+};
+
+function setHintDisplay(rc, visible) {
+  const hint = rc?.querySelector(".rangeClue-hint");
+  if (!hint) return;
+  hint.style.display = visible ? "inline-flex" : "none";
+}
+
+function scheduleHintDisplayNone(rc, delay = HINT_OUT_MS) {
+  if (!rc) return;
+  const hint = rc.querySelector(".rangeClue-hint");
+  if (!hint) return;
+  if (rc.classList.contains("is-hint-visible") || rc.classList.contains("is-hint-intro")) return;
+  window.setTimeout(() => {
+    if (rc.classList.contains("is-hint-visible") || rc.classList.contains("is-hint-intro")) return;
+    hint.style.display = "none";
+  }, delay);
+}
+
+function firstEditableCellInEntry(entry) {
+  if (!entry) return null;
+  for (let i = entry.start; i < entry.start + entry.len; i++) {
+    if (play.mode === MODE.CHAIN && isCellLocked(i)) continue;
+    return i;
+  }
+  return entry.start;
+}
+
+function clearRangeHintHideTimer() {
+  if (_rangeHintHideTimer) clearTimeout(_rangeHintHideTimer);
+  _rangeHintHideTimer = 0;
+}
+
+function rangeClueEl(eIdx) {
+  return els.grid?.querySelector(`.rangeClue[data-e="${eIdx}"]`);
+}
+
+function hideRangeClueHint(eIdx = _rangeHintOpen) {
+  if (eIdx == null) return;
+  clearRangeHintHideTimer();
+  const rc = rangeClueEl(eIdx);
+  if (rc) {
+    rc.classList.remove("is-hint-visible");
+    scheduleHintDisplayNone(rc);
+  }
+  if (_rangeHintOpen === eIdx) _rangeHintOpen = null;
+  if (_rangeHintPinned === eIdx) _rangeHintPinned = null;
+}
+
+function hideAllRangeClueHints() {
+  clearRangeHintHideTimer();
+  _rangeHintOpen = null;
+  _rangeHintPinned = null;
+  els.grid?.querySelectorAll(".rangeClue").forEach((rc) => {
+    rc.classList.remove("is-hint-visible");
+    scheduleHintDisplayNone(rc);
+  });
+}
+
+function showRangeClueHint(eIdx) {
+  const rc = rangeClueEl(eIdx);
+  if (!rc || rc.classList.contains("is-hidden")) return;
+
+  hideAllRangeClueHints();
+
+  clearRangeHintHideTimer();
+  const hint = rc.querySelector(".rangeClue-hint");
+  hint && (hint.style.display = "inline-flex");
+  rc.classList.add("is-hint-visible");
+  _rangeHintOpen = eIdx;
+}
+
+function scheduleHideRangeClueHint(eIdx, delay = 2200) {
+  clearRangeHintHideTimer();
+  _rangeHintHideTimer = window.setTimeout(() => hideRangeClueHint(eIdx), delay);
+}
+
+function ensureRangeFocusEl() {
+  if (!rangeFocusEl) {
+    rangeFocusEl = document.createElement("div");
+    rangeFocusEl.className = "range range-focus";
+    rangeFocusEl.hidden = true;
+  }
+  return rangeFocusEl;
+}
+
+function hideRangeFocus() {
+  if (!rangeFocusEl) return;
+  rangeFocusEl.hidden = true;
+  rangeFocusEl.dataset.e = "";
+  rangeFocusEl.classList.remove("is-active");
+}
+
+function showRangeFocusForEntry(entry) {
+  if (!entry) return;
+  const el = ensureRangeFocusEl();
+  const rangeEl = els.grid?.querySelector(`.range[data-e="${entry.eIdx}"]`);
+  const color = entry.color || rangeEl?.style.getPropertyValue("--color") || "var(--c-red)";
+  el.hidden = false;
+  el.dataset.e = String(entry.eIdx);
+  el.style.setProperty("--gs", String(entry.start + 1));
+  el.style.setProperty("--ge", String(entry.start + entry.len + 1));
+  el.classList.remove("range-full", "range-mid", "range-inner");
+  el.classList.add(`range-${entry.h || "full"}`);
+  el.style.setProperty("--color", color);
+  el.classList.add("is-active");
+}
+
+function onRangeClueContentOver(e) {
+  const content = e.target.closest(".rangeClue-content");
+  if (!content) return;
+  const rc = content.closest(".rangeClue");
+  const eIdx = Number(rc?.dataset.e);
+  if (Number.isNaN(eIdx)) return;
+  setHintDisplay(rc, true);
+  clearRangeHintHideTimer();
+  if (_rangeHintOpen === eIdx) rc.classList.add("is-hint-visible");
+}
+
+function onRangeClueContentOut(e) {
+  const content = e.target.closest(".rangeClue-content");
+  if (!content) return;
+  const rc = content.closest(".rangeClue");
+  const related = e.relatedTarget;
+  if (related && related.closest(".rangeClue-content") === content) return;
+  const eIdx = Number(rc?.dataset.e);
+  if (Number.isNaN(eIdx)) return;
+  if (_rangeHintPinned === eIdx) return;
+  scheduleHideRangeClueHint(eIdx, 1000);
+  scheduleHintDisplayNone(rc, HINT_OUT_MS);
+}
+
+function resetRangeClueHints() {
+  clearRangeHintHideTimer();
+  if (_rangeHintIntroTimer) clearTimeout(_rangeHintIntroTimer);
+  if (_rangeHintIntroClearTimer) clearTimeout(_rangeHintIntroClearTimer);
+  _rangeHintIntroTimer = 0;
+  _rangeHintIntroClearTimer = 0;
+  hideAllRangeClueHints();
+  hideRangeFocus();
+}
+
+function pulseRangeHintIntro({ delay = 300, duration = 1400 } = {}) {
+  if (play.mode === MODE.CHAIN && !chain.started) return;
+  const clues = els.grid?.querySelectorAll(".rangeClue:not(.is-hidden)") || [];
+  if (!clues.length || document.documentElement.classList.contains("chain-prestart")) return;
+
+  if (_rangeHintIntroTimer) clearTimeout(_rangeHintIntroTimer);
+  if (_rangeHintIntroClearTimer) clearTimeout(_rangeHintIntroClearTimer);
+
+  _rangeHintIntroTimer = window.setTimeout(() => {
+    clues.forEach((rc) => {
+      setHintDisplay(rc, true);
+      rc.classList.remove("is-hint-visible", "is-hint-intro");
+      // force reflow so transition can start from opacity 0
+      void rc.offsetWidth;
+    });
+    requestAnimationFrame(() => {
+      clues.forEach((rc) => rc.classList.add("is-hint-intro", "is-hint-visible"));
+      _rangeHintIntroClearTimer = window.setTimeout(() => {
+        clues.forEach((rc) => {
+          rc.classList.remove("is-hint-visible", "is-hint-intro");
+          scheduleHintDisplayNone(rc, HINT_OUT_MS);
+        });
+        _rangeHintOpen = null;
+      }, duration);
+    });
+  }, delay);
+}
+
+function queueInitialHintIntro(delay = 900) {
+  if (_initialHintIntroQueued) return;
+  _initialHintIntroQueued = true;
+  window.setTimeout(() => pulseRangeHintIntro({ delay: 0 }), delay);
+}
+
 function firstHintIndex(entry) {
   if (!entry) return null;
   for (let i = entry.start; i < entry.start + entry.len && i < play.n; i++) {
@@ -2016,6 +2245,7 @@ function chainForceIdleZero() {
   ui.timer.textContent = fmtTime(0);
   chainSetUIState(CHAIN_UI.IDLE, ui);
   setInlineCluesHiddenUntilChainStart();
+  resetRangeClueHints();
 }
 
 function chainShowResetWithClues() {
@@ -2051,6 +2281,7 @@ function chainStartNow() {
   setInlineCluesHiddenUntilChainStart();
   chain.isTimed = false;
   chainSetUIState(CHAIN_UI.RUNNING, ui);
+  pulseRangeHintIntro();
 
   chain.startAt = Date.now();
 
@@ -2221,7 +2452,7 @@ function setInlineCluesHiddenUntilChainStart() {
 
   // hard-hide inline clues during pre-start (covers common selectors)
   els.grid?.querySelectorAll(
-    ".range .rangeClue, .range [data-inline-clue], .range .inlineClue"
+    ".rangeClue"
   ).forEach((el) => {
     el.classList.toggle("is-hidden", preStart);
   });
@@ -2503,6 +2734,7 @@ function resetPlay() {
   resetToastGuards();
   clearToasts();
   clearSelectAll();
+  resetRangeClueHints();
 
   play.lockedEntries.clear();
   play.lockedCells = Array.from({ length: play.n }, () => false);
@@ -2521,6 +2753,8 @@ function resetPlay() {
     els.legend.innerHTML = "";
     chainResetTimer();
     setInlineCluesHiddenUntilChainStart();
+  } else {
+    setInlineCluesHiddenUntilChainStart(); // ensure clues un-hidden when leaving chain mode
   }
 
   cancelSmoothFollow();
@@ -2544,9 +2778,11 @@ function revealPlay() {
 }
 
 function onGridCellClick(e) {
-  const clueBtn = e.target.closest(".rangeClue-string");
-  if (clueBtn) {
-    const eIdx = Number(clueBtn.dataset.e || clueBtn.closest(".rangeClue")?.dataset.e);
+  if (IS_TOUCH && performance.now() < _ignoreGridClickUntil) return;
+
+  const hintBtn = e.target.closest(".rangeClue-hint");
+  if (hintBtn) {
+    const eIdx = Number(hintBtn.dataset.e || hintBtn.closest(".rangeClue")?.dataset.e);
     if (!Number.isNaN(eIdx)) {
       markInteracted();
       focusForTyping();
@@ -2555,9 +2791,29 @@ function onGridCellClick(e) {
     return;
   }
 
+  const clueBtn = e.target.closest(".rangeClue-string");
+  if (clueBtn) {
+    const eIdx = Number(clueBtn.dataset.e || clueBtn.closest(".rangeClue")?.dataset.e);
+    if (!Number.isNaN(eIdx)) {
+      markInteracted();
+      focusForTyping();
+      showRangeClueHint(eIdx);
+      _rangeHintPinned = eIdx;
+      const entry = play.entries.find((x) => x.eIdx === eIdx);
+      showRangeFocusForEntry(entry);
+      const targetCell = firstEditableCellInEntry(entry);
+      if (targetCell != null) setAt(targetCell, { behavior: "smooth" });
+      if (IS_TOUCH) _ignoreGridClickUntil = performance.now() + 500;
+    }
+    return;
+  }
+
   const cell = e.target.closest(".cell");
-  if (!cell) return;
-  if (IS_TOUCH && performance.now() < _ignoreGridClickUntil) return;
+  if (!cell) {
+    hideAllRangeClueHints();
+    hideRangeFocus();
+    return;
+  }
 
   clearSelectAll();
   markInteracted();
@@ -2568,7 +2824,61 @@ function onGridCellClick(e) {
     chainStartNow();
   }
 
+  hideAllRangeClueHints();
+  if (!isCellInFocusedRange(i)) hideRangeFocus();
   setAt(i, { behavior: "smooth" });
+}
+
+function onGridPointerUpTouch(e) {
+  if (e.pointerType !== "touch") return;
+  const hintBtn = e.target.closest(".rangeClue-hint");
+  if (hintBtn) {
+    e.preventDefault();
+    const eIdx = Number(hintBtn.dataset.e || hintBtn.closest(".rangeClue")?.dataset.e);
+    if (!Number.isNaN(eIdx)) {
+      markInteracted();
+      focusForTyping();
+      applyHintForEntry(eIdx);
+      _ignoreGridClickUntil = performance.now() + 500;
+    }
+    return;
+  }
+
+  const clueBtn = e.target.closest(".rangeClue-string");
+  if (clueBtn) {
+    e.preventDefault();
+    const eIdx = Number(clueBtn.dataset.e || clueBtn.closest(".rangeClue")?.dataset.e);
+    if (!Number.isNaN(eIdx)) {
+      markInteracted();
+      focusForTyping();
+      showRangeClueHint(eIdx);
+      _rangeHintPinned = eIdx;
+      const entry = play.entries.find((x) => x.eIdx === eIdx);
+      showRangeFocusForEntry(entry);
+      const targetCell = firstEditableCellInEntry(entry);
+      if (targetCell != null) setAt(targetCell, { behavior: "smooth" });
+      _ignoreGridClickUntil = performance.now() + 500;
+    }
+    return;
+  }
+}
+
+function onGridRangeCluePointerOut(e) {
+  const rc = e.target.closest(".rangeClue");
+  if (!rc) return;
+  const related = e.relatedTarget;
+  if (related && related.closest(".rangeClue") === rc) return;
+  const eIdx = Number(rc.dataset.e);
+  if (Number.isNaN(eIdx)) return;
+  scheduleHideRangeClueHint(eIdx, 1000);
+}
+
+function onGlobalPointerDownForRangeClues(e) {
+  if (e.target.closest(".rangeClue") || e.target.closest(".range-focus")) return;
+  const cell = e.target.closest(".cell");
+  if (cell && isCellInFocusedRange(Number(cell.dataset.i))) return;
+  hideAllRangeClueHints();
+  hideRangeFocus();
 }
 
 // ---- Load puzzle ----
@@ -2602,6 +2912,7 @@ function loadPuzzle(i) {
   resetToastGuards();
   clearToasts();
   clearSelectAll();
+  hideRangeFocus();
 
   play.lockedEntries.clear();
   play.lockedCells = Array.from({ length: play.n }, () => false);
@@ -2635,6 +2946,8 @@ function loadPuzzle(i) {
       els.legend.classList.remove("chainLegend");
       els.legend.innerHTML = "";
     }
+    setInlineCluesHiddenUntilChainStart(); // clears chain-prestart class when not in chain mode
+    pulseRangeHintIntro();
   }
   updateResetRevealVisibility();
 
@@ -3066,6 +3379,7 @@ document.addEventListener(
   },
   { passive: true }
 );
+document.addEventListener("pointerdown", onGlobalPointerDownForRangeClues, { passive: true });
 document.addEventListener("keydown", onKey, true);
 window.addEventListener("resize", () => updateSliderUI());
 
@@ -3080,6 +3394,9 @@ els.stage.addEventListener("pointerdown", (e) => {
 
 // Grid click
 els.grid.addEventListener("click", onGridCellClick);
+els.grid.addEventListener("pointerover", onRangeClueContentOver);
+els.grid.addEventListener("pointerout", onRangeClueContentOut);
+els.grid.addEventListener("pointerup", onGridPointerUpTouch);
 
 // Chain clue updates on scroll
 els.gridScroll?.addEventListener(
@@ -3328,6 +3645,7 @@ initOnScreenKeyboard();
 initSlider();
 loadPuzzle(0);
 setTab(currentView);
+queueInitialHintIntro();
 
 requestAnimationFrame(() => {
   setAt(0);
