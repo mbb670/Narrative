@@ -2526,7 +2526,12 @@ function updatePlayUI() {
     c.querySelector(".num").textContent = i + 1;
     c.querySelector(".letter").textContent = play.usr[i] || "";
     c.classList.toggle("is-active", i === play.at && !play.done);
-    c.setAttribute("aria-label", cellAriaLabel(i, play.cellWords?.[i]));
+    const wordsHere = play.cellWords?.[i] || [];
+    const fullySolved = wordsHere.length > 0 && wordsHere.every((w) => isWordCorrect(w));
+    const locked = play.mode === MODE.CHAIN && isCellLocked(i) && !fullySolved;
+    c.classList.toggle("cell-solved", fullySolved);
+    c.classList.toggle("cell-locked", locked);
+    c.setAttribute("aria-label", cellAriaLabel(i, wordsHere));
   });
   updateSelectedWordUI();
   updateSliderUI();
