@@ -2696,7 +2696,7 @@ function shareResult({ mode }) {
     const hints = Math.max(0, chain.hintsUsed || 0);
     if (chain.unsolvedCount > 0 && chain.lastFinishReason !== "solved") {
       msg += ` with ${chain.unsolvedCount} unsolved words`;
-      msg += ` and ${hints} hints.`;
+      if (hints > 0) msg += ` and ${hints} hints.`;
     } else if (hints > 0) {
       msg += ` with ${hints} hints.`;
     }
