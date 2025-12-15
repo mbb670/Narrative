@@ -940,7 +940,7 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
 }
 
 /* Success */
-.success {
+.results {
     position: fixed;
     inset: 0;
     display: none;
@@ -949,33 +949,75 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
     padding: var(--layout-grid-margin);
     z-index: 50;
 }
+    .result-heading{
+        text-align: center;
+    }
 
-.success.is-open {
+    .stat-label, .resultsSubtitle{
+        color: var(--foreground-subtle);
+        margin-top: var(--spacing-x2);
+    }
+
+    .stat{
+        flex:1;
+        padding: var(--spacing-x8);
+        background-color: var(--background-muted);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-default);
+        text-align: center;
+        min-height: var(--spacing-x80);
+        align-content: center;
+    }
+
+    .chainResults-stats{
+        display: flex;
+        gap: var(--spacing-x8);
+    }
+
+
+.results.is-open {
     display: grid
 }
 
 .card {
     width: min(var(--layout-content-md-max), 100%);
     background: var(--background-default);
-    padding: var(--layout-grid-margin);
-    border-radius: var(--radius-default);
+    padding: var(--spacing-x24);
+    border-radius: var(--radius-soft);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap:var(--spacing-x24);
 }
 
-.card h2 {
-    margin: 0 0 var(--spacing-x4);
-    color: var(--foreground-default);
-}
-
-.card p {
-    margin: 0 0 var(--spacing-x16);
-    color: var(--foreground-muted);
+.resultsClose{
+    position: absolute;
+    top: var(--spacing-x8);
+    right: var(--spacing-x8);
+    border: unset;
 }
 
 .actions {
     display: flex;
-    gap: var(--spacing-x8);
-    justify-content: flex-end;
-    flex-wrap: wrap
+    justify-content: center;
+    .resultsShare{
+        min-width: 120px;
+        min-height: 36px;
+        display: flex;
+
+justify-content: center;
+gap: var(--spacing-x8);
+        &::before{
+         content: '';
+         display: inline-block;
+         width: var(--spacing-x16);
+        aspect-ratio: 1;
+        background-color: var(--foreground-alt);
+        -webkit-mask: url("images/share.svg") center / contain no-repeat;
+        mask: url("images/share.svg") center / contain no-repeat;
+        }
+    }
+
 }
 
 /* Builder (kept intentionally simple + lightweight) */

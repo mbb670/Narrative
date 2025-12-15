@@ -636,10 +636,9 @@ const els = {
   next: $("#next"),
   reset: $("#reset"),
   reveal: $("#reveal"),
-  success: $("#success"),
-  sClose: $("#sClose"),
-  sAgain: $("#sAgain"),
-  sNext: $("#sNext"),
+  resultsModal: document.getElementById("results"),
+  resultsClose: document.querySelector(".resultsClose"),
+  resultsShare: document.querySelector(".resultsShare"),
   slider: $(".game-slider"),
   nextPuzzleBtn: $("#nextPuzzleBtn"),
   puzzleActions: document.querySelector(".puzzle-actions"),
@@ -2142,57 +2141,27 @@ chainSetUIState(
 function ensureChainResults() {
   if (chainResults) return chainResults;
 
-  const wrap = document.createElement("div");
-  wrap.className = "success";
-  wrap.id = "chainResults";
-  wrap.setAttribute("role", "dialog");
-  wrap.setAttribute("aria-modal", "true");
-  wrap.setAttribute("aria-label", "Results");
+  const wrap = els.resultsModal;
+  if (!wrap) return null;
 
-  wrap.innerHTML = `
-    <div class="card">
-      <h2 class="text-headline-semibold-sm" id="chainResultsTitle">Time!</h2>
-      <p class="text-system-regular-md" id="chainScoreLine">Your results</p>
-      <div class="note" id="chainBreakdown"></div>
-      <div class="actions">
-        <button class="btn" id="cClose" type="button">Close</button>
-        <button class="btn" id="cAgain" type="button">Play again</button>
-        <button class="btn primary" id="cNext" type="button">Next puzzle</button>
-        <button class="btn" id="cShare" type="button">Share</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(wrap);
-
-  const cClose = wrap.querySelector("#cClose");
-  const cAgain = wrap.querySelector("#cAgain");
-  const cNext = wrap.querySelector("#cNext");
-  const cShare = wrap.querySelector("#cShare");
+  const cClose = els.resultsClose;
+  const cShare = els.resultsShare;
 
   wrap.addEventListener("click", (e) => {
     if (e.target === wrap) closeChainResults();
   });
-  cClose.addEventListener("click", closeChainResults);
-  cAgain.addEventListener("click", () => {
-    closeChainResults();
-    resetPlay();
-    chainSetUIState(CHAIN_UI.IDLE);
-    focusForTyping();
-  });
-  cNext.addEventListener("click", () => {
-    closeChainResults();
-    chainSetUIState(CHAIN_UI.IDLE);
-    loadByViewOffset(1);
-  });
-  cShare.addEventListener("click", () => {
+  cClose?.addEventListener("click", closeChainResults);
+  cShare?.addEventListener("click", () => {
     shareResult({ mode: MODE.CHAIN });
   });
 
   chainResults = {
     wrap,
-    title: wrap.querySelector("#chainResultsTitle"),
-    scoreLine: wrap.querySelector("#chainScoreLine"),
-    breakdown: wrap.querySelector("#chainBreakdown"),
+    title: wrap.querySelector(".resultsTitle"),
+    subtitle: wrap.querySelector(".resultsSubtitle"),
+    statTime: wrap.querySelector(".resultsStatTimeVal"),
+    statSolved: wrap.querySelector(".resultsStatSolvedVal"),
+    statHints: wrap.querySelector(".resultsStatHintsVal"),
     cClose,
     cShare,
   };
@@ -2325,16 +2294,28 @@ function scoreChain() {
 
 function openChainResults(stats, reason) {
   const r = ensureChainResults();
+  if (!r) return;
   r.wrap.classList.add("is-open");
   const tSec = Math.max(0, Math.floor(chain.lastFinishElapsedSec || 0));
-  r.title.textContent = "Solved!";
-  r.scoreLine.textContent = `Time: ${fmtTime(tSec)}`;
-  const lines = [];
-  if (chain.unsolvedCount > 0) lines.push(`Unsolved words: ${chain.unsolvedCount}`);
-  if (chain.hintsUsed > 0) lines.push(`Hints used: ${chain.hintsUsed}`);
-  r.breakdown.innerHTML = lines.join("<br>");
-  if (!lines.length) r.breakdown.textContent = "";
-  r.cClose.focus();
+  const total = play.entries?.length || 0;
+  const solved = Math.max(0, total - Math.max(0, chain.unsolvedCount || 0));
+  const allSolved = chain.unsolvedCount === 0;
+
+  r.wrap.setAttribute("data-result", allSolved ? "solved" : "partial");
+  r.title.textContent = allSolved ? "Success!" : "Overlap";
+
+  const now = new Date();
+  r.subtitle.textContent = now.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  r.statTime.textContent = fmtTime(tSec);
+  r.statSolved.textContent = `${solved}/${total}`;
+  r.statHints.textContent = String(Math.max(0, chain.hintsUsed || 0));
+
 }
 
 function chainFinish(reason = "time", opts = {}) {
@@ -2527,7 +2508,7 @@ function updatePlayUI() {
     c.querySelector(".letter").textContent = play.usr[i] || "";
     c.classList.toggle("is-active", i === play.at && !play.done);
     const wordsHere = play.cellWords?.[i] || [];
-    const fullySolved = wordsHere.length > 0 && wordsHere.every((w) => isWordCorrect(w));
+    const fullySolved = play.mode === MODE.CHAIN && wordsHere.length > 0 && wordsHere.every((w) => isWordCorrect(w));
     const locked = play.mode === MODE.CHAIN && isCellLocked(i) && !fullySolved;
     c.classList.toggle("cell-solved", fullySolved);
     c.classList.toggle("cell-locked", locked);
@@ -2684,7 +2665,7 @@ function openSuccess() {
 }
 
 function closeSuccess() {
-  els.success.classList.remove("is-open");
+  els.resultsModal?.classList.remove("is-open");
 }
 
 function shareResult({ mode }) {
@@ -3073,7 +3054,7 @@ function handleEnterKey() {
 
 // ---- Global key handler (desktop) ----
 function onKey(e) {
-  if (els.success.classList.contains("is-open")) return;
+  if (els.resultsModal?.classList.contains("is-open")) return;
   if (chainResults?.wrap?.classList.contains("is-open")) return;
   if (e.metaKey && e.key.toLowerCase() === "a") {
     e.preventDefault();
@@ -3518,27 +3499,13 @@ els.navCellNext?.addEventListener("click", () => {
 els.navWordPrev?.addEventListener("click", () => jumpToUnresolvedWord(-1));
 els.navWordNext?.addEventListener("click", () => jumpToUnresolvedWord(1));
 
-// Success modal (Overlap)
-els.success.addEventListener("click", (e) => {
-  if (e.target === els.success) {
+// Results modal overlay click to close
+els.resultsModal?.addEventListener("click", (e) => {
+  if (e.target === els.resultsModal) {
     markInteracted();
-    closeSuccess();
+    closeChainResults();
     focusForTyping();
   }
-});
-els.sClose.addEventListener("click", () => {
-  markInteracted();
-  closeSuccess();
-  focusForTyping();
-});
-els.sAgain.addEventListener("click", () => {
-  markInteracted();
-  resetPlay();
-  focusForTyping();
-});
-els.sNext.addEventListener("click", () => {
-  markInteracted();
-  loadByViewOffset(1);
 });
 
 // Builder
