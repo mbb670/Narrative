@@ -653,6 +653,7 @@ const els = {
   pTitle: $("#pTitle"),
   rows: $("#rows"),
   wAdd: $("#wAdd"),
+  pDate: $("#pDate"),
   ioTxt: $("#ioTxt"),
   ioExp: $("#ioExp"),
   ioImp: $("#ioImp"),
@@ -867,6 +868,71 @@ const isChainPuzzle = (p) => String(p?.type || MODE.OVERLAP) === MODE.CHAIN;
 
 const inferDiffFromColor = () => "easy";
 
+const toDateKey = (d) => {
+  if (!(d instanceof Date) || Number.isNaN(+d)) return null;
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${y}-${pad(m)}-${pad(day)}`;
+};
+
+const normalizePuzzleDate = (val) => {
+  const raw = String(val || "").trim();
+  if (!raw) return { dateKey: null };
+
+  const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) {
+    const y = +iso[1];
+    const m = +iso[2];
+    const d = +iso[3];
+    if (y >= 1900 && m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+      return { dateKey: `${iso[1]}-${iso[2]}-${iso[3]}` };
+    }
+  }
+
+  const mmddyyyy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (mmddyyyy) {
+    const m = +mmddyyyy[1];
+    const d = +mmddyyyy[2];
+    const y = +mmddyyyy[3];
+    const dt = new Date(y, m - 1, d);
+    if (dt && dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d) {
+      const pad = (n) => String(n).padStart(2, "0");
+      return { dateKey: `${y}-${pad(m)}-${pad(d)}` };
+    }
+  }
+
+  const parsed = new Date(raw);
+  const key = toDateKey(parsed);
+  return { dateKey: key };
+};
+
+const dateFromKey = (key) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key || ""));
+  if (!m) return null;
+  const y = +m[1];
+  const mo = +m[2];
+  const d = +m[3];
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt && dt.getUTCFullYear() === y && dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d) return dt;
+  return null;
+};
+
+const puzzleDateLabel = (p) => {
+  if (!p) return null;
+  const dt = p.dateKey ? dateFromKey(p.dateKey) : null;
+  const src = dt;
+  if (!src || Number.isNaN(+src)) return null;
+  return src.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+};
+
 const normWord = (w, pType, opts = {}) => {
   const out = {
     clue: String(w?.clue || ""),
@@ -885,6 +951,7 @@ const normPuzzle = (p) => {
   const fallback = { clue: "Clue", answer: "WORD", start: 1, height: "full" };
   const timed = type === MODE.CHAIN ? false : true;
   const words = (wordsRaw.length ? wordsRaw : [fallback]).map((w) => normWord(w, type, { timed }));
+  const { dateKey } = normalizePuzzleDate(p?.dateKey || p?.date);
 
 
   const out = {
@@ -893,11 +960,8 @@ const normPuzzle = (p) => {
     type,
     palette: normalizePaletteId(p?.palette),
     words,
+    dateKey,
   };
-
-  if (type === MODE.CHAIN) {
-    out.lockCorrectWords = true;
-  }
   return out;
 };
 
@@ -1966,6 +2030,16 @@ function indicesForView(v = currentView) {
   return out;
 }
 
+function findTodayChainIndex() {
+  const todayKey = toDateKey(new Date());
+  if (!todayKey) return null;
+  for (let i = 0; i < puzzles.length; i++) {
+    const p = puzzles[i];
+    if (isChainPuzzle(p) && p.dateKey && p.dateKey === todayKey) return i;
+  }
+  return null;
+}
+
 function loadByViewOffset(delta) {
   const list = indicesForView(currentView);
   if (!list.length) return;
@@ -1980,6 +2054,13 @@ function ensureCurrentPuzzleMatchesView() {
   const list = indicesForView(currentView);
   if (!list.length) return false;
   if (list.includes(pIdx)) return true;
+  if (currentView === VIEW.CHAIN) {
+    const todayIdx = findTodayChainIndex();
+    if (todayIdx != null) {
+      loadPuzzle(todayIdx);
+      return true;
+    }
+  }
   loadPuzzle(list[0]);
   return true;
 }
@@ -2304,13 +2385,14 @@ function openChainResults(stats, reason) {
   r.wrap.setAttribute("data-result", allSolved ? "solved" : "partial");
   r.title.textContent = allSolved ? "Success!" : "Overlap";
 
-  const now = new Date();
-  r.subtitle.textContent = now.toLocaleDateString(undefined, {
+  const p = puzzles[pIdx];
+  const label = puzzleDateLabel(p) || new Date().toLocaleDateString(undefined, {
     weekday: "long",
     year: "numeric",
     month: "short",
     day: "numeric",
   });
+  r.subtitle.textContent = label;
 
   r.statTime.textContent = fmtTime(tSec);
   r.statSolved.textContent = `${solved}/${total}`;
@@ -2669,13 +2751,15 @@ function closeSuccess() {
 }
 
 function shareResult({ mode }) {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const puzzle = puzzles[pIdx];
+  const dateLabel =
+    (mode === MODE.CHAIN && puzzleDateLabel(puzzle)) ||
+    new Date().toLocaleDateString(undefined, {
+      weekday: "long",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   const baseUrl =
     SHARE_URL_OVERRIDE && SHARE_URL_OVERRIDE.trim()
       ? SHARE_URL_OVERRIDE.trim()
@@ -2687,7 +2771,7 @@ function shareResult({ mode }) {
           }
         })();
 
-  let msg = `Overlap | ${dateStr}`;
+  let msg = `Overlap | ${dateLabel}`;
 
   if (mode === MODE.CHAIN) {
     const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
@@ -3168,7 +3252,6 @@ function ensureBuilderModeUI() {
     puzzles[pIdx].type = bModeSel.value;
 
     if (puzzles[pIdx].type === MODE.CHAIN) {
-      puzzles[pIdx].lockCorrectWords = true;
       puzzles[pIdx].words = (puzzles[pIdx].words || []).map((w) => normWord(w, MODE.CHAIN));
     }
 
@@ -3198,6 +3281,7 @@ function syncBuilder() {
     .join("");
 
   els.pTitle.value = puzzles[pIdx]?.title || "";
+  els.pDate.value = puzzles[pIdx]?.dateKey || "";
 
   const p = puzzles[pIdx];
   const chainMode = isChainPuzzle(p);
@@ -3522,6 +3606,11 @@ els.pTitle.addEventListener("input", () => {
   }
   setDirty(true);
   renderPreview();
+});
+els.pDate?.addEventListener("input", () => {
+  const { dateKey } = normalizePuzzleDate(els.pDate.value);
+  puzzles[pIdx].dateKey = dateKey;
+  setDirty(true);
 });
 
 els.pNew.addEventListener("click", () => {

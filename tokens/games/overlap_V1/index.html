@@ -91,6 +91,8 @@
         <h3 class="text-uppercase-semibold-lg">Puzzle</h3>
         <label class="lab" for="pTitle">Title</label>
         <input class="ti" id="pTitle" type="text" placeholder="e.g. Demo" />
+        <label class="lab" for="pDate">Date</label>
+        <input class="ti" id="pDate" type="date" inputmode="numeric" pattern="\\d{4}-\\d{2}-\\d{2}" />
 
         <div style="height:12px"></div>
         <div class="rows" id="rows"></div>
@@ -126,7 +128,7 @@
 
   <div class="keyboard"></div>
   <div class="credit text-system-regular-sm">
-    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.978
+    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.979
   </div>
   </main>
   <!-- Results -->
@@ -134,20 +136,20 @@
     <div class="card">
       <button class="btn resultsClose text-system-regular-lg" type="button" aria-label="Close results">×</button>
       <div class="result-heading">
-        <h2 class="text-headline-semibold-md resultsTitle">Solved!</h2>
+        <h2 class="text-headline-semibold-lg resultsTitle">Solved!</h2>
          <p class="resultsSubtitle"></p>
       </div>
       <div class="chainResults-stats">
         <div class="stat resultsStatTime">
-          <div class="stat-value resultsStatTimeVal text-subheadline-semibold-sm">00:00</div>
+          <div class="stat-value resultsStatTimeVal text-subheadline-semibold-md">00:00</div>
           <div class="stat-label">Time</div>
         </div>
         <div class="stat resultsStatSolved">
-          <div class="stat-value resultsStatSolvedVal text-subheadline-semibold-sm">0/0</div>
+          <div class="stat-value resultsStatSolvedVal text-subheadline-semibold-md">0/0</div>
           <div class="stat-label">Solved</div>
         </div>
         <div class="stat resultsStatHints">
-          <div class="stat-value resultsStatHintsVal text-subheadline-semibold-sm">0</div>
+          <div class="stat-value resultsStatHintsVal text-subheadline-semibold-md">0</div>
           <div class="stat-label">Hints</div>
         </div>
       </div>
