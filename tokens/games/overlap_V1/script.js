@@ -980,6 +980,7 @@ const play = {
   at: 0,
   done: false,
   revealed: false,
+  fullSolveAnimated: false,
 
   lockedCells: [],
   lockedEntries: new Set(), // eIdx
@@ -1919,13 +1920,16 @@ function applyHintForEntry(eIdx) {
     chain.hintsUsed += 1;
     play.lockedCells[idx] = true;
 
+    let lockedByHint = false;
     if (isWordCorrect(entry)) {
+      lockedByHint = !play.lockedEntries.has(entry.eIdx);
       play.lockedEntries.add(entry.eIdx);
       rebuildLockedCells();
     }
 
     updateLockedWordUI();
     updatePlayUI();
+    if (lockedByHint) requestAnimationFrame(() => requestAnimationFrame(() => triggerSolveAnimation(entry)));
     requestChainClues();
     chainMaybeFinishIfSolved();
   } else {
@@ -2468,6 +2472,71 @@ function rebuildLockedCells() {
   }
 }
 
+function triggerSolveAnimation(entry) {
+  if (!entry || play.mode !== MODE.CHAIN || !els.grid) return;
+  const letters = [];
+  for (let i = entry.start; i < entry.start + entry.len; i++) {
+    const cell = els.grid.querySelector(`.cell[data-i="${i}"]`);
+    const letter = cell?.querySelector(".letter");
+    if (letter) letters.push(letter);
+  }
+  letters.forEach((letter, idx) => {
+    letter.classList.remove("solve-anim");
+    letter.style.setProperty("--solve-delay", `${idx * 80}ms`);
+    // force reflow to restart animation
+    void letter.offsetWidth;
+    letter.classList.add("solve-anim");
+    letter.addEventListener(
+      "animationend",
+      () => {
+        letter.classList.remove("solve-anim");
+        letter.style.removeProperty("--solve-delay");
+      },
+      { once: true }
+    );
+  });
+
+  const rangeEl = els.grid.querySelector(`.range[data-e="${entry.eIdx}"]`);
+  if (rangeEl) {
+    rangeEl.classList.remove("range-solve-anim");
+    void rangeEl.offsetWidth;
+    rangeEl.classList.add("range-solve-anim");
+    rangeEl.addEventListener(
+      "animationend",
+      () => {
+        rangeEl.classList.remove("range-solve-anim");
+      },
+      { once: true }
+    );
+  }
+}
+
+function triggerFullSolveAnimation() {
+  if (play.mode !== MODE.OVERLAP || !els.grid || play.fullSolveAnimated) return;
+  const letters = Array.from(els.grid.querySelectorAll(".cell .letter")).sort((a, b) => {
+    const pa = a.closest(".cell");
+    const pb = b.closest(".cell");
+    const ia = pa ? +pa.dataset.i : 0;
+    const ib = pb ? +pb.dataset.i : 0;
+    return ia - ib;
+  });
+  letters.forEach((letter, idx) => {
+    letter.classList.remove("solve-anim");
+    letter.style.setProperty("--solve-delay", `${idx * 80}ms`);
+    void letter.offsetWidth;
+    letter.classList.add("solve-anim");
+    letter.addEventListener(
+      "animationend",
+      () => {
+        letter.classList.remove("solve-anim");
+        letter.style.removeProperty("--solve-delay");
+      },
+      { once: true }
+    );
+  });
+  play.fullSolveAnimated = true;
+}
+
 function updateLockedWordUI() {
   els.grid.querySelectorAll(".range").forEach((r) => {
     const eIdx = +r.dataset.e;
@@ -2482,12 +2551,14 @@ function chainApplyLocksIfEnabled() {
   if (play.mode !== MODE.CHAIN) return;
 
   let changed = false;
+  const newlyLocked = [];
 
   for (const e of play.entries) {
     if (play.lockedEntries.has(e.eIdx)) continue;
     if (isWordCorrect(e)) {
       play.lockedEntries.add(e.eIdx);
       changed = true;
+      newlyLocked.push(e);
     }
   }
 
@@ -2495,6 +2566,11 @@ function chainApplyLocksIfEnabled() {
     rebuildLockedCells();
     updateLockedWordUI();
     if (selectedEntry != null && play.lockedEntries.has(selectedEntry)) clearSelection();
+    if (newlyLocked.length) {
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => newlyLocked.forEach(triggerSolveAnimation))
+      );
+    }
   }
 }
 
@@ -2641,6 +2717,7 @@ function checkSolvedOverlapOnly() {
   if (play.usr.every((ch, i) => ch === play.exp[i])) {
     play.done = true;
     play.revealed = false;
+    triggerFullSolveAnimation();
     showToast("success", "Success! You solved the puzzle!");
     updatePlayControlsVisibility();
   }
@@ -2807,6 +2884,7 @@ function resetPlay() {
   play.at = 0;
   play.done = false;
   play.revealed = false;
+  play.fullSolveAnimated = false;
   resetToastGuards();
   clearToasts();
   clearSelectAll();
@@ -2985,6 +3063,7 @@ function loadPuzzle(i) {
   play.at = 0;
   play.done = false;
   play.revealed = false;
+  play.fullSolveAnimated = false;
   resetToastGuards();
   clearToasts();
   clearSelectAll();
