@@ -179,7 +179,7 @@ header {
     &.primary {
         border-color: var(--border-strong);
         --background-color: var(--background-strong);
-        color: var(--foreground-alt);
+        color: var(--foreground-alt)!important;
     }
 }
 
@@ -339,10 +339,15 @@ header {
         color: var(--foreground-muted);
         flex: 1;
         text-wrap: nowrap;
+        display: none;
 
         span {
             color: var(--foreground-subtle);
         }
+    }
+
+      #prev, #next{
+        display: none;
     }
 
     display: none;
@@ -352,6 +357,7 @@ header {
 body[data-view="play"] {
     .game-data {
         margin-bottom: 0;
+        /* display: block; */
     }
 
     .chainHud {
@@ -360,6 +366,10 @@ body[data-view="play"] {
 
     .meta {
         text-align: center;
+    }
+
+    #prev, #next{
+        display: block;
     }
 }
 
@@ -942,6 +952,16 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
 
     #shareInline {
         display: none;
+    }
+}
+
+body[data-view="play"]{
+     .chainTimer{
+    display: none;
+     }
+    
+    #next, #prev{
+        display: block;
     }
 }
 
