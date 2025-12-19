@@ -39,6 +39,21 @@
           <button class="pill text-system-semibold-sm" id="next" type="button"><span>Next</span></button>
         </div>
       </div>
+       <div class="helper">
+        <div class="chainHud" hidden>
+          <button class="btn text-system-semibold-sm" id="chainStartBtn" type="button">Start</button>
+        </div>
+                  <div class="chainTimer text-system-semibold-sm">00:00</div>
+
+        <div class="puzzle-actions">
+          <button class="btn text-system-semibold-sm" id="reset" type="button">Reset</button>
+          <button class="btn text-system-semibold-sm" id="shareInline" type="button" style="display:none">Share</button>
+          <button class="btn text-system-semibold-sm" id="reveal" type="button">Give Up</button>
+          <button class="btn primary text-system-semibold-sm" id="nextPuzzleBtn" type="button" style="display:none">Next
+            puzzle</button>
+
+        </div>
+      </div>
       <div class="gridScroll" id="gridScroll">
         <div class="grid" id="grid" aria-describedby="sr"></div>
       
@@ -60,20 +75,6 @@
       </div>
       <div class="legend" id="legend" aria-label="Clues"></div>
       <div class="game-slider"></div>
-      <div class="helper">
-        <div class="chainHud" hidden>
-          <button class="btn text-system-semibold-sm" id="chainStartBtn" type="button">Start</button>
-          <div class="chainTimer text-system-semibold-sm">00:00</div>
-        </div>
-        <div class="puzzle-actions">
-          <button class="btn text-system-semibold-sm" id="reset" type="button">Reset</button>
-          <button class="btn text-system-semibold-sm" id="shareInline" type="button" style="display:none">Share</button>
-          <button class="btn text-system-semibold-sm" id="reveal" type="button">Reveal</button>
-          <button class="btn primary text-system-semibold-sm" id="nextPuzzleBtn" type="button" style="display:none">Next
-            puzzle</button>
-
-        </div>
-      </div>
     </div>
   </section>
 
@@ -128,7 +129,7 @@
 
   <div class="keyboard"></div>
   <div class="credit text-system-regular-sm">
-    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V2.98
+    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V3.0
   </div>
   </main>
   <!-- Results -->

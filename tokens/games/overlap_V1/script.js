@@ -28,9 +28,9 @@ const VALID_VIEWS = new Set(Object.values(VIEW));
 function loadLastView() {
   try {
     const v = localStorage.getItem(LAST_VIEW_KEY);
-    return VALID_VIEWS.has(v) ? v : VIEW.PLAY;
+    return VALID_VIEWS.has(v) ? v : VIEW.CHAIN;
   } catch {
-    return VIEW.PLAY;
+    return VIEW.CHAIN;
   }
 }
 
@@ -2112,6 +2112,8 @@ function updatePuzzleActionsVisibility(stateOverride) {
     wrap.style.display = "";
     return;
   }
+
+  // turn this back on to set the give up to only show once the puzzl is started
   const state = stateOverride || document.body.dataset.chainState || CHAIN_UI.IDLE;
   const show = state === CHAIN_UI.RUNNING || state === CHAIN_UI.PAUSED;
   wrap.style.display = show ? "" : "none";
@@ -2210,7 +2212,7 @@ startBtn.addEventListener("click", () => {
   chainUI = {
     hud,
     startBtn,
-    timer: hud.querySelector(".chainTimer"),
+    timer: document.querySelector(".chainTimer"),
   };
 chainSetUIState(
   play?.done

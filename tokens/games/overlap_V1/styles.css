@@ -344,6 +344,8 @@ header {
             color: var(--foreground-subtle);
         }
     }
+
+    display: none;
 }
 
 
@@ -897,13 +899,16 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
     padding-inline: var(--layout-grid-margin);
     width: 100%;
     max-width: var(--layout-content-md-max);
-    margin: 0 auto;
+    margin: var(--spacing-x12) auto;
     flex-wrap: wrap;
+    button{
+        min-height: var(--unit-40);
+    }
 
     .chainHud {
         align-items: center;
         gap: var(--spacing-x8);
-        /* justify-content: space-between; */
+        justify-content: space-between;
         /* justify-content: flex-end; */
         flex: 1;
 
@@ -913,25 +918,35 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
             border: unset;
         }
 
-        .chainTimer {
+     
+    }
+       .chainTimer {
             font-variant-numeric: tabular-nums;
             background: var(--background-subtle);
             color: var(--foreground-muted);
             padding: var(--spacing-x2) var(--spacing-x4);
             border-radius: var(--radius-slight);
         }
-    }
 
     .puzzle-actions {
         display: flex;
         gap: var(--spacing-x8);
-        justify-content: center;
+        justify-content: end;
         flex-wrap: wrap;
+        flex: 1;
+
+        button{
+                    color: var(--foreground-muted);
+        }
     }
 
     #shareInline {
         display: none;
     }
+}
+
+#reset{
+    display: none;
 }
 
 /* Slider (word chain scroll) */
