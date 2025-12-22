@@ -371,6 +371,10 @@ body[data-view="play"] {
     #prev, #next{
         display: block;
     }
+
+    .puzzle-actions{
+        justify-content: center;
+    }
 }
 
 body[data-view="chain"] .chainHud {
