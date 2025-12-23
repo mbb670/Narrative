@@ -175,6 +175,7 @@ header {
 /* Button */
 .btn {
     border-radius: var(--radius-default);
+    align-items: center;
 
     &.primary {
         border-color: var(--border-strong);
