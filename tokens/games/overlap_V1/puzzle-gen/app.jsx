@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from "https://esm.sh/react@18.3.1";
+import React, { useEffect, useMemo, useState, useRef } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { Plus, Trash2, ArrowRight, Link as LinkIcon, RefreshCw, GripVertical, AlertTriangle, Wand2, Hammer, X, Globe, AlertCircle, Sparkles, Layers, Type, CheckCircle2, ArrowUp, ArrowDown, Square, RotateCw, Percent, AlignLeft, ArrowLeft, Copy, Check, ChevronDown, ChevronUp, Undo, PenTool, ArrowLeftCircle, Book, Redo } from "https://esm.sh/lucide-react@0.468.0?dev&deps=react@18.3.1";
-import { GEMINI_API_KEY as apiKey } from "./local-key.js";
 
 const Card = ({ children, className = "" }) => (
   <div className={`bg-white rounded-xl shadow-sm border border-slate-200 ${className}`}>
@@ -63,6 +62,17 @@ const getOverlap = (w1, w2, minLen = 2) => {
   return null;
 };
 
+const totalOverlapBetween = (words, startWord, endWord) => {
+  if (!words || words.length === 0) return 0;
+  let total = 0;
+  total += getOverlap(startWord, words[0], 1)?.count || 0;
+  for (let i = 0; i < words.length - 1; i++) {
+    total += getOverlap(words[i], words[i + 1], 1)?.count || 0;
+  }
+  total += getOverlap(words[words.length - 1], endWord, 1)?.count || 0;
+  return total;
+};
+
 const isDerivative = (w1, w2) => {
     const c1 = cleanWord(w1);
     const c2 = cleanWord(w2);
@@ -103,7 +113,188 @@ const cleanDefinition = (rawDef) => {
     return def;
 };
 
-const generateGeminiClue = async (word, difficulty, definitionContext) => {
+const removeWordVariants = (word, text) => {
+    const w = cleanWord(word);
+    if (!w || !text) return text;
+    const variants = [w, `${w}s`, `${w}es`, `${w}ed`, `${w}ing`, w.slice(0, -1), w.slice(0, -2)].filter(v => v.length >= 3);
+    let result = text;
+    variants.forEach(v => {
+        const re = new RegExp(`\\b${v}\\b`, 'ig');
+        result = result.replace(re, '').replace(/\s{2,}/g, ' ').trim();
+    });
+    return result;
+};
+
+const stripGrammaticalMarkers = (text) => {
+    if (!text) return "";
+    let t = text;
+    // Remove leading parenthetical/brace labels like (countable), (uncountable), (plural), (archaic)
+    t = t.replace(/^\s*\((?:countable|uncountable|plural|transitive|intransitive|chiefly|archaic|dated|british|american|uk|us|usually|formal|informal)[^)]*\)\s*/i, '');
+    // Remove leading bracket labels like [noun]
+    t = t.replace(/^\s*\[[^\]]+\]\s*/i, '');
+    // Remove lingering parentheses/brackets at start
+    t = t.replace(/^\s*[\(\[]\s*[\)\]]\s*/, '');
+    return t.trim();
+};
+
+const stripSenseTagsEverywhere = (text) => {
+    if (!text) return "";
+    let t = text;
+    t = t.replace(/\((?:countable|uncountable|plural|transitive|intransitive|chiefly|archaic|dated|british|american|uk|us|usually|formal|informal)[^)]*\)/gi, '');
+    t = t.replace(/\[[^\]]+\]/g, '');
+    t = t.replace(/\s{2,}/g, ' ');
+    return t.trim();
+};
+
+const shortenClue = (text, maxLen = 35) => {
+    if (!text) return "";
+    let clue = text.trim();
+    if (clue.length <= maxLen) return clue;
+    const words = clue.split(/\s+/);
+    let acc = [];
+    for (let w of words) {
+        const next = [...acc, w].join(' ');
+        if (next.length > maxLen) break;
+        acc.push(w);
+    }
+    clue = acc.join(' ');
+    return clue.replace(/[,\s;:.!?-]+$/, "");
+};
+
+const shuffle = (arr) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+};
+
+const buildFallbackClue = (word, definition, relatedWords = [], triggerWords = [], adjectiveWords = [], examples = []) => {
+    const badWord = cleanWord(word);
+    const filteredRels = shuffle((relatedWords || []).filter(w => w && cleanWord(w) !== badWord && !cleanWord(w).includes(badWord) && !badWord.includes(cleanWord(w))));
+    const filteredTriggers = shuffle((triggerWords || []).filter(w => w && cleanWord(w) !== badWord));
+    const filteredAdjs = shuffle((adjectiveWords || []).filter(w => w && cleanWord(w) !== badWord));
+    const filteredExamples = shuffle((examples || []).map(e => removeWordVariants(word, stripSenseTagsEverywhere(e))).filter(Boolean));
+    
+    const rawDefSnippet = definition && definition !== "No definition found."
+        ? definition.split(/[\.;]/)[0]
+        : "";
+    const cleanedDef = stripSenseTagsEverywhere(stripGrammaticalMarkers(rawDefSnippet));
+    const defSnippet = removeWordVariants(word, cleanedDef).split(/\s+/).join(' ').trim();
+
+    let clue = "";
+
+    const relPool = filteredRels.slice(0, 4);
+    const trgPool = filteredTriggers.slice(0, 3);
+    const adjPool = filteredAdjs.slice(0, 3);
+    const exPool = filteredExamples.slice(0, 2);
+
+    if (defSnippet && defSnippet.length > 4) {
+        clue = shortenClue(defSnippet, 34);
+    } else if (exPool.length > 0) {
+        clue = shortenClue(exPool[0], 34);
+    } else if (relPool.length > 0 && adjPool.length > 0) {
+        clue = shortenClue(`${adjPool[0]} ${relPool[0]}`, 34);
+    } else if (relPool.length > 1) {
+        clue = shortenClue(`Like ${relPool[0]} or ${relPool[1]}`, 34);
+    } else if (relPool.length === 1) {
+        clue = shortenClue(`Similar to ${relPool[0]}`, 34);
+    } else if (trgPool.length > 0) {
+        clue = shortenClue(`Linked to ${trgPool[0]}`, 34);
+    } else if (adjPool.length > 0) {
+        clue = shortenClue(`${adjPool[0]} thing`, 34);
+    } else {
+        clue = "";
+    }
+
+    clue = removeWordVariants(word, clue);
+    if (!clue) clue = buildStructuralClue(word);
+
+    clue = shortenClue(clue, 32);
+    if (!clue) clue = "Curious term";
+    return clue.charAt(0).toUpperCase() + clue.slice(1);
+};
+
+const buildStructuralClue = (word) => {
+    const w = cleanWord(word);
+    const len = w.length;
+    const start = w.slice(0, 2);
+    const end = w.slice(-2);
+    const vowels = (w.match(/[aeiou]/g) || []).length;
+    const patterns = [
+        `${len}-letter word starting ${start}`,
+        `${len}-letter word ending ${end}`,
+        `${len} letters, ${vowels} vowels`,
+        `Starts ${start}, ends ${end}`,
+    ];
+    return shortenClue(shuffle(patterns)[0], 35);
+};
+
+const fetchJsonSafe = async (url) => {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return [];
+        return await res.json();
+    } catch {
+        return [];
+    }
+};
+
+const requestAI = async (prompt, apiConfig, useAI) => {
+    const { key, provider, endpoint, model } = apiConfig || {};
+    if (!useAI) return { text: null, error: "AI disabled" };
+    if (!key) return { text: null, error: "Missing API key" };
+
+    try {
+        let response;
+
+        if (provider === 'openai') {
+            const base = (endpoint || "https://api.openai.com").replace(/\/$/, "");
+            const chatUrl = base.endsWith("/v1") ? `${base}/chat/completions` : `${base}/v1/chat/completions`;
+            const body = {
+                model: model || "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: "You write concise crossword clues." },
+                    { role: "user", content: prompt }
+                ],
+                max_tokens: 120,
+                temperature: 0.7
+            };
+            response = await fetch(chatUrl, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${key}`
+                },
+                body: JSON.stringify(body)
+            });
+        } else {
+            const apiBase = (endpoint || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
+            const gemModel = model || "gemini-2.5-flash-preview-09-2025";
+            response = await fetch(`${apiBase}/v1beta/models/${gemModel}:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+        }
+
+        if (!response.ok) {
+            const errText = await response.text();
+            return { text: null, error: `API error ${response.status}: ${errText?.slice(0,120) || 'unknown'}` };
+        }
+
+        const data = await response.json();
+        const text = data?.choices?.[0]?.message?.content?.trim()
+            || data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        return { text: text || null, error: null };
+    } catch (err) {
+        console.warn("AI request failed", err);
+        return { text: null, error: err?.message || "Unknown AI error" };
+    }
+};
+
+const generateAIClue = async (word, difficulty, definitionContext, apiConfig) => {
     const difficultyPrompts = {
         easy: "Write a direct, simple crossword clue (definition or synonym).",
         medium: "Write a standard crossword clue (witty or slightly lateral).",
@@ -120,34 +311,24 @@ Constraints:
 - Return ONLY the clue text. Do not include labels like "Clue:" or "Silent thought:".`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-        
-        if (!response.ok) return null;
+    const { text, error } = await requestAI(prompt, apiConfig, useAI);
+    if (error) return { clue: null, error };
+        if (!text) return { clue: null, error: null };
 
-        const data = await response.json();
-        let clue = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-        
-        if (clue) {
-            clue = clue.replace(/^(Clue|Answer|Silent thought|Thought):/i, '').trim();
-            clue = clue.split('\n')[0].trim();
-            clue = clue.replace(/^["']|["']$/g, ''); 
-            if (clue.endsWith('.')) clue = clue.slice(0, -1);
-            return clue;
-        }
+        let clue = text;
+        clue = clue.replace(/^(Clue|Answer|Silent thought|Thought):/i, '').trim();
+        clue = clue.split('\n')[0].trim();
+        clue = clue.replace(/^["']|["']$/g, ''); 
+        if (clue.endsWith('.')) clue = clue.slice(0, -1);
+        return { clue, error: null };
     } catch (e) {
         console.warn("Gemini generation failed, falling back", e);
+        return { clue: null, error: e?.message || "AI error" };
     }
-    return null;
 };
 
-const fetchClueData = async (word, difficulty) => {
+const fetchDefinitionOnly = async (word) => {
     let dictionaryDef = "No definition found.";
-    let finalClue = "";
-
     try {
         const defRes = await fetch(`https://api.datamuse.com/words?sp=${word}&md=d&max=1`);
         const defData = await defRes.json();
@@ -155,36 +336,68 @@ const fetchClueData = async (word, difficulty) => {
             dictionaryDef = cleanDefinition(defData[0].defs[0]);
         }
     } catch(e) { console.error(e); }
+    return dictionaryDef;
+};
 
-    const aiClue = await generateGeminiClue(word, difficulty, dictionaryDef);
+const fetchClueData = async (word, difficulty, apiConfig, onError, prevClue = null) => {
+    let dictionaryDef = "No definition found.";
+    let finalClue = "";
+    let usedFallback = false;
+
+    dictionaryDef = await fetchDefinitionOnly(word);
+
+    const { clue: aiClue, error: aiError } = await generateAIClue(word, difficulty, dictionaryDef, apiConfig);
+    if (aiError && onError) onError(aiError);
     
     if (aiClue) {
         finalClue = aiClue;
     } else {
-        try {
-            const relRes = await fetch(`https://api.datamuse.com/words?ml=${word}&max=20`);
-            const relData = await relRes.json();
-            
-            const badWord = cleanWord(word);
-            const options = relData.filter(d => {
-                const t = d.word.toLowerCase();
-                if (t.includes(badWord) || badWord.includes(t)) return false;
-                return true;
-            });
-            
-            if (options.length > 0) {
-                 finalClue = options[0].word; 
-            } else {
-                 finalClue = dictionaryDef.split(' ').slice(0, 5).join(' ') + "..."; 
+        usedFallback = true;
+        const [relData, trgData, adjData, ctxData, synData, dictDataRaw, wikDataRaw] = await Promise.all([
+            fetchJsonSafe(`https://api.datamuse.com/words?ml=${word}&max=30`),
+            fetchJsonSafe(`https://api.datamuse.com/words?rel_trg=${word}&max=20`),
+            fetchJsonSafe(`https://api.datamuse.com/words?rel_jja=${word}&max=15`),
+            fetchJsonSafe(`https://api.datamuse.com/words?topics=${word}&max=10`),
+            fetchJsonSafe(`https://api.datamuse.com/words?rel_syn=${word}&max=20`),
+            fetchJsonSafe(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`),
+            fetchJsonSafe(`https://kaikki.org/dictionary/English/words/${encodeURIComponent(word)}.json`)
+        ]);
+        
+        const relWords = (relData || []).map(d => d.word).filter(Boolean);
+        const trgWords = (trgData || []).map(d => d.word).filter(Boolean);
+        const adjWords = (adjData || []).map(d => d.word).filter(Boolean);
+        const ctxWords = (ctxData || []).map(d => d.word).filter(Boolean);
+        const synWords = (synData || []).map(d => d.word).filter(Boolean);
+        const dictDefsRaw = Array.isArray(dictDataRaw) ? dictDataRaw.flatMap(entry => entry.meanings?.flatMap(m => m.definitions?.map(def => def.definition || "")) || []) : [];
+        const dictExamplesRaw = Array.isArray(dictDataRaw) ? dictDataRaw.flatMap(entry => entry.meanings?.flatMap(m => m.definitions?.map(def => def.example || "")) || []) : [];
+        const wikDefsRaw = Array.isArray(wikDataRaw) ? wikDataRaw.flatMap(entry => entry.senses?.map(s => s.glosses?.[0] || "") || []) : [];
+        const cleanedDefs = [dictionaryDef, ...dictDefsRaw, ...wikDefsRaw].map(stripSenseTagsEverywhere).filter(Boolean);
+        const cleanedExamples = [...dictExamplesRaw].map(stripSenseTagsEverywhere).filter(Boolean);
+        const allDefs = cleanedDefs.length ? cleanedDefs : [dictionaryDef];
+        const allExamples = cleanedExamples;
+        const defChoice = allDefs[0] || buildStructuralClue(word);
+        const synPool = shuffle([...relWords, ...synWords]).slice(0, 6);
+        let attempt = 0;
+        do {
+            let defVariant = defChoice;
+            if (allDefs.length > 1 && attempt > 0) {
+                defVariant = shuffle(allDefs)[0];
             }
-        } catch (e) {
-            finalClue = "A mystery word";
+            finalClue = buildFallbackClue(word, defVariant, [...synPool, ...ctxWords], trgWords, adjWords, allExamples);
+            attempt++;
+        } while (prevClue && finalClue === prevClue && attempt < 5);
+        if (!finalClue) {
+            let structuralAttempts = 0;
+            do {
+                finalClue = buildStructuralClue(word);
+                structuralAttempts++;
+            } while (prevClue && finalClue === prevClue && structuralAttempts < 3);
         }
     }
 
     finalClue = finalClue.charAt(0).toUpperCase() + finalClue.slice(1);
 
-    return { clue: finalClue, definition: dictionaryDef };
+    return { clue: finalClue, definition: dictionaryDef, usedFallback };
 };
 
 
@@ -303,7 +516,7 @@ const filterBadWords = (words) => {
 };
 
 // Pathfinder for Multi-Chain organization
-const findLongestChainInInventory = (items, usedWordsGlobal = new Set()) => {
+const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set()) => {
   if (items.length === 0) return [];
 
   const adj = {};
@@ -317,10 +530,13 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set()) => {
   let maxScore = 0;
   
   const getScore = (path) => {
-      return path.reduce((acc, item) => acc + (item.type === 'triple' ? 50 : item.totalOverlap), 0);
+      return path.reduce((acc, item) => {
+          const penalty = item.words.some(w => devalueWords.has(cleanWord(w))) ? 10 : 0;
+          return acc + (item.type === 'triple' ? 50 : item.totalOverlap) - penalty;
+      }, 0);
   };
 
-  const dfs = (currentPath, currentUsedWords) => {
+      const dfs = (currentPath, currentUsedWords) => {
       if (currentPath.length > 15) return; 
 
       const currentScore = getScore(currentPath);
@@ -372,7 +588,7 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set()) => {
   return bestPath;
 };
 
-const processInventoryToMultiChain = (allItems, limit) => {
+const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set()) => {
     let pool = [...allItems];
     let finalSequence = [];
     let globalUsedWords = new Set();
@@ -380,7 +596,7 @@ const processInventoryToMultiChain = (allItems, limit) => {
     let loopCount = 0;
     while (pool.length > 0 && finalSequence.length < limit && loopCount < 20) {
         loopCount++;
-        const chainSegment = findLongestChainInInventory(pool, globalUsedWords);
+        const chainSegment = findLongestChainInInventory(pool, globalUsedWords, devalueWords);
         
         if (chainSegment.length === 0) break;
 
@@ -473,11 +689,43 @@ export default function App() {
   // History Stacks
   const [history, setHistory] = useState([]);
   const [clueHistory, setClueHistory] = useState({}); 
+
+  // API Config (user-provided key/provider)
+  const [apiConfig, setApiConfig] = useState({
+      key: "",
+      provider: "gemini",
+      model: "gemini-2.5-flash-preview-09-2025",
+      endpoint: "https://generativelanguage.googleapis.com"
+  });
+  const [useAI, setUseAI] = useState(false);
+  const [rememberApiConfig, setRememberApiConfig] = useState(true);
+  const [showApiModal, setShowApiModal] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [excludedWords, setExcludedWords] = useState(new Set());
+  const [devalueWords, setDevalueWords] = useState(new Set());
+  const [manualBridgeInput, setManualBridgeInput] = useState("");
+  const STORAGE_KEY = "puzzleGenChainState";
+  const [stateLoaded, setStateLoaded] = useState(false);
+  const initialSaveSkipped = useRef(false);
   
   // --- Actions ---
   
   const saveToHistory = () => {
       setHistory(prev => [...prev, chain]);
+  };
+  
+  const handleApiFieldChange = (field, value) => {
+      const next = { ...apiConfig, [field]: value };
+      persistApiConfig(next, rememberApiConfig, useAI);
+  };
+
+  const handleRememberToggle = (checked) => {
+      setRememberApiConfig(checked);
+      if (!checked && typeof window !== 'undefined') {
+          localStorage.removeItem('puzzleGenApiConfig');
+      } else if (checked) {
+          persistApiConfig(apiConfig, true, useAI);
+      }
   };
 
   const handleUndo = () => {
@@ -505,6 +753,121 @@ export default function App() {
       }
       return flatWords;
   }, [chain]);
+
+  // --- API Config Helpers ---
+  useEffect(() => {
+      // Try to pull from optional local-key.js first
+      let cancelled = false;
+      import("./local-key.js").then(mod => {
+          if (cancelled) return;
+          if (mod?.GEMINI_API_KEY) {
+              setApiConfig(prev => prev.key ? prev : ({ ...prev, key: mod.GEMINI_API_KEY }));
+          }
+      }).catch(() => {});
+      return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+      if (typeof window === 'undefined') return;
+      try {
+          const saved = localStorage.getItem('puzzleGenApiConfig');
+          if (saved) {
+              const parsed = JSON.parse(saved);
+              const { useAI: savedUseAI, ...rest } = parsed;
+              setApiConfig(prev => prev.key ? prev : ({ ...prev, ...rest }));
+              if (parsed.remember !== undefined) setRememberApiConfig(!!parsed.remember);
+              if (savedUseAI !== undefined) setUseAI(!!savedUseAI);
+          }
+      } catch {}
+  }, []);
+
+  useEffect(() => {
+      if (typeof window === 'undefined') return;
+      try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+              setStateLoaded(true);
+              return;
+          }
+          const parsed = JSON.parse(raw);
+          if (parsed?.chain?.length) setChain(parsed.chain);
+          if (parsed?.clues) setClues(parsed.clues);
+          if (parsed?.definitions) setDefinitions(parsed.definitions);
+          setStateLoaded(true);
+      } catch {
+          setStateLoaded(true);
+      }
+  }, []);
+
+  // Persist chain/clues/definitions
+  useEffect(() => {
+      if (typeof window === 'undefined') return;
+      if (!stateLoaded) return;
+      if (!initialSaveSkipped.current) {
+          initialSaveSkipped.current = true;
+          return;
+      }
+      if (chain.length === 0) {
+          localStorage.removeItem(STORAGE_KEY);
+          return;
+      }
+      try {
+          const payload = {
+              chain,
+              clues,
+              definitions
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch {}
+  }, [chain, clues, definitions, stateLoaded]);
+
+  // Load excluded words (manual list) and devalue list (past answers)
+  useEffect(() => {
+      let cancelled = false;
+      const loadLists = async () => {
+          try {
+              const exclRes = await fetch("../excluded-words.json");
+              if (exclRes.ok) {
+                  const data = await exclRes.json();
+                  if (!cancelled && Array.isArray(data)) {
+                      setExcludedWords(new Set(data.map(d => cleanWord(d)).filter(Boolean)));
+                  }
+              }
+          } catch {}
+
+          try {
+              const exRes = await fetch("../examples.json");
+              if (exRes.ok) {
+                  const data = await exRes.json();
+                  const answers = [];
+                  (data || []).forEach(p => {
+                      (p.words || []).forEach(w => {
+                          if (w.answer) answers.push(cleanWord(w.answer));
+                      });
+                  });
+                  if (!cancelled) setDevalueWords(new Set(answers.filter(Boolean)));
+              }
+          } catch {}
+      };
+      loadLists();
+      return () => { cancelled = true; };
+  }, []);
+
+  const persistApiConfig = (next, remember = rememberApiConfig, nextUseAI = useAI) => {
+      setApiConfig(next);
+      setUseAI(nextUseAI);
+      if (typeof window === 'undefined') return;
+      if (remember) {
+          localStorage.setItem('puzzleGenApiConfig', JSON.stringify({ ...next, remember: true, useAI: nextUseAI }));
+      } else {
+          localStorage.removeItem('puzzleGenApiConfig');
+      }
+  };
+
+  const showToast = (message, type = "info") => {
+      setToast({ message, type });
+      setTimeout(() => setToast(null), 4000);
+  };
 
   // Broken Chain Check
   const hasBrokenLinks = useMemo(() => {
@@ -584,12 +947,80 @@ export default function App() {
       });
   };
 
-  const generateClues = async (forceRegenIndex = null) => {
+  const parseJsonArray = (text) => {
+      if (!text) return null;
+      try {
+          const match = text.match(/```json([\s\S]*?)```/i);
+          const raw = match ? match[1] : text;
+          const bracket = raw.indexOf('[');
+          const lastBracket = raw.lastIndexOf(']');
+          const slice = bracket !== -1 && lastBracket !== -1 ? raw.slice(bracket, lastBracket + 1) : raw;
+          const parsed = JSON.parse(slice);
+          if (Array.isArray(parsed)) return parsed;
+      } catch {}
+      return null;
+  };
+
+  const generateBatchClues = async () => {
+      const flat = flattenChain;
+      if (!flat.length) return;
+
+      const loadingState = {};
+      flat.forEach((_, i) => loadingState[i] = true);
+      setLoadingClues(loadingState);
+
+      const prompt = `You are generating crossword clues for a word chain. Return ONLY valid JSON array of objects like [{"word":"WORD","clue":"CLUE"}].
+Rules:
+- Keep clues <= 35 characters.
+- Do NOT repeat the answer word in the clue.
+- Provide one entry per word in order.
+Words: ${flat.join(', ')}`;
+
+      const { text: aiText, error } = await requestAI(prompt, apiConfig, useAI);
+      if (error || !aiText) {
+          showToast(`AI batch failed: ${error || 'no response'}. Using fallback.`, "warning");
+      }
+      const parsed = parseJsonArray(aiText);
+
+      if (!parsed) {
+          // Fallback to per-word generation
+          showToast("Batch response could not be parsed; using per-word fallback.", "warning");
+          await generateClues(null, false); 
+          return;
+      }
+
+      const clueMap = {};
+      parsed.forEach(item => {
+          if (item?.word && item?.clue) {
+              const idx = flat.findIndex(w => cleanWord(w) === cleanWord(item.word));
+              if (idx >= 0) clueMap[idx] = item.clue;
+          }
+      });
+
+      // Fetch definitions separately
+      const defEntries = await Promise.all(flat.map(async (w, i) => {
+          const def = await fetchDefinitionOnly(w);
+          return [i, def];
+      }));
+      const defMap = Object.fromEntries(defEntries);
+
+      setClues(clueMap);
+      setDefinitions(defMap);
+      setLoadingClues({});
+      if (useAI) showToast("Batch clues generated via AI.", "success");
+  };
+
+  const generateClues = async (forceRegenIndex = null, allowBatch = true, regenerateExisting = false) => {
       const flat = flattenChain;
       
+      if (allowBatch && forceRegenIndex === null && Object.keys(clues).length === 0) {
+          await generateBatchClues();
+          return;
+      }
+
       const wordsToProcess = forceRegenIndex !== null 
           ? [ { word: flat[forceRegenIndex], index: forceRegenIndex } ]
-          : flat.map((w, i) => ({ word: w, index: i }));
+          : flat.map((w, i) => ({ word: w, index: i })).filter(item => regenerateExisting || !clues[item.index]);
 
       // Set Loading
       setLoadingClues(prev => {
@@ -599,10 +1030,14 @@ export default function App() {
       });
 
       let newDefs = { ...definitions };
+      let anyFallback = false;
 
       for (const item of wordsToProcess) {
           if (forceRegenIndex !== null || !clues[item.index]) {
-              const { clue, definition } = await fetchClueData(item.word, clueDifficulty);
+              const { clue, definition, usedFallback } = await fetchClueData(item.word, clueDifficulty, apiConfig, (err) => {
+                  showToast(err, "warning");
+              }, clues[item.index]);
+              if (usedFallback) anyFallback = true;
               
               if (forceRegenIndex !== null) {
                   updateClueState(item.index, clue);
@@ -628,6 +1063,10 @@ export default function App() {
           }
       }
       
+      if (anyFallback) {
+          showToast("Used fallback clue generation for some words (AI unavailable).", "warning");
+      }
+      
       setDefinitions(prev => ({...prev, ...newDefs}));
   };
   
@@ -642,18 +1081,17 @@ export default function App() {
       const processAll = async () => {
           let newDefs = {};
           for (let i = 0; i < flat.length; i++) {
-               const { clue, definition } = await fetchClueData(flat[i], clueDifficulty);
+               const { clue, definition } = await fetchClueData(flat[i], clueDifficulty, apiConfig, (err) => showToast(err, "warning"));
                updateClueState(i, clue);
                newDefs[i] = definition;
                
-               // Clear loading one by one
                setLoadingClues(prev => {
                    const next = { ...prev };
                    delete next[i];
                    return next;
                });
 
-               await new Promise(r => setTimeout(r, 300));
+               await new Promise(r => setTimeout(r, 200));
           }
           setDefinitions(prev => ({...prev, ...newDefs}));
       };
@@ -672,6 +1110,11 @@ export default function App() {
 
   const handleClueChange = (index, text) => {
      setClues(prev => ({ ...prev, [index]: text }));
+  };
+
+  const applyExclusions = (words) => {
+      if (!words || words.length === 0) return [];
+      return words.filter(w => !excludedWords.has(cleanWord(w)));
   };
   
   const fetchRandomWords = async () => {
@@ -703,6 +1146,7 @@ export default function App() {
     
     allWords = [...new Set(allWords)];
     allWords = filterBadWords(allWords);
+    allWords = applyExclusions(allWords);
     return shuffleArray(allWords).slice(0, 1000);
   };
 
@@ -725,7 +1169,7 @@ export default function App() {
         
         setProgress(70);
 
-        const organizedChain = processInventoryToMultiChain(result.inventory, targetLength);
+        const organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords);
         setChain(organizedChain);
         
     } catch (e) {
@@ -746,13 +1190,14 @@ export default function App() {
       setProgress(20);
       
       setTimeout(async () => {
-          const words = inputText.split(/[\s,\n]+/).filter(w => w.length > 1);
+          let words = inputText.split(/[\s,\n]+/).filter(w => w.length > 1);
+          words = applyExclusions(words);
           const result = await processWordsToInventory(words, targetLength, setProgress, true);
           setInventory(result.inventory);
           
           setProgress(70);
           
-          const organizedChain = processInventoryToMultiChain(result.inventory, targetLength);
+          const organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords);
           setChain(organizedChain);
           
           setIsProcessing(false);
@@ -859,6 +1304,7 @@ export default function App() {
     if (!leftItem || !rightItem) return;
 
     setIsBridgeLoading(true);
+    const usedWords = new Set(flattenChain.map(w => cleanWord(w)));
     
     const startWord = leftItem.endWord;
     const endWord = rightItem.startWord;
@@ -869,17 +1315,31 @@ export default function App() {
     let solutions = [];
     let fwdOptions = [];
     let bwdOptions = [];
+    let candidatePool = [];
+    const bridgeOverlapCount = (a, b) => getOverlap(a, b, 1)?.count || 0;
+    const bridgeTotalOverlap = (words) => totalOverlapBetween(words, startWord, endWord);
+    const sortSolutions = (arr) => {
+        return arr.sort((a, b) => {
+            if (a.length !== b.length) return a.length - b.length; // fewer words first
+            if ((b.totalOverlap || 0) !== (a.totalOverlap || 0)) return (b.totalOverlap || 0) - (a.totalOverlap || 0); // higher overlap next
+            return (a.id || "").localeCompare(b.id || "");
+        });
+    };
 
     const isValid = (d, avoid1, avoid2) => {
         if (!/^[a-zA-Z]+$/.test(d.word)) return false;
-        if (d.word.length < 3) return false;
+        if (d.word.length < 3 || d.word.length > 9) return false;
+        if (!/[aeiou]/i.test(d.word)) return false; // avoid consonant-only weirdness
         const w = cleanWord(d.word);
         if (avoid1 && w === cleanWord(avoid1)) return false;
         if (avoid2 && w === cleanWord(avoid2)) return false;
         if (avoid1 && isDerivative(w, avoid1)) return false;
         if (avoid2 && isDerivative(w, avoid2)) return false;
+        if (excludedWords.has(w) || usedWords.has(w)) return false;
+        // reuse existing bad-word filter
+        if (filterBadWords([d.word]).length === 0) return false;
         const freq = d.tags ? parseFloat(d.tags[0].split(':')[1]) : 0;
-        return freq > 0.2; 
+        return freq > 1.5; 
     };
 
     try {
@@ -904,7 +1364,8 @@ export default function App() {
                 length: 1,
                 startWord: d.word,
                 endWord: d.word,
-                type: 'bridge'
+                type: 'bridge',
+                totalOverlap: bridgeTotalOverlap([d.word])
             }));
         
         solutions = [...oneWordBridges];
@@ -913,15 +1374,35 @@ export default function App() {
         const validBwd = dataBwd.filter(d => isValid(d, null, endWord));
         
         // Populate fallback lists - sort by overlap length with respective target
-        fwdOptions = validFwd.map(d => {
-             const ov = getOverlap(startWord, d.word, 1);
-             return {id:`fwd-${d.word}`, words:[d.word], length:1, type:'bridge', overlap: ov ? ov.count : 0};
-        }).sort((a,b) => b.overlap - a.overlap).slice(0, 10);
+        const seenFwd = new Set();
+        fwdOptions = validFwd
+            .map(d => {
+                const ov = getOverlap(startWord, d.word, 1);
+                return {id:`fwd-${d.word}`, words:[d.word], length:1, type:'bridge', overlap: ov ? ov.count : 0};
+            })
+            .filter(opt => {
+                const w = cleanWord(opt.words[0]);
+                if (seenFwd.has(w)) return false;
+                seenFwd.add(w);
+                return true;
+            })
+            .sort((a,b) => b.overlap - a.overlap)
+            .slice(0, 20);
         
-        bwdOptions = validBwd.map(d => {
-             const ov = getOverlap(d.word, endWord, 1);
-             return {id:`bwd-${d.word}`, words:[d.word], length:1, type:'bridge', overlap: ov ? ov.count : 0};
-        }).sort((a,b) => b.overlap - a.overlap).slice(0, 10);
+        const seenBwd = new Set();
+        bwdOptions = validBwd
+            .map(d => {
+                const ov = getOverlap(d.word, endWord, 1);
+                return {id:`bwd-${d.word}`, words:[d.word], length:1, type:'bridge', overlap: ov ? ov.count : 0};
+            })
+            .filter(opt => {
+                const w = cleanWord(opt.words[0]);
+                if (seenBwd.has(w)) return false;
+                seenBwd.add(w);
+                return true;
+            })
+            .sort((a,b) => b.overlap - a.overlap)
+            .slice(0, 20);
         
         // If we found nothing for lists using stricter suffixes, try a 1-char fallback
         if (fwdOptions.length === 0) {
@@ -936,6 +1417,18 @@ export default function App() {
             const dataShort = await resShort.json();
             bwdOptions = dataShort.filter(d => isValid(d, null, endWord)).map(d => ({id:`bwd-${d.word}`, words:[d.word], length:1, type:'bridge'}));
         }
+
+        // Ensure uniqueness and minimum count with simple synthetic fillers if needed
+        // Trim to reasonable list without synthetic fillers
+        fwdOptions = fwdOptions.slice(0, 20);
+        bwdOptions = bwdOptions.slice(0, 20);
+
+        candidatePool = [
+            ...validFwd.map(d => d.word),
+            ...validBwd.map(d => d.word),
+            ...fwdOptions.map(o => o.words[0]),
+            ...bwdOptions.map(o => o.words[0])
+        ];
 
         var manualOptions = { forward: fwdOptions, backward: bwdOptions };
 
@@ -954,7 +1447,8 @@ export default function App() {
                             length: 2,
                             startWord: f.word,
                             endWord: b.word,
-                            type: 'bridge'
+                            type: 'bridge',
+                            totalOverlap: bridgeTotalOverlap([f.word, b.word])
                         });
                         if (twoStepSolutions.length > 20) break;
                     }
@@ -964,23 +1458,113 @@ export default function App() {
             solutions = [...solutions, ...twoStepSolutions];
         }
 
-        solutions.sort((a, b) => a.length - b.length);
+        // If we're still empty, fall back to 1-letter direct overlap search
+        if (solutions.length === 0) {
+            try {
+                const shortSuffix = cleanWord(startWord).slice(-1);
+                const shortPrefix = cleanWord(endWord).slice(0, 1);
+                const resShortDirect = await fetch(`https://api.datamuse.com/words?sp=${shortSuffix}*${shortPrefix}&max=50&md=f`);
+                const dataShortDirect = await resShortDirect.json();
+                const shortBridges = dataShortDirect
+                    .filter(d => isValid(d, startWord, endWord))
+                    .map(d => ({
+                        id: `sol-1short-${d.word}`,
+                        words: [d.word],
+                        length: 1,
+                        startWord: d.word,
+                        endWord: d.word,
+                        type: 'bridge',
+                        totalOverlap: bridgeTotalOverlap([d.word])
+                    }));
+                solutions = [...solutions, ...shortBridges];
+            } catch (e) {
+                console.error("Short direct search failed", e);
+            }
+        }
 
+        solutions = sortSolutions(solutions);
+
+        setBridgeStatus(""); 
+        setShowBridgeModal({ index, solutions, startWord, endWord, ...manualOptions });
+
+        // Async extended search for 3-4 word bridges with time budget
+        const uniquePool = Array.from(new Set(candidatePool.map(w => cleanWord(w)).filter(Boolean)));
+        const cleanStart = cleanWord(startWord);
+        const cleanEnd = cleanWord(endWord);
+        const filteredPool = uniquePool.filter(w => w && !excludedWords.has(w) && !usedWords.has(w) && w !== cleanStart && w !== cleanEnd && filterBadWords([w]).length > 0);
+
+        const searchDepths = [2,3]; // 2 -> 3-word bridge (w1,w2), 3 -> 4-word bridge (w1,w2,w3)
+        const startTime = Date.now();
+        const deadline = startTime + 60000; // 60s
+        const foundKeys = new Set((solutions || []).map(sol => sol.words.join('|')));
+
+        const attemptPush = (path) => {
+            const key = path.join('|');
+            if (foundKeys.has(key)) return;
+            foundKeys.add(key);
+            const bridgeItem = {
+                id: `auto-${key}-${Date.now()}`,
+                words: path,
+                length: path.length,
+                startWord: path[0],
+                endWord: path[path.length - 1],
+                type: 'bridge',
+                totalOverlap: bridgeTotalOverlap(path)
+            };
+            setShowBridgeModal(prev => prev ? { ...prev, solutions: sortSolutions([...prev.solutions, bridgeItem]) } : prev);
+        };
+
+        const expand = async () => {
+            for (const depth of searchDepths) {
+                const stack = [];
+                filteredPool.forEach(w => {
+                    const ov = getOverlap(startWord, w, 1);
+                    if (ov) stack.push([w]);
+                });
+
+                while (stack.length > 0) {
+                    if (Date.now() > deadline) return;
+                    const path = stack.pop();
+                    const last = path[path.length - 1];
+                    if (path.length === depth) {
+                        if (getOverlap(last, endWord, 1)) {
+                            attemptPush(path);
+                        }
+                        continue;
+                    }
+                    for (const next of filteredPool) {
+                        if (path.includes(next)) continue;
+                        if (getOverlap(last, next, 1)) {
+                            stack.push([...path, next]);
+                        }
+                    }
+                    if (stack.length % 50 === 0) await new Promise(r => setTimeout(r, 0));
+                }
+            }
+            if (Date.now() > deadline && (!solutions || solutions.length === 0)) {
+                setBridgeStatus("No bridges found.");
+            }
+        };
+        expand();
     } catch (e) {
         console.error(e);
         setBridgeStatus("Error fetching bridges.");
+        setShowBridgeModal(null);
     } finally {
         setIsBridgeLoading(false);
     }
-    
-    setBridgeStatus(""); 
-    setShowBridgeModal({ index, solutions, ...manualOptions });
   };
 
   const insertBridge = (solution) => {
     saveToHistory();
     const { index } = showBridgeModal;
     const words = solution.words;
+    const existing = new Set(flattenChain.map(w => cleanWord(w)));
+    const hasDup = words.some(w => existing.has(cleanWord(w)));
+    if (hasDup) {
+        showToast("That word already exists in the chain.", "warning");
+        return;
+    }
     let overlaps = [];
     
     if (words.length > 1) {
@@ -1001,14 +1585,59 @@ export default function App() {
         totalOverlap: 0 
     };
 
-    const newChain = [...chain];
-    newChain.splice(index + 1, 0, bridgeItem);
-    setChain(newChain);
+    // If the bridge has multiple words, insert them as separate nodes so each appears individually
+    if (words.length > 1) {
+        const itemsToInsert = words.map((w, i) => ({
+            id: `bridge-${Date.now()}-${i}`,
+            words: [w],
+            type: 'bridge',
+            startWord: w,
+            endWord: w,
+            overlaps: [],
+            totalOverlap: 0
+        }));
+        const newChain = [...chain];
+        newChain.splice(index + 1, 0, ...itemsToInsert);
+        setChain(newChain);
+    } else {
+        const newChain = [...chain];
+        newChain.splice(index + 1, 0, bridgeItem);
+        setChain(newChain);
+    }
     setShowBridgeModal(null);
+  };
+
+  const handleManualBridgeSubmit = () => {
+    const raw = manualBridgeInput.trim();
+    if (!raw) return;
+    const cleaned = cleanWord(raw);
+    if (!cleaned) return;
+    if (excludedWords.has(cleaned)) return;
+    if (filterBadWords([raw]).length === 0) return;
+    const manualItem = {
+        id: `manual-${Date.now()}`,
+        words: [raw],
+        type: 'bridge',
+        startWord: raw,
+        endWord: raw,
+        overlaps: [],
+        totalOverlap: 0
+    };
+    insertBridge(manualItem);
+    setManualBridgeInput("");
   };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-20">
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg border text-sm ${
+            toast.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+            toast.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
+            'bg-slate-50 border-slate-200 text-slate-700'
+        }`}>
+          {toast.message}
+        </div>
+      )}
       
       {/* Modal for Bridges */}
       {showBridgeModal && (
@@ -1061,9 +1690,16 @@ export default function App() {
                                             </React.Fragment>
                                         ))}
                                     </div>
-                                    <div className="text-xs opacity-50 font-normal flex items-center gap-1">
+                                    <div className="text-xs opacity-70 font-normal flex items-center gap-2">
                                         {sol.length === 1 && <CheckCircle2 size={12} className="text-emerald-500" />}
-                                        {sol.length} word{sol.length>1?'s':''}
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
+                                            <span className="text-slate-500">len</span>
+                                            <span className="font-semibold text-indigo-600">{sol.length}</span>
+                                        </span>
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
+                                            <span className="text-slate-500">overlap</span>
+                                            <span className="font-semibold text-emerald-600">{sol.totalOverlap ?? 0}</span>
+                                        </span>
                                     </div>
                                 </button>
                             ))
@@ -1080,27 +1716,127 @@ export default function App() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <h5 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
-                                            <ArrowRight size={10} /> Extend Left
+                                            Extend From Left <ArrowRight size={10} />
                                         </h5>
                                         <div className="space-y-2">
-                                            {showBridgeModal.forward?.map(item => (
-                                                <button key={item.id} onClick={() => insertBridge(item)} className="w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate">
-                                                    {item.words[0]}
-                                                </button>
-                                            ))}
+                                            {(() => {
+                                                const computeOverlap = (a, b) => {
+                                                    const A = cleanWord(a || "");
+                                                    const B = cleanWord(b || "");
+                                                    const min = Math.min(A.length, B.length);
+                                                    let best = 0;
+                                                    for (let len = min; len >= 1; len--) {
+                                                        if (A.endsWith(B.slice(0, len))) {
+                                                            best = len;
+                                                            break;
+                                                        }
+                                                    }
+                                                    return Math.max(best, 1);
+                                                };
+                                                const source = (showBridgeModal.forward || []).map(item => ({
+                                                    item,
+                                                    ov: computeOverlap(chain[showBridgeModal.index]?.endWord || "", item.words[0])
+                                                }));
+                                                let list = source.sort((a,b) => b.ov - a.ov);
+                                                if (list.length === 0) return null;
+
+                                                const groups = {};
+                                                list.forEach(entry => {
+                                                    if (!groups[entry.ov]) groups[entry.ov] = [];
+                                                    groups[entry.ov].push(entry);
+                                                });
+
+                                                const sortedOvs = Object.keys(groups).map(k => parseInt(k, 10)).sort((a,b) => b-a);
+                                                const blocks = [];
+                                                sortedOvs.forEach((ov, i) => {
+                                                    const entries = groups[ov];
+                                                    blocks.push(
+                                                        <div key={`fwd-block-${ov}`} className="space-y-1">
+                                                            {i > 0 && <div className="border-t border-slate-100 my-1"></div>}
+                                                            {entries.map(entry => {
+                                                                const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
+                                                                return (
+                                                                    <button key={key} onClick={() => insertBridge(entry.item)} className="w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between">
+                                                                        <span>{entry.item.words[0]}</span>
+                                                                        <span className="text-[10px] text-slate-400">{ov}</span>
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    );
+                                                });
+                                                return blocks;
+                                            })()}
                                         </div>
                                     </div>
                                     <div>
-                                        <h5 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
-                                            <ArrowLeft size={10} /> Precede Right
+                                        <h5 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1 justify-end">
+                                            <ArrowLeft size={10} /> Extend From Right
                                         </h5>
                                         <div className="space-y-2">
-                                            {showBridgeModal.backward?.map(item => (
-                                                <button key={item.id} onClick={() => insertBridge(item)} className="w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate">
-                                                    {item.words[0]}
-                                                </button>
-                                            ))}
+                                            {(() => {
+                                                const computeOverlap = (a, b) => {
+                                                    const A = cleanWord(a || "");
+                                                    const B = cleanWord(b || "");
+                                                    const min = Math.min(A.length, B.length);
+                                                    let best = 0;
+                                                    for (let len = min; len >= 1; len--) {
+                                                        if (A.endsWith(B.slice(0, len))) {
+                                                            best = len;
+                                                            break;
+                                                        }
+                                                    }
+                                                    return Math.max(best, 1);
+                                                };
+                                                const source = (showBridgeModal.backward || []).map(item => ({
+                                                    item,
+                                                    ov: computeOverlap(item.words[0], chain[showBridgeModal.index + 1]?.startWord || "")
+                                                }));
+                                                let list = source.sort((a,b) => b.ov - a.ov);
+                                                if (list.length === 0) return null;
+
+                                                const groups = {};
+                                                list.forEach(entry => {
+                                                    if (!groups[entry.ov]) groups[entry.ov] = [];
+                                                    groups[entry.ov].push(entry);
+                                                });
+
+                                                const sortedOvs = Object.keys(groups).map(k => parseInt(k, 10)).sort((a,b) => b-a);
+                                                const blocks = [];
+                                                sortedOvs.forEach((ov, i) => {
+                                                    const entries = groups[ov];
+                                                    blocks.push(
+                                                        <div key={`bwd-block-${ov}`} className="space-y-1">
+                                                            {i > 0 && <div className="border-t border-slate-100 my-1"></div>}
+                                                            {entries.map(entry => {
+                                                                const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
+                                                                return (
+                                                                    <button key={key} onClick={() => insertBridge(entry.item)} className="w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between">
+                                                                        <span>{entry.item.words[0]}</span>
+                                                                        <span className="text-[10px] text-slate-400">{ov}</span>
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    );
+                                                });
+                                                return blocks;
+                                            })()}
                                         </div>
+                                    </div>
+                                </div>
+                                <div className="mt-4 pt-3 border-t border-slate-100">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Add custom word</label>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            value={manualBridgeInput}
+                                            onChange={(e) => setManualBridgeInput(e.target.value)}
+                                            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500"
+                                            placeholder="Type a word to insert"
+                                        />
+                                        <Button variant="secondary" onClick={handleManualBridgeSubmit} className="text-sm px-3">
+                                            Add
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -1108,6 +1844,90 @@ export default function App() {
                     </>
                 )}
              </div>
+              </Card>
+            </div>
+          )}
+
+      {/* AI Config Modal */}
+      {showApiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-lg p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Sparkles size={18} className="text-indigo-600" />
+                AI Configuration
+              </h3>
+              <button onClick={() => setShowApiModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Provider & Key</label>
+                    <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                        <label className="inline-flex items-center gap-2 cursor-pointer text-xs text-slate-500">
+                            <input type="checkbox" className="sr-only" checked={useAI} onChange={(e) => persistApiConfig(apiConfig, rememberApiConfig, e.target.checked)} />
+                            <div className={`w-10 h-5 flex items-center bg-slate-200 rounded-full p-1 duration-300 ${useAI ? 'bg-indigo-500' : ''}`}>
+                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ${useAI ? 'translate-x-5' : ''}`}></div>
+                            </div>
+                            <span>Use AI</span>
+                        </label>
+                        <label className="inline-flex items-center gap-1 cursor-pointer">
+                            <input 
+                                id="rememberKey" 
+                                type="checkbox" 
+                                checked={rememberApiConfig} 
+                                onChange={(e) => handleRememberToggle(e.target.checked)} 
+                            />
+                            <span>Remember</span>
+                        </label>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                    <select 
+                        className="p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500"
+                        value={apiConfig.provider}
+                        onChange={(e) => handleApiFieldChange('provider', e.target.value)}
+                    >
+                        <option value="gemini">Gemini</option>
+                        <option value="openai">OpenAI-compatible</option>
+                    </select>
+                    <input 
+                        type="password" 
+                        className="p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500" 
+                        placeholder="API Key"
+                        value={apiConfig.key}
+                        onChange={(e) => handleApiFieldChange('key', e.target.value)}
+                    />
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Model / Endpoint</label>
+                <div className="flex flex-col gap-2">
+                    <input 
+                        type="text"
+                        className="p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500" 
+                        placeholder={apiConfig.provider === 'openai' ? "e.g. gpt-4o-mini" : "gemini-2.5-flash-preview-09-2025"}
+                        value={apiConfig.model}
+                        onChange={(e) => handleApiFieldChange('model', e.target.value)}
+                    />
+                    <input 
+                        type="text"
+                        className="p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500" 
+                        placeholder={apiConfig.provider === 'openai' ? "https://api.openai.com/v1" : "https://generativelanguage.googleapis.com"}
+                        value={apiConfig.endpoint}
+                        onChange={(e) => handleApiFieldChange('endpoint', e.target.value)}
+                    />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="secondary" onClick={() => setShowApiModal(false)}>Close</Button>
+              </div>
+            </div>
           </Card>
         </div>
       )}
@@ -1115,13 +1935,42 @@ export default function App() {
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div className="bg-indigo-600 text-white p-1.5 rounded-lg">
               <LinkIcon size={20} />
             </div>
             <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-600">
-              WordChain
+              WordChain Builder
             </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowApiModal(true)} 
+              className="text-sm h-9 px-3 border border-slate-200" 
+              title="Configure AI"
+            >
+              <Sparkles size={16} className="text-indigo-600" />
+              <span className="hidden sm:inline">AI Config</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={handleCopyCSV}
+              className={`text-sm h-9 px-3 border border-slate-200 ${copiedCSV ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-slate-600'}`}
+              title="Copy Word List"
+            >
+              {copiedCSV ? <Check size={16} /> : <Type size={16} />}
+              <span className="ml-2 hidden sm:inline">Copy Words</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              onClick={handleExportJSON} 
+              className={`text-sm h-9 px-3 border border-slate-200 ${copied ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-slate-600'}`}
+              title="Copy JSON"
+            >
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+              <span className="ml-2 hidden sm:inline">Copy JSON</span>
+            </Button>
           </div>
           {isProcessing && (
             <div className="absolute bottom-0 left-0 h-1 w-full bg-slate-100">
@@ -1164,7 +2013,7 @@ export default function App() {
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md"
                             >
                             {isProcessing ? <RefreshCw className="animate-spin" size={18} /> : <Wand2 size={18} />}
-                            Random 1k & Solve
+                            Generate Random
                             </Button>
                             <Button 
                                 onClick={handleBuildFromText} 
@@ -1186,18 +2035,19 @@ export default function App() {
 
                     {showInput && (
                         <div className="animate-in slide-in-from-top-2 duration-200">
-                            <div className="flex justify-between items-center mb-1">
-                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Source Words</label>
-                                <span className="text-xs text-slate-400">{inputText.split(/\s+/).filter(w=>w).length} words</span>
-                            </div>
-                            <textarea
-                                className="w-full h-32 p-3 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all shadow-sm"
-                                placeholder="e.g. solstice iceberg glacier..."
-                                value={inputText}
-                                onChange={(e) => setInputText(e.target.value)}
-                            />
+                        <div className="flex justify-between items-center mb-1">
+                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Source Words</label>
+                            <span className="text-xs text-slate-400">{inputText.split(/\s+/).filter(w=>w).length} words</span>
+                        </div>
+                        <textarea
+                            className="w-full h-32 p-3 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all shadow-sm"
+                            placeholder="e.g. solstice iceberg glacier..."
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                        />
                         </div>
                     )}
+
                 </div>
             </Card>
             </div>
@@ -1231,12 +2081,12 @@ export default function App() {
 
                     <Button 
                         onClick={handleSwitchToClues} 
-                        disabled={hasBrokenLinks}
-                        className={`ml-2 ${hasBrokenLinks ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
-                        title={hasBrokenLinks ? "Fix broken links first" : ""}
-                    >
+                        disabled={hasBrokenLinks || chain.length === 0}
+                        className={`ml-2 ${hasBrokenLinks || chain.length === 0 ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
+                        title={hasBrokenLinks ? "Fix broken links first" : chain.length === 0 ? "Add words to the chain first" : ""}
+                    ><span className="ml-2">Create Clues</span>
                         {hasBrokenLinks ? <AlertTriangle size={16} /> : <ArrowRight size={16} />}
-                        <span className="ml-2">Next: Create Clues</span>
+                        
                     </Button>
                 </div>
                 </div>
@@ -1253,32 +2103,42 @@ export default function App() {
                         <Layers size={40} />
                     </div>
                     <p className="text-xl font-medium text-slate-600">Ready to build</p>
-                    <p className="text-sm mt-2 text-slate-400">Click "Random 1k & Solve" to start</p>
+                    <p className="text-sm mt-2 text-slate-400">Click "Generate Random" to start</p>
                     </div>
                 ) : (
                     <div className="flex flex-wrap items-center gap-y-8 gap-x-0 content-start max-w-5xl mx-auto">
                     {(() => {
                         let lastDisplayEndWord = null;
                         const overlapBadgeClass = (count) => {
-                            if (count >= 4) return "text-indigo-700 font-bold text-xs";
-                            if (count >= 3) return "text-indigo-600 font-semibold text-[11px]";
-                            return "text-indigo-500 font-medium text-[10px]";
+                            if (count >= 4) return "text-emerald-600 font-semibold text-xs";
+                            if (count >= 3) return "text-blue-600 font-semibold text-xs";
+                            if (count === 2) return "text-amber-600 font-semibold text-xs";
+                            return "text-rose-600 font-semibold text-xs";
                         };
 
                         return chain.map((link, idx) => {
                             const prevLink = chain[idx - 1];
+                            const nextLink = chain[idx + 1];
 
                             // Determine which words to show on the card
                             let wordsToShow = link.words;
                             if (link.type === 'pair' || link.type === 'bridge') {
-                                wordsToShow = idx === 0 ? [link.words[0]] : [link.words[link.words.length - 1]];
+                                // Show the whole bridge path but drop a leading duplicate of the previous end word
+                                const prevClean = lastDisplayEndWord ? cleanWord(lastDisplayEndWord) : null;
+                                wordsToShow = link.words.filter((w, i) => !(i === 0 && prevClean && cleanWord(w) === prevClean));
+                                if (wordsToShow.length === 0 && link.words.length > 0) {
+                                    wordsToShow = [link.words[link.words.length - 1]];
+                                }
                             } else if (link.type === 'triple') {
-                                wordsToShow = link.words; // always show all three
+                                // Only render the triple as a single node containing its three words
+                                wordsToShow = link.words;
                             }
 
-                            const visibleStart = wordsToShow[0] || link.words[0];
-                            const overlapWithPrev = lastDisplayEndWord
-                                ? (getOverlap(lastDisplayEndWord, visibleStart, 1)?.count ?? 0)
+                            const displayStart = wordsToShow[0] || link.words[0];
+                            const displayEnd = wordsToShow[wordsToShow.length - 1] || link.words[link.words.length - 1];
+
+                            const overlapWithPrev = prevLink && lastDisplayEndWord
+                                ? (getOverlap(lastDisplayEndWord, displayStart, 1)?.count || 0)
                                 : null;
 
                             // Broken link check uses actual chain linkage
@@ -1343,31 +2203,31 @@ export default function App() {
                                             </div>
                                         )}
 
-                                        {wordsToShow.map((w, wIdx) => (
-                                            <React.Fragment key={wIdx}>
-                                                {wIdx > 0 && link.type === 'triple' && (
-                                                    <div className="mx-2 flex flex-col items-center">
-                                                        {link.overlaps && link.overlaps[wIdx-1] && (
-                                                            <span className={`${overlapBadgeClass(link.overlaps[wIdx-1].count)} font-mono mb-0.5`}>
-                                                                {link.overlaps[wIdx-1].count}
-                                                            </span>
-                                                        )}
-                                                        <ArrowRight size={14} className="text-slate-300" />
-                                                    </div>
+                                {wordsToShow.map((w, wIdx) => (
+                                    <React.Fragment key={wIdx}>
+                                        {wIdx > 0 && link.type === 'triple' && (
+                                            <div className="mx-2 flex flex-col items-center">
+                                                {link.overlaps && link.overlaps[wIdx-1] && (
+                                                    <span className={`${overlapBadgeClass(link.overlaps[wIdx-1].count)} font-mono mb-0.5`}>
+                                                        {link.overlaps[wIdx-1].count}
+                                                    </span>
                                                 )}
-                                                
-                                                <span className="font-bold text-slate-700">
-                                                    {w}
-                                                </span>
-                                            </React.Fragment>
-                                        ))}
+                                                <ArrowRight size={14} className="text-slate-300" />
+                                            </div>
+                                        )}
+                                        
+                                        <span className="font-bold text-slate-700">
+                                            {w}
+                                        </span>
+                                    </React.Fragment>
+                                ))}
                                     </div>
                                 </div>
                                 </React.Fragment>
                             );
 
-                            // Track visible end word for the next connector computation
-                            lastDisplayEndWord = wordsToShow[wordsToShow.length - 1] || lastDisplayEndWord;
+                            // Track displayed end word for the next connector computation
+                            lastDisplayEndWord = displayEnd || lastDisplayEndWord;
                             return card;
                         });
                     })()}

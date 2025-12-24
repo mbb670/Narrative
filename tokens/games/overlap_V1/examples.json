@@ -2088,6 +2088,140 @@
         "height": "full"
       }
     ]
-  }
+  },
+  {
+  "title": "two",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2025-12-27",
+  "words": [
+    {
+      "clue": "Way to obtain or enter.",
+      "answer": "ACCESS",
+      "start": 1,
+      "height": "full"
+    },
+    {
+      "clue": "The nature of being.",
+      "answer": "ESSE",
+      "start": 4,
+      "height": "mid"
+    },
+    {
+      "clue": "Pertaining to physical intimacy.",
+      "answer": "SEXUAL",
+      "start": 6,
+      "height": "inner"
+    },
+    {
+      "clue": "Turing the cryptographer.",
+      "answer": "ALAN",
+      "start": 10,
+      "height": "full"
+    },
+    {
+      "clue": "A system of communication.",
+      "answer": "LANGUAGE",
+      "start": 11,
+      "height": "mid"
+    },
+    {
+      "clue": "Lacking a trademark or brand.",
+      "answer": "GENERIC",
+      "start": 17,
+      "height": "inner"
+    },
+    {
+      "clue": "North Atlantic island nation",
+      "answer": "ICELAND",
+      "start": 22,
+      "height": "full"
+    },
+    {
+      "clue": "Scenery of a region.",
+      "answer": "LANDSCAPE",
+      "start": 25,
+      "height": "mid"
+    },
+    {
+      "clue": "The outer boundary or edge.",
+      "answer": "PERIMETER",
+      "start": 32,
+      "height": "inner"
+    },
+    {
+      "clue": "Bomb-planting extremist.",
+      "answer": "TERRORIST",
+      "start": 38,
+      "height": "full"
+    },
+    {
+      "clue": "Main body of a plant.",
+      "answer": "STEM",
+      "start": 45,
+      "height": "mid"
+    },
+    {
+      "clue": "Mood or disposition.",
+      "answer": "TEMPER",
+      "start": 46,
+      "height": "inner"
+    },
+    {
+      "clue": "Private and individual.",
+      "answer": "PERSONAL",
+      "start": 49,
+      "height": "full"
+    },
+    {
+      "clue": "The first Greek letter.",
+      "answer": "ALPHA",
+      "start": 55,
+      "height": "mid"
+    },
+    {
+      "clue": "Natural environment of an animal.",
+      "answer": "HABITAT",
+      "start": 58,
+      "height": "inner"
+    },
+    {
+      "clue": "Character traits or qualities.",
+      "answer": "ATTRIBUTES",
+      "start": 63,
+      "height": "full"
+    },
+    {
+      "clue": "Examination",
+      "answer": "TEST",
+      "start": 70,
+      "height": "mid"
+    },
+    {
+      "clue": "Condition of being, or a nation.",
+      "answer": "STATE",
+      "start": 72,
+      "height": "inner"
+    },
+    {
+      "clue": "Relating to applied science.",
+      "answer": "TECHNICAL",
+      "start": 75,
+      "height": "full"
+    },
+    {
+      "clue": "Yell out, or use the phone.",
+      "answer": "CALL",
+      "start": 81,
+      "height": "mid"
+    },
+    {
+      "clue": "Loyalty or commitment.",
+      "answer": "ALLEGIANCE",
+      "start": 82,
+      "height": "inner"
+    }
+  ]
+}
 
 ]
