@@ -2751,18 +2751,26 @@ function write(ch) {
   }
 
   const prevAt = play.at;
+  const wasLocked = isCellLocked(prevAt);
   play.usr[play.at] = ch;
 
-  // auto-advance (skip locked)
+  // auto-advance
   let nextAt = play.at < play.n - 1 ? play.at + 1 : play.at;
-  if (play.mode === MODE.CHAIN) {
-    const nxt = findNextEditable(nextAt, +1);
-    if (nxt != null) nextAt = nxt;
-  }
-  play.at = nextAt;
 
   if (play.mode === MODE.CHAIN) {
     chainApplyLocksIfEnabled();
+    const lockedNow = isCellLocked(prevAt);
+    if (lockedNow && !wasLocked) {
+      const nxt = findNextEditable(prevAt + 1, +1);
+      if (nxt != null) nextAt = nxt;
+      else nextAt = prevAt;
+    } else {
+      // advance one step; if the next cell is locked, stay put and keep overwriting
+      const step = Math.min(play.n - 1, prevAt + 1);
+      nextAt = isCellLocked(step) ? prevAt : step;
+    }
+
+    play.at = nextAt;
     updatePlayUI();
     maybeToastChainFilledWrong();
     requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(nextAt - prevAt) || 1 });
@@ -2771,6 +2779,7 @@ function write(ch) {
     return;
   }
 
+  play.at = nextAt;
   updatePlayUI();
   maybeToastPlayFilledWrong();
   requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(nextAt - prevAt) || 1 });
@@ -2783,8 +2792,10 @@ function back() {
 
   if (play.mode === MODE.CHAIN && isCellLocked(play.at)) {
     const prev = findNextEditable(play.at, -1);
-    if (prev == null) return;
-    play.at = prev;
+    if (prev != null) play.at = prev;
+    updatePlayUI();
+    requestKeepActiveCellInView({ behavior: "smooth", delta: 1 });
+    return;
   }
 
   const prevAt = play.at;
@@ -2793,9 +2804,14 @@ function back() {
   } else {
     let prevAt = play.at > 0 ? play.at - 1 : 0;
     if (play.mode === MODE.CHAIN) {
-      const prev = findNextEditable(prevAt, -1);
-      if (prev == null) prevAt = play.at;
-      else prevAt = prev;
+      // If the next cell back is locked, stay on current cell and overwrite it
+      if (isCellLocked(prevAt)) {
+        prevAt = play.at;
+      } else {
+        const prev = findNextEditable(prevAt, -1);
+        if (prev == null) prevAt = play.at;
+        else prevAt = prev;
+      }
     }
     play.at = prevAt;
     if (play.mode !== MODE.CHAIN || !isCellLocked(play.at)) play.usr[play.at] = "";
@@ -2846,14 +2862,19 @@ function closeSuccess() {
 
 function shareResult({ mode }) {
   const puzzle = puzzles[pIdx];
-  const dateLabel =
-    (mode === MODE.CHAIN && puzzleDateLabel(puzzle)) ||
-    new Date().toLocaleDateString(undefined, {
-      weekday: "long",
+  const shareDateLabel = (() => {
+    const src = mode === MODE.CHAIN && puzzle?.dateKey ? dateFromKey(puzzle.dateKey) : null;
+    const opts = {
+      weekday: "short",
       year: "numeric",
       month: "short",
       day: "numeric",
-    });
+    };
+    if (src) opts.timeZone = "UTC";
+    const d = src || new Date();
+    const label = d.toLocaleDateString(undefined, opts);
+    return label ? label.replace(/^([A-Za-z]{3})/, (m) => m.toUpperCase()) : label;
+  })();
   const baseUrl =
     SHARE_URL_OVERRIDE && SHARE_URL_OVERRIDE.trim()
       ? SHARE_URL_OVERRIDE.trim()
@@ -2865,7 +2886,7 @@ function shareResult({ mode }) {
           }
         })();
 
-  let msg = `Overlap | ${dateLabel}`;
+  let msg = `Overlap | ${shareDateLabel}`;
 
   if (mode === MODE.CHAIN) {
     const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
