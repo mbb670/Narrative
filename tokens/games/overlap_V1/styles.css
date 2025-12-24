@@ -1189,6 +1189,7 @@ gap: var(--spacing-x8);
     .note {
         padding: var(--spacing-x16);
         margin: unset;
+        margin-top: var(--spacing-x12);
     }
 
     h3 {

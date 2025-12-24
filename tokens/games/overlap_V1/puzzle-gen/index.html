@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overlap Builder (React)</title>
+  <!-- Tailwind via CDN for the utility classes used in app.jsx -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Babel transforms the JSX in app.jsx on the fly -->
+  <script src="https://unpkg.com/@babel/standalone@7.25.8/babel.min.js"></script>
+</head>
+<body class="bg-slate-100">
+  <!-- App root (app.jsx will also create this if missing) -->
+  <div id="puzzle-gen-root"></div>
+
+  <!-- Load the React app (kept as a module so imports work) -->
+  <script type="text/babel" data-type="module" data-presets="react" src="./app.jsx"></script>
+</body>
+</html>

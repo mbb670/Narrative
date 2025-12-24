@@ -25,6 +25,15 @@ const LAST_VIEW_KEY = `${KEY}__last_view`;
 
 const VALID_VIEWS = new Set(Object.values(VIEW));
 
+const DEV_DISABLE_AUTOPAUSE = (() => {
+  try {
+    const url = new URL(location.href);
+    return url.searchParams.has("dev") || url.searchParams.has("devmode");
+  } catch {
+    return false;
+  }
+})();
+
 function loadLastView() {
   try {
     const v = localStorage.getItem(LAST_VIEW_KEY);
@@ -639,6 +648,7 @@ const els = {
   resultsModal: document.getElementById("results"),
   resultsClose: document.querySelector(".resultsClose"),
   resultsShare: document.querySelector(".resultsShare"),
+  chainTimer: document.querySelector(".chainTimer"),
   slider: $(".game-slider"),
   nextPuzzleBtn: $("#nextPuzzleBtn"),
   puzzleActions: document.querySelector(".puzzle-actions"),
@@ -840,8 +850,6 @@ const store = {
 
 
 // ---- Utils ----
-const uid = () =>
-  `p-${Math.random().toString(16).slice(2, 8)}-${Date.now().toString(16)}`;
 const cleanA = (s) => (s || "").toUpperCase().replace(/[^A-Z]/g, "");
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const insets = (h) => (h === "mid" ? [12.5, 12.5] : h === "inner" ? [25, 25] : [0, 0]);
@@ -955,7 +963,6 @@ const normPuzzle = (p) => {
 
 
   const out = {
-    id: String(p?.id || uid()),
     title: String(p?.title || "Untitled"),
     type,
     palette: normalizePaletteId(p?.palette),
@@ -2153,6 +2160,14 @@ function chainPause() {
   chainSetUIState(CHAIN_UI.PAUSED, ui);
 }
 
+function chainPauseIfBackgrounded() {
+  if (DEV_DISABLE_AUTOPAUSE) return;
+  if (play.mode !== MODE.CHAIN) return;
+  if (!chain.started || !chain.running) return;
+  if (play.done) return;
+  chainPause();
+}
+
 function chainResume() {
   if (!chain.started || chain.running) return;
 
@@ -2592,7 +2607,7 @@ function chainInputAllowed() {
   return chain.started;
 }
 function setInlineCluesHiddenUntilChainStart() {
-  const preStart = play.mode === MODE.CHAIN && !chain.started;
+  const preStart = play.mode === MODE.CHAIN && !chain.started && currentView !== VIEW.BUILD;
 
   // toggle a class so you can also handle with CSS if you want
   document.documentElement.classList.toggle("chain-prestart", preStart);
@@ -2855,7 +2870,7 @@ function shareResult({ mode }) {
   if (mode === MODE.CHAIN) {
     const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
     const timeText = fmtTime(elapsed);
-    if (timeText) msg += `\nI solved today's puzzle in ${timeText}`;
+    if (timeText) msg += `\nI solved the puzzle in ${timeText}`;
     const hints = Math.max(0, chain.hintsUsed || 0);
     if (chain.unsolvedCount > 0 && chain.lastFinishReason !== "solved") {
       msg += ` with ${chain.unsolvedCount} unsolved words`;
@@ -2978,6 +2993,8 @@ function onGridCellClick(e) {
   const i = +cell.dataset.i;
   if (play.mode === MODE.CHAIN && !chain.started && !play.done) {
     chainStartNow();
+  } else if (play.mode === MODE.CHAIN && chain.started && !chain.running && !play.done) {
+    chainResume();
   }
 
   hideAllRangeClueHints();
@@ -3156,6 +3173,9 @@ function setTab(which) {
 
   els.panelPlay?.classList.toggle("is-active", !isBuild);
   els.panelBuild?.classList.toggle("is-active", isBuild);
+
+  const hideTimer = which === VIEW.PLAY;
+  els.chainTimer?.toggleAttribute("hidden", hideTimer);
 
   updateKeyboardVisibility();
 
@@ -3539,6 +3559,11 @@ document.addEventListener(
 document.addEventListener("pointerdown", onGlobalPointerDownForRangeClues, { passive: true });
 document.addEventListener("keydown", onKey, true);
 window.addEventListener("resize", () => updateSliderUI());
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) chainPauseIfBackgrounded();
+});
+window.addEventListener("pagehide", chainPauseIfBackgrounded);
+window.addEventListener("blur", chainPauseIfBackgrounded);
 
 // Focus gate
 els.stage.addEventListener("pointerdown", (e) => {
@@ -3697,7 +3722,6 @@ els.pDate?.addEventListener("input", () => {
 els.pNew.addEventListener("click", () => {
   puzzles.push(
     normPuzzle({
-      id: uid(),
       title: "Untitled",
       type: MODE.OVERLAP,
       palette: FIRST_PALETTE_ID,
