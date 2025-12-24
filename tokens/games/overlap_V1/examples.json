@@ -2222,6 +2222,129 @@
       "height": "inner"
     }
   ]
+},
+{
+  "title": "Three",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2025-12-28",
+  "words": [
+    {
+      "clue": "Baja California's country",
+      "answer": "MEXICO",
+      "start": 1,
+      "height": "full"
+    },
+    {
+      "clue": "Unconscious state",
+      "answer": "COMA",
+      "start": 5,
+      "height": "mid"
+    },
+    {
+      "clue": "City on the Missouri River",
+      "answer": "OMAHA",
+      "start": 6,
+      "height": "inner"
+    },
+    {
+      "clue": "Scholarly",
+      "answer": "ACADEMIC",
+      "start": 10,
+      "height": "full"
+    },
+    {
+      "clue": "Wealth used to generate more",
+      "answer": "CAPITAL",
+      "start": 17,
+      "height": "mid"
+    },
+    {
+      "clue": "Story passed down",
+      "answer": "TALE",
+      "start": 21,
+      "height": "inner"
+    },
+    {
+      "clue": "Inheritance for heirs",
+      "answer": "LEGACY",
+      "start": 23,
+      "height": "full"
+    },
+    {
+      "clue": "Produce, as returns",
+      "answer": "YIELD",
+      "start": 28,
+      "height": "mid"
+    },
+    {
+      "clue": "One in the red",
+      "answer": "DEBTOR",
+      "start": 32,
+      "height": "inner"
+    },
+    {
+      "clue": "By word of mouth",
+      "answer": "ORAL",
+      "start": 36,
+      "height": "full"
+    },
+    {
+      "clue": "Carolina capital",
+      "answer": "RALEIGH",
+      "start": 37,
+      "height": "mid"
+    },
+    {
+      "clue": "Nail-driving tool",
+      "answer": "HAMMER",
+      "start": 43,
+      "height": "inner"
+    },
+    {
+      "clue": "Capital on seven hills",
+      "answer": "ROME",
+      "start": 48,
+      "height": "full"
+    },
+    {
+      "clue": "Steakhouse offering",
+      "answer": "MEAT",
+      "start": 50,
+      "height": "mid"
+    },
+    {
+      "clue": "Chow, casually",
+      "answer": "EATS",
+      "start": 51,
+      "height": "inner"
+    },
+    {
+      "clue": "Postcard-perfect",
+      "answer": "SCENIC",
+      "start": 54,
+      "height": "full"
+    },
+    {
+      "clue": "Bit of web data or dessert",
+      "answer": "COOKIE",
+      "start": 59,
+      "height": "mid"
+    },
+    {
+      "clue": "Ukriane Capital (old spelling)",
+      "answer": "KIEV",
+      "start": 62,
+      "height": "inner"
+    },
+    {
+      "clue": "At all times",
+      "answer": "EVER",
+      "start": 64,
+      "height": "full"
+    }
+  ]
 }
+
 
 ]

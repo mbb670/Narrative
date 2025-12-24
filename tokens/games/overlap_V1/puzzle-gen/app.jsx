@@ -738,7 +738,9 @@ export default function App() {
   const flattenChain = useMemo(() => {
       if (chain.length === 0) return [];
       let flatWords = [];
-      if (chain[0].words.length > 0) flatWords.push(chain[0].words[0]);
+      if (chain[0].words.length > 0) {
+          flatWords.push(chain[0].words[0]);
+      }
 
       for (let i = 0; i < chain.length; i++) {
           const item = chain[i];
@@ -883,6 +885,44 @@ export default function App() {
          }
     }
     return false;
+  }, [chain]);
+
+  // Display nodes (one per word) used for rendering and counts
+  const displayedNodes = useMemo(() => {
+      const nodes = [];
+      chain.forEach((item, itemIndex) => {
+          const nextItem = chain[itemIndex + 1];
+          const isTriple = item.type === 'triple';
+          item.words.forEach((w) => {
+              const cleanW = cleanWord(w);
+              if (
+                  nextItem &&
+                  nextItem.type === 'triple' &&
+                  cleanWord(nextItem.words[0]) === cleanW &&
+                  item.type !== 'triple'
+              ) {
+                  return;
+              }
+              if (!isTriple && nodes.length > 0 && cleanWord(nodes[nodes.length - 1].word) === cleanW) return;
+              const tripleIds = isTriple ? [item.id] : [];
+              nodes.push({ word: w, itemIndex, tripleIds });
+          });
+      });
+      // Detect triples dynamically based on overlaps (consecutive three with >=1 overlap)
+      for (let i = 0; i < nodes.length - 2; i++) {
+          const a = nodes[i];
+          const b = nodes[i + 1];
+          const c = nodes[i + 2];
+          const ov1 = getOverlap(a.word, b.word, 1)?.count || 0;
+          const ov2 = getOverlap(b.word, c.word, 1)?.count || 0;
+          if (ov1 > 0 && ov2 > 0) {
+              const id = `auto-triple-${i}-${cleanWord(a.word)}`;
+              [a, b, c].forEach(n => {
+                  if (!n.tripleIds.includes(id)) n.tripleIds.push(id);
+              });
+          }
+      }
+      return nodes;
   }, [chain]);
 
   // Clue Generation
@@ -1290,6 +1330,42 @@ Words: ${flat.join(', ')}`;
   const removeFromChain = (index) => {
       saveToHistory();
       setChain(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeNode = (node) => {
+      saveToHistory();
+      setChain(prev => {
+          const next = [...prev];
+          const item = { ...next[node.itemIndex] };
+          const words = [...item.words];
+          const targetIdx = words.findIndex(w => cleanWord(w) === cleanWord(node.word));
+          if (targetIdx === -1) return prev;
+          words.splice(targetIdx, 1);
+
+          if (words.length === 0) {
+              next.splice(node.itemIndex, 1);
+              return next;
+          }
+
+          const overlaps = [];
+          for (let i = 0; i < words.length - 1; i++) {
+              const ov = getOverlap(words[i], words[i + 1], 1);
+              overlaps.push(ov || { overlapStr: '', count: 0 });
+          }
+
+          item.words = words;
+          item.startWord = words[0];
+          item.endWord = words[words.length - 1];
+          item.overlaps = overlaps;
+          item.totalOverlap = overlaps.reduce((acc, o) => acc + (o?.count || 0), 0);
+          if (item.words.length === 1) {
+              item.type = 'bridge';
+              item.overlaps = [];
+              item.totalOverlap = 0;
+          }
+          next[node.itemIndex] = item;
+          return next;
+      });
   };
   
   const clearChain = () => {
@@ -2108,7 +2184,6 @@ Words: ${flat.join(', ')}`;
                 ) : (
                     <div className="flex flex-wrap items-center gap-y-8 gap-x-0 content-start max-w-5xl mx-auto">
                     {(() => {
-                        let lastDisplayEndWord = null;
                         const overlapBadgeClass = (count) => {
                             if (count >= 4) return "text-emerald-600 font-semibold text-xs";
                             if (count >= 3) return "text-blue-600 font-semibold text-xs";
@@ -2116,127 +2191,162 @@ Words: ${flat.join(', ')}`;
                             return "text-rose-600 font-semibold text-xs";
                         };
 
-                        return chain.map((link, idx) => {
-                            const prevLink = chain[idx - 1];
-                            const nextLink = chain[idx + 1];
+                        const nodes = displayedNodes;
 
-                            // Determine which words to show on the card
-                            let wordsToShow = link.words;
-                            if (link.type === 'pair' || link.type === 'bridge') {
-                                // Show the whole bridge path but drop a leading duplicate of the previous end word
-                                const prevClean = lastDisplayEndWord ? cleanWord(lastDisplayEndWord) : null;
-                                wordsToShow = link.words.filter((w, i) => !(i === 0 && prevClean && cleanWord(w) === prevClean));
-                                if (wordsToShow.length === 0 && link.words.length > 0) {
-                                    wordsToShow = [link.words[link.words.length - 1]];
-                                }
-                            } else if (link.type === 'triple') {
-                                // Only render the triple as a single node containing its three words
-                                wordsToShow = link.words;
-                            }
-
-                            const displayStart = wordsToShow[0] || link.words[0];
-                            const displayEnd = wordsToShow[wordsToShow.length - 1] || link.words[link.words.length - 1];
-
-                            const overlapWithPrev = prevLink && lastDisplayEndWord
-                                ? (getOverlap(lastDisplayEndWord, displayStart, 1)?.count || 0)
-                                : null;
-
-                            // Broken link check uses actual chain linkage
-                            let isBroken = false;
-                            if (prevLink) {
-                                const prevEnd = prevLink.endWord;
-                                const currStart = link.startWord;
-                                const overlap = getOverlap(prevEnd, currStart, 1);
-                                if (!overlap && cleanWord(prevEnd) !== cleanWord(currStart)) {
-                                    isBroken = true;
-                                }
-                            }
-
-                            const card = (
-                                <React.Fragment key={link.id + idx}>
+                        const renderNode = (node, isBroken, idxKey) => (
+                            <div key={`node-${idxKey}-${node.word}-${node.itemIndex}`} className="relative group animate-in slide-in-from-bottom-2 duration-500">
+                                <button 
+                                    onClick={() => removeNode(node)}
+                                    className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-rose-500 border border-slate-200 shadow-sm p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all z-20 hover:scale-110"
+                                >
+                                <X size={10} />
+                                </button>
                                 
-                                {idx > 0 && (
-                                    <div className="mx-1 relative flex flex-col items-center justify-center min-w-[3rem]">
-                                        {!isBroken ? (
-                                            <>
-                                                {overlapWithPrev !== null && (
-                                                    <div className={`${overlapBadgeClass(overlapWithPrev)} font-mono mb-1`}>
-                                                        {overlapWithPrev}
-                                                    </div>
-                                                )}
-                                                <div className="w-full h-0.5 bg-indigo-200 relative">
-                                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-400 rounded-full"></div>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="flex flex-col items-center animate-in fade-in zoom-in duration-300 z-10">
-                                                <Button 
-                                                    variant="warning" 
-                                                    size="small" 
-                                                    className="text-[10px] h-6 px-2 py-0 shadow-sm whitespace-nowrap"
-                                                    onClick={() => handleFindBridge(idx - 1)}
-                                                >
-                                                    <Hammer size={10} /> Repair
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                <div className="relative group animate-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
-                                    <button 
-                                        onClick={() => removeFromChain(idx)}
-                                        className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-rose-500 border border-slate-200 shadow-sm p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all z-20 hover:scale-110"
-                                    >
-                                    <X size={10} />
-                                    </button>
-                                    
-                                    <div className={`
-                                        flex items-center px-4 py-3 bg-white rounded-xl shadow-sm border transition-all hover:shadow-md
-                                        ${isBroken ? 'border-rose-300 ring-2 ring-rose-50' : 'border-indigo-100'}
-                                        ${link.type === 'triple' ? 'ring-2 ring-sky-50 border-sky-100 bg-sky-50/30' : ''}
-                                    `}>
-                                        {/* Header Badge */}
-                                        {link.type === 'triple' && (
-                                            <div className="absolute -top-3 left-3 bg-white border border-slate-200 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full text-sky-600 shadow-sm">
-                                                Triple
-                                            </div>
-                                        )}
-
-                                {wordsToShow.map((w, wIdx) => (
-                                    <React.Fragment key={wIdx}>
-                                        {wIdx > 0 && link.type === 'triple' && (
-                                            <div className="mx-2 flex flex-col items-center">
-                                                {link.overlaps && link.overlaps[wIdx-1] && (
-                                                    <span className={`${overlapBadgeClass(link.overlaps[wIdx-1].count)} font-mono mb-0.5`}>
-                                                        {link.overlaps[wIdx-1].count}
-                                                    </span>
-                                                )}
-                                                <ArrowRight size={14} className="text-slate-300" />
-                                            </div>
-                                        )}
-                                        
-                                        <span className="font-bold text-slate-700">
-                                            {w}
-                                        </span>
-                                    </React.Fragment>
-                                ))}
-                                    </div>
+                                <div className={`
+                                    flex items-center px-4 py-3 bg-white rounded-xl shadow-sm border transition-all hover:shadow-md
+                                    ${isBroken ? 'border-rose-300 ring-2 ring-rose-50' : 'border-indigo-100'}
+                                    ${node.tripleIds.length > 0 ? 'bg-sky-50/30' : ''}
+                                `}>
+                                    <span className="font-bold text-slate-700">
+                                        {node.word}
+                                    </span>
                                 </div>
-                                </React.Fragment>
-                            );
+                            </div>
+                        );
 
-                            // Track displayed end word for the next connector computation
-                            lastDisplayEndWord = displayEnd || lastDisplayEndWord;
-                            return card;
-                        });
+                        const shownBrokenEdges = new Set();
+
+                        const renderConnector = (leftNode, rightNode) => {
+                            const sameItem = leftNode.itemIndex === rightNode.itemIndex;
+                            const overlap = getOverlap(leftNode.word, rightNode.word, 1)?.count || 0;
+                            const isBroken = !sameItem && !getOverlap(leftNode.word, rightNode.word, 1) && cleanWord(leftNode.word) !== cleanWord(rightNode.word);
+                            if (isBroken) {
+                                const brokenKey = `${leftNode.itemIndex}-${rightNode.itemIndex}`;
+                                if (shownBrokenEdges.has(brokenKey)) {
+                                    return null; // prevent duplicate repair buttons on the same gap
+                                }
+                                shownBrokenEdges.add(brokenKey);
+                            }
+                            return (
+                                <div key={`conn-${leftNode.word}-${rightNode.word}-${leftNode.itemIndex}`} className="mx-1 relative flex flex-col items-center justify-center min-w-[3rem]">
+                                    {!isBroken ? (
+                                        <>
+                                            <div className={`${overlapBadgeClass(overlap)} font-mono mb-1`}>
+                                                {overlap}
+                                            </div>
+                                            <div className="w-full h-0.5 bg-indigo-200 relative">
+                                                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-400 rounded-full"></div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex flex-col items-center animate-in fade-in zoom-in duration-300 z-10">
+                                            <Button 
+                                                variant="warning" 
+                                                size="small" 
+                                                className="text-[10px] h-6 px-2 py-0 shadow-sm whitespace-nowrap"
+                                                onClick={() => handleFindBridge(leftNode.itemIndex)}
+                                            >
+                                                <Hammer size={10} /> Repair
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        };
+
+                        const elements = [];
+                        let lastNode = null;
+                        for (let i = 0; i < nodes.length; ) {
+                            const node = nodes[i];
+
+                            // If this node is part of a triple, render the entire triple group together
+                            if (node.tripleIds.length > 0) {
+                                const tripleId = node.tripleIds[0];
+                                const group = [];
+                                let j = i;
+                                while (j < nodes.length && nodes[j].tripleIds.includes(tripleId)) {
+                                    group.push(nodes[j]);
+                                    j++;
+                                }
+
+                                // Only treat as triple if we have at least 3 consecutive nodes with this id
+                                if (group.length >= 3) {
+                                    if (lastNode) {
+                                        elements.push(renderConnector(lastNode, group[0]));
+                                    }
+
+                                const ov1 = getOverlap(group[0].word, group[1].word, 1);
+                                const ov2 = getOverlap(group[1].word, group[2].word, 1);
+                                const sharedCount = (ov1 && ov2) ? Math.min(ov1.count, ov2.count) : 0;
+
+                                if (sharedCount > 0 && group.length >= 3) {
+                                    elements.push(
+                                        <div key={`triple-${tripleId}-${i}`} className="flex items-center gap-1 px-3 py-3 rounded-2xl border-2 border-sky-300/80 bg-sky-50/40 shadow-inner relative">
+                                            <div className="absolute -top-3 left-2 bg-white text-sky-700 border border-sky-200 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm">
+                                                Overlap {sharedCount}
+                                            </div>
+                                            {group.map((gNode, gIdx) => (
+                                                <React.Fragment key={`g-${gIdx}-${gNode.word}-${gNode.itemIndex}`}>
+                                                    {gIdx > 0 && (
+                                                        <div className="mx-1 relative flex flex-col items-center justify-center min-w-[2.5rem]">
+                                                            <div className={`${overlapBadgeClass(getOverlap(group[gIdx-1].word, gNode.word, 1)?.count || 0)} font-mono mb-0.5`}>
+                                                                {getOverlap(group[gIdx-1].word, gNode.word, 1)?.count || 0}
+                                                            </div>
+                                                            <div className="w-full h-0.5 bg-indigo-200 relative">
+                                                                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-400 rounded-full"></div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    <div className="relative">
+                                                        <button 
+                                                            onClick={() => removeNode(gNode)}
+                                                            className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-rose-500 border border-slate-200 shadow-sm p-1 rounded-full opacity-0 hover:opacity-100 transition-all z-20 hover:scale-110"
+                                                        >
+                                                            <X size={10} />
+                                                        </button>
+                                                        <div className="px-4 py-3 bg-white rounded-xl shadow-sm border border-sky-200">
+                                                            <span className="font-bold text-slate-700">{gNode.word}</span>
+                                                        </div>
+                                                    </div>
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
+                                    );
+
+                                    lastNode = group[group.length - 1];
+                                    i = j;
+                                    continue;
+                                } else {
+                                    // Not a valid triple; render as normal nodes
+                                    for (let k = 0; k < group.length; k++) {
+                                        const gNode = group[k];
+                                        if (lastNode) {
+                                            elements.push(renderConnector(lastNode, gNode));
+                                        }
+                                        elements.push(renderNode(gNode, false, i + k));
+                                        lastNode = gNode;
+                                    }
+                                    i = j;
+                                    continue;
+                                }
+                            }
+                            }
+
+                            // Normal node
+                                if (lastNode) {
+                                    elements.push(renderConnector(lastNode, node));
+                                }
+                            elements.push(renderNode(node, false, i));
+                            lastNode = node;
+                            i++;
+                        }
+                        return elements;
                     })()}
                     </div>
                 )}
                 </div>
-                <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex justify-between">
-                <div>Chain Length: {chain.length} links</div>
-                <div>Total Words: {chain.length > 0 ? chain.reduce((acc, item) => acc + (item.words.length - 1), 1) : 0}</div>
+                <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex justify-end">
+                <div>Total Words: {displayedNodes.length}</div>
                 </div>
             </Card>
             </div>
