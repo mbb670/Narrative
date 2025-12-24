@@ -1667,153 +1667,123 @@
   "palette": "greens",
   "words": [
     {
-      "clue": "Pit group",
-      "answer": "ORCHESTRA",
-      "start": 1,
-      "height": "full"
-    },
-    {
-      "clue": "Exert to the limit",
-      "answer": "STRAIN",
-      "start": 6,
-      "height": "mid"
-    },
-    {
-      "clue": "Person from New Delhi",
-      "answer": "INDIAN",
-      "start": 10,
-      "height": "full"
-    },
-    {
-      "clue": "Continent with no permanent residents",
-      "answer": "ANTARCTICA",
-      "start": 14,
-      "height": "mid"
-    },
-    {
-      "clue": "Horse-drawn buggy",
-      "answer": "CARRIAGE",
-      "start": 22,
-      "height": "full"
-    },
-    {
       "clue": "Spy, perhaps",
       "answer": "AGENT",
-      "start": 27,
+      "start": 1,
       "height": "mid"
     },
     {
       "clue": "Doorway; submission",
       "answer": "ENTRY",
-      "start": 29,
+      "start": 3,
       "height": "inner"
     },
     {
       "clue": "Hard to endure",
       "answer": "TRYING",
-      "start": 31,
+      "start": 5,
       "height": "full"
     },
     {
       "clue": "Majestic splendor",
       "answer": "GRANDEUR",
-      "start": 36,
+      "start": 10,
       "height": "mid"
     },
     {
       "clue": "Paris's continent",
       "answer": "EUROPE",
-      "start": 41,
+      "start": 15,
       "height": "full"
     },
     {
       "clue": "Not shut",
       "answer": "OPEN",
-      "start": 44,
+      "start": 18,
       "height": "mid"
     },
     {
       "clue": "Coordinated outfit or group",
       "answer": "ENSEMBLE",
-      "start": 46,
+      "start": 20,
       "height": "inner"
     },
     {
       "clue": "45-minute class, maybe",
       "answer": "LESSON",
-      "start": 52,
+      "start": 26,
       "height": "full"
     },
     {
       "clue": "Multi-movement piano piece",
       "answer": "SONATA",
-      "start": 55,
+      "start": 29,
       "height": "mid"
     },
     {
       "clue": "Director's try",
       "answer": "TAKE",
-      "start": 59,
+      "start": 33,
       "height": "full"
     },
     {
       "clue": "Actress Karen ___",
       "answer": "AKERS",
-      "start": 60,
+      "start": 34,
       "height": "inner"
     },
     {
       "clue": "Clever",
       "answer": "SMART",
-      "start": 64,
+      "start": 38,
       "height": "full"
     },
     {
       "clue": "Painter, say",
       "answer": "ARTIST",
-      "start": 66,
+      "start": 40,
       "height": "mid"
     },
     {
       "clue": "Bus sign",
       "answer": "STOP",
-      "start": 70,
+      "start": 44,
       "height": "full"
     },
     {
       "clue": "Subject of discussion",
       "answer": "TOPIC",
-      "start": 71,
+      "start": 45,
       "height": "inner"
     },
     {
       "clue": "Movie, informally",
       "answer": "PICTURE",
-      "start": 73,
+      "start": 47,
       "height": "mid"
     },
     {
       "clue": "Background actor",
       "answer": "EXTRA",
-      "start": 79,
+      "start": 53,
       "height": "full"
     },
     {
       "clue": "Cross",
       "answer": "TRAVERSE",
-      "start": 81,
+      "start": 55,
       "height": "mid"
     },
     {
       "clue": "Oceans",
       "answer": "SEAS",
-      "start": 87,
+      "start": 61,
       "height": "full"
     },
     {
       "clue": "Toward sunrise",
       "answer": "EASTWARD",
-      "start": 88,
+      "start": 62,
       "height": "inner"
     }
   ],
