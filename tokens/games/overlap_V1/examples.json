@@ -1865,103 +1865,103 @@
   ]
 },
 {
-  "title": "testtt",
+  "title": "minus",
   "type": "chain",
-  "palette": "greens",
+  "palette": "classic",
   "dateKey": "2025-12-25",
   "words": [
     {
-      "clue": "Natural philosopher",
+      "clue": "Nature buff",
       "answer": "NATURALIST",
       "start": 1,
       "height": "full"
     },
     {
-      "clue": "Family lineage",
+      "clue": "Plant support",
       "answer": "STEM",
       "start": 9,
       "height": "mid"
     },
     {
-      "clue": "Volatile mood state",
+      "clue": "Short fuse",
       "answer": "TEMPER",
       "start": 10,
       "height": "inner"
     },
     {
-      "clue": "Specific to one's self",
+      "clue": "Private",
       "answer": "PERSONAL",
       "start": 13,
       "height": "full"
     },
     {
-      "clue": "Celtic boy's name",
+      "clue": "Actor Rickman",
       "answer": "ALAN",
       "start": 19,
       "height": "mid"
     },
     {
-      "clue": "Outdoor scenery",
+      "clue": "Scenic views",
       "answer": "LANDSCAPES",
       "start": 20,
       "height": "inner"
     },
     {
-      "clue": "boop",
+      "clue": "Skin under hair",
       "answer": "SCALP",
       "start": 29,
       "height": "full"
     },
     {
-      "clue": "Relating to gender",
+      "clue": "Pack leader",
       "answer": "ALPHA",
       "start": 31,
       "height": "mid"
     },
     {
-      "clue": "First Greek letter",
+      "clue": "Animal home",
       "answer": "HABITAT",
       "start": 34,
       "height": "inner"
     },
     {
-      "clue": "Animal's natural home",
+      "clue": "Traits",
       "answer": "ATTRIBUTES",
       "start": 39,
       "height": "full"
     },
     {
-      "clue": "Able to be credited to",
+      "clue": "Pop quiz",
       "answer": "TEST",
       "start": 46,
       "height": "mid"
     },
     {
-      "clue": "Trial or challenge",
+      "clue": "Condition",
       "answer": "STATE",
       "start": 48,
       "height": "inner"
     },
     {
-      "clue": "Current condition",
+      "clue": "Violent extremist",
       "answer": "TERRORIST",
       "start": 51,
       "height": "full"
     },
     {
-      "clue": "Political bomber",
+      "clue": "Red light command",
       "answer": "STOP",
       "start": 58,
       "height": "mid"
     },
     {
-      "clue": "Come to a halt",
+      "clue": "Land's contours",
       "answer": "TOPOGRAPHY",
       "start": 59,
       "height": "inner"
     },
     {
-      "clue": "Precise place description",
+      "clue": "Body-related",
       "answer": "PHYSICAL",
       "start": 66,
       "height": "full"
