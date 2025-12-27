@@ -42,20 +42,21 @@
     --toast-error-duration: 2200ms;
 }
 
-:root {
-    /* Default puzzle colors (overridden by palette attribute) */
-    --puzzle-color-1: #ff2b1d;
-    --puzzle-color-2: #ff7a1a;
-    --puzzle-color-3: #f5b800;
-    --puzzle-color-4: #2f8f1d;
-    --puzzle-color-5: #2b74ff;
-}
-
 @media (max-width:640px) {
     :root {
         --border-w: 1px;
         --grid-letter-space: 80px;
     }
+}
+
+/* Default puzzle colors (overridden by palette attribute) */
+
+:root {
+    --puzzle-color-1: #ff2b1d;
+    --puzzle-color-2: #ff7a1a;
+    --puzzle-color-3: #f5b800;
+    --puzzle-color-4: #2f8f1d;
+    --puzzle-color-5: #2b74ff;
 }
 
 [data-puzzle-palette="classic"] {
@@ -81,6 +82,35 @@
     --puzzle-color-4: #7EE081;
     --puzzle-color-5: #C2F3C0;
 }
+
+
+
+[data-puzzle-palette="test"] {
+    --puzzle-color-1: #FF8360;
+    --puzzle-color-2: #E8E288;
+    --puzzle-color-3: #7DCE82;
+    --puzzle-color-4: #3CDBD3;
+    --puzzle-color-5: #00FFF5;
+}
+
+[data-puzzle-palette="test"] {
+    --puzzle-color-1: #034732;
+    --puzzle-color-2: #008148;
+    --puzzle-color-3: #C6C013;
+    --puzzle-color-4: #EF8A17;
+    --puzzle-color-5: #EF2917;
+}
+
+
+
+[data-puzzle-palette="test"] {
+    --puzzle-color-1: #173f5f;
+    --puzzle-color-2: #20639b;
+    --puzzle-color-3: #3caea3;
+    --puzzle-color-4: #f6d55c;
+    --puzzle-color-5: #ed553b;
+}
+
 
 
 body {
@@ -447,11 +477,12 @@ body[data-chain-state="done"] .rangeClue-content {
     pointer-events: none;
     position: sticky;
     left: 0;
+    z-index: 10;
 }
 
 .toast {
     opacity: 0;
-    transform: translateY(-8x);
+    transform: translateY(-8px);
     transition: opacity 180ms ease, transform 180ms ease;
     padding: var(--spacing-x8) var(--spacing-x12);
     border-radius: var(--radius-default);
@@ -464,6 +495,8 @@ body[data-chain-state="done"] .rangeClue-content {
     color: var(--foreground-alt);
     background: var(--background-strong);
 
+    /* opacity: 1; */
+
 }
 
 .toast.is-showing {
@@ -475,6 +508,23 @@ body[data-chain-state="done"] .rangeClue-content {
     border-color: var(--system-positive-default);
     color: var(--system-positive-strong);
     background: var(--system-positive-subtle);
+
+}
+
+.toast-success {
+    border-color: var(--system-positive-default);
+    color: var(--system-positive-strong);
+    background: var(--system-positive-subtle);
+
+}
+
+.toast-word-solved {
+    background: var(--background-default);
+    color: var(--foreground-muted);
+    border-color: var(--border-subtle);
+    span{
+        color: var(--foreground-subtle);
+    }
 
 }
 
@@ -510,8 +560,8 @@ body[data-chain-state="done"] .rangeClue-content {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
     touch-action: pan-x pan-y;
-    overflow-x: clip;
-    overflow-y: visible;
+    /* overflow-x: clip; */
+    /* overflow-y: visible; */
     /* overflow: clip; */
 
 
@@ -527,14 +577,25 @@ body[data-chain-state="done"] .rangeClue-content {
     display: grid;
     grid-template-rows: subgrid;
     border-radius: var(--range-radius);
+    position: relative;
     transition:
         opacity 650ms ease,
         border-color 650ms ease,
         background-color 650ms ease,
-        box-shadow 650ms ease,
-        filter 650ms ease;
-    
+        box-shadow 650ms ease;
+    /* &::after{
+       transition:
+       opacity 650ms ease,
+        transform 650ms ease;
+        transform: scale(0);
+        transform-origin: center;
+        opacity: 0;
+
+        content: '';
+        display: block;
+    } */
 }
+
 
 .range.range-solve-anim {
     animation: rangeSolve 650ms ease;
@@ -575,16 +636,19 @@ body[data-chain-state="done"] .rangeClue-content {
 .range-full {
     grid-row: 1 / -1;
     z-index: 1;
+    --range-check-offset: -1;
 }
 
 .range-mid {
     grid-row: 2 / -2;
     z-index: 2;
+    --range-check-offset: -2;
 }
 
 .range-inner {
     grid-row: 3 / -3;
     z-index: 3;
+    --range-check-offset: -3;
 }
 
 .range.is-locked {
@@ -596,7 +660,9 @@ body[data-chain-state="done"] .rangeClue-content {
         pointer-events: none;
     }
 
-    &+.rangeClue .rangeClue-content::after {
+    &+.rangeClue .rangeClue-content::after
+    /* &::after  */
+    {
         content: '';
         display: block;
         aspect-ratio: 1;
@@ -604,8 +670,17 @@ body[data-chain-state="done"] .rangeClue-content {
         -webkit-mask: url("images/circle-check.svg") center / contain no-repeat;
         mask: url("images/circle-check.svg") center / contain no-repeat;
         padding: var(--spacing-x2) var(--spacing-x8);
-
+        /* transform: scale(1);
+        opacity: 1; */
     }
+
+    /* &::after{
+        position: absolute;
+        top: calc(var(--grid-top-space) * var(--range-check-offset));
+        left: 50%;
+        transform: translate(-50%);
+        height: var(--spacing-x16);
+    } */
 }
 
 .rangeClue {

@@ -1971,7 +1971,7 @@
 {
     "title": "aa",
     "type": "chain",
-    "palette": "greens",
+    "palette": "test",
     "dateKey": "2025-12-26",
     "words": [{
         "clue": "Spaghetti, for one",

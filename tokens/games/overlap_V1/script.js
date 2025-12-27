@@ -675,6 +675,7 @@ const els = {
   toastSuccess: $("#toastSuccess"),
   toastWarning: $("#toastWarning"),
   toastError: $("#toastError"),
+  toastWordSolved: $("#toastWordSolved"),
   shareInline: $("#shareInline"),
 
 };
@@ -707,10 +708,16 @@ function showToast(type, message, duration) {
     success: els.toastSuccess,
     warning: els.toastWarning,
     error: els.toastError,
+    wordSolved: els.toastWordSolved,
   };
   const el = map[type];
   if (!el) return;
-  if (message) el.textContent = message;
+  if (type === "wordSolved") {
+    const countSpan = el.querySelector(".toast-word-solved-count");
+    if (countSpan) countSpan.textContent = message || "";
+  } else if (message) {
+    el.textContent = message;
+  }
   const dur = duration ?? toastDuration(type);
   if (toastTimers[type]) clearTimeout(toastTimers[type]);
   el.classList.remove("is-showing");
@@ -720,7 +727,7 @@ function showToast(type, message, duration) {
 }
 
 function clearToasts() {
-  ["success", "warning", "error"].forEach((type) => {
+  ["success", "warning", "error", "wordSolved"].forEach((type) => {
     if (toastTimers[type]) {
       clearTimeout(toastTimers[type]);
       toastTimers[type] = 0;
@@ -1010,6 +1017,7 @@ const UA_DATA_DESKTOP = navigator.userAgentData ? navigator.userAgentData.mobile
 
 const DEFAULTS_TO_HARDWARE = UA_DESKTOP_HINT || UA_DATA_DESKTOP;
 let hasHardwareKeyboard = DEFAULTS_TO_HARDWARE;
+let hardwareKeyboardLocked = DEFAULTS_TO_HARDWARE; // once true, keep hardware assumption until reload
 let lastHardwareKeyboardTs = 0;
 const HARDWARE_STALE_MS = 120000; // demote hardware flag after ~2 minutes of no keys
 const shouldUseCustomKeyboard = () => IS_TOUCH && !hasHardwareKeyboard;
@@ -1190,6 +1198,7 @@ function updateKeyboardVisibility() {
 }
 
 function maybeDemoteHardwareKeyboard() {
+  if (hardwareKeyboardLocked) return;
   if (!hasHardwareKeyboard) return;
   const stale = !lastHardwareKeyboardTs || Date.now() - lastHardwareKeyboardTs > HARDWARE_STALE_MS;
   if (!stale) return;
@@ -1202,6 +1211,7 @@ function noteHardwareKeyboard() {
   if (!IS_TOUCH) return;
   if (hasHardwareKeyboard) return;
   hasHardwareKeyboard = true;
+  hardwareKeyboardLocked = true; // never show virtual keyboard again until reload
   lastHardwareKeyboardTs = Date.now();
   updateKeyboardVisibility();
   focusForTyping();
@@ -1263,7 +1273,7 @@ function setCols(n) {
   document.documentElement.style.setProperty("--cols", String(n));
 }
 
-function renderGrid(target, model, clickable) {
+function renderGrid(target, model, clickable, puzzleForPalette) {
   if (target === els.grid) resetRangeClueHints();
   target.innerHTML = "";
 
@@ -1363,6 +1373,17 @@ function renderGrid(target, model, clickable) {
   if (target === els.grid) {
     play.cellWords = cellWords;
   }
+
+  // Ensure ranges always have a color (robust against missing inline vars)
+  const ensureColor = (rangeEl) => {
+    const existing = (rangeEl?.style?.getPropertyValue("--color") || "").trim();
+    if (existing) return;
+    const eIdx = Number(rangeEl?.dataset?.e);
+    const entry = Number.isFinite(eIdx) ? model.entries.find((e) => e.eIdx === eIdx) : null;
+    const fallbackColor = paletteColorForWord(puzzleForPalette || puzzles[pIdx], entry?.rawIdx ?? entry?.eIdx ?? 0);
+    rangeEl.style.setProperty("--color", fallbackColor);
+  };
+  target.querySelectorAll(".range").forEach(ensureColor);
 }
 
 
@@ -2585,7 +2606,12 @@ function chainApplyLocksIfEnabled() {
     if (selectedEntry != null && play.lockedEntries.has(selectedEntry)) clearSelection();
     if (newlyLocked.length) {
       requestAnimationFrame(() =>
-        requestAnimationFrame(() => newlyLocked.forEach(triggerSolveAnimation))
+        requestAnimationFrame(() => newlyLocked.forEach((e) => {
+          triggerSolveAnimation(e);
+          const solved = play.lockedEntries.size;
+          const total = play.entries.length;
+          showToast("wordSolved", `${solved}/${total}`);
+        }))
       );
     }
   }
@@ -3113,7 +3139,7 @@ function loadPuzzle(i) {
   play.lockedCells = Array.from({ length: play.n }, () => false);
   clearSelection();
 
-  renderGrid(els.grid, m, true);
+  renderGrid(els.grid, m, true, puzzles[pIdx]);
   updateSliderUI();
 
 
@@ -3490,7 +3516,7 @@ function renderRows() {
 function renderPreview() {
   const m = computed(puzzles[pIdx]);
   setCols(m.total);
-  renderGrid(els.bGrid, m, false);
+  renderGrid(els.bGrid, m, false, puzzles[pIdx]);
   els.bGrid.classList.add("showNums");
 
   const bad = m.ok ? null : m.conf?.idx;
