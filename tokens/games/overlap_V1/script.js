@@ -2787,6 +2787,28 @@ function updatePlayUI() {
     const locked = play.mode === MODE.CHAIN && isCellLocked(i) && !fullySolved;
     c.classList.toggle("cell-solved", fullySolved);
     c.classList.toggle("cell-locked", locked);
+    // apply class for largest height covering this cell
+    c.classList.remove("cell-height-full", "cell-height-mid", "cell-height-inner", "cell-range-start", "cell-range-end");
+    if (wordsHere.length) {
+      const priority = { full: 3, mid: 2, inner: 1 };
+      const ranked = wordsHere.map((w) => {
+        const h = w.h || w.height || "full";
+        return { w, h, score: priority[h] || 0 };
+      });
+      ranked.sort((a, b) => b.score - a.score);
+      const topScore = ranked[0]?.score || 0;
+      const topHeights = ranked.filter((r) => r.score === topScore);
+      const topHeight = topHeights[0]?.h;
+      if (topHeight) c.classList.add(`cell-height-${topHeight}`);
+
+      // range start/end flags only if that range shares the top height
+      topHeights.forEach(({ w }) => {
+        const startIdx = w.start;
+        const endIdx = w.start + w.len - 1;
+        if (i === startIdx) c.classList.add("cell-range-start");
+        if (i === endIdx) c.classList.add("cell-range-end");
+      });
+    }
     c.setAttribute("aria-label", cellAriaLabel(i, wordsHere));
   });
   updateSelectedWordUI();
