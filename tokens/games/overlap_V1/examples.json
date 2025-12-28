@@ -2344,7 +2344,124 @@
       "height": "full"
     }
   ]
+},
+{
+  "title": "five",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2025-12-29",
+  "words": [
+    {
+      "clue": "Indian capital on the Yamuna",
+      "answer": "DELHI",
+      "start": 1,
+      "height": "full"
+    },
+    {
+      "clue": "Subject after \"world,\" briefly",
+      "answer": "HIST",
+      "start": 4,
+      "height": "mid"
+    },
+    {
+      "clue": "City on the Bosporus",
+      "answer": "ISTANBUL",
+      "start": 5,
+      "height": "inner"
+    },
+    {
+      "clue": "Short news update",
+      "answer": "BULLETIN",
+      "start": 10,
+      "height": "full"
+    },
+    {
+      "clue": "Bring upon oneself",
+      "answer": "INCUR",
+      "start": 16,
+      "height": "mid"
+    },
+    {
+      "clue": "Of the city",
+      "answer": "URBAN",
+      "start": 19,
+      "height": "inner"
+    },
+    {
+      "clue": "Secure spot for a ship",
+      "answer": "ANCHORAGE",
+      "start": 22,
+      "height": "full"
+    },
+    {
+      "clue": "Swiss city on a lake",
+      "answer": "GENEVA",
+      "start": 29,
+      "height": "mid"
+    },
+    {
+      "clue": "Tiny papal state",
+      "answer": "VATICAN",
+      "start": 33,
+      "height": "inner"
+    },
+    {
+      "clue": "About human cultures",
+      "answer": "ANTHROPOLOGICAL",
+      "start": 38,
+      "height": "full"
+    },
+    {
+      "clue": "System of months and days",
+      "answer": "CALENDAR",
+      "start": 50,
+      "height": "mid"
+    },
+    {
+      "clue": "Store for old records",
+      "answer": "ARCHIVE",
+      "start": 56,
+      "height": "inner"
+    },
+    {
+      "clue": "\"Sin City\"",
+      "answer": "VEGAS",
+      "start": 61,
+      "height": "full"
+    },
+    {
+      "clue": "Help in an emergency",
+      "answer": "ASSISTANCE",
+      "start": 64,
+      "height": "mid"
+    },
+    {
+      "clue": "Stretched out",
+      "answer": "ELONGATED",
+      "start": 73,
+      "height": "inner"
+    },
+    {
+      "clue": "Completely lacking",
+      "answer": "DEVOID",
+      "start": 81,
+      "height": "full"
+    },
+    {
+      "clue": "Brainwave",
+      "answer": "IDEA",
+      "start": 85,
+      "height": "mid"
+    },
+    {
+      "clue": "Bargain or arrangement",
+      "answer": "DEAL",
+      "start": 86,
+      "height": "inner"
+    }
+  ]
 }
+
 
 
 ]
