@@ -480,11 +480,24 @@ body[data-chain-state="done"] .rangeClue-content {
     position: sticky;
     left: 0;
     z-index: 10;
+    .toast{
+    transform: translateY(-8px);
+    }
+}
+
+.toast-stack-working{
+    /* border: 1px solid; */
+    flex: 1;
+    margin-top: unset;
+    .toast{
+        transform: translateY(8px);
+    height: 100%;
+    place-content: center;
+    }
 }
 
 .toast {
     opacity: 0;
-    transform: translateY(-8px);
     transition: opacity 180ms ease, transform 180ms ease;
     padding: var(--spacing-x8) var(--spacing-x12);
     border-radius: var(--radius-default);
@@ -497,7 +510,7 @@ body[data-chain-state="done"] .rangeClue-content {
     color: var(--foreground-alt);
     background: var(--background-strong);
 
-    /* opacity: 1; */
+    
 
 }
 
@@ -524,7 +537,6 @@ body[data-chain-state="done"] .rangeClue-content {
     background: var(--background-default);
     color: var(--foreground-muted);
     border-color: var(--border-subtle);
-
     span {
         color: var(--foreground-subtle);
     }

@@ -61,9 +61,6 @@
         <div class="toast toast-success elevation-fixed-top" id="toastSuccess" role="status">🎉 Success! You solved the puzzle!</div>
         <div class="toast toast-warning elevation-fixed-top" id="toastWarning" role="status">Not quite! Some or all words are incorrect</div>
         <div class="toast toast-error elevation-fixed-top" id="toastError" role="status">Puzzle not complete!</div>
-        <div class="toast toast-word-solved elevation-fixed-top" id="toastWordSolved" role="status">
-         Word solved! <span class="toast-word-solved-count"></span>
-        </div>
       </div>
       </div>
       <div class="puzzle-nav" aria-label="Navigation">
@@ -71,6 +68,11 @@
         <button class="btn icon" id="navWordPrev" type="button" aria-label="Previous unresolved word" title="Previous word">«</button>
         <button class="btn icon" id="navCellPrev" type="button" aria-label="Previous unresolved cell" title="Previous letter">‹</button>
         </div>
+              <div class="toast-stack toast-stack-working text-system-semibold-sm" aria-live="polite" aria-atomic="true">
+        <div class="toast toast-word-solved elevation-fixed-top" id="toastWordSolved" role="status">
+         Word Solved! <span class="toast-word-solved-count"></span>
+        </div>
+      </div>
         <div class="puzzle-nav-next">
         <button class="btn icon" id="navCellNext" type="button" aria-label="Next unresolved cell" title="Next letter">›</button>
         <button class="btn icon" id="navWordNext" type="button" aria-label="Next unresolved word" title="Next word">»</button>
@@ -132,7 +134,7 @@
 
   <div class="keyboard"></div>
   <div class="credit text-system-regular-sm">
-    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V3.17
+    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V3.18
   </div>
   </main>
   <!-- Results -->
