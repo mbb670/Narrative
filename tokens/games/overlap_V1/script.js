@@ -1114,9 +1114,25 @@ function initOnScreenKeyboard() {
   const root = els.keyboard;
   if (!root) return;
 
+  root.addEventListener("contextmenu", (e) => e.preventDefault());
+
   root.setAttribute("role", "region");
   root.setAttribute("aria-label", "On-screen keyboard");
   root.innerHTML = "";
+  const preview = document.createElement("div");
+  preview.className = "keyboard-key-preview text-system-semibold-sm elevation-overlay";
+  root.appendChild(preview);
+  let lastPressTs = 0;
+  let lastPointerHandledTs = 0;
+  let repeatTimer = null;
+  let repeatInterval = null;
+
+  const stopRepeats = () => {
+    if (repeatTimer) clearTimeout(repeatTimer);
+    if (repeatInterval) clearInterval(repeatInterval);
+    repeatTimer = null;
+    repeatInterval = null;
+  };
 
   KB_ROWS.forEach((rowKeys) => {
     const row = document.createElement("div");
@@ -1147,23 +1163,58 @@ function initOnScreenKeyboard() {
     root.appendChild(row);
   });
 
-  const handlePress = (e) => {
-    const btn = e.target.closest("[data-key], [data-action]");
-    if (!btn) return;
-    e.preventDefault();
-    markInteracted();
-
+  const triggerAction = (btn) => {
     if (btn.dataset.key) write(btn.dataset.key);
     else if (btn.dataset.action === "backspace") back();
     else if (btn.dataset.action === "enter") move(1);
+  };
+
+  const handlePress = (e, { isRepeat = false } = {}) => {
+    const btn = e.target.closest("[data-key], [data-action]");
+    if (!btn || btn.disabled) return;
+    e.preventDefault();
+    markInteracted();
+    lastPressTs = performance.now();
+    lastPointerHandledTs = lastPressTs;
+
+    pressedBtn = btn;
+    btn.classList.add("is-pressed");
+    if (!btn.dataset.action) showPreview(btn);
+
+    triggerAction(btn);
 
     focusForTyping();
+
+    // Start repeat for actions only on initial pointer press
+    const allowRepeat = e.type && e.type.startsWith("pointer");
+    if (!isRepeat && allowRepeat && btn.dataset.action) {
+      stopRepeats();
+      repeatTimer = setTimeout(() => {
+        repeatInterval = setInterval(() => triggerAction(btn), 70);
+      }, 350);
+    }
+  };
+
+  const showPreview = (btn) => {
+    if (!btn?.dataset?.key) return;
+    preview.textContent = btn.dataset.key;
+    const rect = btn.getBoundingClientRect();
+    const rootRect = root.getBoundingClientRect();
+    preview.style.left = `${rect.left - rootRect.left + rect.width / 2}px`;
+    preview.style.top = `${rect.top - rootRect.top}px`;
+    preview.classList.add("is-visible");
+  };
+
+  const hidePreview = () => {
+    preview.classList.remove("is-visible");
   };
 
   let pressedBtn = null;
   const clearPressed = () => {
     if (pressedBtn) pressedBtn.classList.remove("is-pressed");
     pressedBtn = null;
+    hidePreview();
+    stopRepeats();
   };
 
   root.addEventListener("pointerdown", (e) => {
@@ -1171,17 +1222,35 @@ function initOnScreenKeyboard() {
     if (!btn) return;
     pressedBtn = btn;
     btn.classList.add("is-pressed");
+    if (!btn.dataset.action) showPreview(btn);
     handlePress(e);
   });
 
-  const endEvents = ["pointerup", "pointercancel", "pointerleave"];
+  const endEvents = ["pointerup", "pointercancel"];
   endEvents.forEach((ev) => {
     root.addEventListener(ev, (e) => {
       if (!pressedBtn) return;
-      if (e.type === "pointerleave" && root.contains(e.target)) return;
       clearPressed();
     });
   });
+
+  // Fallback click handler (in case a pointer event is missed)
+  root.addEventListener("click", (e) => {
+    // Skip if a pointer press was just handled
+    if (performance.now() - lastPointerHandledTs < 400) return;
+    handlePress(e);
+    clearPressed();
+  });
+
+  ["pointerup", "pointercancel"].forEach((ev) => {
+    window.addEventListener(ev, () => {
+      stopRepeats();
+      clearPressed();
+    });
+  });
+
+  // safety: if focus leaves keyboard, clear pressed state
+  root.addEventListener("focusout", () => clearPressed());
 }
 
 function updateKeyboardVisibility() {
@@ -3715,26 +3784,66 @@ els.shareInline?.addEventListener("click", () => {
   markInteracted();
   shareResult({ mode: play.mode });
 });
-els.navCellPrev?.addEventListener("click", () => {
-  let tgt = null;
-  if (play.done || play.mode === MODE.OVERLAP) {
-    tgt = clamp(play.at - 1, 0, play.n - 1);
-  } else {
-    tgt = findUnresolvedCell(play.at, -1);
-  }
-  if (tgt != null) setAt(tgt, { behavior: { behavior: "smooth", delta: Math.abs(play.at - tgt) || 1 } });
-});
-els.navCellNext?.addEventListener("click", () => {
-  let tgt = null;
-  if (play.done || play.mode === MODE.OVERLAP) {
-    tgt = clamp(play.at + 1, 0, play.n - 1);
-  } else {
-    tgt = findUnresolvedCell(play.at, +1);
-  }
-  if (tgt != null) setAt(tgt, { behavior: { behavior: "smooth", delta: Math.abs(play.at - tgt) || 1 } });
-});
-els.navWordPrev?.addEventListener("click", () => jumpToUnresolvedWord(-1));
-els.navWordNext?.addEventListener("click", () => jumpToUnresolvedWord(1));
+const navActions = {
+  cellPrev: () => {
+    let tgt = null;
+    if (play.done || play.mode === MODE.OVERLAP) {
+      tgt = clamp(play.at - 1, 0, play.n - 1);
+    } else {
+      tgt = findUnresolvedCell(play.at, -1);
+    }
+    if (tgt != null) setAt(tgt, { behavior: { behavior: "smooth", delta: Math.abs(play.at - tgt) || 1 } });
+  },
+  cellNext: () => {
+    let tgt = null;
+    if (play.done || play.mode === MODE.OVERLAP) {
+      tgt = clamp(play.at + 1, 0, play.n - 1);
+    } else {
+      tgt = findUnresolvedCell(play.at, +1);
+    }
+    if (tgt != null) setAt(tgt, { behavior: { behavior: "smooth", delta: Math.abs(play.at - tgt) || 1 } });
+  },
+  wordPrev: () => jumpToUnresolvedWord(-1),
+  wordNext: () => jumpToUnresolvedWord(1),
+};
+
+function attachHoldRepeat(btn, fn) {
+  if (!btn || typeof fn !== "function") return;
+  let repeatT = null;
+  let repeatI = null;
+  let lastPointerTs = 0;
+
+  const stop = () => {
+    if (repeatT) clearTimeout(repeatT);
+    if (repeatI) clearInterval(repeatI);
+    repeatT = null;
+    repeatI = null;
+  };
+
+  btn.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    lastPointerTs = performance.now();
+    stop();
+    fn();
+    repeatT = setTimeout(() => {
+      repeatI = setInterval(fn, 120);
+    }, 350);
+  });
+
+  ["pointerup", "pointercancel", "pointerleave", "blur"].forEach((ev) => {
+    btn.addEventListener(ev, () => stop());
+  });
+
+  btn.addEventListener("click", (e) => {
+    if (performance.now() - lastPointerTs < 150) return;
+    fn();
+  });
+}
+
+attachHoldRepeat(els.navCellPrev, navActions.cellPrev);
+attachHoldRepeat(els.navCellNext, navActions.cellNext);
+attachHoldRepeat(els.navWordPrev, navActions.wordPrev);
+attachHoldRepeat(els.navWordNext, navActions.wordNext);
 
 // Results modal overlay click to close
 els.resultsModal?.addEventListener("click", (e) => {

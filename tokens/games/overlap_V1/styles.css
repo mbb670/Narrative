@@ -6,11 +6,6 @@
     box-sizing: border-box;
 }
 
-.game-slider * {
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
 
 :root {
     --grid-line: var(--border-subtle);
@@ -119,6 +114,8 @@ body {
     color: var(--foreground-default);
     position: relative;
     height: 100svh;
+     -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 button {
@@ -441,6 +438,9 @@ body[data-chain-state="done"] .rangeClue-content {
     max-width: var(--layout-content-md-max);
     align-self: center;
     width: 100%;
+      user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 
@@ -1062,6 +1062,11 @@ body[data-view="play"]{
     /* border: 1px solid red; */
     width: calc(100% - (var(--layout-grid-margin) * 2));
     max-width: var(--layout-content-md-max);
+    * {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
 
 }
 
@@ -1435,8 +1440,8 @@ On-screen keyboard (touch)
     /* width: min(920px, 100%); */
     /* margin: var(--spacing-x16) auto var(--spacing-x12); */
     padding: var(--spacing-x12);
-    gap: var(--unit-6);
-    box-sizing: border-box;
+    gap: var(--unit-4);
+    /* box-sizing: border-box; */
     /* width: 50%; */
     /* flex-grow: 1; */
     flex-direction: column;
@@ -1444,6 +1449,8 @@ On-screen keyboard (touch)
     max-width: var(--layout-content-md-max);
     width: 100%;
     margin: 0 auto;
+    position: relative;
+    touch-action: none;
 
 }
 
@@ -1460,9 +1467,10 @@ On-screen keyboard (touch)
     box-sizing: border-box;
     height: var(--unit-56);
     container-type: size;
+    touch-action: none;
 
-    &:nth-of-type(2) {
-        padding-inline: 5%;
+    &:nth-of-type(3) {
+        padding-inline: 5%!important;
     }
 }
 
@@ -1470,6 +1478,7 @@ On-screen keyboard (touch)
 .keyboard * {
     -webkit-user-select: none;
     user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .keyboard-key {
@@ -1479,13 +1488,18 @@ On-screen keyboard (touch)
     background: var(--background-subtle) !important;
     color: var(--foreground-default);
     border-radius: var(--radius-slight);
-    padding: var(--spacing-x8) var(--spacing-x4);
+    /* padding: var(--spacing-x8) var(--spacing-x4); */
     font: inherit;
     text-transform: uppercase;
     cursor: pointer;
     /* box-shadow: 0 2px 0 var(--border-subtle); */
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: filter 120ms ease, color 120ms ease;
     user-select: none;
+     -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
     flex: 1 1 0;
     min-width: var(--unit-24);
     font-size: 35cqmin;
@@ -1501,9 +1515,39 @@ On-screen keyboard (touch)
 .keyboard-key:active {
     /* transform: translateY(2px); */
     filter: brightness(0.92);
+    color: transparent;
 }
 
 .keyboard-key--backspace,
 .keyboard-key--enter {
     flex: 1.75 1 0;
+}
+
+.keyboard-key-preview {
+    position: absolute;
+
+    pointer-events: none;
+    min-width: var(--unit-56);
+    padding: var(--spacing-x8) var(--spacing-x12);
+    border-radius: var(--radius-default);
+    background: var(--background-medium);
+    color: var(--foreground-default);
+    font-size: calc(var(--text-system-semibold-sm, 1rem) * 1.4);
+    /* font-size: 6vw; */
+    text-align: center;
+    transform: translate(-50%, -75%) scale(0.8);
+    opacity: 0;
+    transition: opacity 20ms ease, transform 20ms ease;
+    z-index: 2;
+    /* height: var(--unit-56)!important; */
+
+    /* border:1px solid; */
+/* 
+    transform: translate(-50%, -100%) scale(1); */
+}
+
+.keyboard-key-preview.is-visible {
+    opacity: 1;
+    /* transform: translate(-50%, -75%) scale(1); */
+     transform: translate(-50%, -100%) scale(1);
 }
