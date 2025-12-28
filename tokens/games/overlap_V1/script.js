@@ -1016,8 +1016,9 @@ const UA_DESKTOP_HINT =
 const UA_DATA_DESKTOP = navigator.userAgentData ? navigator.userAgentData.mobile === false : false;
 
 const DEFAULTS_TO_HARDWARE = UA_DESKTOP_HINT || UA_DATA_DESKTOP;
-let hasHardwareKeyboard = DEFAULTS_TO_HARDWARE;
-let hardwareKeyboardLocked = DEFAULTS_TO_HARDWARE; // once true, keep hardware assumption until reload
+// On touch devices default to virtual keyboard; on desktop honor detection
+let hasHardwareKeyboard = IS_TOUCH ? false : DEFAULTS_TO_HARDWARE;
+let hardwareKeyboardLocked = false; // set true when we detect hardware during this session
 let lastHardwareKeyboardTs = 0;
 const HARDWARE_STALE_MS = 120000; // demote hardware flag after ~2 minutes of no keys
 const shouldUseCustomKeyboard = () => IS_TOUCH && !hasHardwareKeyboard;
@@ -1119,11 +1120,9 @@ function initOnScreenKeyboard() {
   root.setAttribute("role", "region");
   root.setAttribute("aria-label", "On-screen keyboard");
   root.innerHTML = "";
-  const preview = document.createElement("div");
-  preview.className = "keyboard-key-preview text-system-semibold-sm elevation-overlay";
-  root.appendChild(preview);
   let lastPressTs = 0;
   let lastPointerHandledTs = 0;
+  let suppressClicksUntil = 0;
   let repeatTimer = null;
   let repeatInterval = null;
 
@@ -1147,15 +1146,19 @@ function initOnScreenKeyboard() {
       if (isBackspace) {
         btn.dataset.action = "backspace";
         btn.setAttribute("aria-label", "Backspace");
-        btn.textContent = "⌫";
+        btn.textContent = "";
       } else if (isEnter) {
         btn.dataset.action = "enter";
         btn.setAttribute("aria-label", "Next cell");
-        btn.textContent = "↦";
+        btn.textContent = "";
       } else {
         btn.dataset.key = key;
-        btn.textContent = key;
         btn.setAttribute("aria-label", key);
+        btn.textContent = key;
+        const pv = document.createElement("div");
+        pv.className = "keyboard-key-preview text-system-semibold-sm elevation-fixed-bottom";
+        pv.textContent = key;
+        btn.appendChild(pv);
       }
       row.appendChild(btn);
     });
@@ -1176,6 +1179,7 @@ function initOnScreenKeyboard() {
     markInteracted();
     lastPressTs = performance.now();
     lastPointerHandledTs = lastPressTs;
+    suppressClicksUntil = lastPointerHandledTs + 1000;
 
     pressedBtn = btn;
     btn.classList.add("is-pressed");
@@ -1197,20 +1201,19 @@ function initOnScreenKeyboard() {
 
   const showPreview = (btn) => {
     if (!btn?.dataset?.key) return;
-    preview.textContent = btn.dataset.key;
-    const rect = btn.getBoundingClientRect();
-    const rootRect = root.getBoundingClientRect();
-    preview.style.left = `${rect.left - rootRect.left + rect.width / 2}px`;
-    preview.style.top = `${rect.top - rootRect.top}px`;
-    preview.classList.add("is-visible");
+    const pv = btn.querySelector(".keyboard-key-preview");
+    if (pv) pv.classList.add("is-visible");
   };
 
   const hidePreview = () => {
-    preview.classList.remove("is-visible");
+    if (!root) return;
+    root.querySelectorAll(".keyboard-key-preview.is-visible").forEach((pv) => pv.classList.remove("is-visible"));
   };
 
   let pressedBtn = null;
   const clearPressed = () => {
+    const pv = pressedBtn?.querySelector(".keyboard-key-preview");
+    if (pv) pv.classList.remove("is-visible");
     if (pressedBtn) pressedBtn.classList.remove("is-pressed");
     pressedBtn = null;
     hidePreview();
@@ -1230,6 +1233,8 @@ function initOnScreenKeyboard() {
   endEvents.forEach((ev) => {
     root.addEventListener(ev, (e) => {
       if (!pressedBtn) return;
+      lastPointerHandledTs = performance.now();
+      suppressClicksUntil = lastPointerHandledTs + 1000;
       clearPressed();
     });
   });
@@ -1237,7 +1242,7 @@ function initOnScreenKeyboard() {
   // Fallback click handler (in case a pointer event is missed)
   root.addEventListener("click", (e) => {
     // Skip if a pointer press was just handled
-    if (performance.now() - lastPointerHandledTs < 400) return;
+    if (performance.now() < suppressClicksUntil) return;
     handlePress(e);
     clearPressed();
   });
@@ -3163,6 +3168,8 @@ function onGridRangeCluePointerOut(e) {
 }
 
 function onGlobalPointerDownForRangeClues(e) {
+  if (e.target.closest(".puzzle-nav")) return;
+  if (e.target.closest("#navWordPrev") || e.target.closest("#navWordNext")) return;
   if (e.target.closest(".rangeClue") || e.target.closest(".range-focus")) return;
   const cell = e.target.closest(".cell");
   if (cell && isCellInFocusedRange(Number(cell.dataset.i))) return;
