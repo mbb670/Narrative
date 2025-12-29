@@ -185,7 +185,7 @@
     --puzzle-color-2: #313A73;
     --puzzle-color-3: #61A87D;
     --puzzle-color-4: #7EE081;
-    --puzzle-color-5: #C2F3C0;
+    --puzzle-color-5: #d1f3d0;
 }
 
 
@@ -562,7 +562,7 @@ body[data-chain-state="done"] .rangeClue-content {
     max-width: 100%;
     overflow-y: hidden;
 
-    padding-inline: var(--layout-grid-margin);
+    padding-inline: var(--layout-grid-margin)!important;
 
     scrollbar-gutter: stable;
     -webkit-overflow-scrolling: touch;
@@ -674,15 +674,15 @@ body[data-chain-state="done"] .rangeClue-content {
     --grid-rows: repeat(3, var(--grid-top-space)) var(--grid-letter-space) repeat(3, var(--grid-bottom-space));
 
     grid-template-rows: var(--grid-rows);
-    width: calc(var(--cell)*var(--cols));
-    margin: 0 auto;
-    background: transparent;
-    box-shadow:
+    width: calc(var(--cell)*var(--cols) + var(--spacing-x64));
+    /* margin: 0 auto; */
+    /* background: transparent; */
+    /* box-shadow:
         inset 0 calc(var(--border-w) * -1) 0 0 var(--grid-line),
         inset 0 var(--border-w) 0 0 var(--grid-line),
         inset calc(var(--border-w) * -1) 0 0 0 var(--grid-line),
         inset var(--border-w) 0 0 0 var(--grid-line);
-    border-radius: var(--range-radius);
+    border-radius: var(--range-radius); */
 
 
     -webkit-overflow-scrolling: touch;
@@ -1062,10 +1062,6 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
     bottom:unset;
     top: calc(var(--spacing-x32) * -1);
     } */
-}
-
-.cell.is-select-all {
-    /* background: var(--opacity-dimm-subtle) !important; */
 }
 
 .cell.is-bad {
