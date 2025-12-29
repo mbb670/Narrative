@@ -2460,8 +2460,367 @@
       "height": "inner"
     }
   ]
+},
+{
+  "title": "2025-12-30",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2025-12-30",
+  "words": [
+    {
+      "clue": "A long religious journey",
+      "answer": "PILGRIMAGE",
+      "start": 1,
+      "height": "full"
+    },
+    {
+      "clue": "Someone acting for another",
+      "answer": "AGENT",
+      "start": 8,
+      "height": "mid"
+    },
+    {
+      "clue": "A thing with independent existence",
+      "answer": "ENTITY",
+      "start": 10,
+      "height": "inner"
+    },
+    {
+      "clue": "Kinds, categories, classifications",
+      "answer": "TYPES",
+      "start": 14,
+      "height": "full"
+    },
+    {
+      "clue": "Set up or found formally",
+      "answer": "ESTABLISH",
+      "start": 17,
+      "height": "mid"
+    },
+    {
+      "clue": "Movement of goods",
+      "answer": "SHIPPING",
+      "start": 24,
+      "height": "inner"
+    },
+    {
+      "clue": "A component in a recipe",
+      "answer": "INGREDIENT",
+      "start": 29,
+      "height": "full"
+    },
+    {
+      "clue": "Go into a room or building",
+      "answer": "ENTER",
+      "start": 36,
+      "height": "mid"
+    },
+    {
+      "clue": "Political extremist using violence",
+      "answer": "TERRORIST",
+      "start": 38,
+      "height": "inner"
+    },
+    {
+      "clue": "Vessel powered by steam engine",
+      "answer": "STEAMER",
+      "start": 45,
+      "height": "full"
+    },
+    {
+      "clue": "Nothing more than; simple",
+      "answer": "MERE",
+      "start": 49,
+      "height": "mid"
+    },
+    {
+      "clue": "Arrive at a destination",
+      "answer": "REACH",
+      "start": 51,
+      "height": "inner"
+    },
+    {
+      "clue": "Distinguishing trait or quality",
+      "answer": "CHARACTERISTIC",
+      "start": 54,
+      "height": "full"
+    },
+    {
+      "clue": "Admission pass or parking fine",
+      "answer": "TICKET",
+      "start": 65,
+      "height": "mid"
+    },
+    {
+      "clue": "Guiding spirit of a culture",
+      "answer": "ETHOS",
+      "start": 69,
+      "height": "inner"
+    },
+    {
+      "clue": "Friendly reception of visitors",
+      "answer": "HOSPITALITY",
+      "start": 71,
+      "height": "full"
+    },
+    {
+      "clue": "A particular sort or category",
+      "answer": "TYPE",
+      "start": 80,
+      "height": "mid"
+    },
+    {
+      "clue": "A publication issued regularly",
+      "answer": "PERIODICAL",
+      "start": 82,
+      "height": "inner"
+    },
+    {
+      "clue": "Make a phone connection",
+      "answer": "CALL",
+      "start": 89,
+      "height": "full"
+    },
+    {
+      "clue": "Symbolic story with a hidden meaning",
+      "answer": "ALLEGORY",
+      "start": 90,
+      "height": "mid"
+    }
+  ]
+},
+{
+  "title": "Wednesday, Dec 31, 2025",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2025-12-31",
+  "words": [
+    {
+      "clue": "Expel a foreigner",
+      "answer": "DEPORT",
+      "start": 1,
+      "height": "full"
+    },
+    {
+      "clue": "Oregon's largest city",
+      "answer": "PORTLAND",
+      "start": 3,
+      "height": "mid"
+    },
+    {
+      "clue": "Hidden explosive in dirt",
+      "answer": "LANDMINE",
+      "start": 7,
+      "height": "inner"
+    },
+    {
+      "clue": "Interstellar cloud",
+      "answer": "NEBULA",
+      "start": 13,
+      "height": "full"
+    },
+    {
+      "clue": "Initiate; send off",
+      "answer": "LAUNCH",
+      "start": 17,
+      "height": "mid"
+    },
+    {
+      "clue": "TikTok D'Amelio",
+      "answer": "CHARLI",
+      "start": 21,
+      "height": "inner"
+    },
+    {
+      "clue": "Real-time internet broadcast",
+      "answer": "LIVESTREAM",
+      "start": 25,
+      "height": "full"
+    },
+    {
+      "clue": "Online video broadcaster",
+      "answer": "STREAMER",
+      "start": 29,
+      "height": "mid"
+    },
+    {
+      "clue": "The United States",
+      "answer": "AMERICA",
+      "start": 33,
+      "height": "inner"
+    },
+    {
+      "clue": "Nation bordering Thailand",
+      "answer": "CAMBODIA",
+      "start": 38,
+      "height": "full"
+    },
+    {
+      "clue": "Medical identification of illness",
+      "answer": "DIAGNOSIS",
+      "start": 43,
+      "height": "mid"
+    },
+    {
+      "clue": "Vatican chapel",
+      "answer": "SISTINE",
+      "start": 49,
+      "height": "inner"
+    },
+    {
+      "clue": "Israeli PM",
+      "answer": "NETANYAHU",
+      "start": 54,
+      "height": "full"
+    },
+    {
+      "clue": "Aid worker",
+      "answer": "HUMANITARIAN",
+      "start": 61,
+      "height": "mid"
+    },
+    {
+      "clue": "Oscars Best Picture",
+      "answer": "ANORA",
+      "start": 71,
+      "height": "inner"
+    },
+    {
+      "clue": "Hard to find",
+      "answer": "RARE",
+      "start": 74,
+      "height": "full"
+    },
+    {
+      "clue": "Large sports venue",
+      "answer": "ARENA",
+      "start": 75,
+      "height": "mid"
+    },
+    {
+      "clue": "Pertaining to a whole country",
+      "answer": "NATIONAL",
+      "start": 78,
+      "height": "inner"
+    }
+  ]
+},
+{
+  "title": "Thrusday, Jan 1, 2026",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2026-01-01",
+  "words": [
+    {
+      "clue": "The universe in totality",
+      "answer": "COSMOS",
+      "start": 1,
+      "height": "full"
+    },
+    {
+      "clue": "Norwegian capital",
+      "answer": "OSLO",
+      "start": 5,
+      "height": "mid"
+    },
+    {
+      "clue": "Narrow opening or groove",
+      "answer": "SLOT",
+      "start": 6,
+      "height": "inner"
+    },
+    {
+      "clue": "Canada's capital",
+      "answer": "OTTAWA",
+      "start": 8,
+      "height": "full"
+    },
+    {
+      "clue": "Rabbit burrow complex",
+      "answer": "WARREN",
+      "start": 12,
+      "height": "mid"
+    },
+    {
+      "clue": "A set of reference volumes",
+      "answer": "ENCYCLOPEDIA",
+      "start": 16,
+      "height": "inner"
+    },
+    {
+      "clue": "Regional form of a language",
+      "answer": "DIALECT",
+      "start": 25,
+      "height": "full"
+    },
+    {
+      "clue": "Quinine carbonated mixer",
+      "answer": "TONIC",
+      "start": 31,
+      "height": "mid"
+    },
+    {
+      "clue": "Specialized",
+      "answer": "NICHE",
+      "start": 33,
+      "height": "inner"
+    },
+    {
+      "clue": "Common Chinese surname",
+      "answer": "CHENG",
+      "start": 35,
+      "height": "full"
+    },
+    {
+      "clue": "Language spoken in London",
+      "answer": "ENGLISH",
+      "start": 37,
+      "height": "mid"
+    },
+    {
+      "clue": "Severe suffering",
+      "answer": "HARDSHIPS",
+      "start": 43,
+      "height": "inner"
+    },
+    {
+      "clue": "Extent of time or space",
+      "answer": "SPAN",
+      "start": 51,
+      "height": "full"
+    },
+    {
+      "clue": "Central American canal site",
+      "answer": "PANAMA",
+      "start": 52,
+      "height": "mid"
+    },
+    {
+      "clue": "Financial profit",
+      "answer": "MARGIN",
+      "start": 56,
+      "height": "inner"
+    },
+    {
+      "clue": "The inside; relating to home",
+      "answer": "INTERIOR",
+      "start": 60,
+      "height": "full"
+    },
+    {
+      "clue": "Central Florida tourist city",
+      "answer": "ORLANDO",
+      "start": 66,
+      "height": "mid"
+    },
+    {
+      "clue": "Sphere of influence",
+      "answer": "DOMAIN",
+      "start": 71,
+      "height": "inner"
+    }
+  ]
 }
-
 
 
 ]

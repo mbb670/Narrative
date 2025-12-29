@@ -702,8 +702,33 @@ export default function App() {
   const [showApiModal, setShowApiModal] = useState(false);
   const [toast, setToast] = useState(null);
   const [excludedWords, setExcludedWords] = useState(new Set());
+  const [recentExcludedAnswers, setRecentExcludedAnswers] = useState(new Set());
   const [devalueWords, setDevalueWords] = useState(new Set());
   const [manualBridgeInput, setManualBridgeInput] = useState("");
+  const [showCluePrepModal, setShowCluePrepModal] = useState(false);
+  const [prepUseAI, setPrepUseAI] = useState(false);
+  const [prepDifficulty, setPrepDifficulty] = useState('medium');
+  const [prepApiKey, setPrepApiKey] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportDate, setExportDate] = useState(() => {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+  });
+  useEffect(() => {
+      if (!exportDate) return;
+      const parts = exportDate.split('-').map(Number);
+      if (parts.length === 3) {
+          setExportMonth(new Date(Date.UTC(parts[0], parts[1] - 1, 1)));
+      }
+  }, [exportDate]);
+  const [exportMonth, setExportMonth] = useState(() => {
+      const today = new Date();
+      return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
+  });
+  const [usedDateKeys, setUsedDateKeys] = useState(new Set());
+  const nodeRefs = useRef([]);
+  const containerRef = useRef(null);
+  const [tripleOverlays, setTripleOverlays] = useState([]);
   const STORAGE_KEY = "puzzleGenChainState";
   const [stateLoaded, setStateLoaded] = useState(false);
   const initialSaveSkipped = useRef(false);
@@ -827,27 +852,66 @@ export default function App() {
   useEffect(() => {
       let cancelled = false;
       const loadLists = async () => {
-          try {
-              const exclRes = await fetch("../excluded-words.json");
-              if (exclRes.ok) {
-                  const data = await exclRes.json();
-                  if (!cancelled && Array.isArray(data)) {
-                      setExcludedWords(new Set(data.map(d => cleanWord(d)).filter(Boolean)));
-                  }
+      try {
+          const exclRes = await fetch("../excluded-words.json");
+          if (exclRes.ok) {
+              const data = await exclRes.json();
+              if (!cancelled && Array.isArray(data)) {
+                  setExcludedWords(new Set(data.map(d => cleanWord(d)).filter(Boolean)));
               }
-          } catch {}
+          }
+      } catch {}
 
-          try {
-              const exRes = await fetch("../examples.json");
-              if (exRes.ok) {
-                  const data = await exRes.json();
-                  const answers = [];
-                  (data || []).forEach(p => {
+      try {
+          const exRes = await fetch("../examples.json");
+          if (exRes.ok) {
+              const data = await exRes.json();
+              const answers = [];
+              const dateKeys = [];
+              const recent = [];
+              const now = Date.now();
+              const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+              (data || []).forEach(p => {
+                  if (p.dateKey) {
+                      dateKeys.push(p.dateKey);
+                  }
+                  let isRecent = false;
+                  if (p.dateKey) {
+                      const t = Date.parse(p.dateKey);
+                      if (!Number.isNaN(t) && (now - t) <= THIRTY_DAYS) {
+                          isRecent = true;
+                          }
+                      }
                       (p.words || []).forEach(w => {
-                          if (w.answer) answers.push(cleanWord(w.answer));
+                          if (w.answer) {
+                              const cw = cleanWord(w.answer);
+                              if (cw) {
+                                  answers.push(cw);
+                                  if (isRecent) recent.push(cw);
+                              }
+                          }
                       });
-                  });
-                  if (!cancelled) setDevalueWords(new Set(answers.filter(Boolean)));
+              });
+                  if (!cancelled) {
+                      setDevalueWords(new Set(answers.filter(Boolean)));
+                      setRecentExcludedAnswers(new Set(recent));
+                      const usedSet = new Set(dateKeys.filter(Boolean));
+                      setUsedDateKeys(usedSet);
+                      // Default export date to the first open date on/after today
+                      if (exportDate === "" || exportDate === new Date().toISOString().split('T')[0]) {
+                          const usedIso = new Set(Array.from(usedSet));
+                          let cursor = new Date();
+                          cursor.setUTCHours(0, 0, 0, 0);
+                          let candidateIso = cursor.toISOString().split('T')[0];
+                          while (usedIso.has(candidateIso)) {
+                              cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
+                              candidateIso = cursor.toISOString().split('T')[0];
+                          }
+                          setExportDate(candidateIso);
+                          const [cy, cm] = candidateIso.split('-').map(Number);
+                          setExportMonth(new Date(Date.UTC(cy, cm - 1, 1)));
+                      }
+                  }
               }
           } catch {}
       };
@@ -1148,13 +1212,37 @@ Words: ${flat.join(', ')}`;
       }
   };
 
+  const handleOpenCluePrep = () => {
+      setPrepUseAI(false); // default to not using AI
+      setPrepDifficulty(clueDifficulty || 'medium');
+      setPrepApiKey(apiConfig.key || "");
+      setShowCluePrepModal(true);
+  };
+
+  const handleConfirmCluePrep = () => {
+      if (prepUseAI && !(prepApiKey || apiConfig.key)) {
+          showToast("Add an API key to use AI clues.", "warning");
+          return;
+      }
+      if (prepUseAI) {
+          const nextConfig = { ...apiConfig, key: prepApiKey || apiConfig.key };
+          persistApiConfig(nextConfig, rememberApiConfig, true);
+      } else {
+          persistApiConfig({ ...apiConfig }, rememberApiConfig, false);
+      }
+      setClueDifficulty(prepDifficulty);
+      setShowCluePrepModal(false);
+      handleSwitchToClues();
+  };
+
   const handleClueChange = (index, text) => {
      setClues(prev => ({ ...prev, [index]: text }));
   };
 
   const applyExclusions = (words) => {
       if (!words || words.length === 0) return [];
-      return words.filter(w => !excludedWords.has(cleanWord(w)));
+      const combinedExcl = new Set([...excludedWords, ...recentExcludedAnswers]);
+      return words.filter(w => !combinedExcl.has(cleanWord(w)));
   };
   
   const fetchRandomWords = async () => {
@@ -1253,7 +1341,7 @@ Words: ${flat.join(', ')}`;
       setTimeout(() => setCopiedCSV(false), 2000);
   };
 
-  const handleExportJSON = () => {
+  const performExportJSON = (dateKey) => {
       if (chain.length === 0) return;
 
       const flatWords = flattenChain;
@@ -1307,13 +1395,23 @@ Words: ${flat.join(', ')}`;
       });
 
       const cleanWords = exportData.map(({ end, ...rest }) => rest);
-      const dateKey = new Date().toISOString().split('T')[0];
+
+      // Parse date in UTC to avoid TZ off-by-one
+      let dateObj;
+      if (dateKey && /^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+          const [y, m, d] = dateKey.split('-').map(Number);
+          dateObj = new Date(Date.UTC(y, m - 1, d));
+      } else {
+          dateObj = new Date();
+      }
+      const safeDateKey = dateObj.toISOString().split('T')[0];
+      const formattedTitle = dateObj.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
       const finalOutput = {
-          title: "",
+          title: formattedTitle,
           type: "chain",
           palette: "greens",
-          dateKey: dateKey,
+          dateKey: safeDateKey,
           words: cleanWords
       };
       
@@ -1374,16 +1472,17 @@ Words: ${flat.join(', ')}`;
       setClues({});
   };
 
-  const handleFindBridge = async (index) => {
-    const leftItem = chain[index];
-    const rightItem = chain[index + 1];
+  const handleFindBridge = async (leftIndex, rightIndexOverride = null, startWordOverride = null, endWordOverride = null) => {
+    const rightIndex = rightIndexOverride !== null ? rightIndexOverride : leftIndex + 1;
+    const leftItem = chain[leftIndex];
+    const rightItem = chain[rightIndex];
     if (!leftItem || !rightItem) return;
 
     setIsBridgeLoading(true);
     const usedWords = new Set(flattenChain.map(w => cleanWord(w)));
     
-    const startWord = leftItem.endWord;
-    const endWord = rightItem.startWord;
+    const startWord = startWordOverride || leftItem.endWord;
+    const endWord = endWordOverride || rightItem.startWord;
     
     const suffix = cleanWord(startWord).slice(-(cleanWord(startWord).length >= 4 ? 3 : 2));
     const prefix = cleanWord(endWord).slice(0, (cleanWord(endWord).length >= 4 ? 3 : 2));
@@ -1561,7 +1660,7 @@ Words: ${flat.join(', ')}`;
         solutions = sortSolutions(solutions);
 
         setBridgeStatus(""); 
-        setShowBridgeModal({ index, solutions, startWord, endWord, ...manualOptions });
+        setShowBridgeModal({ leftIndex, rightIndex, solutions, startWord, endWord, ...manualOptions });
 
         // Async extended search for 3-4 word bridges with time budget
         const uniquePool = Array.from(new Set(candidatePool.map(w => cleanWord(w)).filter(Boolean)));
@@ -1633,7 +1732,7 @@ Words: ${flat.join(', ')}`;
 
   const insertBridge = (solution) => {
     saveToHistory();
-    const { index } = showBridgeModal;
+    const { leftIndex, rightIndex } = showBridgeModal || {};
     const words = solution.words;
     const existing = new Set(flattenChain.map(w => cleanWord(w)));
     const hasDup = words.some(w => existing.has(cleanWord(w)));
@@ -1651,19 +1750,9 @@ Words: ${flat.join(', ')}`;
         }
     }
 
-    const bridgeItem = {
-        id: `bridge-${Date.now()}`,
-        words: words,
-        type: 'bridge',
-        startWord: words[0],
-        endWord: words[words.length - 1],
-        overlaps: overlaps,
-        totalOverlap: 0 
-    };
-
-    // If the bridge has multiple words, insert them as separate nodes so each appears individually
-    if (words.length > 1) {
-        const itemsToInsert = words.map((w, i) => ({
+    const effectiveRightIndex = (typeof rightIndex === 'number' && rightIndex > leftIndex) ? rightIndex : leftIndex + 1;
+    const insertionItems = words.length > 1
+        ? words.map((w, i) => ({
             id: `bridge-${Date.now()}-${i}`,
             words: [w],
             type: 'bridge',
@@ -1671,15 +1760,21 @@ Words: ${flat.join(', ')}`;
             endWord: w,
             overlaps: [],
             totalOverlap: 0
-        }));
-        const newChain = [...chain];
-        newChain.splice(index + 1, 0, ...itemsToInsert);
-        setChain(newChain);
-    } else {
-        const newChain = [...chain];
-        newChain.splice(index + 1, 0, bridgeItem);
-        setChain(newChain);
-    }
+        }))
+        : [{
+            id: `bridge-${Date.now()}`,
+            words: words,
+            type: 'bridge',
+            startWord: words[0],
+            endWord: words[words.length - 1],
+            overlaps: overlaps,
+            totalOverlap: 0 
+        }];
+
+    const newChain = [...chain];
+    const removeCount = Math.max(0, effectiveRightIndex - leftIndex - 1);
+    newChain.splice(leftIndex + 1, removeCount, ...insertionItems);
+    setChain(newChain);
     setShowBridgeModal(null);
   };
 
@@ -1729,11 +1824,11 @@ Words: ${flat.join(', ')}`;
                 </button>
              </div>
              
-             <div className="mb-4 text-sm text-slate-600 text-center bg-slate-50 p-4 rounded-lg border border-slate-100 flex-shrink-0">
+                <div className="mb-4 text-sm text-slate-600 text-center bg-slate-50 p-4 rounded-lg border border-slate-100 flex-shrink-0">
                 <div className="flex items-center justify-center gap-2 text-lg">
-                    <span className="font-bold text-indigo-700">{chain[showBridgeModal.index].endWord}</span>
+                    <span className="font-bold text-indigo-700">{showBridgeModal.startWord}</span>
                     <span className="text-slate-300">...</span>
-                    <span className="font-bold text-indigo-700">{chain[showBridgeModal.index + 1].startWord}</span>
+                    <span className="font-bold text-indigo-700">{showBridgeModal.endWord}</span>
                 </div>
                 <div className="text-xs text-slate-400 mt-1">Select the best path</div>
              </div>
@@ -1811,7 +1906,7 @@ Words: ${flat.join(', ')}`;
                                                 };
                                                 const source = (showBridgeModal.forward || []).map(item => ({
                                                     item,
-                                                    ov: computeOverlap(chain[showBridgeModal.index]?.endWord || "", item.words[0])
+                                                    ov: computeOverlap(showBridgeModal.startWord || "", item.words[0])
                                                 }));
                                                 let list = source.sort((a,b) => b.ov - a.ov);
                                                 if (list.length === 0) return null;
@@ -1866,7 +1961,7 @@ Words: ${flat.join(', ')}`;
                                                 };
                                                 const source = (showBridgeModal.backward || []).map(item => ({
                                                     item,
-                                                    ov: computeOverlap(item.words[0], chain[showBridgeModal.index + 1]?.startWord || "")
+                                                    ov: computeOverlap(item.words[0], showBridgeModal.endWord || "")
                                                 }));
                                                 let list = source.sort((a,b) => b.ov - a.ov);
                                                 if (list.length === 0) return null;
@@ -1922,7 +2017,7 @@ Words: ${flat.join(', ')}`;
              </div>
               </Card>
             </div>
-          )}
+      )}
 
       {/* AI Config Modal */}
       {showApiModal && (
@@ -2008,6 +2103,154 @@ Words: ${flat.join(', ')}`;
         </div>
       )}
 
+      {/* Clue Prep Modal */}
+      {showCluePrepModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Sparkles size={18} className="text-indigo-600" />
+                Clue Generation
+              </h3>
+              <button onClick={() => setShowCluePrepModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">Use AI?</label>
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={prepUseAI} onChange={(e) => setPrepUseAI(e.target.checked)} />
+                  <span>Use AI for clues</span>
+                </label>
+                {prepUseAI && !(apiConfig.key || prepApiKey) && (
+                  <div className="mt-3 space-y-2">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block">API Key</label>
+                    <input 
+                      type="password"
+                      className="w-full p-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500" 
+                      placeholder="Enter key to save to AI config"
+                      value={prepApiKey}
+                      onChange={(e) => setPrepApiKey(e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">Difficulty</label>
+                <div className="flex gap-2">
+                  {['easy', 'medium', 'hard'].map(level => (
+                    <button
+                      key={level}
+                      onClick={() => setPrepDifficulty(level)}
+                      className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase transition-all ${prepDifficulty === level ? 'bg-indigo-600 text-white' : 'bg-white text-slate-500 border border-slate-200'}`}
+                    >
+                      {level}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="secondary" onClick={() => setShowCluePrepModal(false)}>Cancel</Button>
+                <Button onClick={handleConfirmCluePrep} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                  Generate Clues
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Export Date Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Copy size={18} className="text-indigo-600" />
+                Export JSON
+              </h3>
+              <button onClick={() => setShowExportModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">Date</label>
+                <div className="flex items-center justify-between mb-2">
+                  <button 
+                    className="text-xs px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100"
+                    onClick={() => setExportMonth(prev => new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() - 1, 1)))}
+                  >
+                    ◀
+                  </button>
+                  <div className="text-sm font-semibold text-slate-700">
+                    {exportMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' })}
+                  </div>
+                  <button 
+                    className="text-xs px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100"
+                    onClick={() => setExportMonth(prev => new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() + 1, 1)))}
+                  >
+                    ▶
+                  </button>
+                </div>
+                <div className="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-400 mb-1">
+                  {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => <div key={d}>{d}</div>)}
+                </div>
+                {(() => {
+                  const year = exportMonth.getUTCFullYear();
+                  const month = exportMonth.getUTCMonth();
+                  const firstDay = new Date(Date.UTC(year, month, 1));
+                  const startWeekday = firstDay.getUTCDay();
+                  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+                  const cells = [];
+                  for (let i = 0; i < startWeekday; i++) cells.push(null);
+                  for (let d = 1; d <= daysInMonth; d++) {
+                    cells.push(d);
+                  }
+                  return (
+                    <div className="grid grid-cols-7 gap-1">
+                      {cells.map((day, idx) => {
+                        if (day === null) return <div key={`blank-${idx}`} />;
+                        const iso = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                        const isUsed = usedDateKeys.has(iso);
+                        const isSelected = exportDate === iso;
+                        return (
+                          <button
+                            key={iso}
+                            onClick={() => setExportDate(iso)}
+                            className={`h-8 text-sm rounded border transition ${
+                              isSelected ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                            } ${isUsed && !isSelected ? 'ring-2 ring-amber-300' : ''}`}
+                            title={isUsed ? 'Already used' : ''}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+                {exportDate && usedDateKeys.has(exportDate) && (
+                  <div className="mt-2 text-xs text-amber-600 flex items-center gap-2">
+                    <AlertCircle size={14} />
+                    <span>This date is already used in examples.</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="secondary" onClick={() => setShowExportModal(false)}>Cancel</Button>
+                <Button onClick={() => { performExportJSON(exportDate); setShowExportModal(false); }} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                  Copy JSON
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -2038,9 +2281,9 @@ Words: ${flat.join(', ')}`;
               {copiedCSV ? <Check size={16} /> : <Type size={16} />}
               <span className="ml-2 hidden sm:inline">Copy Words</span>
             </Button>
-            <Button 
+                <Button 
               variant="ghost" 
-              onClick={handleExportJSON} 
+              onClick={() => setShowExportModal(true)} 
               className={`text-sm h-9 px-3 border border-slate-200 ${copied ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-slate-600'}`}
               title="Copy JSON"
             >
@@ -2156,7 +2399,7 @@ Words: ${flat.join(', ')}`;
                     </Button>
 
                     <Button 
-                        onClick={handleSwitchToClues} 
+                        onClick={handleOpenCluePrep} 
                         disabled={hasBrokenLinks || chain.length === 0}
                         className={`ml-2 ${hasBrokenLinks || chain.length === 0 ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
                         title={hasBrokenLinks ? "Fix broken links first" : chain.length === 0 ? "Add words to the chain first" : ""}
@@ -2193,7 +2436,9 @@ Words: ${flat.join(', ')}`;
 
                         const nodes = displayedNodes;
 
-                        const renderNode = (node, isBroken, idxKey) => (
+                        const renderNode = (node, isBroken, idxKey) => {
+                            const isForbidden = excludedWords.has(cleanWord(node.word)) || recentExcludedAnswers.has(cleanWord(node.word));
+                            return (
                             <div key={`node-${idxKey}-${node.word}-${node.itemIndex}`} className="relative group animate-in slide-in-from-bottom-2 duration-500">
                                 <button 
                                     onClick={() => removeNode(node)}
@@ -2206,13 +2451,18 @@ Words: ${flat.join(', ')}`;
                                     flex items-center px-4 py-3 bg-white rounded-xl shadow-sm border transition-all hover:shadow-md
                                     ${isBroken ? 'border-rose-300 ring-2 ring-rose-50' : 'border-indigo-100'}
                                     ${node.tripleIds.length > 0 ? 'bg-sky-50/30' : ''}
+                                    ${isForbidden ? 'border-rose-400 ring-2 ring-rose-100' : ''}
                                 `}>
                                     <span className="font-bold text-slate-700">
                                         {node.word}
                                     </span>
+                                    {isForbidden && (
+                                        <span className="ml-2 text-[10px] uppercase text-rose-600 font-bold">Excluded</span>
+                                    )}
                                 </div>
                             </div>
                         );
+                        };
 
                         const shownBrokenEdges = new Set();
 
@@ -2244,7 +2494,7 @@ Words: ${flat.join(', ')}`;
                                                 variant="warning" 
                                                 size="small" 
                                                 className="text-[10px] h-6 px-2 py-0 shadow-sm whitespace-nowrap"
-                                                onClick={() => handleFindBridge(leftNode.itemIndex)}
+                                                onClick={() => handleFindBridge(leftNode.itemIndex, rightNode.itemIndex, leftNode.word, rightNode.word)}
                                             >
                                                 <Hammer size={10} /> Repair
                                             </Button>
@@ -2381,7 +2631,7 @@ Words: ${flat.join(', ')}`;
                                 ))}
                             </div>
                             <Button 
-                                onClick={handleExportJSON} 
+                                onClick={() => setShowExportModal(true)} 
                                 className={`text-sm h-9 px-4 ${copied ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white shadow-md`}
                             >
                                 {copied ? <Check size={16} /> : <Copy size={16} />}

@@ -41,29 +41,31 @@
 
 /* NEW DESIGN CONTENT START */
 
-.range{
-        box-shadow: var(--unit-12) var(--spacing-x16) var(--spacing-x48) 0 var(--color-alpha-black-a200);
-        /* box-shadow: 0 -16px 32px 0 var(--color-alpha-black-a100); */
+.range {
+    box-shadow: var(--unit-12) var(--spacing-x16) var(--spacing-x48) 0 var(--color-alpha-black-a200);
+    /* box-shadow: 0 -16px 32px 0 var(--color-alpha-black-a100); */
 }
+
 .range-full {
     /* box-shadow: unset; */
 }
 
-.range.is-locked{
-    box-shadow: none!important;
+.range.is-locked {
+    box-shadow: none !important;
 }
 
-:root{
---grid-letter-space: var(--spacing-x144);
---grid-bottom-space: var(--spacing-x12);
-/* --grid-bottom-space: var(--grid-top-space); */
---range-radius: var(--radius-relaxed);
---letter: 62cqmin;
+:root {
+    --grid-letter-space: var(--spacing-x144);
+    --grid-bottom-space: var(--spacing-x12);
+    /* --grid-bottom-space: var(--grid-top-space); */
+    --range-radius: var(--radius-relaxed);
+    --letter: 62cqmin;
 }
-.grid{
-    box-shadow: none!important;
-    border-radius: none!important;
-    
+
+.grid {
+    box-shadow: none !important;
+    border-radius: none !important;
+
 }
 
 /* .gridScroll{
@@ -73,9 +75,10 @@
 } */
 
 
-.cell{
-    box-shadow: none!important;
-    &::before{
+.cell {
+    box-shadow: none !important;
+
+    &::before {
         content: '';
         width: 100%;
         border-left: calc(var(--border-w) / 2) solid var(--grid-line);
@@ -86,34 +89,43 @@
     }
 }
 
-.cell-range-start{
-    &::before{
+.cell-range-start {
+    &::before {
         border-radius: var(--radius-relaxed) 0 0 var(--radius-relaxed);
     }
 }
 
-.cell-range-end{
-     &::before{
+.cell-range-end {
+    &::before {
         border-radius: 0 var(--radius-relaxed) var(--radius-relaxed) 0;
     }
 }
 
-.cell.is-active, .cell.is-select-all{
-        &::before{
+.cell.is-active,
+.cell.is-select-all {
+    &::before {
         background-color: var(--opacity-dimm-subtle) !important;
     }
 }
 
-.cell-height-mid{
-       &::before{
-    grid-row: 2/-2!important;
+.cell-height-full {
+    &::before {
+        grid-row: 1/-1 !important;
     }
 }
-.cell-height-inner{
-    &::before{
-     grid-row: 3/-3!important;
+
+.cell-height-mid {
+    &::before {
+        grid-row: 2/-2 !important;
     }
 }
+
+.cell-height-inner {
+    &::before {
+        grid-row: 3/-3 !important;
+    }
+}
+
 /* .grid{
     &::before, &::after{
         content:'';
@@ -578,19 +590,21 @@ body[data-chain-state="done"] .rangeClue-content {
     position: sticky;
     left: 0;
     z-index: 10;
-    .toast{
-    transform: translateY(-8px);
+
+    .toast {
+        transform: translateY(-8px);
     }
 }
 
-.toast-stack-working{
+.toast-stack-working {
     /* border: 1px solid; */
     flex: 1;
     margin-top: unset;
-    .toast{
+
+    .toast {
         transform: translateY(8px);
-    height: 100%;
-    place-content: center;
+        height: 100%;
+        place-content: center;
     }
 }
 
@@ -608,7 +622,7 @@ body[data-chain-state="done"] .rangeClue-content {
     color: var(--foreground-alt);
     background: var(--background-strong);
 
-    
+
 
 }
 
@@ -635,6 +649,7 @@ body[data-chain-state="done"] .rangeClue-content {
     background: var(--background-default);
     color: var(--foreground-muted);
     border-color: var(--border-subtle);
+
     span {
         color: var(--foreground-subtle);
     }
@@ -691,6 +706,7 @@ body[data-chain-state="done"] .rangeClue-content {
     grid-template-rows: subgrid;
     border-radius: var(--range-radius);
     position: relative;
+    margin-right: calc(var(--border-w) * -0.75);
     transition:
         opacity 650ms ease,
         border-color 650ms ease,
@@ -777,7 +793,7 @@ body[data-chain-state="done"] .rangeClue-content {
         border-width: calc(var(--border-w)/2);
     }
 
-    &+.rangeClue{
+    &+.rangeClue {
         /* opacity: 0.3; */
     }
 
@@ -903,12 +919,12 @@ body[data-chain-state="done"] .rangeClue-content {
     cursor: pointer;
     display: grid;
     place-items: center;
-    grid-template-rows: subgrid;
+    /* grid-template-rows: subgrid; */
+    grid-template-rows: var(--grid-rows);
     text-transform: uppercase;
     color: var(--foreground-default);
     user-select: none;
     touch-action: pan-x;
-    margin-block: var(--border-w);
 
     z-index: 10;
     mix-blend-mode: multiply;
@@ -1626,7 +1642,7 @@ On-screen keyboard (touch)
     /* --background-color: var(--background-subtle); */
     background: var(--background-subtle) !important;
     color: var(--foreground-default);
-    border-radius:var(--radius-slight);
+    border-radius: var(--radius-slight);
     /* padding: var(--spacing-x8) var(--spacing-x4); */
     font: inherit;
     text-transform: uppercase;
@@ -1669,7 +1685,7 @@ On-screen keyboard (touch)
     filter: brightness(0.9);
     color: transparent;
 
- /* border-radius: 0 0  var(--radius-slight) var(--radius-slight);
+    /* border-radius: 0 0  var(--radius-slight) var(--radius-slight);
     &::before{
          content: '';
     } */
@@ -1678,31 +1694,32 @@ On-screen keyboard (touch)
 .keyboard-key--backspace,
 .keyboard-key--enter {
     flex: 1.75 1 0;
-        &::before{
-    content: '';
-    display: block;
-    width: var(--unit-20);
-    aspect-ratio: 1;
-    margin: 0 auto;
-    background-color: var(--foreground-default);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
+
+    &::before {
+        content: '';
+        display: block;
+        width: var(--unit-20);
+        aspect-ratio: 1;
+        margin: 0 auto;
+        background-color: var(--foreground-default);
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
     }
 }
 
-.keyboard-key--backspace{
-    &::before{
-    -webkit-mask: url("images/keyboard-delete.svg") center / contain no-repeat;
-    mask: url("images/keyboard-delete.svg") center / contain no-repeat;
+.keyboard-key--backspace {
+    &::before {
+        -webkit-mask: url("images/keyboard-delete.svg") center / contain no-repeat;
+        mask: url("images/keyboard-delete.svg") center / contain no-repeat;
     }
 }
 
 .keyboard-key--enter {
-    &::before{
-    width: var(--unit-18);
-    -webkit-mask: url("images/arrow-right-start.svg") center / contain no-repeat;
-    mask: url("images/arrow-right-start.svg") center / contain no-repeat;
+    &::before {
+        width: var(--unit-18);
+        -webkit-mask: url("images/arrow-right-start.svg") center / contain no-repeat;
+        mask: url("images/arrow-right-start.svg") center / contain no-repeat;
     }
 }
 
