@@ -1763,104 +1763,87 @@
     {
       "clue": "Whole bread unit",
       "answer": "LOAF",
-      "start": 1,
-      "height": "mid"
+      "start": 1
     },
     {
       "clue": "From a great distance",
       "answer": "AFAR",
-      "start": 3,
-      "height": "full"
+      "start": 3
     },
     {
       "clue": "Two-dimensional measure",
       "answer": "AREA",
-      "start": 5,
-      "height": "inner"
+      "start": 5
     },
     {
       "clue": "Extend an arm",
       "answer": "REACH",
-      "start": 6,
-      "height": "mid"
+      "start": 6
     },
     {
       "clue": "Relating to reactions in matter",
       "answer": "CHEMICAL",
-      "start": 9,
-      "height": "inner"
+      "start": 9
     },
     {
       "clue": "First name of Rickman",
       "answer": "ALAN",
-      "start": 15,
-      "height": "full"
+      "start": 15
     },
     {
       "clue": "System of human speech",
       "answer": "LANGUAGE",
-      "start": 16,
-      "height": "mid"
+      "start": 16
     },
     {
       "clue": "School subject with maps",
       "answer": "GEOGRAPHY",
-      "start": 22,
-      "height": "inner"
+      "start": 22
     },
     {
       "clue": "Relating to the body",
       "answer": "PHYSICAL",
-      "start": 28,
-      "height": "full"
+      "start": 28
     },
     {
       "clue": "Related to food energy",
       "answer": "CALORIC",
-      "start": 33,
-      "height": "mid"
+      "start": 33
     },
     {
       "clue": "Grain grown in paddies",
       "answer": "RICE",
-      "start": 37,
-      "height": "inner"
+      "start": 37
     },
     {
       "clue": "Breakfast bowlful",
       "answer": "CEREAL",
-      "start": 39,
-      "height": "full"
+      "start": 39
     },
     {
       "clue": "First Greek letter",
       "answer": "ALPHA",
-      "start": 43,
-      "height": "mid"
+      "start": 43
     },
     {
       "clue": "Safe harbor",
       "answer": "HAVEN",
-      "start": 46,
-      "height": "inner"
+      "start": 46
     },
     {
       "clue": "Proteins that speed reactions",
       "answer": "ENZYMES",
-      "start": 49,
-      "height": "full"
+      "start": 49
     },
     {
       "clue": "Netlike material",
       "answer": "MESH",
-      "start": 53,
-      "height": "mid"
+      "start": 53
     },
     {
       "clue": "Badminton birdie",
       "answer": "SHUTTLE",
-      "start": 55,
-      "height": "inner"
+      "start": 55
     }
   ]
 },
@@ -1873,98 +1856,82 @@
     {
       "clue": "Nature buff",
       "answer": "NATURALIST",
-      "start": 1,
-      "height": "full"
+      "start": 1
     },
     {
       "clue": "Plant support",
       "answer": "STEM",
-      "start": 9,
-      "height": "mid"
+      "start": 9
     },
     {
       "clue": "Short fuse",
       "answer": "TEMPER",
-      "start": 10,
-      "height": "inner"
+      "start": 10
     },
     {
       "clue": "Private",
       "answer": "PERSONAL",
-      "start": 13,
-      "height": "full"
+      "start": 13
     },
     {
       "clue": "Actor Rickman",
       "answer": "ALAN",
-      "start": 19,
-      "height": "mid"
+      "start": 19
     },
     {
       "clue": "Scenic views",
       "answer": "LANDSCAPES",
-      "start": 20,
-      "height": "inner"
+      "start": 20
     },
     {
       "clue": "Skin under hair",
       "answer": "SCALP",
-      "start": 29,
-      "height": "full"
+      "start": 29
     },
     {
       "clue": "Pack leader",
       "answer": "ALPHA",
-      "start": 31,
-      "height": "mid"
+      "start": 31
     },
     {
       "clue": "Animal home",
       "answer": "HABITAT",
-      "start": 34,
-      "height": "inner"
+      "start": 34
     },
     {
       "clue": "Traits",
       "answer": "ATTRIBUTES",
-      "start": 39,
-      "height": "full"
+      "start": 39
     },
     {
       "clue": "Pop quiz",
       "answer": "TEST",
-      "start": 46,
-      "height": "mid"
+      "start": 46
     },
     {
       "clue": "Condition",
       "answer": "STATE",
-      "start": 48,
-      "height": "inner"
+      "start": 48
     },
     {
       "clue": "Violent extremist",
       "answer": "TERRORIST",
-      "start": 51,
-      "height": "full"
+      "start": 51
     },
     {
       "clue": "Red light command",
       "answer": "STOP",
-      "start": 58,
-      "height": "mid"
+      "start": 58
     },
     {
       "clue": "Land's contours",
       "answer": "TOPOGRAPHY",
-      "start": 59,
-      "height": "inner"
+      "start": 59
     },
     {
       "clue": "Body-related",
       "answer": "PHYSICAL",
-      "start": 66,
-      "height": "full"
+      "start": 66
     }
   ]
 },
@@ -2098,128 +2065,107 @@
     {
       "clue": "Way to obtain or enter.",
       "answer": "ACCESS",
-      "start": 1,
-      "height": "full"
+      "start": 1
     },
     {
       "clue": "The nature of being.",
       "answer": "ESSE",
-      "start": 4,
-      "height": "mid"
+      "start": 4
     },
     {
       "clue": "Pertaining to physical intimacy.",
       "answer": "SEXUAL",
-      "start": 6,
-      "height": "inner"
+      "start": 6
     },
     {
       "clue": "Turing the cryptographer.",
       "answer": "ALAN",
-      "start": 10,
-      "height": "full"
+      "start": 10
     },
     {
       "clue": "A system of communication.",
       "answer": "LANGUAGE",
-      "start": 11,
-      "height": "mid"
+      "start": 11
     },
     {
       "clue": "Lacking a trademark or brand.",
       "answer": "GENERIC",
-      "start": 17,
-      "height": "inner"
+      "start": 17
     },
     {
       "clue": "North Atlantic island nation",
       "answer": "ICELAND",
-      "start": 22,
-      "height": "full"
+      "start": 22
     },
     {
       "clue": "Scenery of a region.",
       "answer": "LANDSCAPE",
-      "start": 25,
-      "height": "mid"
+      "start": 25
     },
     {
       "clue": "The outer boundary or edge.",
       "answer": "PERIMETER",
-      "start": 32,
-      "height": "inner"
+      "start": 32
     },
     {
       "clue": "Bomb-planting extremist.",
       "answer": "TERRORIST",
-      "start": 38,
-      "height": "full"
+      "start": 38
     },
     {
       "clue": "Main body of a plant.",
       "answer": "STEM",
-      "start": 45,
-      "height": "mid"
+      "start": 45
     },
     {
       "clue": "Mood or disposition.",
       "answer": "TEMPER",
-      "start": 46,
-      "height": "inner"
+      "start": 46
     },
     {
       "clue": "Private and individual.",
       "answer": "PERSONAL",
-      "start": 49,
-      "height": "full"
+      "start": 49
     },
     {
       "clue": "The first Greek letter.",
       "answer": "ALPHA",
-      "start": 55,
-      "height": "mid"
+      "start": 55
     },
     {
       "clue": "Natural environment of an animal.",
       "answer": "HABITAT",
-      "start": 58,
-      "height": "inner"
+      "start": 58
     },
     {
       "clue": "Character traits or qualities.",
       "answer": "ATTRIBUTES",
-      "start": 63,
-      "height": "full"
+      "start": 63
     },
     {
       "clue": "Examination",
       "answer": "TEST",
-      "start": 70,
-      "height": "mid"
+      "start": 70
     },
     {
       "clue": "Condition of being, or a nation.",
       "answer": "STATE",
-      "start": 72,
-      "height": "inner"
+      "start": 72
     },
     {
       "clue": "Relating to applied science.",
       "answer": "TECHNICAL",
-      "start": 75,
-      "height": "full"
+      "start": 75
     },
     {
       "clue": "Yell out, or use the phone.",
       "answer": "CALL",
-      "start": 81,
-      "height": "mid"
+      "start": 81
     },
     {
       "clue": "Loyalty or commitment.",
       "answer": "ALLEGIANCE",
-      "start": 82,
-      "height": "inner"
+      "start": 82
     }
   ]
 },
@@ -2232,116 +2178,97 @@
     {
       "clue": "Baja California's country",
       "answer": "MEXICO",
-      "start": 1,
-      "height": "full"
+      "start": 1
     },
     {
       "clue": "Unconscious state",
       "answer": "COMA",
-      "start": 5,
-      "height": "mid"
+      "start": 5
     },
     {
       "clue": "City on the Missouri River",
       "answer": "OMAHA",
-      "start": 6,
-      "height": "inner"
+      "start": 6
     },
     {
       "clue": "Scholarly",
       "answer": "ACADEMIC",
-      "start": 10,
-      "height": "full"
+      "start": 10
     },
     {
       "clue": "Wealth used to generate more",
       "answer": "CAPITAL",
-      "start": 17,
-      "height": "mid"
+      "start": 17
     },
     {
       "clue": "Story passed down",
       "answer": "TALE",
-      "start": 21,
-      "height": "inner"
+      "start": 21
     },
     {
       "clue": "Inheritance for heirs",
       "answer": "LEGACY",
-      "start": 23,
-      "height": "full"
+      "start": 23
     },
     {
       "clue": "Produce, as returns",
       "answer": "YIELD",
-      "start": 28,
-      "height": "mid"
+      "start": 28
     },
     {
       "clue": "One in the red",
       "answer": "DEBTOR",
-      "start": 32,
-      "height": "inner"
+      "start": 32
     },
     {
       "clue": "By word of mouth",
       "answer": "ORAL",
-      "start": 36,
-      "height": "full"
+      "start": 36
     },
     {
       "clue": "Carolina capital",
       "answer": "RALEIGH",
-      "start": 37,
-      "height": "mid"
+      "start": 37
     },
     {
       "clue": "Nail-driving tool",
       "answer": "HAMMER",
-      "start": 43,
-      "height": "inner"
+      "start": 43
     },
     {
       "clue": "Capital on seven hills",
       "answer": "ROME",
-      "start": 48,
-      "height": "full"
+      "start": 48
     },
     {
       "clue": "Steakhouse offering",
       "answer": "MEAT",
-      "start": 50,
-      "height": "mid"
+      "start": 50
     },
     {
       "clue": "Chow, casually",
       "answer": "EATS",
-      "start": 51,
-      "height": "inner"
+      "start": 51
     },
     {
       "clue": "Postcard-perfect",
       "answer": "SCENIC",
-      "start": 54,
-      "height": "full"
+      "start": 54
     },
     {
       "clue": "Bit of web data or dessert",
       "answer": "COOKIE",
-      "start": 59,
-      "height": "mid"
+      "start": 59
     },
     {
       "clue": "Ukriane Capital (old spelling)",
       "answer": "KIEV",
-      "start": 62,
-      "height": "inner"
+      "start": 62
     },
     {
       "clue": "At all times",
       "answer": "EVER",
-      "start": 64,
-      "height": "full"
+      "start": 64
     }
   ]
 },
@@ -2354,110 +2281,92 @@
     {
       "clue": "Capital of India",
       "answer": "DELHI",
-      "start": 1,
-      "height": "full"
+      "start": 1
     },
     {
       "clue": "Short for \"history\"",
       "answer": "HIST",
-      "start": 4,
-      "height": "mid"
+      "start": 4
     },
     {
       "clue": "Largest city in Turkey",
       "answer": "ISTANBUL",
-      "start": 5,
-      "height": "inner"
+      "start": 5
     },
     {
       "clue": "Short news update",
       "answer": "BULLETIN",
-      "start": 10,
-      "height": "full"
+      "start": 10
     },
     {
       "clue": "Bring upon oneself",
       "answer": "INCUR",
-      "start": 16,
-      "height": "mid"
+      "start": 16
     },
     {
       "clue": "City center",
       "answer": "URBAN",
-      "start": 19,
-      "height": "inner"
+      "start": 19
     },
     {
       "clue": "Largest city in Alaska",
       "answer": "ANCHORAGE",
-      "start": 22,
-      "height": "full"
+      "start": 22
     },
     {
       "clue": "Swiss city on a lake",
       "answer": "GENEVA",
-      "start": 29,
-      "height": "mid"
+      "start": 29
     },
     {
       "clue": "Tiny papal state",
       "answer": "VATICAN",
-      "start": 33,
-      "height": "inner"
+      "start": 33
     },
     {
       "clue": "About human cultures",
       "answer": "ANTHROPOLOGICAL",
-      "start": 38,
-      "height": "full"
+      "start": 38
     },
     {
       "clue": "Chart of months and days",
       "answer": "CALENDAR",
-      "start": 50,
-      "height": "mid"
+      "start": 50
     },
     {
       "clue": "Place for old records",
       "answer": "ARCHIVE",
-      "start": 56,
-      "height": "inner"
+      "start": 56
     },
     {
       "clue": "\"Sin City\"",
       "answer": "VEGAS",
-      "start": 61,
-      "height": "full"
+      "start": 61
     },
     {
       "clue": "Help in an emergency",
       "answer": "ASSISTANCE",
-      "start": 64,
-      "height": "mid"
+      "start": 64
     },
     {
       "clue": "Stretched out",
       "answer": "ELONGATED",
-      "start": 73,
-      "height": "inner"
+      "start": 73
     },
     {
       "clue": "Completely lacking",
       "answer": "DEVOID",
-      "start": 81,
-      "height": "full"
+      "start": 81
     },
     {
       "clue": "Novel thought",
       "answer": "IDEA",
-      "start": 85,
-      "height": "mid"
+      "start": 85
     },
     {
       "clue": "Bargain or arrangement",
       "answer": "DEAL",
-      "start": 86,
-      "height": "inner"
+      "start": 86
     }
   ]
 },
@@ -2470,122 +2379,102 @@
     {
       "clue": "A long religious journey",
       "answer": "PILGRIMAGE",
-      "start": 1,
-      "height": "full"
+      "start": 1
     },
     {
       "clue": "Someone acting for another",
       "answer": "AGENT",
-      "start": 8,
-      "height": "mid"
+      "start": 8
     },
     {
       "clue": "A thing with independent existence",
       "answer": "ENTITY",
-      "start": 10,
-      "height": "inner"
+      "start": 10
     },
     {
       "clue": "Kinds, categories, classifications",
       "answer": "TYPES",
-      "start": 14,
-      "height": "full"
+      "start": 14
     },
     {
       "clue": "Set up or found formally",
       "answer": "ESTABLISH",
-      "start": 17,
-      "height": "mid"
+      "start": 17
     },
     {
       "clue": "Movement of goods",
       "answer": "SHIPPING",
-      "start": 24,
-      "height": "inner"
+      "start": 24
     },
     {
       "clue": "A component in a recipe",
       "answer": "INGREDIENT",
-      "start": 29,
-      "height": "full"
+      "start": 29
     },
     {
       "clue": "Go into a room or building",
       "answer": "ENTER",
-      "start": 36,
-      "height": "mid"
+      "start": 36
     },
     {
       "clue": "Political extremist using violence",
       "answer": "TERRORIST",
-      "start": 38,
-      "height": "inner"
+      "start": 38
     },
     {
       "clue": "Vessel powered by steam engine",
       "answer": "STEAMER",
-      "start": 45,
-      "height": "full"
+      "start": 45
     },
     {
       "clue": "Nothing more than; simple",
       "answer": "MERE",
-      "start": 49,
-      "height": "mid"
+      "start": 49
     },
     {
       "clue": "Arrive at a destination",
       "answer": "REACH",
-      "start": 51,
-      "height": "inner"
+      "start": 51
     },
     {
       "clue": "Distinguishing trait or quality",
       "answer": "CHARACTERISTIC",
-      "start": 54,
-      "height": "full"
+      "start": 54
     },
     {
       "clue": "Admission pass or parking fine",
       "answer": "TICKET",
-      "start": 65,
-      "height": "mid"
+      "start": 65
     },
     {
       "clue": "Guiding spirit of a culture",
       "answer": "ETHOS",
-      "start": 69,
-      "height": "inner"
+      "start": 69
     },
     {
       "clue": "Friendly reception of visitors",
       "answer": "HOSPITALITY",
-      "start": 71,
-      "height": "full"
+      "start": 71
     },
     {
       "clue": "A particular sort or category",
       "answer": "TYPE",
-      "start": 80,
-      "height": "mid"
+      "start": 80
     },
     {
       "clue": "A publication issued regularly",
       "answer": "PERIODICAL",
-      "start": 82,
-      "height": "inner"
+      "start": 82
     },
     {
       "clue": "Make a phone connection",
       "answer": "CALL",
-      "start": 89,
-      "height": "full"
+      "start": 89
     },
     {
       "clue": "Symbolic story with a hidden meaning",
       "answer": "ALLEGORY",
-      "start": 90,
-      "height": "mid"
+      "start": 90
     }
   ]
 },
@@ -2598,110 +2487,92 @@
     {
       "clue": "Expel a foreigner",
       "answer": "DEPORT",
-      "start": 1,
-      "height": "full"
+      "start": 1
     },
     {
       "clue": "Oregon's largest city",
       "answer": "PORTLAND",
-      "start": 3,
-      "height": "mid"
+      "start": 3
     },
     {
       "clue": "Hidden explosive in dirt",
       "answer": "LANDMINE",
-      "start": 7,
-      "height": "inner"
+      "start": 7
     },
     {
       "clue": "Interstellar cloud",
       "answer": "NEBULA",
-      "start": 13,
-      "height": "full"
+      "start": 13
     },
     {
       "clue": "Initiate; send off",
       "answer": "LAUNCH",
-      "start": 17,
-      "height": "mid"
+      "start": 17
     },
     {
       "clue": "TikTok D'Amelio",
       "answer": "CHARLI",
-      "start": 21,
-      "height": "inner"
+      "start": 21
     },
     {
       "clue": "Real-time internet broadcast",
       "answer": "LIVESTREAM",
-      "start": 25,
-      "height": "full"
+      "start": 25
     },
     {
       "clue": "Online video broadcaster",
       "answer": "STREAMER",
-      "start": 29,
-      "height": "mid"
+      "start": 29
     },
     {
       "clue": "The United States",
       "answer": "AMERICA",
-      "start": 33,
-      "height": "inner"
+      "start": 33
     },
     {
       "clue": "Nation bordering Thailand",
       "answer": "CAMBODIA",
-      "start": 38,
-      "height": "full"
+      "start": 38
     },
     {
       "clue": "Medical identification of illness",
       "answer": "DIAGNOSIS",
-      "start": 43,
-      "height": "mid"
+      "start": 43
     },
     {
       "clue": "Vatican chapel",
       "answer": "SISTINE",
-      "start": 49,
-      "height": "inner"
+      "start": 49
     },
     {
       "clue": "Israeli PM",
       "answer": "NETANYAHU",
-      "start": 54,
-      "height": "full"
+      "start": 54
     },
     {
       "clue": "Aid worker",
       "answer": "HUMANITARIAN",
-      "start": 61,
-      "height": "mid"
+      "start": 61
     },
     {
       "clue": "Oscars Best Picture",
       "answer": "ANORA",
-      "start": 71,
-      "height": "inner"
+      "start": 71
     },
     {
       "clue": "Hard to find",
       "answer": "RARE",
-      "start": 74,
-      "height": "full"
+      "start": 74
     },
     {
       "clue": "Large sports venue",
       "answer": "ARENA",
-      "start": 75,
-      "height": "mid"
+      "start": 75
     },
     {
       "clue": "Pertaining to a whole country",
       "answer": "NATIONAL",
-      "start": 78,
-      "height": "inner"
+      "start": 78
     }
   ]
 },
@@ -2714,113 +2585,121 @@
     {
       "clue": "The universe in totality",
       "answer": "COSMOS",
-      "start": 1,
-      "height": "full"
+      "start": 1
     },
     {
       "clue": "Norwegian capital",
       "answer": "OSLO",
-      "start": 5,
-      "height": "mid"
+      "start": 5
     },
     {
       "clue": "Narrow opening or groove",
       "answer": "SLOT",
-      "start": 6,
-      "height": "inner"
+      "start": 6
     },
     {
       "clue": "Canada's capital",
       "answer": "OTTAWA",
-      "start": 8,
-      "height": "full"
+      "start": 8
     },
     {
       "clue": "Rabbit burrow complex",
       "answer": "WARREN",
-      "start": 12,
-      "height": "mid"
+      "start": 12
     },
     {
       "clue": "A set of reference volumes",
       "answer": "ENCYCLOPEDIA",
-      "start": 16,
-      "height": "inner"
+      "start": 16
     },
     {
       "clue": "Regional form of a language",
       "answer": "DIALECT",
-      "start": 25,
-      "height": "full"
+      "start": 25
     },
     {
       "clue": "Quinine carbonated mixer",
       "answer": "TONIC",
-      "start": 31,
-      "height": "mid"
+      "start": 31
     },
     {
       "clue": "Specialized",
       "answer": "NICHE",
-      "start": 33,
-      "height": "inner"
+      "start": 33
     },
     {
       "clue": "Common Chinese surname",
       "answer": "CHENG",
-      "start": 35,
-      "height": "full"
+      "start": 35
     },
     {
       "clue": "Language spoken in London",
       "answer": "ENGLISH",
-      "start": 37,
-      "height": "mid"
+      "start": 37
     },
     {
       "clue": "Severe suffering",
       "answer": "HARDSHIPS",
-      "start": 43,
-      "height": "inner"
+      "start": 43
     },
     {
       "clue": "Extent of time or space",
       "answer": "SPAN",
-      "start": 51,
-      "height": "full"
+      "start": 51
     },
     {
       "clue": "Central American canal site",
       "answer": "PANAMA",
-      "start": 52,
-      "height": "mid"
+      "start": 52
     },
     {
       "clue": "Financial profit",
       "answer": "MARGIN",
-      "start": 56,
-      "height": "inner"
+      "start": 56
     },
     {
       "clue": "The inside; relating to home",
       "answer": "INTERIOR",
-      "start": 60,
-      "height": "full"
+      "start": 60
     },
     {
       "clue": "Central Florida tourist city",
       "answer": "ORLANDO",
-      "start": 66,
-      "height": "mid"
+      "start": 66
     },
     {
       "clue": "Sphere of influence",
       "answer": "DOMAIN",
-      "start": 71,
-      "height": "inner"
+      "start": 71
+    }
+  ]
+},
+{
+  "title": "FTUE",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "",
+  "words": [
+    {
+      "clue": "common greeting",
+      "answer": "Hello",
+      "start": 1
+    },
+    {
+      "clue": "A deep connection",
+      "answer": "Love",
+      "start": 4
+    },
+    {
+      "clue": "Our Hompe Planet",
+      "answer": "Earth",
+      "start": 7
+    },
+ {
+      "clue": "A seat for a king",
+      "answer": "throne",
+      "start": 10
     }
   ]
 }
-
-
 ]

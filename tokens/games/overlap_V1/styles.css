@@ -7,6 +7,7 @@
 }
 
 
+
 :root {
     --grid-line: var(--border-subtle);
     --cols: 10;
@@ -74,9 +75,15 @@
     height: max-content!important;
 } */
 
+header{
+    /* display: none!important; */
+}
 
 .cell {
     box-shadow: none !important;
+    font-weight: var(--system-strong);
+    line-height: unset;
+    font-family: var(--system-fontfamily);
 
     &::before {
         content: '';
@@ -674,8 +681,8 @@ body[data-chain-state="done"] .rangeClue-content {
     --grid-rows: repeat(3, var(--grid-top-space)) var(--grid-letter-space) repeat(3, var(--grid-bottom-space));
 
     grid-template-rows: var(--grid-rows);
-    width: calc(var(--cell)*var(--cols) + var(--spacing-x64));
-    /* margin: 0 auto; */
+    width: calc(var(--cell)*var(--cols));
+    margin: 0 auto;
     /* background: transparent; */
     /* box-shadow:
         inset 0 calc(var(--border-w) * -1) 0 0 var(--grid-line),

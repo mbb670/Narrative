@@ -11,11 +11,7 @@ const COLORS = [
   ["Purple", "--c-purple"],
 ];
 
-const HEIGHTS = [
-  ["Full", "full"],
-  ["Mid", "mid"],
-  ["Inner", "inner"],
-];
+const HEIGHT_CYCLE = ["full", "mid", "inner"];
 
 const MODE = { OVERLAP: "overlap", CHAIN: "chain" };
 const VIEW = { PLAY: "play", CHAIN: "chain", BUILD: "build" };
@@ -25,7 +21,7 @@ const LAST_VIEW_KEY = `${KEY}__last_view`;
 
 const VALID_VIEWS = new Set(Object.values(VIEW));
 
-const DEV_DISABLE_AUTOPAUSE = (() => {
+const DEV_MODE = (() => {
   try {
     const url = new URL(location.href);
     return url.searchParams.has("dev") || url.searchParams.has("devmode");
@@ -33,11 +29,13 @@ const DEV_DISABLE_AUTOPAUSE = (() => {
     return false;
   }
 })();
+const DEV_DISABLE_AUTOPAUSE = DEV_MODE;
 
 function loadLastView() {
   try {
     const v = localStorage.getItem(LAST_VIEW_KEY);
-    return VALID_VIEWS.has(v) ? v : VIEW.CHAIN;
+    if (!DEV_MODE && v === VIEW.BUILD) return VIEW.CHAIN;
+    return (DEV_MODE ? VALID_VIEWS.has(v) : v === VIEW.PLAY || v === VIEW.CHAIN) ? v : VIEW.CHAIN;
   } catch {
     return VIEW.CHAIN;
   }
@@ -822,6 +820,15 @@ function bindGridScrollCancels() {
   });
 }
 
+const stripHeightsFromPuzzles = (arr = []) =>
+  arr.map((p) => ({
+    ...p,
+    words: (p?.words || []).map((w) => {
+      const { height, h, ...rest } = w || {};
+      return { ...rest };
+    }),
+  }));
+
 // ---- Storage ----
 const store = {
   load() {
@@ -851,7 +858,7 @@ const store = {
   },
   save() {
     localStorage.setItem(DEFAULTS_VER_KEY, DEFAULTS_VERSION);
-    localStorage.setItem(KEY, JSON.stringify(puzzles));
+    localStorage.setItem(KEY, JSON.stringify(stripHeightsFromPuzzles(puzzles)));
   },
 };
 
@@ -953,7 +960,6 @@ const normWord = (w, pType, opts = {}) => {
     clue: String(w?.clue || ""),
     answer: String(w?.answer || ""),
     start: +w?.start || 1,
-    height: String(w?.height || "full"),
   };
 
   return out;
@@ -963,7 +969,7 @@ const normWord = (w, pType, opts = {}) => {
 const normPuzzle = (p) => {
   const type = String(p?.type || MODE.OVERLAP);
   const wordsRaw = Array.isArray(p?.words) ? p.words : [];
-  const fallback = { clue: "Clue", answer: "WORD", start: 1, height: "full" };
+  const fallback = { clue: "Clue", answer: "WORD", start: 1 };
   const timed = type === MODE.CHAIN ? false : true;
   const words = (wordsRaw.length ? wordsRaw : [fallback]).map((w) => normWord(w, type, { timed }));
   const { dateKey } = normalizePuzzleDate(p?.dateKey || p?.date);
@@ -1299,7 +1305,8 @@ function computed(p) {
     .map((w, rawIdx) => {
       const ans = cleanA(w.answer);
       const start = Math.max(0, Math.floor(+w.start || 1) - 1);
-      const [t, b] = insets(w.height || "full");
+      const h = HEIGHT_CYCLE[rawIdx % HEIGHT_CYCLE.length] || "full";
+      const [t, b] = insets(h);
 
       let diff = null;
       const color = paletteColorForWord(p, rawIdx);
@@ -1313,7 +1320,7 @@ function computed(p) {
         color,
         t,
         b,
-        h: String(w.height || "full"),
+        h,
         r: tr(w),
         rawIdx,
         diff,
@@ -3298,6 +3305,7 @@ function loadPuzzle(i) {
 
 // ---- Tabs ----
 function setTab(which) {
+  if (!DEV_MODE && which === VIEW.BUILD) which = VIEW.CHAIN;
   currentView = which;
   try { localStorage.setItem(LAST_VIEW_KEY, currentView); } catch {}
   resetPlay();
@@ -3312,14 +3320,14 @@ function setTab(which) {
 
   els.tabPlay?.classList.toggle("is-active", isPlay);
   els.tabChain?.classList.toggle("is-active", isChain);
-  els.tabBuild?.classList.toggle("is-active", isBuild);
+  els.tabBuild?.classList.toggle("is-active", DEV_MODE && isBuild);
 
   els.tabPlay?.setAttribute("aria-selected", isPlay ? "true" : "false");
   els.tabChain?.setAttribute("aria-selected", isChain ? "true" : "false");
-  els.tabBuild?.setAttribute("aria-selected", isBuild ? "true" : "false");
+  els.tabBuild?.setAttribute("aria-selected", isBuild && DEV_MODE ? "true" : "false");
 
   els.panelPlay?.classList.toggle("is-active", !isBuild);
-  els.panelBuild?.classList.toggle("is-active", isBuild);
+  els.panelBuild?.classList.toggle("is-active", DEV_MODE && isBuild);
 
   const hideTimer = which === VIEW.PLAY;
   els.chainTimer?.toggleAttribute("hidden", hideTimer);
@@ -3574,7 +3582,6 @@ function renderRows() {
       const i = o.i;
       const w = ws[i];
 
-      const heightOpts = HEIGHTS.map(([lab, val]) => `<option value="${val}" ${w.height === val ? "selected" : ""}>${lab}</option>`).join("");
       const swColor = paletteColorForWord(p, i);
 
       return `
@@ -3598,11 +3605,6 @@ function renderRows() {
             <div>
               <label class="lab">Start</label>
               <input class="mi" data-f="start" inputmode="numeric" value="${escapeAttr(String(w.start ?? 1))}" />
-            </div>
-
-            <div>
-              <label class="lab">Height</label>
-              <select class="ms" data-f="height">${heightOpts}</select>
             </div>
           </div>
         </div>`;
@@ -3652,7 +3654,7 @@ els.pSave.addEventListener("click", () => {
 
 // Export
 els.ioExp.addEventListener("click", async () => {
-  const t = JSON.stringify(puzzles, null, 2);
+  const t = JSON.stringify(stripHeightsFromPuzzles(puzzles), null, 2);
   els.ioTxt.value = t;
   try {
     await navigator.clipboard.writeText(t);
@@ -3677,7 +3679,12 @@ els.ioImp.addEventListener("click", () => {
 // Tabs
 els.tabPlay?.addEventListener("click", () => setTab(VIEW.PLAY));
 els.tabChain?.addEventListener("click", () => setTab(VIEW.CHAIN));
-els.tabBuild?.addEventListener("click", () => setTab(VIEW.BUILD));
+if (DEV_MODE) {
+  els.tabBuild?.addEventListener("click", () => setTab(VIEW.BUILD));
+} else if (els.tabBuild) {
+  els.tabBuild.style.display = "none";
+  els.panelBuild && (els.panelBuild.style.display = "none");
+}
 
 // Keyboard (physical detection + input)
 document.addEventListener(
@@ -3912,7 +3919,7 @@ els.pNew.addEventListener("click", () => {
       title: "Untitled",
       type: MODE.OVERLAP,
       palette: FIRST_PALETTE_ID,
-      words: [{ clue: "Clue", answer: "WORD", start: 1, height: "full" }],
+      words: [{ clue: "Clue", answer: "WORD", start: 1 }],
     })
   );
   store.save();
@@ -3946,7 +3953,6 @@ els.wAdd.addEventListener("click", () => {
     answer: "WORD",
     start: nextStart,
     color: "--c-red",
-    height: "full",
     ...(chainMode ? { diff: "easy" } : {}),
   });
 

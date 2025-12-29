@@ -1361,8 +1361,7 @@ Words: ${flat.join(', ')}`;
           return {
               clue: clues[idx] || "", 
               answer: word.toUpperCase(),
-              start: thisStart,
-              height: "full" 
+              start: thisStart
           };
       });
 
@@ -1370,27 +1369,7 @@ Words: ${flat.join(', ')}`;
           d.end = d.start + d.answer.length - 1;
       });
 
-      const heights = ["full", "mid", "inner"];
-      
-      exportData.forEach((item, i) => {
-          const usedHeights = new Set();
-          for (let j = 0; j < i; j++) {
-              const prev = exportData[j];
-              // Strict overlap check for height assignment
-              if (prev.end >= item.start) {
-                  usedHeights.add(prev.height);
-              }
-          }
-          
-          const preferenceIndex = i % 3;
-          const preferredOrder = [
-              heights[preferenceIndex],
-              heights[(preferenceIndex + 1) % 3],
-              heights[(preferenceIndex + 2) % 3]
-          ];
-          
-          let assigned = preferredOrder.find(h => !usedHeights.has(h)) || "full";
-          item.height = assigned;
+      exportData.forEach((item) => {
           delete item.end;
       });
 
