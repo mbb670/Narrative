@@ -1906,6 +1906,7 @@ function ensureRangeFocusEl() {
 function hideRangeFocus() {
   if (!rangeFocusEl) return;
   rangeFocusEl.hidden = true;
+  rangeFocusEl.style.display = "none";
   rangeFocusEl.dataset.e = "";
   rangeFocusEl.classList.remove("is-active");
 }
@@ -1916,6 +1917,7 @@ function showRangeFocusForEntry(entry) {
   const rangeEl = els.grid?.querySelector(`.range[data-e="${entry.eIdx}"]`);
   const color = entry.color || rangeEl?.style.getPropertyValue("--color") || "var(--c-red)";
   el.hidden = false;
+  el.style.display = "grid";
   el.dataset.e = String(entry.eIdx);
   el.style.setProperty("--gs", String(entry.start + 1));
   el.style.setProperty("--ge", String(entry.start + entry.len + 1));

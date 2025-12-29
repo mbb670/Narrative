@@ -42,24 +42,35 @@
 /* NEW DESIGN CONTENT START */
 
 .range{
-        box-shadow: var(--unit-12) var(--unit-12) var(--spacing-x48) 0 var(--color-alpha-black-a200);
+        box-shadow: var(--unit-12) var(--spacing-x16) var(--spacing-x48) 0 var(--color-alpha-black-a200);
         /* box-shadow: 0 -16px 32px 0 var(--color-alpha-black-a100); */
 }
 .range-full {
     /* box-shadow: unset; */
 }
 
+.range.is-locked{
+    box-shadow: none!important;
+}
+
 :root{
---grid-letter-space: var(--spacing-x80);
---grid-bottom-space: 16px;
+--grid-letter-space: var(--spacing-x144);
+--grid-bottom-space: var(--spacing-x12);
 /* --grid-bottom-space: var(--grid-top-space); */
 --range-radius: var(--radius-relaxed);
+--letter: 62cqmin;
 }
 .grid{
     box-shadow: none!important;
     border-radius: none!important;
     
 }
+
+/* .gridScroll{
+
+    overflow-y: auto!important;
+    height: max-content!important;
+} */
 
 
 .cell{
