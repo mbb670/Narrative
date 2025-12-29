@@ -2352,19 +2352,19 @@
   "dateKey": "2025-12-29",
   "words": [
     {
-      "clue": "Indian capital on the Yamuna",
+      "clue": "Capital of India",
       "answer": "DELHI",
       "start": 1,
       "height": "full"
     },
     {
-      "clue": "Subject after \"world,\" briefly",
+      "clue": "Short for \"history\"",
       "answer": "HIST",
       "start": 4,
       "height": "mid"
     },
     {
-      "clue": "City on the Bosporus",
+      "clue": "Largest city in Turkey",
       "answer": "ISTANBUL",
       "start": 5,
       "height": "inner"
@@ -2382,13 +2382,13 @@
       "height": "mid"
     },
     {
-      "clue": "Of the city",
+      "clue": "City center",
       "answer": "URBAN",
       "start": 19,
       "height": "inner"
     },
     {
-      "clue": "Secure spot for a ship",
+      "clue": "Largest city in Alaska",
       "answer": "ANCHORAGE",
       "start": 22,
       "height": "full"
@@ -2412,13 +2412,13 @@
       "height": "full"
     },
     {
-      "clue": "System of months and days",
+      "clue": "Chart of months and days",
       "answer": "CALENDAR",
       "start": 50,
       "height": "mid"
     },
     {
-      "clue": "Store for old records",
+      "clue": "Place for old records",
       "answer": "ARCHIVE",
       "start": 56,
       "height": "inner"
@@ -2448,7 +2448,7 @@
       "height": "full"
     },
     {
-      "clue": "Brainwave",
+      "clue": "Novel thought",
       "answer": "IDEA",
       "start": 85,
       "height": "mid"
