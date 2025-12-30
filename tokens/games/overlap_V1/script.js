@@ -30,6 +30,15 @@ const DEV_MODE = (() => {
   }
 })();
 const DEV_DISABLE_AUTOPAUSE = DEV_MODE;
+const FORCE_FTUE = (() => {
+  try {
+    const url = new URL(location.href);
+    return url.searchParams.has("ftue");
+  } catch {
+    return false;
+  }
+})();
+const FTUE_SEEN_KEY = `${KEY}__ftue_seen`;
 
 function loadLastView() {
   try {
@@ -654,6 +663,19 @@ const els = {
   navCellPrev: $("#navCellPrev"),
   navCellNext: $("#navCellNext"),
   navWordNext: $("#navWordNext"),
+  ftueModal: $("#ftueModal"),
+  ftuePrev: document.querySelector(".ftue-prev"),
+  ftueNext: document.querySelector(".ftue-next"),
+  ftueSkip: document.querySelector(".ftue-skip"),
+  ftueStepLabel: document.querySelector(".ftue-step-label"),
+  ftueTitle: document.querySelector("#ftueTitle"),
+  ftueDesc: document.querySelector(".ftue-desc"),
+  ftueTip: document.querySelector(".ftue-tip"),
+  ftueDots: document.querySelectorAll(".ftue-dot"),
+  ftueGrid: $("#ftueGrid"),
+  ftueGridScroll: $("#ftueGridScroll"),
+  ftuePlayPause: document.querySelector(".ftue-playpause"),
+  ftuePlayPauseIcon: document.querySelector(".ftue-playpause-icon"),
   pSel: $("#pSel"),
   pNew: $("#pNew"),
   pDel: $("#pDel"),
@@ -741,6 +763,526 @@ const userKey = () => (Array.isArray(play.usr) ? play.usr.join("") : "");
 function resetToastGuards() {
   lastPlayWarningKey = "";
   lastChainWarningKey = "";
+}
+
+// ---- FTUE ----
+const FTUE_STEPS = [
+  {
+    title: "Solve each clue to fill a block",
+    desc: "Type in a block to fill the answer. Once correct, the letters are locked in.",
+    tip: "Tip: Start anywhere in the puzzle.",
+  },
+  {
+    title: "Neighboring blocks share letters",
+    desc: "Stuck? Try a nearby block. Shared letters will help fill in the gaps.",
+    tip: "Tip: Tap a clue to reveal a hint.",
+  },
+  {
+    title: "Complete the chain to finish the puzzle",
+    desc: "Solve every word to complete the chain. Speed counts!",
+    tip: "Tip: A new puzzle drops every day.",
+  },
+];
+
+let ftueStep = 0;
+const ftueDemo = {
+  puzzle: null,
+  model: null,
+  usr: [],
+  at: 0,
+  timers: [],
+  lockedEntries: new Set(),
+  paused: false,
+  solvedCells: new Set(),
+};
+const FTUE_TIMING = {
+  startDelay: 800,
+  typeStep: 500,
+  endDelay: 8000,
+  step3MidPause: 2000,
+};
+
+const hasSeenFtue = () => {
+  try {
+    return localStorage.getItem(FTUE_SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+const markFtueSeen = () => {
+  try {
+    localStorage.setItem(FTUE_SEEN_KEY, "1");
+  } catch {}
+};
+
+function renderFtueStep() {
+  const step = Math.max(0, Math.min(FTUE_STEPS.length - 1, ftueStep));
+  const data = FTUE_STEPS[step] || FTUE_STEPS[0];
+  if (els.ftueTitle) els.ftueTitle.textContent = data.title || "";
+  if (els.ftueDesc) els.ftueDesc.textContent = data.desc || "";
+  if (els.ftueTip) els.ftueTip.textContent = data.tip || "";
+  if (els.ftueStepLabel) els.ftueStepLabel.textContent = `${step + 1}/${FTUE_STEPS.length}`;
+  if (els.ftuePrev) {
+    els.ftuePrev.disabled = step === 0;
+    els.ftuePrev.classList.toggle("is-disabled", step === 0);
+  }
+  if (els.ftueNext) {
+    els.ftueNext.textContent = step === FTUE_STEPS.length - 1 ? "Let's Play" : "Next";
+  }
+  if (els.ftueDots && els.ftueDots.forEach) {
+    els.ftueDots.forEach((dot, idx) => dot.classList.toggle("is-active", idx === step));
+  }
+
+  runFtueAnimation(step);
+}
+
+function openFtue(startStep = 0) {
+  if (!els.ftueModal) return;
+  ftueStep = Math.max(0, Math.min(FTUE_STEPS.length - 1, startStep));
+  ftueDemo.paused = false;
+  ftueUpdatePlayPauseUI();
+  ensureFtueBoard();
+  renderFtueStep();
+  els.ftueModal.classList.add("is-open");
+  els.ftueModal.setAttribute("aria-hidden", "false");
+  els.ftueModal.removeAttribute("hidden");
+  document.body.classList.add("is-ftue-open");
+}
+
+function closeFtue() {
+  if (!els.ftueModal) return;
+  clearFtueTimers();
+  els.ftueModal.classList.remove("is-open");
+  els.ftueModal.setAttribute("aria-hidden", "true");
+  els.ftueModal.setAttribute("hidden", "true");
+  document.body.classList.remove("is-ftue-open");
+  markFtueSeen();
+}
+
+const nextFtue = () => {
+  if (ftueStep >= FTUE_STEPS.length - 1) {
+    closeFtue();
+    return;
+  }
+  ftueStep = Math.min(ftueStep + 1, FTUE_STEPS.length - 1);
+  renderFtueStep();
+};
+
+const prevFtue = () => {
+  ftueStep = Math.max(ftueStep - 1, 0);
+  renderFtueStep();
+};
+
+function maybeShowFtue() {
+  if (!els.ftueModal) return;
+  if (FORCE_FTUE || !hasSeenFtue()) {
+    openFtue(0);
+  }
+}
+
+function clearFtueTimers() {
+  ftueDemo.timers.forEach((t) => clearTimeout(t));
+  ftueDemo.timers = [];
+}
+
+function ftueUpdatePlayPauseUI() {
+  if (!els.ftuePlayPause) return;
+  const isPaused = !!ftueDemo.paused;
+  els.ftuePlayPause.setAttribute("aria-pressed", isPaused ? "true" : "false");
+  if (els.ftuePlayPauseIcon) {
+    els.ftuePlayPauseIcon.textContent = isPaused ? "▶" : "⏸";
+  }
+  els.ftuePlayPause.title = isPaused ? "Play animation" : "Pause animation";
+}
+
+function ftuePause() {
+  ftueDemo.paused = true;
+  clearFtueTimers();
+  ftueUpdatePlayPauseUI();
+}
+
+function ftuePlay() {
+  ftueDemo.paused = false;
+  clearFtueTimers();
+  ftueUpdatePlayPauseUI();
+  runFtueAnimation(ftueStep);
+}
+
+function ensureFtueBoard() {
+  if (!els.ftueGrid) return null;
+  const ftuePuzzle = puzzles.find(
+    (p) => String(p.title || "").trim().toLowerCase() === "ftue"
+  );
+  if (!ftuePuzzle) return null;
+  const model = computed(ftuePuzzle);
+  ftueDemo.puzzle = ftuePuzzle;
+  ftueDemo.model = model;
+  ftueDemo.usr = Array.from({ length: model.total }, () => "");
+  ftueDemo.at = 0;
+  ftueDemo.lockedEntries = new Set();
+  renderGrid(els.ftueGrid, model, false, ftuePuzzle);
+  ftueRenderState();
+  return ftueDemo;
+}
+
+function ftueRenderState() {
+  if (!ftueDemo.model || !els.ftueGrid) return;
+  const cells = els.ftueGrid.querySelectorAll(".cell");
+  cells.forEach((c) => {
+    const i = +c.dataset.i;
+    const letterEl = c.querySelector(".letter");
+    if (letterEl) letterEl.textContent = ftueDemo.usr[i] || "";
+    c.classList.toggle("is-active", i === ftueDemo.at);
+
+    // solved state only when a covering entry is solved
+    const solved = ftueDemo.solvedCells.has(i);
+    c.classList.toggle("cell-solved", solved);
+  });
+  // range lock styling
+  els.ftueGrid.querySelectorAll(".range").forEach((r) => {
+    const eIdx = Number(r.dataset.e);
+    r.classList.toggle("is-locked", ftueDemo.lockedEntries.has(eIdx));
+  });
+  ftueKeepActiveInView(ftueDemo.lastScrollBehavior || "smooth");
+}
+
+function ftueSetAt(idx, opts = {}) {
+  if (!ftueDemo.model) return;
+  ftueDemo.at = clamp(idx, 0, ftueDemo.model.total - 1);
+  ftueDemo.lastScrollBehavior = opts.smooth ? "smooth" : "auto";
+  ftueRenderState();
+}
+
+function ftueSetLetter(idx, ch) {
+  if (!ftueDemo.model) return;
+  if (idx == null || idx < 0 || idx >= ftueDemo.usr.length) return;
+  ftueDemo.usr[idx] = (ch || "").toUpperCase();
+  ftueRenderState();
+}
+
+function ftueIsEntrySolved(entry) {
+  if (!entry) return false;
+  for (let i = 0; i < entry.len; i++) {
+    if (ftueDemo.usr[entry.start + i] !== entry.ans[i]) return false;
+  }
+  return true;
+}
+
+function ftueIsCellSolved(i) {
+  if (ftueDemo.solvedCells?.size) return ftueDemo.solvedCells.has(i);
+  const covering = ftueDemo.model?.entries?.filter((e) => entryContainsIndex(e, i)) || [];
+  if (!covering.length) return false;
+  return covering.every((e) => ftueDemo.lockedEntries.has(e.eIdx) && ftueIsEntrySolved(e));
+}
+
+function ftueAddSolvedCells(entry, count = null) {
+  if (!entry || !ftueDemo.solvedCells) return;
+  const n = count == null ? entry.len : Math.min(count, entry.len);
+  for (let i = 0; i < n; i++) {
+    ftueDemo.solvedCells.add(entry.start + i);
+  }
+}
+
+function ftueKeepActiveInView(behavior = "smooth") {
+  if (ftueDemo.freezeScroll) return;
+  if (ftueStep === 0) {
+    if (els.ftueGridScroll) els.ftueGridScroll.scrollTo({ left: 0, behavior: "smooth" });
+    return; // slide 1 stays static
+  }
+  const sc = els.ftueGridScroll;
+  if (!sc || !els.ftueGrid) return;
+  const cell = els.ftueGrid.querySelector(`.cell[data-i="${ftueDemo.at}"]`);
+  if (!cell) return;
+  const rect = cell.getBoundingClientRect();
+  const scRect = sc.getBoundingClientRect();
+  const target =
+    sc.scrollLeft + (rect.left - scRect.left) - (sc.clientWidth - rect.width) / 2;
+  const max = Math.max(0, sc.scrollWidth - sc.clientWidth);
+  const clamped = Math.max(0, Math.min(max, target));
+  sc.scrollTo({ left: clamped, behavior });
+  if (clamped >= max - 1) {
+    ftueDemo.freezeScroll = true;
+  }
+}
+
+function ftueLockEntry(entry) {
+  if (!entry) return;
+  if (!ftueDemo.lockedEntries) ftueDemo.lockedEntries = new Set();
+  ftueDemo.lockedEntries.add(entry.eIdx);
+  const rangeEl = els.ftueGrid?.querySelector(`.range[data-e="${entry.eIdx}"]`);
+  if (rangeEl) {
+    rangeEl.classList.add("range-solve-anim");
+    rangeEl.addEventListener(
+      "animationend",
+      () => rangeEl.classList.remove("range-solve-anim"),
+      { once: true }
+    );
+  }
+  ftueRenderState();
+}
+
+function ftueEntry(ans) {
+  if (!ftueDemo.model) return null;
+  return ftueDemo.model.entries.find((e) => e.ans.toUpperCase() === ans.toUpperCase()) || null;
+}
+
+function ftueFillEntryInstant(entry) {
+  if (!entry) return;
+  const letters = entry.ans.split("");
+  letters.forEach((ch, idx) => {
+    ftueSetLetter(entry.start + idx, ch);
+  });
+}
+
+function ftueTypeLetters(startIdx, letters, opts = {}) {
+  let delay = opts.delayBefore ?? 0;
+  const step = opts.step ?? 180;
+  const smoothScroll = opts.smoothScroll !== false; // default true
+  const freezeDuring = opts.freezeDuringType === true; // default false
+  const centerAfter = opts.centerAfter !== false; // default true
+  const onDone = opts.onDone;
+  const touched = [];
+  letters.toUpperCase().split("").forEach((ch, offset) => {
+    ftueDemo.timers.push(
+      setTimeout(() => {
+        const idx = startIdx + offset;
+        touched.push(idx);
+        ftueSetLetter(idx, ch);
+        ftueSetAt(idx, { smooth: smoothScroll });
+      }, delay)
+    );
+    delay += step;
+  });
+  if (onDone) {
+    ftueDemo.timers.push(
+      setTimeout(() => {
+        if (freezeDuring) ftueDemo.freezeScroll = false;
+        if (centerAfter && touched.length) ftueSetAt(touched[touched.length - 1], { smooth: true });
+        onDone();
+      }, delay + (opts.afterDone ?? 0))
+    );
+  }
+}
+
+function ftueTriggerSolveAnimation(entry) {
+  if (!entry || !els.ftueGrid) return;
+  const letters = [];
+  for (let i = entry.start; i < entry.start + entry.len; i++) {
+    const cell = els.ftueGrid.querySelector(`.cell[data-i="${i}"]`);
+    const letter = cell?.querySelector(".letter");
+    if (letter) letters.push(letter);
+  }
+  letters.forEach((letter, idx) => {
+    letter.classList.remove("solve-anim");
+    letter.style.setProperty("--solve-delay", `${idx * 80}ms`);
+    void letter.offsetWidth;
+    letter.classList.add("solve-anim");
+    letter.addEventListener(
+      "animationend",
+      () => {
+        letter.classList.remove("solve-anim");
+        letter.style.removeProperty("--solve-delay");
+      },
+      { once: true }
+    );
+  });
+
+  const rangeEl = els.ftueGrid.querySelector(`.range[data-e="${entry.eIdx}"]`);
+  if (rangeEl) {
+    rangeEl.classList.remove("range-solve-anim");
+    void rangeEl.offsetWidth;
+    rangeEl.classList.add("range-solve-anim");
+    rangeEl.addEventListener(
+      "animationend",
+      () => rangeEl.classList.remove("range-solve-anim"),
+      { once: true }
+    );
+  }
+}
+
+function ftueResetBoard() {
+  if (!ftueDemo.model) return;
+  if (els.ftueGrid) {
+    els.ftueGrid.querySelectorAll(".solve-anim").forEach((el) => {
+      el.classList.remove("solve-anim");
+      el.style.removeProperty("--solve-delay");
+    });
+    els.ftueGrid.querySelectorAll(".range-solve-anim").forEach((el) => el.classList.remove("range-solve-anim"));
+    els.ftueGrid.querySelectorAll(".cell-solved").forEach((el) => el.classList.remove("cell-solved"));
+    els.ftueGrid.querySelectorAll(".range.is-locked").forEach((el) => el.classList.remove("is-locked"));
+  }
+  ftueDemo.usr = Array.from({ length: ftueDemo.model.total }, () => "");
+  ftueDemo.lockedEntries = new Set();
+  ftueDemo.solvedCells = new Set();
+  ftueDemo.freezeScroll = false;
+  ftueSetAt(0, { smooth: true });
+  ftueRenderState();
+}
+
+function runFtueAnimation(step) {
+  if (!ensureFtueBoard()) return;
+  clearFtueTimers();
+  if (ftueDemo.paused) return;
+
+  const entries = ftueDemo.model?.entries || [];
+  const first = entries[0];
+  const second = entries[1];
+  const third = entries[2];
+  const fourth = entries[3];
+  const earthEntry =
+    entries.find((e) => e.ans?.toUpperCase() === "EARTH") || third || second || entries[0];
+  const loveEntry = entries.find((e) => e.ans?.toUpperCase() === "LOVE") || second;
+
+  // Reset board
+  ftueResetBoard();
+
+  if (step === 0) {
+    ftueSetAt(first ? first.start : 0, { smooth: true });
+    ftueRenderState();
+    if (first) {
+      ftueDemo.timers.push(
+        setTimeout(() => {
+          ftueTypeLetters(first.start, first.ans, {
+            step: FTUE_TIMING.typeStep,
+            smoothScroll: true,
+            onDone: () => {
+              ftueTriggerSolveAnimation(first);
+              ftueLockEntry(first);
+              // Only mark H,E,L as "solved" for demo
+              ftueAddSolvedCells(first, 3);
+              ftueRenderState();
+              ftueSetAt(first.start + first.len - 1);
+            },
+          });
+        }, FTUE_TIMING.startDelay)
+      );
+      ftueDemo.timers.push(
+        setTimeout(() => {
+          if (ftueStep === step) runFtueAnimation(step);
+        }, FTUE_TIMING.endDelay)
+      );
+    }
+    return;
+  }
+
+  if (step === 1) {
+    // Prefill first word
+    if (first) {
+      ftueFillEntryInstant(first);
+      ftueLockEntry(first);
+      ftueAddSolvedCells(first, 3); // keep HEL marked
+    }
+    const startAfterFirst = first ? first.start + first.len : 0;
+    ftueSetAt(startAfterFirst, { smooth: true });
+    ftueRenderState();
+
+    if (loveEntry) {
+      ftueDemo.timers.push(
+        setTimeout(() => {
+          // Type next two letters (e.g., V, E) without extra movement
+          const startIdx = loveEntry.start + 2; // positions for V and E in LOVE
+          // prefill first two letters so VE completes the word
+          ftueSetLetter(loveEntry.start, loveEntry.ans[0] || "L");
+          ftueSetLetter(loveEntry.start + 1, loveEntry.ans[1] || "O");
+          ftueSetAt(startIdx, { smooth: true });
+          ftueDemo.timers.push(
+            setTimeout(() => {
+              ftueTypeLetters(startIdx, (loveEntry.ans || "VE").slice(2, 4) || "VE", {
+                step: FTUE_TIMING.typeStep,
+                smoothScroll: true,
+                onDone: () => {
+                  if (ftueIsEntrySolved(loveEntry)) {
+                    ftueTriggerSolveAnimation(loveEntry);
+                    ftueLockEntry(loveEntry);
+                  }
+                  // mark L,O,V as solved demo cells
+                  ftueAddSolvedCells(loveEntry, 3);
+                  ftueRenderState();
+                  ftueSetAt(startIdx + 1, { smooth: true });
+                },
+              });
+            }, FTUE_TIMING.startDelay)
+          );
+        }, FTUE_TIMING.startDelay)
+      );
+      ftueDemo.timers.push(
+        setTimeout(() => {
+          if (ftueStep === step) runFtueAnimation(step);
+        }, FTUE_TIMING.endDelay)
+      );
+    }
+    return;
+  }
+
+  if (step === 2) {
+    if (first) {
+      ftueFillEntryInstant(first);
+      ftueLockEntry(first);
+      ftueAddSolvedCells(first); // HELLO should already be solved
+    }
+    if (second) {
+      ftueFillEntryInstant(second);
+      ftueLockEntry(second);
+      ftueAddSolvedCells(second, 3); // LOV persists
+    }
+    const earthStart = earthEntry ? earthEntry.start + 1 : 0; // continue after existing E
+    ftueSetAt(earthStart, { smooth: true });
+    ftueRenderState();
+
+    // Type ARTH
+    ftueDemo.timers.push(
+      setTimeout(() => {
+        ftueTypeLetters(earthStart, "ARTH", {
+          step: FTUE_TIMING.typeStep,
+          smoothScroll: true,
+          centerAfter: true,
+          onDone: () => {
+            if (earthEntry && ftueIsEntrySolved(earthEntry)) {
+              ftueTriggerSolveAnimation(earthEntry);
+              ftueLockEntry(earthEntry);
+            }
+            // mark E,A,R as solved demo cells
+            for (let i = 0; i < Math.min(3, earthEntry?.len || 0); i++) {
+              ftueDemo.solvedCells.add((earthEntry?.start || 0) + i);
+            }
+            ftueRenderState();
+            // Pause, then type RONE in the fourth entry if available
+            ftueDemo.timers.push(
+              setTimeout(() => {
+                if (fourth) {
+                  const roneStart = fourth.start + 2; // start at R in THRONE
+                  ftueDemo.freezeScroll = false; // allow scroll while finishing
+                  ftueSetAt(roneStart, { smooth: true });
+                  ftueTypeLetters(roneStart, "RONE", {
+                    step: FTUE_TIMING.typeStep,
+                    smoothScroll: true,
+                    centerAfter: false,
+                    onDone: () => {
+                      if (ftueIsEntrySolved(fourth)) {
+                        ftueTriggerSolveAnimation(fourth);
+                        ftueLockEntry(fourth);
+                      }
+                      for (let i = 0; i < fourth.len; i++) {
+                        ftueDemo.solvedCells.add(fourth.start + i);
+                      }
+                      ftueRenderState();
+                      ftueDemo.freezeScroll = true; // keep board stable at end
+                      ftueSetAt(fourth.start + fourth.len - 1, { smooth: false });
+                    },
+                  });
+                }
+              }, FTUE_TIMING.step3MidPause)
+            );
+          },
+        });
+      }, FTUE_TIMING.startDelay)
+    );
+    ftueDemo.timers.push(
+      setTimeout(() => {
+        if (ftueStep === step) runFtueAnimation(step);
+      }, FTUE_TIMING.endDelay)
+    );
+  }
 }
 
 function clearAllUnlockedCells() {
@@ -3883,6 +4425,32 @@ attachHoldRepeat(els.navCellNext, navActions.cellNext);
 attachHoldRepeat(els.navWordPrev, navActions.wordPrev);
 attachHoldRepeat(els.navWordNext, navActions.wordNext);
 
+// FTUE events
+els.ftuePrev?.addEventListener("click", (e) => {
+  e.preventDefault();
+  prevFtue();
+});
+els.ftueNext?.addEventListener("click", (e) => {
+  e.preventDefault();
+  nextFtue();
+});
+els.ftueSkip?.addEventListener("click", (e) => {
+  e.preventDefault();
+  closeFtue();
+});
+els.ftueDots?.forEach?.((dot, idx) =>
+  dot.addEventListener("click", (e) => {
+    e.preventDefault();
+    ftueStep = idx;
+    renderFtueStep();
+  })
+);
+els.ftuePlayPause?.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (ftueDemo.paused) ftuePlay();
+  else ftuePause();
+});
+
 // Results modal overlay click to close
 els.resultsModal?.addEventListener("click", (e) => {
   if (e.target === els.resultsModal) {
@@ -4011,6 +4579,7 @@ initSlider();
 loadPuzzle(0);
 setTab(currentView);
 queueInitialHintIntro();
+maybeShowFtue();
 
 requestAnimationFrame(() => {
   setAt(0);

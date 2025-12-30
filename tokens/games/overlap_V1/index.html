@@ -83,6 +83,46 @@
     </div>
   </section>
 
+  <!-- FTUE modal -->
+  <div id="ftueModal" class="ftue-modal" aria-hidden="true" hidden>
+    <div class="ftue-modal__dialog card" role="dialog" aria-modal="true" aria-labelledby="ftueTitle">
+      <div class="ftue-modal__header">
+        <button type="button" class="ftue-prev btn text-system-semibold-xs" aria-label="Previous step">
+          <span class="ftue-prev-icon" aria-hidden="true">‹</span>
+          <span class="ftue-step-label">1/3</span>
+        </button>
+        <div class="ftue-header-actions">
+          <button type="button" class="ftue-skip btn text-system-semibold-xs">Skip to game X</button>
+        </div>
+      </div>
+
+      <section class="ftue-modal__body">
+        <div class="ftue-text">
+          <h2 id="ftueTitle" class="ftue-title text-headline-semibold-lg">Welcome!</h2>
+          <p class="ftue-desc text-system-regular-md">Learn how to play.</p>
+        </div>
+        <div class="ftue-board" aria-hidden="true">
+          <button type="button" class="ftue-playpause btn icon" aria-pressed="false" aria-label="Pause animation">
+            <span class="ftue-playpause-icon" aria-hidden="true">⏸</span>
+          </button>
+          <div class="gridScroll ftueGridScroll" id="ftueGridScroll">
+            <div class="grid ftueGrid" id="ftueGrid"></div>
+          </div>
+        </div>
+        <p class="ftue-tip text-system-regular-md">Tip text</p>
+      </section>
+
+      <div class="ftue-modal__footer">
+        <div class="ftue-dots" aria-hidden="true">
+          <span class="ftue-dot" data-step="0"></span>
+          <span class="ftue-dot" data-step="1"></span>
+          <span class="ftue-dot" data-step="2"></span>
+        </div>
+        <button type="button" class="ftue-next btn primary text-system-semibold-md">Next</button>
+      </div>
+    </div>
+  </div>
+
   <!-- BUILDER -->
   <section class="panel" id="panelBuild" role="tabpanel" aria-labelledby="tabBuild">
     <div class="bTop">
@@ -108,7 +148,7 @@
 
         <div class="status" id="status"></div>
         <div class="note">
-          Start is <strong>column</strong> (1-based). Height controls inset (Full / Mid / Inner).
+          Start is <strong>column</strong> (1-based).
         </div>
 
         <details class="io">
@@ -134,7 +174,7 @@
 
   <div class="keyboard"></div>
   <div class="credit text-system-regular-sm">
-    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V3.22
+    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V3.3
   </div>
   </main>
   <!-- Results -->

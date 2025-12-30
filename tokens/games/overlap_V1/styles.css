@@ -75,7 +75,7 @@
     height: max-content!important;
 } */
 
-header{
+header {
     /* display: none!important; */
 }
 
@@ -569,7 +569,7 @@ body[data-chain-state="done"] .rangeClue-content {
     max-width: 100%;
     overflow-y: hidden;
 
-    padding-inline: var(--layout-grid-margin)!important;
+    padding-inline: var(--layout-grid-margin) !important;
 
     scrollbar-gutter: stable;
     -webkit-overflow-scrolling: touch;
@@ -1269,14 +1269,101 @@ body[data-view="play"] {
 }
 
 /* Success */
-.results {
+
+.ftue-modal {
+    display: grid;
+    place-content: center;
+
+    display: none;
+    
+ 
+
+    .ftue-desc,
+    .ftue-tip {
+        color: var(--foreground-muted);
+    }
+
+    .ftue-modal__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .btn {
+            border: unset;
+        }
+    }
+
+    .ftue-modal__dialog{
+        justify-content: space-between;
+        height: 100%;
+        max-width: 94vw;
+        height: 94svh;
+    }
+
+   .ftue-title, .ftue-desc{
+    text-wrap:balance;
+   }
+
+   .ftue-title{
+    margin-bottom: var(--spacing-x8);
+   }
+
+   .ftue-board{
+    padding-inline: unset!important;
+    margin-inline: calc(var(--spacing-x24) * -1);
+    .gridScroll{
+        padding-block: var(--spacing-x24);
+        pointer-events: none;
+        cursor: default;
+        *{
+           pointer-events: none; 
+        }
+        .grid{
+            width: unset!important;
+        }
+        
+    .rangeClue{
+        display: block!important;
+    }
+}
+   }
+   
+
+    .ftue-dots{
+        display: flex;
+        gap: var(--spacing-x8);
+        justify-content: center;
+        margin-bottom: var(--spacing-x16);
+        .ftue-dot{
+            background-color: var(--background-subtle);
+            aspect-ratio: 1;
+            width: var(--spacing-x8);
+            border-radius: var(--radius-full);
+            &.is-active{
+                background-color: var(--background-strong);
+            }
+        }
+    }
+
+    .ftue-next{
+        height: var(--unit-48);
+         width: 100%;
+    }
+}
+
+
+.results,
+.ftue-modal {
     position: fixed;
     inset: 0;
-    display: none;
     place-items: center;
     background: var(--opacity-dimm-strong);
     padding: var(--layout-grid-margin);
     z-index: 50;
+}
+
+.results {
+    display: none;
 }
 
 .result-heading {
