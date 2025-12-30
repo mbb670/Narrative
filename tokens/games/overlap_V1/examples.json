@@ -2412,7 +2412,7 @@
       "start": 29
     },
     {
-      "clue": "Go into a room or building",
+      "clue": "Go into a room",
       "answer": "ENTER",
       "start": 36
     },
@@ -2422,7 +2422,7 @@
       "start": 38
     },
     {
-      "clue": "Vessel powered by steam engine",
+      "clue": "Vessel powered by hot, moist air",
       "answer": "STEAMER",
       "start": 45
     },
