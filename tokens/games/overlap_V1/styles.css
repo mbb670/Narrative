@@ -911,11 +911,11 @@ body[data-chain-state="done"] .rangeClue-content {
 /* word chain: style clue when solved/locked */
 
 
-@supports not (background:color-mix(in srgb, red 10%, transparent)) {
+/* @supports not (background:color-mix(in srgb, red 10%, transparent)) {
     .range {
         background: transparent
     }
-}
+} */
 
 .cell {
     appearance: none;
@@ -1284,18 +1284,44 @@ body[data-view="play"] {
         color: var(--foreground-muted);
     }
 
+    .ftue-tip {
+        color: var(--foreground-subtle);
+    }
     .ftue-modal__header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin: calc(var(--spacing-x16) * -1);
 
         .btn {
             border: unset;
         }
+
+        .ftue-prev{
+            display: flex;
+            align-items: center;
+            &::before{
+                        content: '';
+        width: var(--spacing-x12);
+        aspect-ratio: 1;
+        rotate: 180deg;
+        background-color: var(--foreground-muted);
+        -webkit-mask: url("images/arrow.svg") center / contain no-repeat;
+        mask: url("images/arrow.svg") center / contain no-repeat;
+        margin: var(--unit-4) var(--unit-4) 0 0;
+            }
+        }
+        .ftue-prev-icon{
+            display: none;
+        }
+
+        .ftue-step-label{
+            display: none;
+        }
     }
 
     .ftue-modal__dialog {
-        justify-content: space-between;
+        /* justify-content: space-between; */
         height: 100%;
         max-width: 94vw;
         height: 94svh;
@@ -1306,23 +1332,29 @@ body[data-view="play"] {
         opacity: 0;
         transition-delay: 0.1s;
         transform: translateY(var(--spacing-x24));
+        padding: var(--spacing-x32)!important;
+        
+    }
+    .ftue-modal__body{
+        flex:1;
     }
     .ftue-text{
-        padding-right: 10%;
+        padding-inline: 2%;
     }
 
     .ftue-title,
     .ftue-desc {
         text-wrap: balance;
+        text-align: center;
     }
 
-    .ftue-title {
-        margin-bottom: var(--spacing-x8);
+    .ftue-desc {
+        margin-block: var(--spacing-x8);
     }
 
     .ftue-board {
         padding-inline: unset !important;
-        margin-inline: calc(var(--spacing-x24) * -1);
+        margin-inline: calc(var(--spacing-x32) * -1);
 
         /* --grid-top-space: var(--spacing-x); */
 
@@ -1337,7 +1369,7 @@ body[data-view="play"] {
        
 
         .gridScroll {
-            padding-block: var(--spacing-x8);
+            padding-block: var(--spacing-x2);
             pointer-events: none;
             cursor: default;
 
@@ -1404,25 +1436,35 @@ body[data-view="play"] {
 
     .ftue-dots {
         display: flex;
-        gap: var(--spacing-x8);
+        gap: var(--unit-6);
         justify-content: center;
-        margin-bottom: var(--spacing-x16);
+
 
         .ftue-dot {
-            background-color: var(--background-subtle);
-            aspect-ratio: 1;
+            cursor: pointer;
+            background-color: var(--background-medium);
+            height: var(--spacing-x8);
             width: var(--spacing-x8);
             border-radius: var(--radius-full);
+            transition: width 300ms ease-in-out, background-color 300ms ease-in-out;
 
             &.is-active {
-                background-color: var(--background-strong);
+                background-color: var(--background-strong)!important;
+                width: var(--spacing-x24);
             }
         }
+    }
+    .ftue-modal__footer{
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-x12);
+        align-items: center;
     }
 
     .ftue-next {
         height: var(--unit-56);
         width: 100%;
+         /* margin-block: var(--spacing-x12); */
     }
 
     &.is-open{
@@ -1436,13 +1478,22 @@ body[data-view="play"] {
     }
 }
 
+
+/* the extended dot width breaks the transitions on safari */
+@supports (font: -apple-system-body) {
+    .ftue-dot.is-active{
+        width: var(--spacing-x8)!important;
+    }
+
+}
+
 @media (max-width:640px) {
     .ftue-text{
         padding-right: unset!important;
     }
     .ftue-board{
          .gridScroll {
-            padding-block: var(--spacing-x24)!important;
+            padding-block: var(--spacing-x32)!important;
         .grid {
             transform: scale(0.85)!important;
         }

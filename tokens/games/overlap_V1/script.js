@@ -789,6 +789,7 @@ let ftueStep = 0;
 let ftueDialogTimer = null;
 let ftueShowTimer = null;
 let ftueNavBlockedUntil = 0;
+let ftueTouchStart = null;
 const ftueDemo = {
   puzzle: null,
   model: null,
@@ -801,8 +802,9 @@ const ftueDemo = {
 };
 const FTUE_DIALOG_DELAY = 500;
 const FTUE_NAV_COOLDOWN = 10;
+const FTUE_SWIPE_THRESHOLD = 40;
 const FTUE_TIMING = {
-  typeStep: 550,
+  typeStep: 600,
   stepStartDelay: [1000, 300, 1200], // per-step start delays (0,1,2)
   stepEndDelay: [7000, 5000, 10000], // per-step end delays (0,1,2)
   step3MidPause: 2000,
@@ -932,6 +934,31 @@ function maybeShowFtue() {
 function clearFtueTimers() {
   ftueDemo.timers.forEach((t) => clearTimeout(t));
   ftueDemo.timers = [];
+}
+
+function onFtueTouchStart(e) {
+  if (!ftueIsOpen()) return;
+  const t = e.touches && e.touches[0];
+  if (!t) return;
+  ftueTouchStart = { x: t.clientX, y: t.clientY, time: Date.now() };
+}
+
+function onFtueTouchEnd(e) {
+  if (!ftueIsOpen() || !ftueTouchStart) return;
+  const t = e.changedTouches && e.changedTouches[0];
+  if (!t) {
+    ftueTouchStart = null;
+    return;
+  }
+  const dx = t.clientX - ftueTouchStart.x;
+  const dy = t.clientY - ftueTouchStart.y;
+  const dt = Date.now() - ftueTouchStart.time;
+  ftueTouchStart = null;
+  if (Math.abs(dx) < FTUE_SWIPE_THRESHOLD) return;
+  if (Math.abs(dx) <= Math.abs(dy)) return;
+  if (dt > 800) return;
+  if (dx < 0) nextFtue();
+  else prevFtue();
 }
 
 function ftueUpdatePlayPauseUI() {
@@ -4506,6 +4533,8 @@ els.ftueDots?.forEach?.((dot, idx) =>
     renderFtueStep();
   })
 );
+els.ftueModal?.addEventListener("touchstart", onFtueTouchStart, { passive: true });
+els.ftueModal?.addEventListener("touchend", onFtueTouchEnd, { passive: true });
 els.ftuePlayPause?.addEventListener("click", (e) => {
   e.preventDefault();
   if (ftueDemo.paused) ftuePlay();
