@@ -1273,10 +1273,11 @@ body[data-view="play"] {
 .ftue-modal {
     display: grid;
     place-content: center;
+    background-color: color-mix(in oklab, var(--background-default), transparent 100%) !important;
+    transition: background-color 800ms ease-out;
+    transition-delay: 0.1s;
+    visibility: hidden;
 
-    display: none;
-    
- 
 
     .ftue-desc,
     .ftue-tip {
@@ -1293,64 +1294,165 @@ body[data-view="play"] {
         }
     }
 
-    .ftue-modal__dialog{
+    .ftue-modal__dialog {
         justify-content: space-between;
         height: 100%;
         max-width: 94vw;
         height: 94svh;
+        width: min(var(--layout-content-md-max), 100%);
+        height:  min(var(--layout-content-lg-max), 100%);
+        margin: 0 auto;
+        transition: transform 800ms ease-out, opacity 800ms ease-out;
+        opacity: 0;
+        transition-delay: 0.1s;
+        transform: translateY(var(--spacing-x24));
+    }
+    .ftue-text{
+        padding-right: 10%;
     }
 
-   .ftue-title, .ftue-desc{
-    text-wrap:balance;
-   }
+    .ftue-title,
+    .ftue-desc {
+        text-wrap: balance;
+    }
 
-   .ftue-title{
-    margin-bottom: var(--spacing-x8);
-   }
+    .ftue-title {
+        margin-bottom: var(--spacing-x8);
+    }
 
-   .ftue-board{
-    padding-inline: unset!important;
-    margin-inline: calc(var(--spacing-x24) * -1);
-    .gridScroll{
-        padding-block: var(--spacing-x24);
-        pointer-events: none;
-        cursor: default;
-        *{
-           pointer-events: none; 
+    .ftue-board {
+        padding-inline: unset !important;
+        margin-inline: calc(var(--spacing-x24) * -1);
+
+        /* --grid-top-space: var(--spacing-x); */
+
+
+        /* --range-clue-size: 40cqmin; */
+
+        /* --cell: clamp(40px, 8vw, 48px)!important; */
+        /* --grid-top-space: var(--spacing-x40); */
+        /* --grid-letter-space: var(--spacing-x48); */
+        /* --grid-bottom-space: var(--spacing-x8); */
+        /* --letter: 48cqmin; */
+       
+
+        .gridScroll {
+            padding-block: var(--spacing-x8);
+            pointer-events: none;
+            cursor: default;
+
+            * {
+                pointer-events: none;
+            }
+
+            .grid {
+                width: unset !important;
+                 transform: scale(0.75);
+                 transform-origin: left;
+                 grid-template-columns: repeat(var(--cols), var(--cell));
+
+                 &::after{
+                    content:'';
+                    height: 100%;
+                 }
+            }
+
+            .rangeClue {
+                display: block !important;
+            }
+
+            [data-i="5"],
+            [data-i="6"] {
+                &::before {
+                    grid-row: 2/-2 !important;
+                }
+            }
+
+            [data-i="7"],
+            [data-i="8"] {
+                &::before {
+                    grid-row: 3/-3 !important;
+                }
+            }
+
+            [data-i="0"],
+            [data-i="9"] {
+                &::before {
+                    border-radius: var(--radius-relaxed) 0 0 var(--radius-relaxed);
+                }
+            }
+
+            [data-i="4"],
+            [data-i="6"],
+            [data-i="14"] {
+                &::before {
+                    border-radius: 0 var(--radius-relaxed) var(--radius-relaxed) 0;
+                }
+            }
+            
         }
-        .grid{
-            width: unset!important;
-        }
+
+    }
+
+    .ftue-secondary{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         
-    .rangeClue{
-        display: block!important;
     }
-}
-   }
-   
 
-    .ftue-dots{
+
+    .ftue-dots {
         display: flex;
         gap: var(--spacing-x8);
         justify-content: center;
         margin-bottom: var(--spacing-x16);
-        .ftue-dot{
+
+        .ftue-dot {
             background-color: var(--background-subtle);
             aspect-ratio: 1;
             width: var(--spacing-x8);
             border-radius: var(--radius-full);
-            &.is-active{
+
+            &.is-active {
                 background-color: var(--background-strong);
             }
         }
     }
 
-    .ftue-next{
-        height: var(--unit-48);
-         width: 100%;
+    .ftue-next {
+        height: var(--unit-56);
+        width: 100%;
+    }
+
+    &.is-open{
+        background-color: color-mix(in oklab, var(--background-default), transparent 10%)!important;
+        display: block;
+        visibility: visible;
+        .ftue-modal__dialog{
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
 }
 
+@media (max-width:640px) {
+    .ftue-text{
+        padding-right: unset!important;
+    }
+    .ftue-board{
+         .gridScroll {
+            padding-block: var(--spacing-x24)!important;
+        .grid {
+            transform: scale(0.85)!important;
+        }
+    }
+   
+}
+  .ftue-next {
+        height: var(--unit-48)!important;
+    }
+}
 
 .results,
 .ftue-modal {

@@ -85,7 +85,7 @@
 
   <!-- FTUE modal -->
   <div id="ftueModal" class="ftue-modal" aria-hidden="true" hidden>
-    <div class="ftue-modal__dialog card" role="dialog" aria-modal="true" aria-labelledby="ftueTitle">
+    <div class="ftue-modal__dialog card elevation-overlay" role="dialog" aria-modal="true" aria-labelledby="ftueTitle">
       <div class="ftue-modal__header">
         <button type="button" class="ftue-prev btn text-system-semibold-xs" aria-label="Previous step">
           <span class="ftue-prev-icon" aria-hidden="true">‹</span>
@@ -102,14 +102,17 @@
           <p class="ftue-desc text-system-regular-md">Learn how to play.</p>
         </div>
         <div class="ftue-board" aria-hidden="true">
-          <button type="button" class="ftue-playpause btn icon" aria-pressed="false" aria-label="Pause animation">
-            <span class="ftue-playpause-icon" aria-hidden="true">⏸</span>
-          </button>
           <div class="gridScroll ftueGridScroll" id="ftueGridScroll">
             <div class="grid ftueGrid" id="ftueGrid"></div>
           </div>
+
         </div>
+        <div class="ftue-secondary">
         <p class="ftue-tip text-system-regular-md">Tip text</p>
+                            <button type="button" class="ftue-playpause btn icon" aria-pressed="false" aria-label="Pause animation">
+            <span class="ftue-playpause-icon" aria-hidden="true">⏸</span>
+          </button>
+          </div>
       </section>
 
       <div class="ftue-modal__footer">
@@ -174,7 +177,7 @@
 
   <div class="keyboard"></div>
   <div class="credit text-system-regular-sm">
-    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V3.3
+    Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • V3.4
   </div>
   </main>
   <!-- Results -->

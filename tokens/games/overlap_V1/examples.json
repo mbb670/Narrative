@@ -2701,5 +2701,98 @@
       "start": 10
     }
   ]
+},
+{
+  "title": "Friday, Jan 2, 2026",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2026-01-02",
+  "words": [
+    {
+      "clue": "A trail for the use of, or worn",
+      "answer": "PATH",
+      "start": 1
+    },
+    {
+      "clue": "To the degree or extent",
+      "answer": "THIS",
+      "start": 3
+    },
+    {
+      "clue": "A writer of history",
+      "answer": "HISTORIAN",
+      "start": 4
+    },
+    {
+      "clue": "A short account of a real",
+      "answer": "ANECDOTE",
+      "start": 11
+    },
+    {
+      "clue": "Of, relating to, or involving",
+      "answer": "TECHNOLOGICAL",
+      "start": 17
+    },
+    {
+      "clue": "The set of letters used when",
+      "answer": "ALPHABET",
+      "start": 28
+    },
+    {
+      "clue": "The substance formerly supposed",
+      "answer": "ETHER",
+      "start": 34
+    },
+    {
+      "clue": "An inheritance",
+      "answer": "HERITAGE",
+      "start": 36
+    },
+    {
+      "clue": "A temporally organized plan for",
+      "answer": "AGENDA",
+      "start": 41
+    },
+    {
+      "clue": "(collectively) Information",
+      "answer": "DATA",
+      "start": 45
+    },
+    {
+      "clue": "The science or the technique",
+      "answer": "TAXONOMY",
+      "start": 47
+    },
+    {
+      "clue": "Relating to mystics or mysticism",
+      "answer": "MYSTICAL",
+      "start": 53
+    },
+    {
+      "clue": "Elementary : A system for",
+      "answer": "ALGEBRA",
+      "start": 59
+    },
+    {
+      "clue": "The woody part of a tree arising",
+      "answer": "BRANCH",
+      "start": 63
+    },
+    {
+      "clue": "A written account of events and",
+      "answer": "CHRONICLE",
+      "start": 67
+    },
+    {
+      "clue": "The life story of a saint (such",
+      "answer": "LEGEND",
+      "start": 74
+    },
+    {
+      "clue": "(obsolete) Class",
+      "answer": "GENDER",
+      "start": 76
+    }
+  ]
 }
 ]

@@ -674,6 +674,7 @@ const els = {
   ftueDots: document.querySelectorAll(".ftue-dot"),
   ftueGrid: $("#ftueGrid"),
   ftueGridScroll: $("#ftueGridScroll"),
+  ftueDialog: document.querySelector(".ftue-modal__dialog"),
   ftuePlayPause: document.querySelector(".ftue-playpause"),
   ftuePlayPauseIcon: document.querySelector(".ftue-playpause-icon"),
   pSel: $("#pSel"),
@@ -785,6 +786,9 @@ const FTUE_STEPS = [
 ];
 
 let ftueStep = 0;
+let ftueDialogTimer = null;
+let ftueShowTimer = null;
+let ftueNavBlockedUntil = 0;
 const ftueDemo = {
   puzzle: null,
   model: null,
@@ -795,12 +799,30 @@ const ftueDemo = {
   paused: false,
   solvedCells: new Set(),
 };
+const FTUE_DIALOG_DELAY = 500;
+const FTUE_NAV_COOLDOWN = 10;
 const FTUE_TIMING = {
-  startDelay: 800,
-  typeStep: 500,
-  endDelay: 8000,
+  typeStep: 550,
+  stepStartDelay: [1000, 300, 1200], // per-step start delays (0,1,2)
+  stepEndDelay: [7000, 5000, 10000], // per-step end delays (0,1,2)
   step3MidPause: 2000,
 };
+
+const ftueIsOpen = () => !!els.ftueModal?.classList.contains("is-open");
+let _ftuePrevOverflow = "";
+function ftueDisableInteractions() {
+  _ftuePrevOverflow = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+  if (els.stage) els.stage.style.pointerEvents = "none";
+  if (els.gridScroll) els.gridScroll.style.pointerEvents = "none";
+  if (els.keyboard) els.keyboard.style.pointerEvents = "none";
+}
+function ftueEnableInteractions() {
+  document.body.style.overflow = _ftuePrevOverflow || "";
+  if (els.stage) els.stage.style.pointerEvents = "";
+  if (els.gridScroll) els.gridScroll.style.pointerEvents = "";
+  if (els.keyboard) els.keyboard.style.pointerEvents = "";
+}
 
 const hasSeenFtue = () => {
   try {
@@ -833,33 +855,56 @@ function renderFtueStep() {
     els.ftueDots.forEach((dot, idx) => dot.classList.toggle("is-active", idx === step));
   }
 
-  runFtueAnimation(step);
+  // reset any in-flight timers/scroll freeze before re-running animation
+  clearFtueTimers();
+  ftueDemo.freezeScroll = false;
+  requestAnimationFrame(() => runFtueAnimation(step));
 }
 
 function openFtue(startStep = 0) {
   if (!els.ftueModal) return;
+  clearTimeout(ftueDialogTimer);
+  if (els.ftueDialog) els.ftueDialog.classList.remove("is-open");
+  ftueNavBlockedUntil = 0;
   ftueStep = Math.max(0, Math.min(FTUE_STEPS.length - 1, startStep));
   ftueDemo.paused = false;
   ftueUpdatePlayPauseUI();
   ensureFtueBoard();
   renderFtueStep();
-  els.ftueModal.classList.add("is-open");
+  els.ftueModal.classList.remove("is-open");
   els.ftueModal.setAttribute("aria-hidden", "false");
   els.ftueModal.removeAttribute("hidden");
-  document.body.classList.add("is-ftue-open");
+  // document.body.classList.add("is-ftue-open");
+  ftueDisableInteractions();
+  requestAnimationFrame(() => {
+    els.ftueModal?.classList.add("is-open");
+  });
+  ftueDialogTimer = window.setTimeout(() => {
+    if (els.ftueDialog && ftueIsOpen()) {
+      els.ftueDialog.classList.add("is-open");
+    }
+  }, FTUE_DIALOG_DELAY);
 }
 
 function closeFtue() {
   if (!els.ftueModal) return;
   clearFtueTimers();
+  clearTimeout(ftueDialogTimer);
+  ftueDialogTimer = null;
+  ftueDemo.paused = true;
+  if (els.ftueDialog) els.ftueDialog.classList.remove("is-open");
   els.ftueModal.classList.remove("is-open");
   els.ftueModal.setAttribute("aria-hidden", "true");
   els.ftueModal.setAttribute("hidden", "true");
-  document.body.classList.remove("is-ftue-open");
+  // document.body.classList.remove("is-ftue-open");
   markFtueSeen();
+  ftueEnableInteractions();
 }
 
 const nextFtue = () => {
+  const now = Date.now();
+  if (now < ftueNavBlockedUntil) return;
+  ftueNavBlockedUntil = now + FTUE_NAV_COOLDOWN;
   if (ftueStep >= FTUE_STEPS.length - 1) {
     closeFtue();
     return;
@@ -869,14 +914,18 @@ const nextFtue = () => {
 };
 
 const prevFtue = () => {
+  const now = Date.now();
+  if (now < ftueNavBlockedUntil) return;
+  ftueNavBlockedUntil = now + FTUE_NAV_COOLDOWN;
   ftueStep = Math.max(ftueStep - 1, 0);
   renderFtueStep();
 };
 
 function maybeShowFtue() {
   if (!els.ftueModal) return;
+  clearTimeout(ftueShowTimer);
   if (FORCE_FTUE || !hasSeenFtue()) {
-    openFtue(0);
+    ftueShowTimer = window.setTimeout(() => openFtue(0), FTUE_DIALOG_DELAY);
   }
 }
 
@@ -968,12 +1017,12 @@ function ftueIsEntrySolved(entry) {
   return true;
 }
 
-function ftueIsCellSolved(i) {
-  if (ftueDemo.solvedCells?.size) return ftueDemo.solvedCells.has(i);
-  const covering = ftueDemo.model?.entries?.filter((e) => entryContainsIndex(e, i)) || [];
-  if (!covering.length) return false;
-  return covering.every((e) => ftueDemo.lockedEntries.has(e.eIdx) && ftueIsEntrySolved(e));
-}
+// function ftueIsCellSolved(i) {
+//   if (ftueDemo.solvedCells?.size) return ftueDemo.solvedCells.has(i);
+//   const covering = ftueDemo.model?.entries?.filter((e) => entryContainsIndex(e, i)) || [];
+//   if (!covering.length) return false;
+//   return covering.every((e) => ftueDemo.lockedEntries.has(e.eIdx) && ftueIsEntrySolved(e));
+// }
 
 function ftueAddSolvedCells(entry, count = null) {
   if (!entry || !ftueDemo.solvedCells) return;
@@ -1021,10 +1070,10 @@ function ftueLockEntry(entry) {
   ftueRenderState();
 }
 
-function ftueEntry(ans) {
-  if (!ftueDemo.model) return null;
-  return ftueDemo.model.entries.find((e) => e.ans.toUpperCase() === ans.toUpperCase()) || null;
-}
+// function ftueEntry(ans) {
+//   if (!ftueDemo.model) return null;
+//   return ftueDemo.model.entries.find((e) => e.ans.toUpperCase() === ans.toUpperCase()) || null;
+// }
 
 function ftueFillEntryInstant(entry) {
   if (!entry) return;
@@ -1124,6 +1173,13 @@ function runFtueAnimation(step) {
   clearFtueTimers();
   if (ftueDemo.paused) return;
 
+  const startDelay = Array.isArray(FTUE_TIMING.stepStartDelay)
+    ? FTUE_TIMING.stepStartDelay[step] ?? 0
+    : 0;
+  const endDelay = Array.isArray(FTUE_TIMING.stepEndDelay)
+    ? FTUE_TIMING.stepEndDelay[step] ?? 0
+    : 0;
+
   const entries = ftueDemo.model?.entries || [];
   const first = entries[0];
   const second = entries[1];
@@ -1154,12 +1210,12 @@ function runFtueAnimation(step) {
               ftueSetAt(first.start + first.len - 1);
             },
           });
-        }, FTUE_TIMING.startDelay)
+        }, startDelay)
       );
       ftueDemo.timers.push(
         setTimeout(() => {
           if (ftueStep === step) runFtueAnimation(step);
-        }, FTUE_TIMING.endDelay)
+        }, endDelay)
       );
     }
     return;
@@ -1201,14 +1257,14 @@ function runFtueAnimation(step) {
                   ftueSetAt(startIdx + 1, { smooth: true });
                 },
               });
-            }, FTUE_TIMING.startDelay)
+            }, startDelay)
           );
-        }, FTUE_TIMING.startDelay)
+        }, startDelay)
       );
       ftueDemo.timers.push(
         setTimeout(() => {
           if (ftueStep === step) runFtueAnimation(step);
-        }, FTUE_TIMING.endDelay)
+        }, endDelay)
       );
     }
     return;
@@ -1275,12 +1331,12 @@ function runFtueAnimation(step) {
             );
           },
         });
-      }, FTUE_TIMING.startDelay)
+      }, startDelay)
     );
     ftueDemo.timers.push(
       setTimeout(() => {
         if (ftueStep === step) runFtueAnimation(step);
-      }, FTUE_TIMING.endDelay)
+      }, endDelay)
     );
   }
 }
@@ -3936,6 +3992,11 @@ function handleEnterKey() {
 
 // ---- Global key handler (desktop) ----
 function onKey(e) {
+  if (ftueIsOpen()) {
+    e.preventDefault();
+    e.stopImmediatePropagation?.();
+    return;
+  }
   if (els.resultsModal?.classList.contains("is-open")) return;
   if (chainResults?.wrap?.classList.contains("is-open")) return;
   if (e.metaKey && e.key.toLowerCase() === "a") {
