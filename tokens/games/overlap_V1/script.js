@@ -672,6 +672,7 @@ const els = {
   ftueDesc: document.querySelector(".ftue-desc"),
   ftueTip: document.querySelector(".ftue-tip"),
   ftueDots: document.querySelectorAll(".ftue-dot"),
+  ftueToast: document.querySelector(".ftue-toast"),
   ftueGrid: $("#ftueGrid"),
   ftueGridScroll: $("#ftueGridScroll"),
   ftueDialog: document.querySelector(".ftue-modal__dialog"),
@@ -1349,6 +1350,10 @@ function runFtueAnimation(step) {
                         ftueDemo.solvedCells.add(fourth.start + i);
                       }
                       ftueRenderState();
+                      if (els.ftueToast) {
+                        els.ftueToast.classList.add("is-showing");
+                        setTimeout(() => els.ftueToast?.classList.remove("is-showing"), 2000);
+                      }
                       ftueDemo.freezeScroll = true; // keep board stable at end
                       ftueSetAt(fourth.start + fourth.len - 1, { smooth: false });
                     },
