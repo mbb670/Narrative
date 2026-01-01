@@ -682,6 +682,7 @@ const els = {
   pNew: $("#pNew"),
   pDel: $("#pDel"),
   pSave: $("#pSave"),
+  pClear: $("#pClear"),
   pTitle: $("#pTitle"),
   rows: $("#rows"),
   wAdd: $("#wAdd"),
@@ -1492,6 +1493,188 @@ const store = {
   },
 };
 
+// ---- Per-puzzle chain progress persistence ----
+const CHAIN_PROGRESS_KEY = `${KEY}__chain_progress_v1`;
+
+const todayKey = () => toDateKey(new Date());
+
+function chainPuzzleKey(p) {
+  if (!p || !isChainPuzzle(p)) return null;
+  const wordSig = (p.words || [])
+    .map((w) => `${cleanA(w.answer)}@${Math.max(1, Math.floor(+w.start || 1))}`)
+    .join(";");
+  return `${p.dateKey || "nodate"}||${(p.title || "").toLowerCase()}||${wordSig}`;
+}
+
+function loadChainProgressStore() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CHAIN_PROGRESS_KEY) || "{}");
+    const base = raw && typeof raw === "object" ? raw : {};
+    base.puzzles = base.puzzles && typeof base.puzzles === "object" ? base.puzzles : {};
+    return base;
+  } catch {
+    return { puzzles: {} };
+  }
+}
+
+function saveChainProgressStore(store) {
+  try {
+    localStorage.setItem(CHAIN_PROGRESS_KEY, JSON.stringify(store));
+  } catch {}
+}
+
+function pruneStaleChainProgress() {
+  const store = loadChainProgressStore();
+  const t = todayKey();
+  let changed = false;
+  Object.keys(store.puzzles || {}).forEach((k) => {
+    const v = store.puzzles[k];
+    const savedDay = v?.savedDayKey || v?.puzzleDateKey;
+    if (t && savedDay && savedDay !== t) {
+      delete store.puzzles[k];
+      changed = true;
+    }
+  });
+  if (changed) saveChainProgressStore(store);
+}
+
+function clearChainProgressForPuzzle(p) {
+  const key = chainPuzzleKey(p);
+  if (!key) return;
+  const store = loadChainProgressStore();
+  if (store.puzzles?.[key]) {
+    delete store.puzzles[key];
+    saveChainProgressStore(store);
+  }
+}
+
+function clearAllChainProgress() {
+  try {
+    localStorage.removeItem(CHAIN_PROGRESS_KEY);
+  } catch {}
+}
+
+let _persistChainRaf = 0;
+let _persistTickLastTs = 0;
+let _restoredFromStorage = false;
+let _restoredAt = 0;
+
+function chainProgressSnapshot(p) {
+  if (play.mode !== MODE.CHAIN) return null;
+  const key = chainPuzzleKey(p);
+  if (!key) return null;
+  const hasInput = Array.isArray(play.usr) && play.usr.some(Boolean);
+  const elapsed = chain.running ? (Date.now() - chain.startAt) / 1000 : chain.elapsed || 0;
+  const score = scoreChain();
+  const snap = {
+    puzzleKey: key,
+    puzzleDateKey: p.dateKey || null,
+    savedDayKey: todayKey(),
+    usr: (play.usr || []).slice(0, play.n),
+    at: clamp(play.at ?? 0, 0, Math.max(0, play.n - 1)),
+    started: !!(chain.started || play.done || hasInput),
+    done: !!play.done,
+    revealed: !!play.revealed,
+    lockedEntries: [...play.lockedEntries],
+    lockedCells: Array.isArray(play.lockedCells) ? play.lockedCells.slice(0, play.n) : [],
+    hintsUsed: chain.hintsUsed || 0,
+    elapsed: Math.max(0, +elapsed || 0),
+    lastFinishElapsedSec: Math.max(0, chain.lastFinishElapsedSec || (play.done ? elapsed : 0)),
+    unsolvedCount: chain.unsolvedCount || 0,
+  };
+
+  if (play.done) {
+    snap.stats = {
+      timeSec: snap.lastFinishElapsedSec,
+      solved: score.correct,
+      total: play.entries?.length || 0,
+      hintsUsed: snap.hintsUsed,
+    };
+  }
+
+  return snap;
+}
+
+function persistChainProgressImmediate() {
+  if (play.mode !== MODE.CHAIN) return;
+  const p = puzzles[pIdx];
+  const snap = chainProgressSnapshot(p);
+  if (!snap) return;
+  pruneStaleChainProgress();
+  const store = loadChainProgressStore();
+  store.puzzles[snap.puzzleKey] = snap;
+  saveChainProgressStore(store);
+  _persistTickLastTs = performance.now ? performance.now() : Date.now();
+}
+
+function requestPersistChainProgress() {
+  if (play.mode !== MODE.CHAIN) return;
+  if (_persistChainRaf) return;
+  _persistChainRaf = requestAnimationFrame(() => {
+    _persistChainRaf = 0;
+    persistChainProgressImmediate();
+  });
+}
+
+function restoreChainProgressForCurrentPuzzle() {
+  if (play.mode !== MODE.CHAIN) return false;
+  _restoredFromStorage = false;
+  const p = puzzles[pIdx];
+  const key = chainPuzzleKey(p);
+  if (!key) return false;
+
+  pruneStaleChainProgress();
+  const store = loadChainProgressStore();
+  const data = store.puzzles?.[key];
+  const today = todayKey();
+  const stale =
+    data &&
+    today &&
+    data.savedDayKey &&
+    data.savedDayKey !== today &&
+    data.puzzleDateKey !== today;
+
+  if (stale) {
+    delete store.puzzles[key];
+    saveChainProgressStore(store);
+  }
+  if (!data || stale) return false;
+
+  const ui = ensureChainUI();
+
+  play.usr = Array.from({ length: play.n }, (_, i) => data.usr?.[i] || "");
+  play.at = clamp(data.at ?? 0, 0, Math.max(0, play.n - 1));
+  play.done = !!data.done;
+  play.revealed = !!data.revealed;
+
+  chain.started = !!(data.started || play.done || play.usr.some(Boolean));
+  chain.running = false;
+  chain.elapsed = Math.max(0, +data.elapsed || 0);
+  chain.startAt = 0;
+  chain.left = 0;
+  chain.lastFinishElapsedSec = Math.max(0, +data.lastFinishElapsedSec || 0);
+  chain.unsolvedCount = Math.max(0, +data.unsolvedCount || 0);
+  chain.hintsUsed = Math.max(0, +data.hintsUsed || 0);
+
+  play.lockedEntries = new Set(Array.isArray(data.lockedEntries) ? data.lockedEntries : []);
+  const prevLocked = Array.isArray(data.lockedCells) ? data.lockedCells.slice(0, play.n) : [];
+  play.lockedCells = prevLocked.concat(Array.from({ length: Math.max(0, play.n - prevLocked.length) }, () => false));
+  rebuildLockedCells();
+
+  ui.timer.textContent = fmtTime(chain.elapsed);
+  const state = play.done ? CHAIN_UI.DONE : chain.started ? CHAIN_UI.PAUSED : CHAIN_UI.IDLE;
+  chainSetUIState(state, ui);
+  setInlineCluesHiddenUntilChainStart();
+  updateLockedWordUI();
+  updatePlayUI();
+  setAt(play.at, { behavior: "none", noScroll: true });
+  scrollActiveCellAfterRestore(play.at);
+  _restoredFromStorage = true;
+  _restoredAt = play.at;
+
+  return true;
+}
+
 
 // ---- Utils ----
 const cleanA = (s) => (s || "").toUpperCase().replace(/[^A-Z]/g, "");
@@ -2219,6 +2402,27 @@ function requestKeepActiveCellInView(behavior) {
   });
 }
 
+function scrollActiveCellAfterRestore(idx = play.at) {
+  let attempts = 0;
+  const MAX_ATTEMPTS = 14;
+  const tryScroll = () => {
+    const sc = els.gridScroll;
+    const cell = els.grid?.querySelector(`.cell[data-i="${idx}"]`);
+    if (!sc || !cell) {
+      if (attempts++ < MAX_ATTEMPTS) requestAnimationFrame(tryScroll);
+      return;
+    }
+    const overflow = sc.scrollWidth - sc.clientWidth;
+    if (overflow <= 2 && attempts++ < MAX_ATTEMPTS) {
+      requestAnimationFrame(tryScroll);
+      return;
+    }
+    keepCellInView(idx, { behavior: "auto", delta: 1 });
+    updateThumbFromScroll(true);
+  };
+  requestAnimationFrame(tryScroll);
+}
+
 function scrollToWordStart(e, behavior = IS_TOUCH ? "smooth" : "auto") {
   if (!e) return;
 
@@ -2673,6 +2877,7 @@ function applyHintForEntry(eIdx) {
     if (lockedByHint) requestAnimationFrame(() => requestAnimationFrame(() => triggerSolveAnimation(entry)));
     requestChainClues();
     chainMaybeFinishIfSolved();
+    requestPersistChainProgress();
   } else {
     updatePlayUI();
     checkSolvedOverlapOnly();
@@ -2873,7 +3078,7 @@ ui.startBtn.textContent =
   state === CHAIN_UI.IDLE ? "Start" :
   state === CHAIN_UI.RUNNING ? "Pause" :
   state === CHAIN_UI.PAUSED ? "Resume" :
-  "Reset";
+  "View results";
 
   // toggle reset/reveal visibility in chain mode
   updateResetRevealVisibility(state);
@@ -2892,6 +3097,7 @@ function chainPause() {
 
   chain.running = false;
   chainSetUIState(CHAIN_UI.PAUSED, ui);
+  requestPersistChainProgress();
 }
 
 function chainPauseIfBackgrounded() {
@@ -2912,6 +3118,7 @@ function chainResume() {
 
   chain.running = true;
   chainSetUIState(CHAIN_UI.RUNNING, ui);
+  ensureChainTick();
   focusForTyping();
 }
 
@@ -2945,9 +3152,9 @@ startBtn.addEventListener("click", () => {
 
   if (play.mode !== MODE.CHAIN) return;
 
-  // If completed, button becomes Reset
+  // If completed, button becomes "View results"
   if (play.done) {
-    chainResetFromHud();
+    openChainResults(scoreChain(), chain.lastFinishReason || "solved");
     return;
   }
 
@@ -3033,6 +3240,25 @@ function chainStopTimer() {
     clearInterval(chain.tickId);
     chain.tickId = 0;
   }
+  _persistTickLastTs = 0;
+}
+
+function ensureChainTick() {
+  if (chain.tickId) return;
+  const ui = ensureChainUI();
+  chain.tickId = setInterval(() => {
+    if (!chain.running) return;
+    const elapsed = (Date.now() - chain.startAt) / 1000;
+    chain.elapsed = elapsed;
+    ui.timer.textContent = fmtTime(elapsed);
+
+    // Throttle persistence so the latest time is saved even without typing
+    const now = performance.now ? performance.now() : Date.now();
+    if (!_persistTickLastTs || now - _persistTickLastTs > 900) {
+      requestPersistChainProgress();
+      _persistTickLastTs = now;
+    }
+  }, 120);
 }
 
 function chainResetTimer() {
@@ -3096,15 +3322,8 @@ function chainStartNow() {
 
   chain.startAt = Date.now();
 
-  if (chain.tickId) clearInterval(chain.tickId);
-  chain.tickId = setInterval(() => {
-    if (!chain.running) return;
-
-    const elapsed = (Date.now() - chain.startAt) / 1000;
-    chain.elapsed = elapsed;
-
-    ui.timer.textContent = fmtTime(elapsed);
-  }, 120);
+  ensureChainTick();
+  requestPersistChainProgress();
 }
 
 function isWordAttempted(e) {
@@ -3185,6 +3404,7 @@ function chainFinish(reason = "time", opts = {}) {
   } catch {}
 
   openChainResults(scoreChain(), reason);
+  persistChainProgressImmediate();
 }
 
 function chainMaybeFinishIfSolved() {
@@ -3327,6 +3547,7 @@ function chainApplyLocksIfEnabled() {
         }))
       );
     }
+    requestPersistChainProgress();
   }
 }
 
@@ -3470,6 +3691,7 @@ function setAt(i, { behavior, noScroll } = {}) {
 
   maybeClearSelectionOnCursorMove();
   if (play.mode === MODE.CHAIN) requestChainClues();
+  if (play.mode === MODE.CHAIN) requestPersistChainProgress();
 }
 
 function jumpToEntry(eIdx) {
@@ -3537,6 +3759,7 @@ function write(ch) {
     requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(nextAt - prevAt) || 1 });
     requestChainClues();
     chainMaybeFinishIfSolved();
+    requestPersistChainProgress();
     return;
   }
 
@@ -3583,6 +3806,7 @@ function back() {
     maybeToastChainFilledWrong();
     requestKeepActiveCellInView({ behavior: "smooth", delta: Math.abs(play.at - prevAt) || 1 });
     requestChainClues();
+    requestPersistChainProgress();
     return;
   }
 
@@ -3678,7 +3902,8 @@ function shareResult({ mode }) {
 }
 
 // ---- Reset / reveal ----
-function resetPlay() {
+function resetPlay(opts = {}) {
+  const { clearPersist = true } = opts;
   play.usr = Array.from({ length: play.n }, () => "");
   play.at = 0;
   play.done = false;
@@ -3700,6 +3925,7 @@ function resetPlay() {
   closeChainResults();
 
   if (play.mode === MODE.CHAIN) {
+    if (clearPersist) clearChainProgressForPuzzle(puzzles[pIdx]);
     const ui = ensureChainUI();
     ui.startBtn.style.display = "";
     els.legend.hidden = true;
@@ -3720,6 +3946,7 @@ function revealPlay() {
     const unsolved = countUnsolvedWords();
     play.usr = play.exp.slice();
     chainFinish("reveal", { unsolved });
+    persistChainProgressImmediate();
     return;
   }
 
@@ -3930,7 +4157,12 @@ function loadPuzzle(i) {
 
   syncBuilder();
   setDirty(false);
-  setAt(0, { behavior: "none", noScroll: true });
+  const restored = play.mode === MODE.CHAIN ? restoreChainProgressForCurrentPuzzle() : false;
+  if (!restored) {
+    _restoredFromStorage = false;
+    _restoredAt = 0;
+    setAt(0, { behavior: "none", noScroll: true });
+  }
 }
 
 // ---- Tabs ----
@@ -3938,8 +4170,6 @@ function setTab(which) {
   if (!DEV_MODE && which === VIEW.BUILD) which = VIEW.CHAIN;
   currentView = which;
   try { localStorage.setItem(LAST_VIEW_KEY, currentView); } catch {}
-  resetPlay();
-  chainSetUIState(CHAIN_UI.IDLE);
 
   // Global hook for CSS
   document.body.dataset.view = which; // "play" | "chain" | "build"
@@ -3968,13 +4198,23 @@ function setTab(which) {
     ensureCurrentPuzzleMatchesView();
     updateSliderUI();
     focusForTyping();
-  } else {
-    chainStopTimer();
   }
 
   updateResetRevealVisibility();
   updatePlayControlsVisibility();
   updatePuzzleActionsVisibility();
+
+  // Keep chain HUD in sync without resetting state
+  const uiState =
+    play.done
+      ? CHAIN_UI.DONE
+      : chain.running
+      ? CHAIN_UI.RUNNING
+      : chain.started
+      ? CHAIN_UI.PAUSED
+      : CHAIN_UI.IDLE;
+  chainSetUIState(uiState);
+  if (chain.running) ensureChainTick();
 }
 
 
@@ -4598,6 +4838,12 @@ els.pDel.addEventListener("click", () => {
   loadPuzzle(Math.max(0, pIdx - 1));
 });
 
+els.pClear?.addEventListener("click", () => {
+  clearChainProgressForPuzzle(puzzles[pIdx]);
+  resetPlay({ clearPersist: true });
+  chainForceIdleZero();
+});
+
 els.wAdd.addEventListener("click", () => {
   const p = puzzles[pIdx];
   p.words = p.words || [];
@@ -4677,6 +4923,10 @@ queueInitialHintIntro();
 maybeShowFtue();
 
 requestAnimationFrame(() => {
-  setAt(0);
+  if (_restoredFromStorage) {
+    setAt(_restoredAt, { behavior: "none", noScroll: true });
+  } else {
+    setAt(0);
+  }
   focusForTyping();
 });

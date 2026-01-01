@@ -1697,6 +1697,9 @@ body[data-view="play"] {
 
     .gridScroll {
         padding-inline: var(--spacing-x16);
+        .rangeClue{
+            display: block !important;
+        }
     }
 
     h3,
