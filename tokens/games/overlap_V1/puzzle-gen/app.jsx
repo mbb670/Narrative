@@ -305,10 +305,21 @@ const generateAIClue = async (word, difficulty, definitionContext, apiConfig) =>
 Answer Word: "${word}"
 Context Definition: "${definitionContext}"
 Constraints:
-- Max 35 characters.
-- NEVER include the answer word "${word}" or variations of it in the clue.
-- Prefer phrases over single words.
-- Return ONLY the clue text. Do not include labels like "Clue:" or "Silent thought:".`;
+- Write short, clean crossword clues that feel modern and straightforward (light wordplay is OK)
+- Max 35 characters (including spaces/punctuation)
+- Match the answer: same part of speech, tense, and number (singular/plural)
+- Be specific, not vague: avoid broad synonyms that could fit many answers.
+- Avoid obscurity: no niche trivia, no overly tricky wording, no cryptic-style clueing.
+- Never include the answer ${word} or any variation (plural, tense, -ing/-ed, hyphenation, spacing, etc.)
+- Prefer phrases over single words when possible.
+- No trailing period: do not end the clue with a period (use ? only for wordplay; otherwise no ending punctuation).
+- Output only: return ONLY the clue text (no labels, notes, or extra formatting).
+- Use explicit signals only when needed:
+    - abbreviations → “for short,” “briefly,” “abbr.”
+    - foreign words → “in French/Spanish/etc.”
+    - example-of → “e.g.,” “for example,” “say”
+    - spoken/quoted → use quotation marks
+    - wordplay → use a ?`;
 
     try {
     const { text, error } = await requestAI(prompt, apiConfig, useAI);

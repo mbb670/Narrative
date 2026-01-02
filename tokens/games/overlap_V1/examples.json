@@ -2794,5 +2794,103 @@
       "start": 76
     }
   ]
+},
+{
+  "title": "Saturday, Jan 3, 2026",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2026-01-03",
+  "words": [
+    {
+      "clue": "Apply color to a surface",
+      "answer": "PAINT",
+      "start": 1
+    },
+    {
+      "clue": "Secret governmental info",
+      "answer": "INTEL",
+      "start": 3
+    },
+    {
+      "clue": "Handset used to make calls",
+      "answer": "TELEPHONE",
+      "start": 5
+    },
+    {
+      "clue": "Strikingly unusual or foreign",
+      "answer": "EXOTIC",
+      "start": 13
+    },
+    {
+      "clue": "Reference a source",
+      "answer": "CITE",
+      "start": 18
+    },
+    {
+      "clue": "Single piece",
+      "answer": "ITEM",
+      "start": 19
+    },
+    {
+      "clue": "Newly rising or developing",
+      "answer": "EMERGENT",
+      "start": 21
+    },
+    {
+      "clue": "Necessarily involves",
+      "answer": "ENTAILS",
+      "start": 26
+    },
+    {
+      "clue": "Learned academic person",
+      "answer": "SCHOLAR",
+      "start": 32
+    },
+    {
+      "clue": "Eraser material",
+      "answer": "RUBBER",
+      "start": 38
+    },
+    {
+      "clue": "German capital",
+      "answer": "BERLIN",
+      "start": 41
+    },
+    {
+      "clue": "Queue",
+      "answer": "LINE",
+      "start": 44
+    },
+    {
+      "clue": "Local districts of a city",
+      "answer": "NEIGHBORHOODS",
+      "start": 46
+    },
+    {
+      "clue": "Things that rouse activity",
+      "answer": "STIMULI",
+      "start": 58
+    },
+    {
+      "clue": "The World Wide Web",
+      "answer": "INTERNET",
+      "start": 64
+    },
+    {
+      "clue": "Everlasting and ceaseless",
+      "answer": "ETERNAL",
+      "start": 70
+    },
+    {
+      "clue": "Largest city in New Mexico",
+      "answer": "ALBUQUERQUE",
+      "start": 75
+    },
+    {
+      "clue": "Large Canadian province",
+      "answer": "QUEBEC",
+      "start": 83
+    }
+  ]
 }
 ]
