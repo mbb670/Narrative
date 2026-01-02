@@ -2682,22 +2682,22 @@
   "words": [
     {
       "clue": "common greeting",
-      "answer": "Hello",
+      "answer": "HELLO",
       "start": 1
     },
     {
       "clue": "A deep connection",
-      "answer": "Love",
+      "answer": "LOVE",
       "start": 4
     },
     {
       "clue": "Our Home Planet",
-      "answer": "Earth",
+      "answer": "EARTH",
       "start": 7
     },
  {
       "clue": "A seat for a king",
-      "answer": "throne",
+      "answer": "THRONE",
       "start": 10
     }
   ]
@@ -2892,5 +2892,100 @@
       "start": 83
     }
   ]
+},
+{
+  "title": "Sunday, Jan 4, 2026",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2026-01-04",
+  "words": [
+    {
+      "clue": "Painter's surface",
+      "answer": "CANVAS",
+      "start": 1
+    },
+    {
+      "clue": "Huge in scope",
+      "answer": "VAST",
+      "start": 4
+    },
+    {
+      "clue": "Space for saving files",
+      "answer": "STORAGE",
+      "start": 6
+    },
+    {
+      "clue": "Category music",
+      "answer": "GENRE",
+      "start": 11
+    },
+    {
+      "clue": "Take a break",
+      "answer": "REST",
+      "start": 14
+    },
+    {
+      "clue": "Fashion sense",
+      "answer": "STYLE",
+      "start": 16
+    },
+    {
+      "clue": "First position in a race",
+      "answer": "LEAD",
+      "start": 19
+    },
+    {
+      "clue": "Ahead of the curve",
+      "answer": "ADVANCED",
+      "start": 21
+    },
+    {
+      "clue": "Sharp border",
+      "answer": "EDGE",
+      "start": 27
+    },
+    {
+      "clue": "Cogs and wheels",
+      "answer": "GEAR",
+      "start": 29
+    },
+    {
+      "clue": "Newspaper story",
+      "answer": "ARTICLE",
+      "start": 31
+    },
+    {
+      "clue": "Transparent",
+      "answer": "CLEAR",
+      "start": 35
+    },
+    {
+      "clue": "Terra",
+      "answer": "EARTH",
+      "start": 37
+    },
+    {
+      "clue": "Out-of-control panic",
+      "answer": "HYSTERIA",
+      "start": 41
+    },
+    {
+      "clue": "Cause-driven organizing",
+      "answer": "ACTIVISM",
+      "start": 48
+    },
+    {
+      "clue": "NYC borough",
+      "answer": "MANHATTAN",
+      "start": 55
+    },
+    {
+      "clue": "Corner in geometry",
+      "answer": "ANGLE",
+      "start": 62
+    }
+  ]
 }
+
+
 ]

@@ -649,6 +649,7 @@ const els = {
   tabPlay: $("#tabPlay"),
   tabChain: $("#tabChain"),
   tabBuild: $("#tabBuild"),
+  logo: $("#logo"),
   panelPlay: $("#panelPlay"),
   panelBuild: $("#panelBuild"),
   stage: $("#stage"),
@@ -663,7 +664,6 @@ const els = {
   resultsModal: document.getElementById("results"),
   resultsClose: document.querySelector(".resultsClose"),
   resultsShare: document.querySelector(".resultsShare"),
-  chainTimer: document.querySelector(".chainTimer"),
   slider: $(".game-slider"),
   nextPuzzleBtn: $("#nextPuzzleBtn"),
   puzzleActions: document.querySelector(".puzzle-actions"),
@@ -833,11 +833,11 @@ function addTimePenalty(seconds, type = "") {
     const ui = ensureChainUI();
     const elapsed = (Date.now() - chain.startAt) / 1000;
     chain.elapsed = elapsed;
-    ui.timer.textContent = fmtTime(elapsed);
+    if (ui.timer) ui.timer.textContent = fmtTime(elapsed);
   } else {
     chain.elapsed = Math.max(0, (chain.elapsed || 0) + sec);
     const ui = ensureChainUI();
-    ui.timer.textContent = fmtTime(chain.elapsed);
+    if (ui.timer) ui.timer.textContent = fmtTime(chain.elapsed);
   }
 
   if (type === "hint" && els.toastHint) {
@@ -3508,12 +3508,25 @@ function chainSetUIState(state, ui = ensureChainUI()) {
   // button hook for CSS
   ui.startBtn.dataset.state = state;
 
-  // button label
-ui.startBtn.textContent =
-  state === CHAIN_UI.IDLE ? "Start" :
-  state === CHAIN_UI.RUNNING ? "Pause" :
-  state === CHAIN_UI.PAUSED ? "Resume" :
-  "View results";
+  const visibleLabel =
+    state === CHAIN_UI.IDLE ? "Start" :
+    state === CHAIN_UI.DONE ? "View results" :
+    "";
+  const ariaLabel =
+    state === CHAIN_UI.IDLE ? "Start" :
+    state === CHAIN_UI.RUNNING ? "Pause" :
+    state === CHAIN_UI.PAUSED ? "Resume" :
+    "View results";
+  if (ui.label) ui.label.textContent = visibleLabel;
+  else ui.startBtn.textContent = visibleLabel;
+  ui.startBtn.setAttribute("aria-label", ariaLabel);
+
+  const showTimer = state === CHAIN_UI.RUNNING || state === CHAIN_UI.PAUSED;
+  if (ui.timer) {
+    ui.timer.hidden = !showTimer;
+    const current = Number.isFinite(chain.elapsed) ? chain.elapsed : 0;
+    ui.timer.textContent = fmtTime(current);
+  }
 
   // toggle reset/reveal visibility in chain mode
   updateResetRevealVisibility(state);
@@ -3532,7 +3545,7 @@ function chainPauseWithOpts(opts = {}) {
   // snapshot time so resume is accurate
   const elapsed = Math.max(0, (Date.now() - chain.startAt) / 1000);
   chain.elapsed = elapsed;
-  ui.timer.textContent = fmtTime(elapsed);
+  if (ui.timer) ui.timer.textContent = fmtTime(elapsed);
 
   chain.running = false;
   chainSetUIState(CHAIN_UI.PAUSED, ui);
@@ -3610,7 +3623,8 @@ startBtn.addEventListener("click", () => {
   chainUI = {
     hud,
     startBtn,
-    timer: document.querySelector(".chainTimer"),
+    timer: startBtn.querySelector(".chainTimerLabel"),
+    label: startBtn.querySelector(".chainStartLabel"),
   };
 chainSetUIState(
   play?.done
@@ -3692,7 +3706,7 @@ function ensureChainTick() {
     if (!chain.running) return;
     const elapsed = (Date.now() - chain.startAt) / 1000;
     chain.elapsed = elapsed;
-    ui.timer.textContent = fmtTime(elapsed);
+    if (ui.timer) ui.timer.textContent = fmtTime(elapsed);
 
     // Throttle persistence so the latest time is saved even without typing
     const now = performance.now ? performance.now() : Date.now();
@@ -3713,7 +3727,7 @@ function chainResetTimer() {
   chain.hintsUsed = 0;
   chain.hintPenaltySecTotal = 0;
   chain.wordPenaltySecTotal = 0;
-  ui.timer.textContent = fmtTime(0);
+  if (ui.timer) ui.timer.textContent = fmtTime(0);
 }
 
 function chainForceIdleZero() {
@@ -3724,7 +3738,7 @@ function chainForceIdleZero() {
   chain.left = 0;
   chain.elapsed = 0;
   const ui = ensureChainUI();
-  ui.timer.textContent = fmtTime(0);
+  if (ui.timer) ui.timer.textContent = fmtTime(0);
   chainSetUIState(CHAIN_UI.IDLE, ui);
   setInlineCluesHiddenUntilChainStart();
   resetRangeClueHints();
@@ -3738,7 +3752,7 @@ function chainShowResetWithClues() {
   chain.left = 0;
   chain.elapsed = 0;
   const ui = ensureChainUI();
-  ui.timer.textContent = fmtTime(0);
+  if (ui.timer) ui.timer.textContent = fmtTime(0);
   chainSetUIState(CHAIN_UI.DONE, ui);
   setInlineCluesHiddenUntilChainStart(); // will unhide since started=true
 }
@@ -4750,9 +4764,6 @@ function setTab(which) {
   els.panelPlay?.classList.toggle("is-active", !isBuild);
   els.panelBuild?.classList.toggle("is-active", DEV_MODE && isBuild);
 
-  const hideTimer = which === VIEW.PLAY;
-  els.chainTimer?.toggleAttribute("hidden", hideTimer);
-
   updateKeyboardVisibility();
 
   if (!isBuild) {
@@ -5269,6 +5280,14 @@ els.giveUpCancel?.addEventListener("click", () => {
   closeGiveUpModal();
   if (play.mode === MODE.CHAIN && chain.started && !play.done) chainResume();
   focusForTyping();
+});
+els.logo?.addEventListener("click", () => {
+  markInteracted();
+  if (play.mode === MODE.CHAIN && chain.running && !play.done) {
+    chainPauseWithOpts({ showSplash: true });
+  } else {
+    openSplash("default");
+  }
 });
 els.splashPuzzleBtn?.addEventListener("click", (e) => {
   e.preventDefault();

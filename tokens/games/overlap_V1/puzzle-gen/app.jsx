@@ -307,19 +307,22 @@ Context Definition: "${definitionContext}"
 Constraints:
 - Write short, clean crossword clues that feel modern and straightforward (light wordplay is OK)
 - Max 35 characters (including spaces/punctuation)
+- Keep it minimal: use the fewest words that still make the answer fair and clear
+- Don’t over-specify: avoid adding extra identifying details unless they’re required to prevent multiple reasonable answers
 - Match the answer: same part of speech, tense, and number (singular/plural)
-- Be specific, not vague: avoid broad synonyms that could fit many answers.
-- Avoid obscurity: no niche trivia, no overly tricky wording, no cryptic-style clueing.
+- Medium difficulty target: everyday vocabulary + common knowledge; avoid clues that are too obvious or too niche
+- Be specific when it matters: avoid vague synonyms that could fit many answers; add detail only to disambiguate
+- Avoid obscurity: no deep trivia, no overly tricky wording, no cryptic-style clueing
 - Never include the answer ${word} or any variation (plural, tense, -ing/-ed, hyphenation, spacing, etc.)
-- Prefer phrases over single words when possible.
-- No trailing period: do not end the clue with a period (use ? only for wordplay; otherwise no ending punctuation).
-- Output only: return ONLY the clue text (no labels, notes, or extra formatting).
+- Prefer phrases over single words when possible
+- Punctuation rule: do not end the clue with a period (use ? only for wordplay; otherwise no ending punctuation)
+- Output only: return ONLY the clue text (no labels, notes, or extra formatting)
 - Use explicit signals only when needed:
-    - abbreviations → “for short,” “briefly,” “abbr.”
-    - foreign words → “in French/Spanish/etc.”
-    - example-of → “e.g.,” “for example,” “say”
-    - spoken/quoted → use quotation marks
-    - wordplay → use a ?`;
+     - abbreviations → “for short,” “briefly,” “abbr.”
+     - foreign words → “in French/Spanish/etc.”
+     - example-of → “e.g.,” “for example,” “say”
+     - spoken/quoted → use quotation marks
+     - wordplay → use a ?`;
 
     try {
     const { text, error } = await requestAI(prompt, apiConfig, useAI);
