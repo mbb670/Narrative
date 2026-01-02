@@ -5286,7 +5286,7 @@ els.logo?.addEventListener("click", () => {
   if (play.mode === MODE.CHAIN && chain.running && !play.done) {
     chainPauseWithOpts({ showSplash: true });
   } else {
-    openSplash("default");
+    openSplash(splashState());
   }
 });
 els.splashPuzzleBtn?.addEventListener("click", (e) => {
