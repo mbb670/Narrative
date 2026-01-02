@@ -29,6 +29,14 @@ const DEV_MODE = (() => {
     return false;
   }
 })();
+const SUPPRESS_SPLASH = (() => {
+  try {
+    const url = new URL(location.href);
+    return url.searchParams.get("splash") === "1";
+  } catch {
+    return false;
+  }
+})();
 const DEV_DISABLE_AUTOPAUSE = DEV_MODE;
 const FORCE_FTUE = (() => {
   try {
@@ -659,6 +667,16 @@ const els = {
   slider: $(".game-slider"),
   nextPuzzleBtn: $("#nextPuzzleBtn"),
   puzzleActions: document.querySelector(".puzzle-actions"),
+  splash: $("#splashModal"),
+  splashPrimary: $("#splashPrimary"),
+  splashPuzzleBtn: $("#splashPuzzleBtn"),
+  splashTutorialBtn: $("#splashTutorialBtn"),
+  splashDate: $("#splashDate"),
+  splashTitle: $("#splashTitle"),
+  splashSubtitle: $("#splashSubtitle"),
+  splashAvgTime: $("#splashAvgTime"),
+  splashGamesPlayed: $("#splashGamesPlayed"),
+  splashVersion: $("#splashVersion"),
   navWordPrev: $("#navWordPrev"),
   navCellPrev: $("#navCellPrev"),
   navCellNext: $("#navCellNext"),
@@ -699,7 +717,11 @@ const els = {
   toastWarning: $("#toastWarning"),
   toastError: $("#toastError"),
   toastWordSolved: $("#toastWordSolved"),
+  toastHint: $("#toastHint"),
+  hintPenalty: $("#hintPenalty"),
   shareInline: $("#shareInline"),
+  totalHintPenalty: $("#totalHintPenalty"),
+  totalWordPenalty: $("#totalWordPenalty"),
 
 };
 
@@ -708,9 +730,11 @@ const NAV_DEBUG = false;
 const logNav = () => {};
 
 // ---- Toasts ----
-const toastTimers = { success: 0, warning: 0, error: 0 };
+const toastTimers = { success: 0, warning: 0, error: 0, hint: 0 };
+let resultsToastTimer = 0;
 let lastPlayWarningKey = "";
 let lastChainWarningKey = "";
+const HINT_PENALTY_SEC = 10;
 
 function parseMsVar(val, fallback) {
   if (!val) return fallback;
@@ -732,12 +756,16 @@ function showToast(type, message, duration) {
     warning: els.toastWarning,
     error: els.toastError,
     wordSolved: els.toastWordSolved,
+    hint: els.toastHint,
   };
   const el = map[type];
   if (!el) return;
   if (type === "wordSolved") {
     const countSpan = el.querySelector(".toast-word-solved-count");
     if (countSpan) countSpan.textContent = message || "";
+  } else if (type === "hint") {
+    const penaltyEl = el.querySelector("#hintPenalty");
+    if (penaltyEl && message != null) penaltyEl.textContent = message;
   } else if (message) {
     el.textContent = message;
   }
@@ -749,14 +777,30 @@ function showToast(type, message, duration) {
   toastTimers[type] = setTimeout(() => el.classList.remove("is-showing"), dur);
 }
 
+function showShareToast(message) {
+  const t = els.resultsModal?.querySelector(".resultsShareToast");
+  const resultsOpen = t && els.resultsModal?.classList.contains("is-open");
+  if (resultsOpen && t) {
+    t.textContent = message;
+    const dur = toastDuration("success");
+    if (resultsToastTimer) clearTimeout(resultsToastTimer);
+    t.classList.remove("is-showing");
+    void t.offsetWidth;
+    t.classList.add("is-showing");
+    resultsToastTimer = setTimeout(() => t.classList.remove("is-showing"), dur);
+    return;
+  }
+  showToast("success", message);
+}
+
 function clearToasts() {
-  ["success", "warning", "error", "wordSolved"].forEach((type) => {
+  ["success", "warning", "error", "wordSolved", "hint"].forEach((type) => {
     if (toastTimers[type]) {
       clearTimeout(toastTimers[type]);
       toastTimers[type] = 0;
     }
     const el =
-      type === "success" ? els.toastSuccess : type === "warning" ? els.toastWarning : els.toastError;
+      type === "success" ? els.toastSuccess : type === "warning" ? els.toastWarning : type === "error" ? els.toastError : type === "wordSolved" ? els.toastWordSolved : els.toastHint;
     if (el) el.classList.remove("is-showing");
   });
 }
@@ -766,6 +810,33 @@ const userKey = () => (Array.isArray(play.usr) ? play.usr.join("") : "");
 function resetToastGuards() {
   lastPlayWarningKey = "";
   lastChainWarningKey = "";
+}
+
+// ---- Time penalties ----
+function addTimePenalty(seconds, type = "") {
+  if (play.mode !== MODE.CHAIN) return;
+  const sec = Math.max(0, Math.round(seconds || 0));
+  if (!sec) return;
+  if (type === "hint") chain.hintPenaltySecTotal = Math.max(0, (chain.hintPenaltySecTotal || 0) + sec);
+  if (type === "word") chain.wordPenaltySecTotal = Math.max(0, (chain.wordPenaltySecTotal || 0) + sec);
+
+  if (chain.running) {
+    // Move start backward so elapsed includes penalty immediately
+    chain.startAt -= sec * 1000;
+    const ui = ensureChainUI();
+    const elapsed = (Date.now() - chain.startAt) / 1000;
+    chain.elapsed = elapsed;
+    ui.timer.textContent = fmtTime(elapsed);
+  } else {
+    chain.elapsed = Math.max(0, (chain.elapsed || 0) + sec);
+    const ui = ensureChainUI();
+    ui.timer.textContent = fmtTime(chain.elapsed);
+  }
+
+  if (type === "hint" && els.toastHint) {
+    const txt = String(sec).padStart(2, "0");
+    showToast("hint", txt);
+  }
 }
 
 // ---- FTUE ----
@@ -849,11 +920,24 @@ function renderFtueStep() {
   if (els.ftueTip) els.ftueTip.textContent = data.tip || "";
   if (els.ftueStepLabel) els.ftueStepLabel.textContent = `${step + 1}/${FTUE_STEPS.length}`;
   if (els.ftuePrev) {
-    els.ftuePrev.disabled = step === 0;
-    els.ftuePrev.classList.toggle("is-disabled", step === 0);
+    // Keep back enabled so users can return to splash on step 0
+    els.ftuePrev.disabled = false;
+    els.ftuePrev.classList.remove("is-disabled");
   }
   if (els.ftueNext) {
-    els.ftueNext.textContent = step === FTUE_STEPS.length - 1 ? "Let's Play" : "Next";
+    const summary = chainProgressSummary();
+    const solved = summary.solved || 0;
+    const total = summary.total || play.entries.length || 0;
+    let label = "Next";
+    if (step === FTUE_STEPS.length - 1) {
+      label =
+        summary.state === "complete"
+          ? "Admire puzzle"
+          : summary.state === "paused"
+          ? `Continue puzzle (${solved}/${total})`
+          : "Let's Play";
+    }
+    els.ftueNext.textContent = label;
   }
   if (els.ftueDots && els.ftueDots.forEach) {
     els.ftueDots.forEach((dot, idx) => dot.classList.toggle("is-active", idx === step));
@@ -865,7 +949,7 @@ function renderFtueStep() {
   requestAnimationFrame(() => runFtueAnimation(step));
 }
 
-function openFtue(startStep = 0) {
+function openFtue(startStep = 0, opts = {}) {
   if (!els.ftueModal) return;
   clearTimeout(ftueDialogTimer);
   if (els.ftueDialog) els.ftueDialog.classList.remove("is-open");
@@ -873,6 +957,23 @@ function openFtue(startStep = 0) {
   ftueStep = Math.max(0, Math.min(FTUE_STEPS.length - 1, startStep));
   ftueDemo.paused = false;
   ftueUpdatePlayPauseUI();
+
+  // Ensure chain isn't running underneath the FTUE
+  if (play.mode === MODE.CHAIN) {
+    // snapshot elapsed if running
+    if (chain.running) {
+      const elapsed = Math.max(0, (Date.now() - chain.startAt) / 1000);
+      chain.elapsed = elapsed;
+    }
+    chain.running = false;
+    if (chain.tickId) {
+      clearInterval(chain.tickId);
+      chain.tickId = 0;
+    }
+    const anyProgress = chain.started || play.usr.some(Boolean);
+    chainSetUIState(play.done ? CHAIN_UI.DONE : anyProgress ? CHAIN_UI.PAUSED : CHAIN_UI.IDLE);
+  }
+
   ensureFtueBoard();
   renderFtueStep();
   els.ftueModal.classList.remove("is-open");
@@ -880,14 +981,57 @@ function openFtue(startStep = 0) {
   els.ftueModal.removeAttribute("hidden");
   // document.body.classList.add("is-ftue-open");
   ftueDisableInteractions();
-  requestAnimationFrame(() => {
+  const noAnim = opts.noAnim === true;
+  const applyNoAnim = () => {
+    [els.ftueModal, els.ftueDialog].forEach((el) => {
+      if (!el) return;
+      el.dataset.ftuePrevTransition = el.style.transition || "";
+      el.dataset.ftuePrevAnim = el.style.animationDuration || "";
+      el.style.transition = "none";
+      el.style.animationDuration = "0ms";
+    });
+  };
+  const restoreNoAnim = () => {
+    [els.ftueModal, els.ftueDialog].forEach((el) => {
+      if (!el) return;
+      if (el.dataset.ftuePrevTransition != null) {
+        el.style.transition = el.dataset.ftuePrevTransition;
+        delete el.dataset.ftuePrevTransition;
+      } else {
+        el.style.transition = "";
+      }
+      if (el.dataset.ftuePrevAnim != null) {
+        el.style.animationDuration = el.dataset.ftuePrevAnim;
+        delete el.dataset.ftuePrevAnim;
+      } else {
+        el.style.animationDuration = "";
+      }
+    });
+  };
+
+  if (noAnim) applyNoAnim();
+
+  const finishOpen = () => {
     els.ftueModal?.classList.add("is-open");
-  });
-  ftueDialogTimer = window.setTimeout(() => {
     if (els.ftueDialog && ftueIsOpen()) {
       els.ftueDialog.classList.add("is-open");
     }
-  }, FTUE_DIALOG_DELAY);
+    if (noAnim) {
+      // restore styles after paint so future opens animate
+      setTimeout(restoreNoAnim, 50);
+    }
+  };
+
+  if (opts.instant || noAnim) {
+    finishOpen();
+  } else {
+    requestAnimationFrame(finishOpen);
+    ftueDialogTimer = window.setTimeout(() => {
+      if (els.ftueDialog && ftueIsOpen()) {
+        els.ftueDialog.classList.add("is-open");
+      }
+    }, FTUE_DIALOG_DELAY);
+  }
 }
 
 function closeFtue() {
@@ -898,6 +1042,13 @@ function closeFtue() {
   ftueDemo.paused = true;
   if (els.ftueDialog) els.ftueDialog.classList.remove("is-open");
   els.ftueModal.classList.remove("is-open");
+  [els.ftueModal, els.ftueDialog].forEach((el) => {
+    if (!el) return;
+    el.style.transition = "";
+    el.style.animationDuration = "";
+    delete el.dataset.ftuePrevTransition;
+    delete el.dataset.ftuePrevAnim;
+  });
   els.ftueModal.setAttribute("aria-hidden", "true");
   els.ftueModal.setAttribute("hidden", "true");
   // document.body.classList.remove("is-ftue-open");
@@ -1495,6 +1646,7 @@ const store = {
 
 // ---- Per-puzzle chain progress persistence ----
 const CHAIN_PROGRESS_KEY = `${KEY}__chain_progress_v1`;
+const CHAIN_STATS_KEY = `${KEY}__chain_stats_v1`;
 
 const todayKey = () => toDateKey(new Date());
 
@@ -1558,6 +1710,215 @@ let _persistChainRaf = 0;
 let _persistTickLastTs = 0;
 let _restoredFromStorage = false;
 let _restoredAt = 0;
+let _splashShown = false;
+let _ftueNoAnimRestore = null;
+
+// ---- Chain stats (completed games only) ----
+function loadChainStatsStore() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CHAIN_STATS_KEY) || "{}");
+    if (!raw || typeof raw !== "object") throw 0;
+    raw.puzzles = raw.puzzles && typeof raw.puzzles === "object" ? raw.puzzles : {};
+    raw.games = Number.isFinite(raw.games) ? raw.games : 0;
+    raw.totalSec = Number.isFinite(raw.totalSec) ? raw.totalSec : 0;
+    return raw;
+  } catch {
+    return { games: 0, totalSec: 0, puzzles: {} };
+  }
+}
+
+function saveChainStatsStore(store) {
+  try {
+    localStorage.setItem(CHAIN_STATS_KEY, JSON.stringify(store));
+  } catch {}
+}
+
+function clearChainStats() {
+  try {
+    localStorage.removeItem(CHAIN_STATS_KEY);
+  } catch {}
+}
+
+function recordChainCompletionIfNeeded(elapsedSec) {
+  const key = chainPuzzleKey(puzzles[pIdx]);
+  if (!key || play.mode !== MODE.CHAIN) return;
+  const store = loadChainStatsStore();
+  if (store.puzzles[key]?.done) return;
+  const time = Math.max(0, Math.floor(elapsedSec || 0));
+  store.puzzles[key] = { done: true, timeSec: time };
+  store.games = Math.max(0, (store.games || 0) + 1);
+  store.totalSec = Math.max(0, (store.totalSec || 0) + time);
+  saveChainStatsStore(store);
+}
+
+function chainStatsSummary() {
+  const store = loadChainStatsStore();
+  const games = Math.max(0, store.games || 0);
+  const totalSec = Math.max(0, store.totalSec || 0);
+  const avgSec = games > 0 ? totalSec / games : 0;
+  return { games, totalSec, avgSec };
+}
+
+// ---- Splash modal ----
+function chainSummaryFromLive() {
+  if (play.mode !== MODE.CHAIN) return null;
+  const total = play.entries?.length || 0;
+  const solved = total ? play.entries.filter(isWordCorrect).length : 0;
+  const state = play.done ? "complete" : chain.started && !chain.running ? "paused" : "default";
+  return { state, solved, total };
+}
+
+function chainSummaryFromStore() {
+  // Use today's chain puzzle (if available) to infer state when not in chain view
+  const idx = findTodayChainIndex();
+  const p = idx != null ? puzzles[idx] : null;
+  if (!p || !isChainPuzzle(p)) return null;
+  const key = chainPuzzleKey(p);
+  if (!key) return null;
+  const store = loadChainProgressStore();
+  const data = store.puzzles?.[key];
+  if (!data) return { state: "default", solved: 0, total: computed(p).entries?.length || 0 };
+
+  const model = computed(p);
+  const total = model.entries?.length || 0;
+  const usr = Array.isArray(data.usr) ? data.usr : [];
+  const solved = (model.entries || []).filter((e) => {
+    for (let i = 0; i < e.len; i++) {
+      const idx = e.start + i;
+      if (!usr[idx]) return false;
+      if (usr[idx] !== model.exp[idx]) return false;
+    }
+    return true;
+  }).length;
+
+  const anyInput = usr.some(Boolean);
+  const state = data.done
+    ? "complete"
+    : data.started || anyInput
+    ? "paused"
+    : "default";
+
+  return { state, solved, total };
+}
+
+function chainProgressSummary() {
+  return chainSummaryFromLive() || chainSummaryFromStore() || { state: "default", solved: 0, total: 0 };
+}
+
+function splashState() {
+  return chainProgressSummary().state;
+}
+
+function splashSolvedText() {
+  const { solved, total } = chainProgressSummary();
+  return { solved, total };
+}
+
+function updateSplashContent(forceState) {
+  if (!els.splash) return;
+  const summary = chainProgressSummary();
+  const state = forceState || summary.state;
+  const solved = summary.solved || 0;
+  const total = summary.total || play.entries.length || 0;
+
+  if (els.splashDate) {
+    const now = new Date();
+    els.splashDate.textContent = now.toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  const primaryLabel =
+    state === "complete"
+      ? "Admire puzzle"
+      : state === "paused"
+      ? `Continue puzzle (${solved}/${total || play.entries.length || 0})`
+      : "Play";
+
+  if (els.splashPrimary) els.splashPrimary.textContent = primaryLabel;
+  if (els.splashSubtitle) {
+    els.splashSubtitle.textContent =
+      state === "complete"
+        ? "You finished today’s chain"
+        : state === "paused"
+        ? "Pick up where you left off"
+        : "Daily word chain";
+  }
+  const stats = chainStatsSummary();
+  if (els.splashGamesPlayed) {
+    els.splashGamesPlayed.textContent = stats.games > 0 ? String(stats.games) : "--";
+  }
+  if (els.splashAvgTime) {
+    if (stats.games > 0) {
+      const sec = Math.max(0, Math.round(stats.avgSec));
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      els.splashAvgTime.textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    } else {
+      els.splashAvgTime.textContent = "--";
+    }
+  }
+  if (els.splashVersion) {
+    const txt = els.splashVersion.textContent || "";
+    els.splashVersion.textContent = txt || "V3.6";
+  }
+}
+
+function openSplash(forceState) {
+  if (!els.splash) return;
+  updateSplashContent(forceState);
+  els.splash.hidden = false;
+  els.splash.setAttribute("aria-hidden", "false");
+  requestAnimationFrame(() => els.splash?.classList.add("is-open"));
+}
+
+function closeSplash() {
+  if (!els.splash) return;
+  els.splash.classList.remove("is-open");
+  els.splash.setAttribute("aria-hidden", "true");
+  els.splash.hidden = true;
+}
+
+function handleSplashPrimary() {
+  if (!hasSeenFtue()) {
+    // First-time: move to chain view in an idle state, then show FTUE (chain must not start yet)
+    setTab(VIEW.CHAIN);
+    chainForceIdleZero();
+    chain.started = false;
+    chain.running = false;
+    chain.elapsed = 0;
+    chainSetUIState(CHAIN_UI.IDLE);
+    closeSplash();
+    openFtue(0);
+    return;
+  }
+
+  const state = splashState();
+  setTab(VIEW.CHAIN);
+  if (state === "complete") {
+    closeSplash();
+    return;
+  }
+  if (state === "paused") {
+    closeSplash();
+    if (play.done) return;
+    if (chain.started) chainResume();
+    else chainStartNow();
+    return;
+  }
+  closeSplash();
+  if (!chain.started) chainStartNow();
+  else if (!chain.running) chainResume();
+}
+
+function maybeShowSplashOnLoad() {
+  if (_splashShown || SUPPRESS_SPLASH) return;
+  _splashShown = true;
+  openSplash();
+}
 
 function chainProgressSnapshot(p) {
   if (play.mode !== MODE.CHAIN) return null;
@@ -1578,6 +1939,8 @@ function chainProgressSnapshot(p) {
     lockedEntries: [...play.lockedEntries],
     lockedCells: Array.isArray(play.lockedCells) ? play.lockedCells.slice(0, play.n) : [],
     hintsUsed: chain.hintsUsed || 0,
+    hintPenaltySecTotal: chain.hintPenaltySecTotal || 0,
+    wordPenaltySecTotal: chain.wordPenaltySecTotal || 0,
     elapsed: Math.max(0, +elapsed || 0),
     lastFinishElapsedSec: Math.max(0, chain.lastFinishElapsedSec || (play.done ? elapsed : 0)),
     unsolvedCount: chain.unsolvedCount || 0,
@@ -1655,6 +2018,8 @@ function restoreChainProgressForCurrentPuzzle() {
   chain.lastFinishElapsedSec = Math.max(0, +data.lastFinishElapsedSec || 0);
   chain.unsolvedCount = Math.max(0, +data.unsolvedCount || 0);
   chain.hintsUsed = Math.max(0, +data.hintsUsed || 0);
+  chain.hintPenaltySecTotal = Math.max(0, +data.hintPenaltySecTotal || chain.hintsUsed * HINT_PENALTY_SEC || 0);
+  chain.wordPenaltySecTotal = Math.max(0, +data.wordPenaltySecTotal || 0);
 
   play.lockedEntries = new Set(Array.isArray(data.lockedEntries) ? data.lockedEntries : []);
   const prevLocked = Array.isArray(data.lockedCells) ? data.lockedCells.slice(0, play.n) : [];
@@ -2864,6 +3229,7 @@ function applyHintForEntry(eIdx) {
     if (!chain.started && !play.done) chainStartNow();
     chain.hintsUsed += 1;
     play.lockedCells[idx] = true;
+    addTimePenalty(HINT_PENALTY_SEC, "hint");
 
     let lockedByHint = false;
     if (isWordCorrect(entry)) {
@@ -3029,6 +3395,8 @@ const chain = {
   unsolvedCount: 0,
   lastFinishReason: "idle",
   hintsUsed: 0,
+  hintPenaltySecTotal: 0,
+  wordPenaltySecTotal: 0,
 };
 
 
@@ -3086,6 +3454,10 @@ ui.startBtn.textContent =
 }
 
 function chainPause() {
+  return chainPauseWithOpts({});
+}
+
+function chainPauseWithOpts(opts = {}) {
   if (!chain.started || !chain.running) return;
 
   const ui = ensureChainUI();
@@ -3097,6 +3469,9 @@ function chainPause() {
 
   chain.running = false;
   chainSetUIState(CHAIN_UI.PAUSED, ui);
+  if (opts.showSplash) {
+    openSplash("paused");
+  }
   requestPersistChainProgress();
 }
 
@@ -3105,7 +3480,7 @@ function chainPauseIfBackgrounded() {
   if (play.mode !== MODE.CHAIN) return;
   if (!chain.started || !chain.running) return;
   if (play.done) return;
-  chainPause();
+  chainPauseWithOpts({ showSplash: true });
 }
 
 function chainResume() {
@@ -3159,7 +3534,7 @@ startBtn.addEventListener("click", () => {
   }
 
   if (!chain.started) chainStartNow();
-  else if (chain.running) chainPause();
+  else if (chain.running) chainPauseWithOpts({ showSplash: true });
   else chainResume();
 });
 
@@ -3268,6 +3643,9 @@ function chainResetTimer() {
   chainStopTimer();
 
   chain.elapsed = 0;
+  chain.hintsUsed = 0;
+  chain.hintPenaltySecTotal = 0;
+  chain.wordPenaltySecTotal = 0;
   ui.timer.textContent = fmtTime(0);
 }
 
@@ -3371,6 +3749,16 @@ function openChainResults(stats, reason) {
   r.statTime.textContent = fmtTime(tSec);
   r.statSolved.textContent = `${solved}/${total}`;
   r.statHints.textContent = String(Math.max(0, chain.hintsUsed || 0));
+  const hintPenalty = Math.max(0, chain.hintPenaltySecTotal || 0);
+  const wordPenalty = Math.max(0, chain.wordPenaltySecTotal || 0);
+  if (els.totalHintPenalty) {
+    els.totalHintPenalty.textContent = String(hintPenalty).padStart(2, "0");
+    els.totalHintPenalty.parentElement.style.display = hintPenalty > 0 ? "" : "none";
+  }
+  if (els.totalWordPenalty) {
+    els.totalWordPenalty.textContent = String(wordPenalty).padStart(2, "0");
+    els.totalWordPenalty.parentElement.style.display = wordPenalty > 0 ? "" : "none";
+  }
 
 }
 
@@ -3403,6 +3791,7 @@ function chainFinish(reason = "time", opts = {}) {
     kb.blur();
   } catch {}
 
+  recordChainCompletionIfNeeded(chain.lastFinishElapsedSec);
   openChainResults(scoreChain(), reason);
   persistChainProgressImmediate();
 }
@@ -3820,6 +4209,15 @@ function countUnsolvedWords() {
   return play.entries.filter((e) => !isWordCorrect(e)).length;
 }
 
+function countUnsolvedLetters() {
+  if (!play.exp?.length || !play.usr?.length) return 0;
+  let c = 0;
+  for (let i = 0; i < play.exp.length; i++) {
+    if ((play.usr[i] || "") !== (play.exp[i] || "")) c++;
+  }
+  return c;
+}
+
 function move(d, opts = {}) {
   if (!chainInputAllowed()) return;
 
@@ -3888,17 +4286,35 @@ function shareResult({ mode }) {
 
   const payload = { title: "Overlap", text: msg, url: baseUrl };
 
-  if (navigator.share) {
-    navigator.share(payload).catch(() => {});
-    return;
-  }
-
-  // Fallback: copy to clipboard
   const full = `${msg}\n${baseUrl}`;
-  navigator.clipboard?.writeText(full).then(
-    () => alert("Share text copied!"),
-    () => alert(full)
-  );
+
+  const isTouch = IS_TOUCH || navigator.maxTouchPoints > 0 || navigator.userAgentData?.mobile === true;
+
+  const tryClipboard = async (message) => {
+    try {
+      await navigator.clipboard?.writeText(full);
+      if (message) showShareToast(message);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  (async () => {
+    if (isTouch && navigator.share) {
+      try {
+        await navigator.share(payload);
+        return;
+      } catch {
+        // fall through to copy
+      }
+    }
+
+    const copied = await tryClipboard(isTouch ? null : "Results copied to clipboard");
+    if (!copied) {
+      alert(full);
+    }
+  })();
 }
 
 // ---- Reset / reveal ----
@@ -3944,6 +4360,8 @@ function resetPlay(opts = {}) {
 function revealPlay() {
   if (play.mode === MODE.CHAIN) {
     const unsolved = countUnsolvedWords();
+    const unsolvedLetters = countUnsolvedLetters();
+    if (unsolvedLetters > 0) addTimePenalty(unsolvedLetters * HINT_PENALTY_SEC, "word");
     play.usr = play.exp.slice();
     chainFinish("reveal", { unsolved });
     persistChainProgressImmediate();
@@ -4689,6 +5107,21 @@ els.reveal.addEventListener("click", () => {
   revealPlay();
   focusForTyping();
 });
+els.splashPrimary?.addEventListener("click", (e) => {
+  e.preventDefault();
+  handleSplashPrimary();
+});
+els.splashPuzzleBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  closeSplash();
+  setTab(VIEW.PLAY);
+});
+els.splashTutorialBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  // Update splash content to tutorial context then open FTUE
+  closeSplash();
+  openFtue(0, { instant: true, noAnim: true });
+});
 els.nextPuzzleBtn?.addEventListener("click", () => {
   markInteracted();
   loadByViewOffset(1);
@@ -4761,15 +5194,44 @@ attachHoldRepeat(els.navWordNext, navActions.wordNext);
 // FTUE events
 els.ftuePrev?.addEventListener("click", (e) => {
   e.preventDefault();
-  prevFtue();
+  if (ftueStep === 0) {
+    closeFtue();
+    openSplash("default");
+  } else {
+    prevFtue();
+  }
 });
 els.ftueNext?.addEventListener("click", (e) => {
   e.preventDefault();
-  nextFtue();
+  const atLast = ftueStep >= FTUE_STEPS.length - 1;
+  if (atLast) {
+    // Always jump into chain play on final CTA
+    const summary = chainProgressSummary();
+    closeFtue();
+    setTab(VIEW.CHAIN);
+    if (summary.state === "complete" || play.done) {
+      chain.running = false;
+      chain.started = true;
+      chainSetUIState(CHAIN_UI.DONE);
+      updatePlayUI();
+    } else if (!chain.started) chainStartNow();
+    else if (!chain.running) chainResume();
+  } else {
+    nextFtue();
+  }
 });
 els.ftueSkip?.addEventListener("click", (e) => {
   e.preventDefault();
   closeFtue();
+  setTab(VIEW.CHAIN);
+  const summary = chainProgressSummary();
+  if (summary.state === "complete" || play.done) {
+    chain.running = false;
+    chain.started = true;
+    chainSetUIState(CHAIN_UI.DONE);
+    updatePlayUI();
+  } else if (!chain.started) chainStartNow();
+  else if (!chain.running) chainResume();
 });
 els.ftueDots?.forEach?.((dot, idx) =>
   dot.addEventListener("click", (e) => {
@@ -4840,6 +5302,7 @@ els.pDel.addEventListener("click", () => {
 
 els.pClear?.addEventListener("click", () => {
   clearChainProgressForPuzzle(puzzles[pIdx]);
+  clearChainStats();
   resetPlay({ clearPersist: true });
   chainForceIdleZero();
 });
@@ -4921,6 +5384,7 @@ loadPuzzle(0);
 setTab(currentView);
 queueInitialHintIntro();
 maybeShowFtue();
+maybeShowSplashOnLoad();
 
 requestAnimationFrame(() => {
   if (_restoredFromStorage) {

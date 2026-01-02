@@ -75,29 +75,30 @@
     height: max-content!important;
 } */
 
-.logo-icon{
-width: 100px;
-aspect-ratio: 1;
-position: relative;
-container-type: size;
-
-&::before, &::after{
-    content: '';
-    width: 70%;
+.logo-icon {
+    width: 100px;
     aspect-ratio: 1;
-    background: var(--system-positive-subtle);
-    display: block;
-    border-radius: 24%;
-    border: 4cqmin solid var(--system-positive-default);
-}
+    position: relative;
+    container-type: size;
 
-&::after{
-    background: var(--system-informative-subtle);
-    border-color: var(--system-informative-default);
-    position: absolute;
-    bottom: 0;
-    right: 0;
-}
+    &::before,
+    &::after {
+        content: '';
+        width: 70%;
+        aspect-ratio: 1;
+        background: var(--system-positive-subtle);
+        display: block;
+        border-radius: 24%;
+        border: 4cqmin solid var(--system-positive-default);
+    }
+
+    &::after {
+        background: var(--system-informative-subtle);
+        border-color: var(--system-informative-default);
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
 }
 
 .cell {
@@ -308,13 +309,16 @@ header {
 
 .tabs {
     padding: var(--unit-6);
-
-    display: flex;
+    display: none;
     justify-content: center;
     gap: var(--spacing-x2);
     background-color: var(--background-muted);
     border-radius: var(--radius-default);
     height: max-content;
+}
+
+.is-dev .tabs {
+    display: flex;
 }
 
 @media (max-width:640px) {
@@ -618,10 +622,6 @@ body[data-chain-state="done"] .rangeClue-content {
     position: sticky;
     left: 0;
     z-index: 10;
-
-    .toast {
-        transform: translateY(-8px);
-    }
 }
 
 .toast-stack-working {
@@ -645,14 +645,15 @@ body[data-chain-state="done"] .rangeClue-content {
     /* color: var(--foreground-default); */
     position: absolute;
     border: 1px solid;
-
+    transform: translateY(-8px);
     border-color: transparent;
     color: var(--foreground-alt);
     background: var(--background-strong);
+
     &.is-showing {
-    opacity: 1;
-    transform: translateY(0);
-}
+        opacity: 1;
+        transform: translateY(0);
+    }
 
 
 
@@ -665,14 +666,7 @@ body[data-chain-state="done"] .rangeClue-content {
 
 }
 
-.toast-success {
-    border-color: var(--system-positive-default);
-    color: var(--system-positive-strong);
-    background: var(--system-positive-subtle);
-
-}
-
-.toast-word-solved {
+.toast-word-solved, .resultsShareToast {
     background: var(--background-default);
     color: var(--foreground-muted);
     border-color: var(--border-subtle);
@@ -680,9 +674,7 @@ body[data-chain-state="done"] .rangeClue-content {
     span {
         color: var(--foreground-subtle);
     }
-
 }
-
 /* .toast-warning {
     border-color: var(--system-warning-default);
     color: var(--system-warning-strong);
@@ -1290,7 +1282,58 @@ body[data-view="play"] {
 
 /* Success */
 
-.ftue-modal {
+.splash {
+    .splash__top {
+        flex: 1;
+        align-content: center;
+
+        .splash__brand {
+            .logo-icon {
+                width: 20%;
+                margin: 0 auto;
+            }
+
+            .splash__text {
+                text-align: center;
+                margin-bottom: var(--spacing-x40);
+
+                .splash__subtitle {
+                    margin-top: var(--spacing-x4);
+                    color: var(--foreground-muted);
+                }
+            }
+        }
+
+        #splashPrimary {
+            width: 100%;
+            margin-bottom: var(--spacing-x8);
+        }
+
+        .splash__row {
+            display: flex;
+            gap: var(--spacing-x8);
+
+            button {
+                flex: 1;
+            }
+        }
+    }
+
+    .splash__footer{
+        .splash__date{
+            text-align: center;
+            margin-bottom: var(--spacing-x8);
+            color: var(--foreground-subtle);
+        }
+        .splash__stats{
+            display: flex;
+            gap: var(--spacing-x8);
+        }
+    }
+}
+
+.ftue-modal,
+.splash {
     display: grid;
     place-content: center;
     background-color: color-mix(in oklab, var(--background-default), transparent 100%) !important;
@@ -1343,7 +1386,8 @@ body[data-view="play"] {
         }
     }
 
-    .ftue-modal__dialog {
+    .ftue-modal__dialog,
+    .splash__dialog {
         height: 100%;
         max-width: 94vw;
         width: min(var(--layout-content-md-max), 100%);
@@ -1452,12 +1496,13 @@ body[data-view="play"] {
     }
 
     .ftue-toast {
-        top:50%;
+        top: 50%;
         left: 50%;
         transform: translate(-50%, -40%);
-            &.is-showing{
-   transform: translate(-50%, -50%);
-            }
+
+        &.is-showing {
+            transform: translate(-50%, -50%);
+        }
     }
 
 
@@ -1500,7 +1545,10 @@ body[data-view="play"] {
         align-items: center;
     }
 
-    .ftue-next {
+    .ftue-next,
+    #splashTutorialBtn,
+    #splashPuzzleBtn,
+    #splashPrimary {
         height: var(--unit-56);
         width: 100%;
         /* margin-block: var(--spacing-x12); */
@@ -1511,7 +1559,8 @@ body[data-view="play"] {
         display: block;
         visibility: visible;
 
-        .ftue-modal__dialog {
+        .ftue-modal__dialog,
+        .splash__dialog {
             transform: translateY(0);
             opacity: 1;
         }
@@ -1543,13 +1592,17 @@ body[data-view="play"] {
 
     }
 
-    .ftue-next {
+    .ftue-next,
+    #splashTutorialBtn,
+    #splashPuzzleBtn,
+    #splashPrimary {
         height: var(--unit-48) !important;
     }
 }
 
 .results,
-.ftue-modal {
+.ftue-modal,
+.splash {
     position: fixed;
     inset: 0;
     place-items: center;
@@ -1567,9 +1620,23 @@ body[data-view="play"] {
 }
 
 .stat-label,
-.resultsSubtitle {
+.resultsSubtitle, .stat-penalty {
     color: var(--foreground-subtle);
     margin-top: var(--spacing-x2);
+}
+
+.stat-extras{
+    display: flex;
+    gap: var(--spacing-x8);
+    margin-top: var(--spacing-x8);
+}
+.stat-container{
+    flex: 1;
+
+}
+
+.stat-penalty{
+    text-align: center;
 }
 
 .stat {
@@ -1583,9 +1650,11 @@ body[data-view="play"] {
     align-content: center;
 }
 
-.chainResults-stats {
-    display: flex;
-    gap: var(--spacing-x8);
+.resultsShareToast{
+    top:calc(100% + var(--spacing-x8));
+    left: 50%;
+    transform: translate(-50%)!important;
+    width: max-content;
 }
 
 
@@ -1697,7 +1766,8 @@ body[data-view="play"] {
 
     .gridScroll {
         padding-inline: var(--spacing-x16);
-        .rangeClue{
+
+        .rangeClue {
             display: block !important;
         }
     }
