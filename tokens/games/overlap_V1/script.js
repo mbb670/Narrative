@@ -4306,7 +4306,8 @@ function shareResult({ mode }) {
         await navigator.share(payload);
         return;
       } catch {
-        // fall through to copy
+        // on touch, if native share fails, don't alert; silently return
+        return;
       }
     }
 
