@@ -97,58 +97,6 @@
     </div>
   </section>
 
-  <!-- FTUE modal -->
-  <div id="ftueModal" class="ftue-modal" aria-hidden="true" hidden>
-    <div class="ftue-modal__dialog card elevation-overlay" role="dialog" aria-modal="true" aria-labelledby="ftueTitle">
-
-      <div class="ftue-modal__header">
-        <button type="button" class="ftue-prev btn" aria-label="Previous step">
-          <span class="ftue-prev-icon text-system-regular-lg" aria-hidden="true">‹</span>
-          <span class="ftue-step-label">1/3</span>
-          <span class="text-subheadline-semibold-lg"> Overlap</span>
-
-        </button>
-        <div class="ftue-header-actions">
-          <button type="button" class="ftue-skip btn text-system-semibold-xs">Skip to game X</button>
-        </div>
-      </div>
-
-      <section class="ftue-modal__body">
-
-        <div class="ftue-board" aria-hidden="true">
-          <div class="gridScroll ftueGridScroll" id="ftueGridScroll">
-            <div class="grid ftueGrid" id="ftueGrid"></div>
-          </div>
-          <div class="ftue-toast toast elevation-fixed-top text-system-semibold-sm" role="status">🎉 Puzzle Solved!
-          </div>
-
-        </div>
-
-        <div class="ftue-text">
-          <h2 id="ftueTitle" class="ftue-title text-headline-semibold-lg">Welcome!</h2>
-          <p class="ftue-desc text-system-regular-md">Learn how to play.</p>
-        </div>
-
-        <!-- <div class="ftue-secondary">
-          <button type="button" class="ftue-playpause btn icon" aria-pressed="false" aria-label="Pause animation">
-            <span class="ftue-playpause-icon" aria-hidden="true">⏸</span>
-          </button>
-        </div> -->
-      </section>
-
-      <div class="ftue-modal__footer">
-        <p class="ftue-tip text-system-regular-md">Tip text</p>
-        <button type="button" class="ftue-next btn primary text-system-semibold-md">Next</button>
-
-        <div class="ftue-dots" aria-hidden="true">
-          <span class="ftue-dot" data-step="0"></span>
-          <span class="ftue-dot" data-step="1"></span>
-          <span class="ftue-dot" data-step="2"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- BUILDER -->
   <section class="panel" id="panelBuild" role="tabpanel" aria-labelledby="tabBuild">
     <div class="bTop">
@@ -202,46 +150,6 @@
   <div class="keyboard"></div>
   </main>
 
-  <!-- Splash -->
-  <div class="splash" id="splashModal" aria-hidden="true" role="dialog" aria-modal="true" hidden>
-    <div class="splash__dialog card elevation-overlay">
-      <div class="splash__top">
-        <div class="splash__brand">
-          <div class="logo-icon"></div>
-          <div class="splash__text">
-            <h1 class="splash__title text-display-semibold-lg" id="splashTitle">Overlap</h1>
-            <p class="splash__subtitle text-system-regular-md" id="splashSubtitle">Horizontal Crossword Puzzle</p>
-          </div>
-        </div>
-        <div class="splash__actions">
-          <button class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
-          <div class="splash__row">
-            <button class="btn text-system-semibold-md" id="splashPuzzleBtn" type="button">Puzzle mode</button>
-            <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">Tutorial</button>
-          </div>
-        </div>
-
-      </div>
-      <footer class="splash__footer">
-        <p class="splash__date text-system-regular-md" id="splashDate"></p>
-        <div class="splash__stats text-system-regular-sm">
-          <div class="stat">
-            <div class="stat-value text-subheadline-semibold-sm" id="splashAvgTime">---</div>
-            <div class="stat-label">Average time</div>
-          </div>
-          <div class="splash__stat stat">
-            <div class="stat-value text-subheadline-semibold-sm" id="splashGamesPlayed">---</div>
-            <div class="stat-label">Games played</div>
-          </div>
-        </div>
-        <p class="credit splash__meta text-system-regular-xs">
-          Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.8</span>
-        </p>
-      </footer>
-    </div>
-  </div>
-
   <!-- Results -->
   <div class="results text-system-regular-md" id="results" role="dialog" aria-modal="true" aria-label="Results">
     <div class="card results__dialog">
@@ -280,6 +188,101 @@
       <div class="toast resultsShareToast" aria-live="polite" aria-atomic="true"></div>
     </div>
   </div>
+
+
+  <!-- FTUE modal -->
+  <div id="ftueModal" class="ftue-modal" aria-hidden="true" hidden>
+    <div class="ftue-modal__dialog card elevation-overlay" role="dialog" aria-modal="true" aria-labelledby="ftueTitle">
+
+      <div class="ftue-modal__header">
+        <button type="button" class="ftue-prev btn" aria-label="Previous step">
+          <span class="ftue-prev-icon text-system-regular-lg" aria-hidden="true">‹</span>
+          <span class="ftue-step-label">1/3</span>
+          <span class="text-subheadline-semibold-lg"> Overlap</span>
+
+        </button>
+        <div class="ftue-header-actions">
+          <button type="button" class="ftue-skip btn text-system-semibold-xs">Skip to game X</button>
+        </div>
+      </div>
+
+      <section class="ftue-modal__body">
+
+        <div class="ftue-board" aria-hidden="true">
+          <div class="gridScroll ftueGridScroll" id="ftueGridScroll">
+            <div class="grid ftueGrid" id="ftueGrid"></div>
+          </div>
+          <div class="ftue-toast toast elevation-fixed-top text-system-semibold-sm" role="status">🎉 Puzzle Solved!
+          </div>
+
+        </div>
+
+        <div class="ftue-text">
+          <h2 id="ftueTitle" class="ftue-title text-headline-semibold-lg">Welcome!</h2>
+          <p class="ftue-desc text-system-regular-md">Learn how to play.</p>
+        </div>
+
+        <!-- <div class="ftue-secondary">
+          <button type="button" class="ftue-playpause btn icon" aria-pressed="false" aria-label="Pause animation">
+            <span class="ftue-playpause-icon" aria-hidden="true">⏸</span>
+          </button>
+        </div> -->
+      </section>
+
+      <div class="ftue-modal__footer">
+        <p class="ftue-tip text-system-regular-md">Tip text</p>
+        <button type="button" class="ftue-next btn primary text-system-semibold-md">Next</button>
+
+        <div class="ftue-dots" aria-hidden="true">
+          <span class="ftue-dot" data-step="0"></span>
+          <span class="ftue-dot" data-step="1"></span>
+          <span class="ftue-dot" data-step="2"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+ <!-- Splash -->
+  <div class="splash" id="splashModal" aria-hidden="true" role="dialog" aria-modal="true" hidden>
+    <div class="splash__dialog card elevation-overlay">
+      <div class="splash__top">
+        <div class="splash__brand">
+          <div class="logo-icon"></div>
+          <div class="splash__text">
+            <h1 class="splash__title text-display-semibold-lg" id="splashTitle">Overlap</h1>
+            <p class="splash__subtitle text-system-regular-md" id="splashSubtitle">Horizontal Crossword Puzzle</p>
+          </div>
+        </div>
+        <div class="splash__actions">
+          <button class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
+          <div class="splash__row">
+            <button class="btn text-system-semibold-md" id="splashPuzzleBtn" type="button">Puzzle mode</button>
+            <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">Tutorial</button>
+          </div>
+        </div>
+
+      </div>
+      <footer class="splash__footer">
+        <p class="splash__date text-system-regular-md" id="splashDate"></p>
+        <div class="splash__stats text-system-regular-sm">
+          <div class="stat">
+            <div class="stat-value text-subheadline-semibold-sm" id="splashAvgTime">---</div>
+            <div class="stat-label">Average time</div>
+          </div>
+          <div class="splash__stat stat">
+            <div class="stat-value text-subheadline-semibold-sm" id="splashGamesPlayed">---</div>
+            <div class="stat-label">Games played</div>
+          </div>
+        </div>
+        <p class="credit splash__meta text-system-regular-xs">
+          Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
+            id="splashVersion">V3.81</span>
+        </p>
+      </footer>
+    </div>
+  </div>
+
   <script type="module" src="script.js"></script>
 </body>
 
