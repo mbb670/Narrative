@@ -273,10 +273,6 @@ h1 {
     text-align: center;
 }
 
-body.uses-custom-keyboard .credit {
-    display: none;
-}
-
 header {
     display: flex;
     padding: var(--spacing-x12) var(--layout-grid-margin);
