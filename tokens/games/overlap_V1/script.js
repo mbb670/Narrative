@@ -1872,6 +1872,9 @@ function openSplash(forceState) {
   updateSplashContent(forceState);
   els.splash.hidden = false;
   els.splash.setAttribute("aria-hidden", "false");
+  document.documentElement.classList.add("is-modal-open");
+  document.body.style.overflow = "hidden";
+  document.body.style.touchAction = "none";
   requestAnimationFrame(() => els.splash?.classList.add("is-open"));
 }
 
@@ -1880,6 +1883,9 @@ function closeSplash() {
   els.splash.classList.remove("is-open");
   els.splash.setAttribute("aria-hidden", "true");
   els.splash.hidden = true;
+  document.documentElement.classList.remove("is-modal-open");
+  document.body.style.overflow = "";
+  document.body.style.touchAction = "";
 }
 
 function handleSplashPrimary() {

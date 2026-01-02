@@ -14,9 +14,12 @@
 
 <body class="wrap">
 <script>
-  if (new URL(location.href).searchParams.has("dev") || new URL(location.href).searchParams.has("devmode")) {
-    document.documentElement.classList.add("is-dev");
-  }
+  (function () {
+    const url = new URL(location.href);
+    if (url.searchParams.has("dev") || url.searchParams.has("devmode")) {
+      document.documentElement.classList.add("is-dev");
+    }
+  })();
 </script>
 
 
