@@ -253,7 +253,7 @@ body {
     color: var(--foreground-default);
     position: relative;
     height: 100svh;
-    -webkit-user-select: none;
+    /* -webkit-user-select: none; */
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -1673,14 +1673,27 @@ body[data-view="play"] {
     border: unset;
 }
 
+.giveUpSubtitle{
+    margin-top: var(--spacing-x8);
+    .giveUpWordsCount, .giveUpSeconds{
+        color: var(--foreground-default);
+    }
+}
+
 .actions {
     display: flex;
     justify-content: center;
+    gap: var(--spacing-x8);
+
+    .btn{
+        flex: 1;
+    }
 
     .resultsShare {
         min-width: 120px;
         min-height: 36px;
         display: flex;
+        flex: unset;
 
         justify-content: center;
         gap: var(--spacing-x8);

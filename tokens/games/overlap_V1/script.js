@@ -677,6 +677,13 @@ const els = {
   splashAvgTime: $("#splashAvgTime"),
   splashGamesPlayed: $("#splashGamesPlayed"),
   splashVersion: $("#splashVersion"),
+  giveUpModal: $("#giveUpModal"),
+  giveUpSubtitle: document.querySelector(".giveUpSubtitle"),
+  giveUpWordsCount: document.querySelector(".giveUpWordsCount"),
+  giveUpWordLabel: document.querySelector(".giveUpWordLabel"),
+  giveUpSeconds: document.querySelector(".giveUpSeconds"),
+  giveUpConfirm: $("#giveUpConfirm"),
+  giveUpCancel: $("#giveUpCancel"),
   navWordPrev: $("#navWordPrev"),
   navCellPrev: $("#navCellPrev"),
   navCellNext: $("#navCellNext"),
@@ -2193,6 +2200,33 @@ const play = {
 let selectedEntry = null;
 let selectAllUnlocked = false;
 
+// When we intentionally keep the cursor on a newly locked cell, pause letter-triggered auto-advance.
+const lockedAutoAdvanceSuppression = { idx: null, remaining: 0 };
+
+function markLockedAutoAdvanceSuppression(idx, count = 2) {
+  lockedAutoAdvanceSuppression.idx = idx;
+  lockedAutoAdvanceSuppression.remaining = Math.max(0, count);
+}
+
+function consumeLockedAutoAdvanceSuppression(idx) {
+  if (
+    lockedAutoAdvanceSuppression.remaining > 0 &&
+    lockedAutoAdvanceSuppression.idx === idx &&
+    isCellLocked(idx)
+  ) {
+    lockedAutoAdvanceSuppression.remaining -= 1;
+    return true;
+  }
+  return false;
+}
+
+function clearLockedAutoAdvanceSuppressionIfMoved(newIdx) {
+  if (lockedAutoAdvanceSuppression.idx != null && lockedAutoAdvanceSuppression.idx !== newIdx) {
+    lockedAutoAdvanceSuppression.idx = null;
+    lockedAutoAdvanceSuppression.remaining = 0;
+  }
+}
+
 // ---- Touch + on-screen keyboard ----
 let hasInteracted = true;
 const markInteracted = () => {
@@ -3296,6 +3330,33 @@ function selectAllUnlockedCells() {
   updateSelectAllUI();
 }
 
+// ---- Give up confirm modal ----
+function openGiveUpModal() {
+  if (!els.giveUpModal) return;
+  const unsolvedWords = countUnsolvedWords();
+  const unsolvedLetters = countUnsolvedLetters();
+  const penaltySec = unsolvedLetters * HINT_PENALTY_SEC;
+
+  if (els.giveUpWordsCount) els.giveUpWordsCount.textContent = String(unsolvedWords).padStart(2, "0");
+  if (els.giveUpWordLabel) els.giveUpWordLabel.textContent = unsolvedWords === 1 ? "word" : "words";
+  if (els.giveUpSeconds) els.giveUpSeconds.textContent = String(penaltySec).padStart(2, "0");
+
+  els.giveUpModal.hidden = false;
+  els.giveUpModal.classList.add("is-open");
+  els.giveUpModal.setAttribute("aria-hidden", "false");
+
+  try {
+    els.giveUpConfirm?.focus({ preventScroll: true });
+  } catch {}
+}
+
+function closeGiveUpModal() {
+  if (!els.giveUpModal) return;
+  els.giveUpModal.classList.remove("is-open");
+  els.giveUpModal.hidden = true;
+  els.giveUpModal.setAttribute("aria-hidden", "true");
+}
+
 // ---- UI visibility helpers ----
 function updatePlayControlsVisibility() {
   if (!els.reset || !els.reveal) return;
@@ -3772,14 +3833,17 @@ function chainFinish(reason = "time", opts = {}) {
   if (play.mode !== MODE.CHAIN) return;
   if (play.done) return;
   const unsolved = Math.max(0, opts.unsolved ?? 0);
-  if (reason === "solved" && chain.started) {
-    chain.lastFinishElapsedSec = Math.max(0, (Date.now() - chain.startAt) / 1000);
-    chain.lastFinishLeftSec = 0;
-  } else {
-    chain.lastFinishLeftSec = 0;
-    const elapsed = chain.startAt ? (Date.now() - chain.startAt) / 1000 : chain.elapsed || 0;
-    chain.lastFinishElapsedSec = Math.max(0, elapsed);
-  }
+  chain.lastFinishLeftSec = 0;
+
+  const elapsed = (() => {
+    // If actively running, derive from startAt; otherwise trust accumulated elapsed (penalties included).
+    if (chain.running && chain.startAt) return (Date.now() - chain.startAt) / 1000;
+    if (Number.isFinite(chain.elapsed)) return chain.elapsed;
+    if (chain.startAt) return (Date.now() - chain.startAt) / 1000;
+    return 0;
+  })();
+
+  chain.lastFinishElapsedSec = Math.max(0, elapsed);
 
   chain.running = false;
   if (chain.tickId) {
@@ -3955,6 +4019,69 @@ function findNextEditable(from, dir) {
   return null;
 }
 
+function chooseAutoAdvanceTarget(prevIdx) {
+  const currentEntry = entryAtIndex(prevIdx);
+  const ordered = (play.entries || []).slice().sort((a, b) => a.start - b.start);
+  const curPos = currentEntry ? ordered.findIndex((e) => e.eIdx === currentEntry.eIdx) : -1;
+  const prevEntry = curPos > 0 ? ordered[curPos - 1] : null;
+  const nextEntry = curPos >= 0 && curPos < ordered.length - 1 ? ordered[curPos + 1] : null;
+
+  const prevSolved = prevEntry == null ? null : isWordCorrect(prevEntry);
+  const nextSolved = nextEntry == null ? null : isWordCorrect(nextEntry);
+
+  const unsolved = unresolvedEntries().sort((a, b) => a.start - b.start);
+  const editableRight = findNextEditable(prevIdx + 1, +1);
+  const editableLeft = findNextEditable(prevIdx - 1, -1);
+
+  let firstUnsolvedRight = unsolved.find((e) => e.start > (currentEntry?.start ?? -Infinity));
+  let firstUnsolvedLeft = [...unsolved].reverse().find((e) => e.start < (currentEntry?.start ?? Infinity));
+
+  // Fallback: if we didn't find an unsolved entry but there is an editable cell right/left, treat its entry as unsolved.
+  if (!firstUnsolvedRight && editableRight != null && editableRight > prevIdx) {
+    const e = entryAtIndex(editableRight);
+    if (e && !isWordCorrect(e)) firstUnsolvedRight = e;
+  }
+  if (!firstUnsolvedLeft && editableLeft != null && editableLeft < prevIdx) {
+    const e = entryAtIndex(editableLeft);
+    if (e && !isWordCorrect(e)) firstUnsolvedLeft = e;
+  }
+
+  // If the word on the right is solved, decide whether and where to jump.
+  if (nextSolved) {
+    if (firstUnsolvedRight) {
+      // Unsovled exists to the right
+      if (prevSolved !== false) {
+        // Case: prev solved + next solved + unsolved to the right -> jump right.
+        return { target: firstEditableCellInEntry(firstUnsolvedRight), suppress: false };
+      }
+      // Case: prev unsolved + next solved -> stay put.
+      return { target: null, suppress: true };
+    }
+
+    // No unsolved to the right; if any unsolved to the left, jump left (regardless of prev solved).
+    if (!firstUnsolvedRight && firstUnsolvedLeft) {
+      // But if there is an editable cell to the right, honor it instead of jumping left.
+      if (editableRight != null && editableRight > prevIdx) {
+        return { target: editableRight, suppress: false };
+      }
+      return { target: firstEditableCellInEntry(firstUnsolvedLeft), suppress: false };
+    }
+  }
+
+  // If there is no word to the right (end of chain) but unsolved remains to the left, jump left.
+  if (!nextEntry && firstUnsolvedLeft) {
+    // But if there is an editable cell to the right, prefer it.
+    if (editableRight != null && editableRight > prevIdx) {
+      return { target: editableRight, suppress: false };
+    }
+    return { target: firstEditableCellInEntry(firstUnsolvedLeft), suppress: false };
+  }
+
+  // Default behavior: step forward to the next editable cell if available.
+  const fallback = findNextEditable(prevIdx + 1, +1);
+  return { target: fallback != null ? fallback : prevIdx, suppress: false };
+}
+
 function chainInputAllowed() {
   if (play.mode !== MODE.CHAIN) return true;
   if (!chain.started && !play.done) chainStartNow();
@@ -4074,7 +4201,9 @@ function updatePlayUI() {
 
 function setAt(i, { behavior, noScroll } = {}) {
   clearSelectAll();
-  play.at = clamp(i, 0, play.n - 1);
+  const target = clamp(i, 0, play.n - 1);
+  if (target !== play.at) clearLockedAutoAdvanceSuppressionIfMoved(target);
+  play.at = target;
   updatePlayUI();
   if (!noScroll) {
     const bh = behavior || (IS_TOUCH ? "smooth" : "auto");
@@ -4123,6 +4252,7 @@ function write(ch) {
   if (!chainInputAllowed()) return; // require Start for word chain
 
   if (play.mode === MODE.CHAIN && isCellLocked(play.at)) {
+    if (consumeLockedAutoAdvanceSuppression(play.at)) return;
     const next = findNextEditable(play.at, +1);
     if (next == null) return;
     play.at = next;
@@ -4139,9 +4269,15 @@ function write(ch) {
     chainApplyLocksIfEnabled();
     const lockedNow = isCellLocked(prevAt);
     if (lockedNow && !wasLocked) {
-      const nxt = findNextEditable(prevAt + 1, +1);
-      if (nxt != null) nextAt = nxt;
-      else nextAt = prevAt;
+      const decision = chooseAutoAdvanceTarget(prevAt);
+      if (decision.suppress) {
+        nextAt = prevAt;
+        markLockedAutoAdvanceSuppression(prevAt, 2);
+      } else if (decision.target != null) {
+        nextAt = decision.target;
+      } else {
+        nextAt = prevAt;
+      }
     } else {
       // advance one step; if the next cell is locked, stay put and keep overwriting
       const step = Math.min(play.n - 1, prevAt + 1);
@@ -5111,12 +5247,28 @@ els.reset.addEventListener("click", () => {
 });
 els.reveal.addEventListener("click", () => {
   markInteracted();
+  if (play.mode === MODE.CHAIN && !play.done) {
+    chainPauseWithOpts({ showSplash: false });
+    openGiveUpModal();
+    return;
+  }
   revealPlay();
   focusForTyping();
 });
 els.splashPrimary?.addEventListener("click", (e) => {
   e.preventDefault();
   handleSplashPrimary();
+});
+els.giveUpConfirm?.addEventListener("click", () => {
+  markInteracted();
+  closeGiveUpModal();
+  revealPlay();
+});
+els.giveUpCancel?.addEventListener("click", () => {
+  markInteracted();
+  closeGiveUpModal();
+  if (play.mode === MODE.CHAIN && chain.started && !play.done) chainResume();
+  focusForTyping();
 });
 els.splashPuzzleBtn?.addEventListener("click", (e) => {
   e.preventDefault();

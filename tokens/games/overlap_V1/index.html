@@ -192,6 +192,27 @@
     </div>
   </div>
 
+  <!-- Give Up confirm -->
+  <div class="give-up results text-system-regular-md" id="giveUpModal" role="dialog" aria-modal="true" aria-label="Confirm give up" hidden>
+    <div class="card results__dialog">
+      <div class="result-heading">
+        <h2 class="text-headline-semibold-lg">Give up?</h2>
+        <p class="resultsSubtitle giveUpSubtitle">
+          You still have
+          <span class="giveUpWordsCount">00</span>
+          unsolved <span class="giveUpWordLabel">words</span>.
+          Giving up will add
+          <span class="giveUpSeconds">00</span>
+          seconds to your total time.
+        </p>
+      </div>
+      <div class="actions">
+        <button class="btn text-system-regular-md" id="giveUpCancel" type="button">Cancel</button>
+        <button class="btn primary text-system-regular-md" id="giveUpConfirm" type="button">Yes, give up</button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- FTUE modal -->
   <div id="ftueModal" class="ftue-modal" aria-hidden="true" hidden>
@@ -280,7 +301,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.82</span>
+            id="splashVersion">V3.85</span>
         </p>
       </footer>
     </div>
