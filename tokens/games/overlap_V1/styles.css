@@ -120,7 +120,7 @@
         right: 0;
         --shift: 32%;
         --layer: 0;
-                box-shadow: -12cqmin -12cqmin 24cqmin 0 var(--color-alpha-black-a100);
+        box-shadow: -12cqmin -12cqmin 24cqmin 0 var(--color-alpha-black-a100);
 
 
     }
@@ -354,8 +354,8 @@ header {
 
     .logo-icon {
         width: var(--spacing-x32);
-         height: var(--spacing-x32);
-         margin-top: var(--spacing-x4);
+        height: var(--spacing-x32);
+        margin-top: var(--spacing-x4);
     }
 
     .header-content {
@@ -367,29 +367,68 @@ header {
     }
 }
 
+.builder-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-x2);
+    button {
+        aspect-ratio: 1;
+        &::after {
+            content: "";
+            width: var(--spacing-x16);
+            display: block;
+            aspect-ratio: 1;
+            background-color: var(--foreground-disabled);
+            -webkit-mask: url("images/builder-icon.svg") center / contain no-repeat;
+            mask: url("images/builder-icon.svg") center / contain no-repeat;
+        }
+    }
+
+    #builderClose {
+        &::after {
+            -webkit-mask: url("images/close.svg") center / contain no-repeat;
+            mask: url("images/close.svg") center / contain no-repeat;
+        }
+    }
+}
+
+#pClear{
+    display: none;
+}
+
+.is-dev .builder-toggle {
+    display: flex;
+}
+
+
+[data-view="build"] {
+    .helper {
+        display: none;
+    }
+
+    #pClear{
+        display: block;
+    }
+}
+
 .tabs {
     padding: var(--unit-6);
-    display: none;
+    display: flex;
     justify-content: center;
     gap: var(--spacing-x2);
     background-color: var(--background-muted);
     border-radius: var(--radius-default);
     height: max-content;
+    width: 100%;
+    width: max-content;
 }
 
-.is-dev .tabs {
-    display: flex;
-}
-
-@media (max-width:640px) {
+/* @media (max-width:640px) {
     .stage {
         margin-top: 0px !important;
     }
-
-    /* .tabs {
-        display: none;
-    } */
-}
+} */
 
 /* Base (shared) */
 :is(.tab, .pill, .btn) {
@@ -478,40 +517,6 @@ header {
 #next {
     &::after {
         content: "";
-    }
-}
-
-#tabPlay {
-    display: none;
-}
-
-/* Build tab icon */
-#tabBuild {
-    span {
-        display: block;
-    }
-
-    &::after {
-        content: "";
-        width: 16px;
-        aspect-ratio: 1;
-        background-color: var(--foreground-disabled);
-        -webkit-mask: url("images/builder-icon.svg") center / contain no-repeat;
-        mask: url("images/builder-icon.svg") center / contain no-repeat;
-    }
-}
-
-
-
-@media (max-width:640px) {
-    #tabBuild {
-        span {
-            display: none;
-        }
-
-        &::after {
-            display: block;
-        }
     }
 }
 
@@ -964,10 +969,20 @@ body[data-chain-state="done"] .rangeClue-content {
             white-space: nowrap;
             text-overflow: ellipsis;
             --background-color: color-mix(in srgb, var(--color), var(--background-default) 70%);
-
             border-radius: var(--radius-full);
-
             border: 0.5px solid var(--color);
+
+            position: relative;
+
+
+            &::before {
+                content: '';
+                width: 110%;
+                height: 140%;
+                position: absolute;
+                top: -30%;
+                left: -5%;
+            }
 
         }
 
@@ -985,15 +1000,10 @@ body[data-chain-state="done"] .rangeClue-content {
     transform: translateX(-12px);
     pointer-events: none;
     transition: opacity 160ms ease, transform 160ms ease;
-    position: relative;
 
-    &::before{
-        content: '';
-        width: 140%;
-        height: 140%;
-        position: absolute;
-        top:-20%;
-        left: -20%;
+    &::before {
+        width: 140% !important;
+        left: -20% !important;
     }
 
 }
@@ -1009,6 +1019,7 @@ body[data-chain-state="done"] .rangeClue-content {
 }
 
 @media (hover: hover) {
+
     .rangeClue .rangeClue-content:hover .rangeClue-hint,
     .rangeClue .rangeClue-string:hover~.rangeClue-hint {
         display: inline-flex;
@@ -1790,6 +1801,7 @@ body[data-view="play"] {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-x24);
+    overflow-y: scroll;
 }
 
 .resultsClose {

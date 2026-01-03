@@ -47,13 +47,11 @@
           </button>
         </div>
       </div>
+      <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
 
-    <div class="tabs" role="tablist" aria-label="Overlap sections">
-      <button class="tab is-active text-system-semibold-sm" id="tabPlay" type="button" role="tab"
-        aria-selected="true">Puzzle</button>
-      <button class="tab text-system-semibold-sm" id="tabChain" type="button" role="tab" aria-selected="true">Chain</button>
-      <button class="tab text-system-semibold-sm" id="tabBuild" type="button" role="tab"
-        aria-selected="false"><span>Builder</span></button>
+    <div class="builder-toggle" aria-label="Builder toggle">
+      <button class="btn" id="builderOpen" type="button"></button>
+      <button class="btn" id="builderClose" type="button" hidden></button>
     </div>
     </section>
   </header>
@@ -110,11 +108,15 @@
   <!-- BUILDER -->
   <section class="panel" id="panelBuild" role="tabpanel" aria-labelledby="tabBuild">
     <div class="bTop">
+      <div class="builder-mode-tabs tabs" role="tablist" aria-label="Builder puzzle type">
+        <button class="tab text-system-semibold-sm is-active" id="builderTabChain" type="button" role="tab" aria-selected="true">Word Chain</button>
+        <button class="tab text-system-semibold-sm" id="builderTabPuzzle" type="button" role="tab" aria-selected="false">Puzzle</button>
+        <button class="tab text-system-semibold-sm" id="builderTabOther" type="button" role="tab" aria-selected="false">Other</button>
+      </div>
       <select class="sel" id="pSel" aria-label="Choose puzzle"></select>
       <button class="pill text-uppercase-semibold-md" id="pNew" type="button">New</button>
       <button class="pill text-uppercase-semibold-md" id="pDel" type="button">Delete</button>
       <button class="pill text-uppercase-semibold-md" id="pSave" type="button">Save</button>
-      <button class="pill text-uppercase-semibold-md" id="pClear" type="button">Reset data</button>
     </div>
 
     <div class="bBody">
@@ -308,7 +310,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.87</span>
+            id="splashVersion">V3.88</span>
         </p>
       </footer>
     </div>

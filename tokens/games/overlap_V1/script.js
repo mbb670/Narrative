@@ -649,6 +649,11 @@ const els = {
   tabPlay: $("#tabPlay"),
   tabChain: $("#tabChain"),
   tabBuild: $("#tabBuild"),
+  builderOpen: document.getElementById("builderOpen"),
+  builderClose: document.getElementById("builderClose"),
+  builderTabChain: document.getElementById("builderTabChain"),
+  builderTabPuzzle: document.getElementById("builderTabPuzzle"),
+  builderTabOther: document.getElementById("builderTabOther"),
   logo: $("#logo"),
   panelPlay: $("#panelPlay"),
   panelBuild: $("#panelBuild"),
@@ -2181,6 +2186,10 @@ let puzzles = store.load().map(normPuzzle);
 let pIdx = 0;
 
 let currentView = loadLastView(); // play | chain | build
+let lastNonBuildView = currentView === VIEW.BUILD ? VIEW.PLAY : currentView;
+let pausedForBuilder = false;
+const BUILDER_FILTER = { CHAIN: "chain", PUZZLE: "puzzle", OTHER: "other" };
+let builderFilterMode = BUILDER_FILTER.CHAIN;
 
 const play = {
   mode: MODE.OVERLAP,
@@ -4750,6 +4759,24 @@ function loadPuzzle(i) {
 // ---- Tabs ----
 function setTab(which) {
   if (!DEV_MODE && which === VIEW.BUILD) which = VIEW.CHAIN;
+  const enteringBuild = which === VIEW.BUILD && currentView !== VIEW.BUILD;
+  const exitingBuild = which !== VIEW.BUILD && currentView === VIEW.BUILD;
+  if (enteringBuild) {
+    pausedForBuilder = false;
+    if (play.mode === MODE.CHAIN && chain.started && chain.running && !play.done) {
+      pausedForBuilder = true;
+      chainPauseWithOpts({ showSplash: false });
+    }
+  }
+  if (exitingBuild && pausedForBuilder) {
+    if (play.mode === MODE.CHAIN && chain.started && !chain.running && !play.done) {
+      chainResume();
+    }
+    pausedForBuilder = false;
+  }
+  if (which !== VIEW.BUILD) {
+    lastNonBuildView = which;
+  }
   currentView = which;
   try { localStorage.setItem(LAST_VIEW_KEY, currentView); } catch {}
 
@@ -4763,6 +4790,8 @@ function setTab(which) {
   els.tabPlay?.classList.toggle("is-active", isPlay);
   els.tabChain?.classList.toggle("is-active", isChain);
   els.tabBuild?.classList.toggle("is-active", DEV_MODE && isBuild);
+  if (els.builderOpen) els.builderOpen.hidden = !(DEV_MODE && !isBuild);
+  if (els.builderClose) els.builderClose.hidden = !(DEV_MODE && isBuild);
 
   els.tabPlay?.setAttribute("aria-selected", isPlay ? "true" : "false");
   els.tabChain?.setAttribute("aria-selected", isChain ? "true" : "false");
@@ -4770,6 +4799,9 @@ function setTab(which) {
 
   els.panelPlay?.classList.toggle("is-active", !isBuild);
   els.panelBuild?.classList.toggle("is-active", DEV_MODE && isBuild);
+  if (isBuild) {
+    syncBuilder();
+  }
 
   updateKeyboardVisibility();
 
@@ -4979,14 +5011,65 @@ function ensureBuilderModeUI() {
 
 }
 
+const filteredBuilderIndices = (mode = builderFilterMode) => {
+  return puzzles
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => {
+      const type = String(p?.type || MODE.OVERLAP);
+      if (mode === BUILDER_FILTER.CHAIN) return type === MODE.CHAIN;
+      if (mode === BUILDER_FILTER.PUZZLE) return type !== MODE.CHAIN && type !== "other";
+      if (mode === BUILDER_FILTER.OTHER) return type === "other";
+      return true;
+    })
+    .map(({ i }) => i);
+};
+
+const updateBuilderTabsUI = () => {
+  const set = (el, active) => {
+    if (!el) return;
+    el.classList.toggle("is-active", active);
+    el.setAttribute("aria-selected", active ? "true" : "false");
+  };
+  set(els.builderTabChain, builderFilterMode === BUILDER_FILTER.CHAIN);
+  set(els.builderTabPuzzle, builderFilterMode === BUILDER_FILTER.PUZZLE);
+  set(els.builderTabOther, builderFilterMode === BUILDER_FILTER.OTHER);
+};
+
+const setBuilderFilter = (mode) => {
+  if (!Object.values(BUILDER_FILTER).includes(mode)) return;
+  builderFilterMode = mode;
+  updateBuilderTabsUI();
+  const filtered = filteredBuilderIndices(mode);
+  if (!filtered.length) {
+    syncBuilder();
+    return;
+  }
+  if (!filtered.includes(pIdx)) {
+    pIdx = filtered[0];
+    loadPuzzle(pIdx);
+  } else {
+    syncBuilder();
+  }
+};
+
 // ---- Builder render ----
 function syncBuilder() {
   ensureBuilderModeUI();
 
-  els.pSel.innerHTML = puzzles
-    .map((p, i) => {
-      const tag = p.type === MODE.CHAIN ? " — Word Chain" : "";
-      return `<option value="${i}" ${i === pIdx ? "selected" : ""}>${escapeHtml(p.title || "Untitled")}${tag}</option>`;
+  const applyFilter = currentView === VIEW.BUILD;
+  const filtered = applyFilter ? filteredBuilderIndices() : [];
+  const indices = applyFilter && filtered.length ? filtered : puzzles.map((_, idx) => idx);
+
+  if (applyFilter && indices.length && !indices.includes(pIdx)) {
+    pIdx = indices[0];
+    loadPuzzle(pIdx);
+    return;
+  }
+
+  els.pSel.innerHTML = indices
+    .map((i) => {
+      const p = puzzles[i];
+      return `<option value="${i}" ${i === pIdx ? "selected" : ""}>${escapeHtml(p.title || "Untitled")}</option>`;
     })
     .join("");
 
@@ -5138,6 +5221,25 @@ if (DEV_MODE) {
 } else if (els.tabBuild) {
   els.tabBuild.style.display = "none";
   els.panelBuild && (els.panelBuild.style.display = "none");
+}
+
+if (DEV_MODE) {
+  els.builderOpen?.addEventListener("click", () => {
+    if (currentView !== VIEW.BUILD) lastNonBuildView = currentView;
+    setTab(VIEW.BUILD);
+  });
+  els.builderClose?.addEventListener("click", () => {
+    setTab(lastNonBuildView || VIEW.PLAY);
+  });
+  els.builderTabChain?.addEventListener("click", () => setBuilderFilter(BUILDER_FILTER.CHAIN));
+  els.builderTabPuzzle?.addEventListener("click", () => setBuilderFilter(BUILDER_FILTER.PUZZLE));
+  els.builderTabOther?.addEventListener("click", () => setBuilderFilter(BUILDER_FILTER.OTHER));
+} else {
+  if (els.builderOpen) els.builderOpen.hidden = true;
+  if (els.builderClose) els.builderClose.hidden = true;
+  if (els.builderTabChain) els.builderTabChain.hidden = true;
+  if (els.builderTabPuzzle) els.builderTabPuzzle.hidden = true;
+  if (els.builderTabOther) els.builderTabOther.hidden = true;
 }
 
 // Keyboard (physical detection + input)
@@ -5450,24 +5552,32 @@ els.pSel.addEventListener("change", () => {
 
 els.pTitle.addEventListener("input", () => {
   puzzles[pIdx].title = els.pTitle.value;
-  if (els.pSel.options[pIdx]) {
-    const tag = puzzles[pIdx].type === MODE.CHAIN ? " — Word Chain" : "";
-    els.pSel.options[pIdx].text = (els.pTitle.value || "Untitled") + tag;
-  }
+  const opt = Array.from(els.pSel.options).find((o) => +o.value === pIdx);
+  if (opt) opt.text = els.pTitle.value || "Untitled";
   setDirty(true);
+  store.save();
+  setDirty(false);
   renderPreview();
 });
 els.pDate?.addEventListener("input", () => {
   const { dateKey } = normalizePuzzleDate(els.pDate.value);
   puzzles[pIdx].dateKey = dateKey;
   setDirty(true);
+  store.save();
+  setDirty(false);
 });
 
 els.pNew.addEventListener("click", () => {
+  const newType =
+    builderFilterMode === BUILDER_FILTER.CHAIN
+      ? MODE.CHAIN
+      : builderFilterMode === BUILDER_FILTER.PUZZLE
+      ? MODE.OVERLAP
+      : "other";
   puzzles.push(
     normPuzzle({
       title: "Untitled",
-      type: MODE.OVERLAP,
+      type: newType,
       palette: FIRST_PALETTE_ID,
       words: [{ clue: "Clue", answer: "WORD", start: 1 }],
     })
@@ -5560,11 +5670,14 @@ els.rows.addEventListener("change", (e) => {
   setDirty(true);
   renderRows();
   renderPreview();
+   store.save();
+   setDirty(false);
 });
 
 // ---- Start ----
 initOnScreenKeyboard();
 initSlider();
+updateBuilderTabsUI();
 loadPuzzle(0);
 setTab(currentView);
 queueInitialHintIntro();
