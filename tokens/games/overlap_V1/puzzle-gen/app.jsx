@@ -62,6 +62,32 @@ const getOverlap = (w1, w2, minLen = 2) => {
   return null;
 };
 
+// Calculate a true triple intersection: both adjacent overlaps must exist and
+// overlap inside the middle word. Returns the letters shared by all 3 (first/last).
+const getTripleDetails = (w1, w2, w3) => {
+  const overlapAB = getOverlap(w1, w2, 1);
+  const overlapBC = getOverlap(w2, w3, 1);
+  if (!overlapAB || !overlapBC) return null;
+
+  const mid = cleanWord(w2);
+  const intersectionStart = mid.length - overlapBC.count; // where the second overlap begins in the middle word
+  const intersectionEnd = overlapAB.count; // where the first overlap ends in the middle word
+  const sharedCount = intersectionEnd - intersectionStart;
+  if (sharedCount <= 0) return null; // overlaps don't collide, so no triple
+
+  const sharedStr = mid.slice(intersectionStart, intersectionEnd);
+  const directOverlap = getOverlap(w1, w3, 1);
+
+  return {
+    overlapAB: overlapAB.count,
+    overlapBC: overlapBC.count,
+    sharedCount,
+    sharedStr,
+    displayCount: directOverlap?.count || sharedCount,
+    displayStr: directOverlap?.overlapStr || sharedStr
+  };
+};
+
 const totalOverlapBetween = (words, startWord, endWord) => {
   if (!words || words.length === 0) return 0;
   let total = 0;
@@ -478,23 +504,20 @@ const processWordsToInventory = async (wordList, targetLength, targetTriplePct, 
       const candidates = pairsByStart[p1.endWord] || [];
       for (let p2 of candidates) {
         if (p1.startWord !== p2.endWord) {
-            const midWord = p1.endWord;
-            const startOverlapEndIdx = p1.totalOverlap; 
-            const endOverlapStartIdx = midWord.length - p2.totalOverlap;
-            
-            if (startOverlapEndIdx > endOverlapStartIdx) {
-                if (!isDerivative(p1.startWord, p2.endWord)) {
-                    triples.push({
-                        id: `triple-${p1.startWord}-${p1.endWord}-${p2.endWord}`,
-                        words: [p1.startWord, p1.endWord, p2.endWord],
-                        overlaps: [p1.overlaps[0], p2.overlaps[0]],
-                        totalOverlap: p1.totalOverlap + p2.totalOverlap,
-                        startWord: p1.startWord,
-                        endWord: p2.endWord,
-                        type: 'triple'
-                    });
-                }
-            }
+            if (isDerivative(p1.startWord, p2.endWord)) continue;
+            const tripleDetails = getTripleDetails(p1.startWord, p1.endWord, p2.endWord);
+            if (!tripleDetails) continue;
+
+            triples.push({
+                id: `triple-${p1.startWord}-${p1.endWord}-${p2.endWord}`,
+                words: [p1.startWord, p1.endWord, p2.endWord],
+                overlaps: [p1.overlaps[0], p2.overlaps[0]],
+                totalOverlap: tripleDetails.displayCount,
+                sharedOverlap: tripleDetails.displayCount,
+                startWord: p1.startWord,
+                endWord: p2.endWord,
+                type: 'triple'
+            });
         }
       }
   }
@@ -513,11 +536,28 @@ const filterBadWords = (words) => {
         'over', 'under', 'mid', 'out', 'self', 'super', 'inter', 'intra', 'non', 'pre', 're', 
         'counter', 'anti', 'semi', 'multi', 'poly', 'tide', 'fest', 'light', 'side', 'back', 'fore', 'head', 'less', 'ness', 'tion', 'sion', 'ment'
     ];
+
+    const isWeirdWord = (w) => {
+        const c = cleanWord(w);
+        if (!c) return true;
+        if (c.length < 4) return true;
+        if (/(.)\1\1/.test(c)) return true; // triple same letter
+        if (/q[^u]/i.test(c)) return true; // q without u
+        const vowels = (c.match(/[aeiou]/g) || []).length;
+        if (vowels === 0) return true;
+        if ((vowels / c.length) < 0.2 && !c.includes('y')) return true; // too consonant-heavy
+        if (/[bcdfghjklmnpqrstvwxz]{5,}/i.test(c)) return true; // long consonant runs
+        if (c.length > 12) return true; // avoid unwieldy entries
+        const oddEndings = ['ship', 'ness', 'ment', 'tion', 'sion', 'less'];
+        if (oddEndings.some(end => c.endsWith(end) && c.length > 9)) return true; // long derivations
+        return false;
+    };
     
     return words.filter(w => {
         if (w.length < 4) return false; 
         if (!/^[a-zA-Z]+$/.test(w)) return false;
         if (w[0] === w[0].toUpperCase() && w[0] !== w[0].toLowerCase()) return false;
+        if (isWeirdWord(w)) return false;
 
         const hasBadAffix = badAffixes.some(a => {
             if (w.startsWith(a) && w.length > a.length + 3) return true;
@@ -528,6 +568,23 @@ const filterBadWords = (words) => {
         return !hasBadAffix;
     });
 };
+
+const getFreqFromDatamuse = (entry) => {
+    if (!entry || !Array.isArray(entry.tags)) return 0;
+    const freqTag = entry.tags.find(t => t.startsWith('f:'));
+    return freqTag ? parseFloat(freqTag.split(':')[1]) : 0;
+};
+
+const isProperNounTag = (entry) => Array.isArray(entry?.tags) && entry.tags.some(t => /prop|proper|pn/i.test(t));
+
+const isCommonEnough = (entry, minFreq = 2.0) => {
+    const freq = getFreqFromDatamuse(entry);
+    if (!freq || freq < minFreq) return false;
+    if (isProperNounTag(entry)) return false;
+    return true;
+};
+
+const countTriples = (sequence = []) => sequence.reduce((acc, item) => acc + (item?.type === 'triple' ? 1 : 0), 0);
 
 // Pathfinder for Multi-Chain organization
 const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set()) => {
@@ -728,6 +785,7 @@ export default function App() {
       const today = new Date();
       return today.toISOString().split('T')[0];
   });
+  const [bridgeCache, setBridgeCache] = useState({});
   useEffect(() => {
       if (!exportDate) return;
       const parts = exportDate.split('-').map(Number);
@@ -966,7 +1024,7 @@ export default function App() {
   }, [chain]);
 
   // Display nodes (one per word) used for rendering and counts
-  const displayedNodes = useMemo(() => {
+  const { nodes: displayedNodes, triples: tripleGroups } = useMemo(() => {
       const nodes = [];
       chain.forEach((item, itemIndex) => {
           const nextItem = chain[itemIndex + 1];
@@ -982,26 +1040,34 @@ export default function App() {
                   return;
               }
               if (!isTriple && nodes.length > 0 && cleanWord(nodes[nodes.length - 1].word) === cleanW) return;
-              const tripleIds = isTriple ? [item.id] : [];
-              nodes.push({ word: w, itemIndex, tripleIds });
+              nodes.push({ word: w, itemIndex, tripleIds: [] });
           });
       });
-      // Detect triples dynamically based on overlaps (consecutive three with >=1 overlap)
+
+      const triples = [];
       for (let i = 0; i < nodes.length - 2; i++) {
-          const a = nodes[i];
-          const b = nodes[i + 1];
-          const c = nodes[i + 2];
-          const ov1 = getOverlap(a.word, b.word, 1)?.count || 0;
-          const ov2 = getOverlap(b.word, c.word, 1)?.count || 0;
-          if (ov1 > 0 && ov2 > 0) {
-              const id = `auto-triple-${i}-${cleanWord(a.word)}`;
-              [a, b, c].forEach(n => {
-                  if (!n.tripleIds.includes(id)) n.tripleIds.push(id);
-              });
+          const details = getTripleDetails(nodes[i].word, nodes[i + 1].word, nodes[i + 2].word);
+          if (!details) continue;
+          const id = `triple-${i}-${cleanWord(nodes[i].word)}-${cleanWord(nodes[i + 2].word)}`;
+          triples.push({ id, startIndex: i, endIndex: i + 2, ...details });
+          for (let j = i; j <= i + 2; j++) {
+              if (!nodes[j].tripleIds.includes(id)) nodes[j].tripleIds.push(id);
           }
       }
-      return nodes;
+
+      return { nodes, triples };
   }, [chain]);
+
+  const tripleGroupsByStart = useMemo(() => {
+      const map = new Map();
+      tripleGroups.forEach(group => {
+          const existing = map.get(group.startIndex);
+          if (!existing || group.displayCount > existing.displayCount) {
+              map.set(group.startIndex, group);
+          }
+      });
+      return map;
+  }, [tripleGroups]);
 
   // Clue Generation
   const updateClueState = (index, newClue) => {
@@ -1259,14 +1325,14 @@ Words: ${flat.join(', ')}`;
       return words.filter(w => !combinedExcl.has(cleanWord(w)));
   };
   
-  const fetchRandomWords = async () => {
+const fetchRandomWords = async () => {
     const TOPICS = ["nature", "city", "technology", "food", "travel", "music", "science", "abstract", "history", "art", "ocean", "space"];
     const shuffledTopics = shuffleArray(TOPICS).slice(0, 3);
     
     let allWords = [];
     try {
         const promises = shuffledTopics.map(topic => 
-            fetch(`https://api.datamuse.com/words?ml=${topic}&max=400&md=f`)
+            fetch(`https://api.datamuse.com/words?ml=${topic}&max=600&md=f`)
                 .then(res => res.json())
         );
         
@@ -1275,9 +1341,9 @@ Words: ${flat.join(', ')}`;
             const words = data
                 .filter(d => {
                     if (!d.tags) return false;
-                    const freqTag = d.tags.find(t => t.startsWith('f:'));
-                    // Higher frequency threshold for common words
-                    return freqTag && parseFloat(freqTag.split(':')[1]) > 1.5; 
+                    if (isProperNounTag(d)) return false;
+                    const freq = getFreqFromDatamuse(d);
+                    return freq && freq >= 3; // favor common words
                 })
                 .map(d => d.word);
             allWords.push(...words);
@@ -1302,17 +1368,41 @@ Words: ${flat.join(', ')}`;
     setDefinitions({});
     
     try {
-        const words = await fetchRandomWords();
-        setInputText(words.join(" "));
-        setProgress(40);
+        const MIN_TRIPLES = 2;
+        const MAX_ATTEMPTS = 6;
+        let best = null;
+        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            const words = await fetchRandomWords();
+            setInputText(words.join(" "));
+            setProgress(30);
 
-        const result = await processWordsToInventory(words, targetLength, setProgress, true); 
-        setInventory(result.inventory);
-        
-        setProgress(70);
+            const result = await processWordsToInventory(words, targetLength, setProgress, true); 
+            setInventory(result.inventory);
+            
+            setProgress(60);
 
-        const organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords);
-        setChain(organizedChain);
+            const organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords);
+            const tripleCount = countTriples(organizedChain);
+
+            if (!best || tripleCount > best.tripleCount) {
+                best = { words, inventory: result.inventory, chain: organizedChain, tripleCount };
+            }
+
+            if (tripleCount >= MIN_TRIPLES) {
+                break;
+            }
+        }
+
+        if (best) {
+            setInputText(best.words.join(" "));
+            setInventory(best.inventory);
+            setChain(best.chain);
+            if (best.tripleCount < MIN_TRIPLES) {
+                showToast("Could not guarantee 2 triples after multiple tries; showing best found.", "warning");
+            }
+        } else {
+            showToast("Failed to generate chain.", "warning");
+        }
         
     } catch (e) {
         console.error(e);
@@ -1465,7 +1555,30 @@ Words: ${flat.join(', ')}`;
       setClues({});
   };
 
-  const handleFindBridge = async (leftIndex, rightIndexOverride = null, startWordOverride = null, endWordOverride = null) => {
+  const BASE_BRIDGE_BATCH = 15;
+
+  const mergeSolutionsUnique = (base = [], additions = []) => {
+      const map = new Map();
+      [...base, ...additions].forEach(sol => {
+          const key = sol.words.join('|');
+          if (!map.has(key)) map.set(key, sol);
+      });
+      return Array.from(map.values());
+  };
+
+  const mergeSingleWordList = (base = [], additions = []) => {
+      const seen = new Set();
+      const combined = [...base, ...additions].filter(entry => {
+          const word = cleanWord(entry.words?.[0] || "");
+          if (!word) return false;
+          if (seen.has(word)) return false;
+          seen.add(word);
+          return true;
+      });
+      return combined;
+  };
+
+  const handleFindBridge = async (leftIndex, rightIndexOverride = null, startWordOverride = null, endWordOverride = null, deep = false) => {
     const rightIndex = rightIndexOverride !== null ? rightIndexOverride : leftIndex + 1;
     const leftItem = chain[leftIndex];
     const rightItem = chain[rightIndex];
@@ -1484,11 +1597,26 @@ Words: ${flat.join(', ')}`;
     let fwdOptions = [];
     let bwdOptions = [];
     let candidatePool = [];
+    const wordFreq = {};
+    const cacheKey = `${cleanWord(startWord)}|${cleanWord(endWord)}`;
+    const prevCache = bridgeCache[cacheKey] || { solutions: [], forward: [], backward: [], attempt: 0 };
+    const prevSolutions = prevCache.allSolutions || prevCache.solutions || [];
+    const attempt = prevCache.attempt + 1;
+    const solutionCap = BASE_BRIDGE_BATCH * attempt;
+
+    const freqThreshold = Math.max(0.4, (deep ? 0.9 : 1.1) - 0.1 * (attempt - 1));
+    const sizeBoost = Math.min(attempt, 4);
+    const maxDirect = (deep ? 70 : 40) + sizeBoost * 30;
+    const maxFwdBwd = (deep ? 90 : 50) + sizeBoost * 30;
+    const searchDepths = deep ? [2,3,4] : [2,3];
     const bridgeOverlapCount = (a, b) => getOverlap(a, b, 1)?.count || 0;
     const bridgeTotalOverlap = (words) => totalOverlapBetween(words, startWord, endWord);
     const sortSolutions = (arr) => {
         return arr.sort((a, b) => {
             if (a.length !== b.length) return a.length - b.length; // fewer words first
+            const aMin = a.minOverlap ?? 0;
+            const bMin = b.minOverlap ?? 0;
+            if (aMin !== bMin) return bMin - aMin; // prefer stronger side overlaps
             if ((b.totalOverlap || 0) !== (a.totalOverlap || 0)) return (b.totalOverlap || 0) - (a.totalOverlap || 0); // higher overlap next
             return (a.id || "").localeCompare(b.id || "");
         });
@@ -1504,38 +1632,83 @@ Words: ${flat.join(', ')}`;
         if (avoid1 && isDerivative(w, avoid1)) return false;
         if (avoid2 && isDerivative(w, avoid2)) return false;
         if (excludedWords.has(w) || usedWords.has(w)) return false;
+        if (isProperNounTag(d)) return false; // avoid proper nouns
         // reuse existing bad-word filter
         if (filterBadWords([d.word]).length === 0) return false;
-        const freq = d.tags ? parseFloat(d.tags[0].split(':')[1]) : 0;
-        return freq > 1.5; 
+        const freq = getFreqFromDatamuse(d);
+        return freq >= freqThreshold; 
     };
 
     try {
-        setBridgeStatus("Searching depth 1 (Direct)...");
-        const queryDirect = `${suffix}*${prefix}`;
-        const fwdQuery = `${suffix}*`;
-        const bwdQuery = `*${prefix}`;
+        setShowBridgeModal({
+            leftIndex,
+            rightIndex,
+            startWord,
+            endWord,
+            solutions: prevSolutions.slice(0, solutionCap),
+            forward: prevCache.forward || [],
+            backward: prevCache.backward || [],
+            attempt
+        });
 
-        const [resDirect, resFwd, resBwd] = await Promise.all([
-            fetch(`https://api.datamuse.com/words?sp=${queryDirect}&max=25&md=f`),
-            fetch(`https://api.datamuse.com/words?sp=${fwdQuery}&max=40&md=f`),
-            fetch(`https://api.datamuse.com/words?sp=${bwdQuery}&max=40&md=f`)
+        setBridgeStatus("Searching depth 1 (Direct)...");
+        const clampLen = (val, min, max) => Math.max(min, Math.min(max, val));
+        const suffixLens = [3,2,1].map(len => clampLen(len, 1, suffix.length)).filter((v,i,a) => a.indexOf(v) === i);
+        const prefixLens = [3,2,1].map(len => clampLen(len, 1, prefix.length)).filter((v,i,a) => a.indexOf(v) === i);
+
+        const directPatterns = [];
+        suffixLens.forEach(sLen => {
+            prefixLens.forEach(pLen => {
+                directPatterns.push(`${cleanWord(startWord).slice(-sLen)}*${cleanWord(endWord).slice(0, pLen)}`);
+            });
+        });
+
+        const fwdPatterns = suffixLens.map(len => `${cleanWord(startWord).slice(-len)}*`);
+        const bwdPatterns = prefixLens.map(len => `*${cleanWord(endWord).slice(0, len)}`);
+
+        const fetchPatterns = async (patterns, max) => {
+            const resArr = await Promise.all(patterns.map(p => 
+                fetch(`https://api.datamuse.com/words?sp=${p}&max=${max}&md=f`).then(r => r.json()).catch(() => [])
+            ));
+            return resArr.flat();
+        };
+
+        const [dataDirect, dataFwd, dataBwd] = await Promise.all([
+            fetchPatterns(directPatterns, maxDirect),
+            fetchPatterns(fwdPatterns, maxFwdBwd),
+            fetchPatterns(bwdPatterns, maxFwdBwd)
         ]);
 
-        const [dataDirect, dataFwd, dataBwd] = await Promise.all([resDirect.json(), resFwd.json(), resBwd.json()]);
+        [...dataDirect, ...dataFwd, ...dataBwd].forEach(entry => {
+            const cw = cleanWord(entry.word);
+            if (cw) wordFreq[cw] = Math.max(wordFreq[cw] || 0, getFreqFromDatamuse(entry));
+        });
 
-        const oneWordBridges = dataDirect
+        const strongOneWords = [];
+        const fallbackOneWords = [];
+        dataDirect
             .filter(d => isValid(d, startWord, endWord))
-            .map(d => ({
-                id: `sol-1-${d.word}`,
-                words: [d.word],
-                length: 1,
-                startWord: d.word,
-                endWord: d.word,
-                type: 'bridge',
-                totalOverlap: bridgeTotalOverlap([d.word])
-            }));
+            .forEach(d => {
+                const leftOv = getOverlap(startWord, d.word, 1)?.count || 0;
+                const rightOv = getOverlap(d.word, endWord, 1)?.count || 0;
+                const minOv = Math.min(leftOv, rightOv);
+                const item = {
+                    id: `sol-1-${d.word}`,
+                    words: [d.word],
+                    length: 1,
+                    startWord: d.word,
+                    endWord: d.word,
+                    type: 'bridge',
+                    totalOverlap: leftOv + rightOv,
+                    minOverlap: minOv,
+                    overlapLeft: leftOv,
+                    overlapRight: rightOv
+                };
+                if (minOv >= 2) strongOneWords.push(item);
+                else fallbackOneWords.push(item);
+            });
         
+        const oneWordBridges = strongOneWords.length > 0 ? strongOneWords : fallbackOneWords;
         solutions = [...oneWordBridges];
 
         const validFwd = dataFwd.filter(d => isValid(d, startWord, null));
@@ -1586,16 +1759,19 @@ Words: ${flat.join(', ')}`;
             bwdOptions = dataShort.filter(d => isValid(d, null, endWord)).map(d => ({id:`bwd-${d.word}`, words:[d.word], length:1, type:'bridge'}));
         }
 
-        // Ensure uniqueness and minimum count with simple synthetic fillers if needed
-        // Trim to reasonable list without synthetic fillers
-        fwdOptions = fwdOptions.slice(0, 20);
-        bwdOptions = bwdOptions.slice(0, 20);
+        const optionCap = deep ? 50 : 25;
+        fwdOptions = fwdOptions.slice(0, optionCap);
+        bwdOptions = bwdOptions.slice(0, optionCap);
 
         candidatePool = [
             ...validFwd.map(d => d.word),
             ...validBwd.map(d => d.word),
             ...fwdOptions.map(o => o.words[0]),
-            ...bwdOptions.map(o => o.words[0])
+            ...bwdOptions.map(o => o.words[0]),
+            ...dataDirect.map(d => d.word),
+            ...(prevCache.forward || []).map(o => o.words?.[0]).filter(Boolean),
+            ...(prevCache.backward || []).map(o => o.words?.[0]).filter(Boolean),
+            ...(prevSolutions || []).flatMap(s => s.words || [])
         ];
 
         var manualOptions = { forward: fwdOptions, backward: bwdOptions };
@@ -1652,18 +1828,73 @@ Words: ${flat.join(', ')}`;
 
         solutions = sortSolutions(solutions);
 
+        const mergedSolutions = sortSolutions(mergeSolutionsUnique(prevCache.solutions, solutions));
+        const mergedForward = mergeSingleWordList(prevCache.forward, fwdOptions);
+        const mergedBackward = mergeSingleWordList(prevCache.backward, bwdOptions);
+
         setBridgeStatus(""); 
-        setShowBridgeModal({ leftIndex, rightIndex, solutions, startWord, endWord, ...manualOptions });
+        const modalPayload = { leftIndex, rightIndex, solutions: mergedSolutions.slice(0, solutionCap), allSolutions: mergedSolutions, startWord, endWord, forward: mergedForward, backward: mergedBackward, attempt };
+        setShowBridgeModal(modalPayload);
+        setBridgeCache(prev => ({ ...prev, [cacheKey]: modalPayload }));
 
         // Async extended search for 3-4 word bridges with time budget
         const uniquePool = Array.from(new Set(candidatePool.map(w => cleanWord(w)).filter(Boolean)));
         const cleanStart = cleanWord(startWord);
         const cleanEnd = cleanWord(endWord);
-        const filteredPool = uniquePool.filter(w => w && !excludedWords.has(w) && !usedWords.has(w) && w !== cleanStart && w !== cleanEnd && filterBadWords([w]).length > 0);
+        const freqFloor = Math.max(1.4, freqThreshold);
+        const filteredPool = uniquePool.filter(w => {
+            if (!w) return false;
+            const cw = cleanWord(w);
+            if (!cw) return false;
+            if (excludedWords.has(cw) || usedWords.has(cw)) return false;
+            if (cw === cleanStart || cw === cleanEnd) return false;
+            if (filterBadWords([cw]).length === 0) return false;
+            const freq = wordFreq[cw] || 0;
+            if (freq < freqFloor) return false;
+            return true;
+        });
 
-        const searchDepths = [2,3]; // 2 -> 3-word bridge (w1,w2), 3 -> 4-word bridge (w1,w2,w3)
+        // Enrich manual lists with deeper candidates when requested
+        if (deep && filteredPool.length > 0) {
+            const extraFwd = filteredPool.map(word => {
+                const ov = getOverlap(startWord, word, 1);
+                return { id: `fwd-deep-${word}`, words: [word], length: 1, type: 'bridge', overlap: ov ? ov.count : 0 };
+            }).filter(entry => entry.overlap > 0).sort((a,b) => b.overlap - a.overlap).slice(0, 50);
+
+            const extraBwd = filteredPool.map(word => {
+                const ov = getOverlap(word, endWord, 1);
+                return { id: `bwd-deep-${word}`, words: [word], length: 1, type: 'bridge', overlap: ov ? ov.count : 0 };
+            }).filter(entry => entry.overlap > 0).sort((a,b) => b.overlap - a.overlap).slice(0, 50);
+
+            setShowBridgeModal(prev => {
+                if (!prev) return prev;
+                const mergedForward = mergeSingleWordList(prev.forward, extraFwd);
+                const mergedBackward = mergeSingleWordList(prev.backward, extraBwd);
+                const next = { ...prev, forward: mergedForward, backward: mergedBackward };
+                return next;
+            });
+            setBridgeCache(prev => {
+                const cacheKeyInner = `${cleanWord(startWord)}|${cleanWord(endWord)}`;
+                const existing = prev[cacheKeyInner] || {};
+                return {
+                    ...prev,
+                    [cacheKeyInner]: {
+                        ...existing,
+                        forward: mergeSingleWordList(existing.forward || [], extraFwd),
+                        backward: mergeSingleWordList(existing.backward || [], extraBwd),
+                        allSolutions: existing.allSolutions || existing.solutions || [],
+                        solutions: existing.solutions || existing.allSolutions || [],
+                        startWord,
+                        endWord,
+                        leftIndex,
+                        rightIndex
+                    }
+                };
+            });
+        }
+
         const startTime = Date.now();
-        const deadline = startTime + 60000; // 60s
+        const deadline = startTime + (deep ? 90000 : 60000); // longer budget when deep
         const foundKeys = new Set((solutions || []).map(sol => sol.words.join('|')));
 
         const attemptPush = (path) => {
@@ -1679,7 +1910,19 @@ Words: ${flat.join(', ')}`;
                 type: 'bridge',
                 totalOverlap: bridgeTotalOverlap(path)
             };
-            setShowBridgeModal(prev => prev ? { ...prev, solutions: sortSolutions([...prev.solutions, bridgeItem]) } : prev);
+            setShowBridgeModal(prev => {
+                if (!prev) return prev;
+                const existingAll = prev.allSolutions || prev.solutions || [];
+                const mergedAll = sortSolutions(mergeSolutionsUnique(existingAll, [bridgeItem]));
+                const limited = mergedAll.slice(0, solutionCap);
+                return { ...prev, allSolutions: mergedAll, solutions: limited };
+            });
+            setBridgeCache(prev => {
+                const cacheKeyInner = `${cleanWord(startWord)}|${cleanWord(endWord)}`;
+                const existing = prev[cacheKeyInner] || {};
+                const merged = sortSolutions(mergeSolutionsUnique((existing.allSolutions || existing.solutions || []), [bridgeItem]));
+                return { ...prev, [cacheKeyInner]: { ...existing, allSolutions: merged, solutions: merged, forward: existing.forward || [], backward: existing.backward || [], startWord, endWord, leftIndex, rightIndex, attempt } };
+            });
         };
 
         const expand = async () => {
@@ -1692,6 +1935,7 @@ Words: ${flat.join(', ')}`;
 
                 while (stack.length > 0) {
                     if (Date.now() > deadline) return;
+                    if (foundKeys.size >= solutionCap * 2) return; // avoid runaway generation
                     const path = stack.pop();
                     const last = path[path.length - 1];
                     if (path.length === depth) {
@@ -1812,9 +2056,22 @@ Words: ${flat.join(', ')}`;
                     <Hammer size={18} className="text-indigo-600" />
                     Repair Chain Gap
                 </h3>
+                <div className="flex items-center gap-2">
+                    <Button 
+                        variant="ghost" 
+                        size="small" 
+                        onClick={() => handleFindBridge(showBridgeModal.leftIndex, showBridgeModal.rightIndex, showBridgeModal.startWord, showBridgeModal.endWord, true)}
+                        disabled={isBridgeLoading}
+                        className="h-8 px-2 text-xs border border-slate-200"
+                        title="Refresh bridge search"
+                    >
+                        <RefreshCw size={14} className={isBridgeLoading ? "animate-spin" : ""} />
+                        <span className="hidden sm:inline">Refresh</span>
+                    </Button>
                 <button onClick={() => setShowBridgeModal(null)} className="text-slate-400 hover:text-slate-600">
                     <X size={20} />
                 </button>
+                </div>
              </div>
              
                 <div className="mb-4 text-sm text-slate-600 text-center bg-slate-50 p-4 rounded-lg border border-slate-100 flex-shrink-0">
@@ -1836,21 +2093,34 @@ Words: ${flat.join(', ')}`;
                     <>
                         {showBridgeModal.solutions && showBridgeModal.solutions.length > 0 ? (
                             showBridgeModal.solutions.map(sol => (
-                                <button 
-                                    key={sol.id} 
-                                    onClick={() => insertBridge(sol)} 
-                                    className={`
+                                (() => {
+                                    const isExcludedWord = (w) => excludedWords.has(cleanWord(w)) || recentExcludedAnswers.has(cleanWord(w));
+                                    const hasExcluded = sol.words.some(isExcludedWord);
+                                    const wordBadges = (w) => (
+                                        <span className="inline-flex items-center gap-1">
+                                            <span>{w}</span>
+                                            {isExcludedWord(w) && (
+                                                <span className="text-[9px] uppercase text-rose-600 font-bold bg-rose-50 border border-rose-200 rounded px-1 py-0.5">Excluded</span>
+                                            )}
+                                        </span>
+                                    );
+                                    return (
+                                    <button 
+                                        key={sol.id} 
+                                        onClick={() => insertBridge(sol)} 
+                                        className={`
                                         w-full text-left px-4 py-3 border rounded-lg text-sm font-medium transition-colors flex items-center justify-between group
                                         ${sol.length === 1 ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100' : 
                                           sol.length === 2 ? 'bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100' :
                                           'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-indigo-300'}
+                                        ${hasExcluded ? 'ring-2 ring-rose-100 border-rose-200' : ''}
                                     `}
                                 >
                                     <div className="flex items-center gap-2">
                                         {sol.words.map((w, i) => (
                                             <React.Fragment key={i}>
                                                 {i > 0 && <ArrowRight size={12} className="text-slate-400" />}
-                                                <span>{w}</span>
+                                                {wordBadges(w)}
                                             </React.Fragment>
                                         ))}
                                     </div>
@@ -1866,6 +2136,8 @@ Words: ${flat.join(', ')}`;
                                         </span>
                                     </div>
                                 </button>
+                                    );
+                                })()
                             ))
                         ) : (
                             <div className="text-center text-sm text-slate-400 italic p-4">
@@ -1919,9 +2191,16 @@ Words: ${flat.join(', ')}`;
                                                             {i > 0 && <div className="border-t border-slate-100 my-1"></div>}
                                                             {entries.map(entry => {
                                                                 const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
+                                                                const word = entry.item.words[0];
+                                                                const isExcludedWord = excludedWords.has(cleanWord(word)) || recentExcludedAnswers.has(cleanWord(word));
                                                                 return (
-                                                                    <button key={key} onClick={() => insertBridge(entry.item)} className="w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between">
-                                                                        <span>{entry.item.words[0]}</span>
+                                                                    <button key={key} onClick={() => insertBridge(entry.item)} className={`w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between ${isExcludedWord ? 'ring-1 ring-rose-100 border-rose-200' : ''}`}>
+                                                                        <span className="inline-flex items-center gap-1">
+                                                                            {word}
+                                                                            {isExcludedWord && (
+                                                                                <span className="text-[9px] uppercase text-rose-600 font-bold bg-rose-50 border border-rose-200 rounded px-1 py-0.5">Excluded</span>
+                                                                            )}
+                                                                        </span>
                                                                         <span className="text-[10px] text-slate-400">{ov}</span>
                                                                     </button>
                                                                 );
@@ -1974,9 +2253,16 @@ Words: ${flat.join(', ')}`;
                                                             {i > 0 && <div className="border-t border-slate-100 my-1"></div>}
                                                             {entries.map(entry => {
                                                                 const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
+                                                                const word = entry.item.words[0];
+                                                                const isExcludedWord = excludedWords.has(cleanWord(word)) || recentExcludedAnswers.has(cleanWord(word));
                                                                 return (
-                                                                    <button key={key} onClick={() => insertBridge(entry.item)} className="w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between">
-                                                                        <span>{entry.item.words[0]}</span>
+                                                                    <button key={key} onClick={() => insertBridge(entry.item)} className={`w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between ${isExcludedWord ? 'ring-1 ring-rose-100 border-rose-200' : ''}`}>
+                                                                        <span className="inline-flex items-center gap-1">
+                                                                            {word}
+                                                                            {isExcludedWord && (
+                                                                                <span className="text-[9px] uppercase text-rose-600 font-bold bg-rose-50 border border-rose-200 rounded px-1 py-0.5">Excluded</span>
+                                                                            )}
+                                                                        </span>
                                                                         <span className="text-[10px] text-slate-400">{ov}</span>
                                                                     </button>
                                                                 );
@@ -2428,9 +2714,11 @@ Words: ${flat.join(', ')}`;
                         };
 
                         const nodes = displayedNodes;
+                        const tripleStartMap = tripleGroupsByStart;
 
                         const renderNode = (node, isBroken, idxKey) => {
                             const isForbidden = excludedWords.has(cleanWord(node.word)) || recentExcludedAnswers.has(cleanWord(node.word));
+                            const tripleCount = node.tripleIds.length;
                             return (
                             <div key={`node-${idxKey}-${node.word}-${node.itemIndex}`} className="relative group animate-in slide-in-from-bottom-2 duration-500">
                                 <button 
@@ -2449,6 +2737,11 @@ Words: ${flat.join(', ')}`;
                                     <span className="font-bold text-slate-700">
                                         {node.word}
                                     </span>
+                                    {tripleCount > 1 && (
+                                        <span className="ml-2 text-[10px] uppercase text-sky-700 font-bold bg-sky-50 border border-sky-200 rounded px-1 py-0.5">
+                                            T×{tripleCount}
+                                        </span>
+                                    )}
                                     {isForbidden && (
                                         <span className="ml-2 text-[10px] uppercase text-rose-600 font-bold">Excluded</span>
                                     )}
@@ -2487,7 +2780,7 @@ Words: ${flat.join(', ')}`;
                                                 variant="warning" 
                                                 size="small" 
                                                 className="text-[10px] h-6 px-2 py-0 shadow-sm whitespace-nowrap"
-                                                onClick={() => handleFindBridge(leftNode.itemIndex, rightNode.itemIndex, leftNode.word, rightNode.word)}
+                                                onClick={() => handleFindBridge(leftNode.itemIndex, rightNode.itemIndex, leftNode.word, rightNode.word, true)}
                                             >
                                                 <Hammer size={10} /> Repair
                                             </Button>
@@ -2497,88 +2790,97 @@ Words: ${flat.join(', ')}`;
                             );
                         };
 
+                        const renderInlineConnector = (leftNode, rightNode, key) => {
+                            const overlap = getOverlap(leftNode.word, rightNode.word, 1)?.count || 0;
+                            return (
+                                <div key={key} className="mx-1 relative flex flex-col items-center justify-center min-w-[2.5rem]">
+                                    <div className={`${overlapBadgeClass(overlap)} font-mono mb-0.5`}>
+                                        {overlap}
+                                    </div>
+                                    <div className="w-full h-0.5 bg-indigo-200 relative">
+                                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-400 rounded-full"></div>
+                                    </div>
+                                </div>
+                            );
+                        };
+
+                        const renderTripleGroup = (group) => {
+                            const groupNodes = nodes.slice(group.startIndex, group.endIndex + 1);
+                            if (groupNodes.length < 3) return null;
+                            const hasExcluded = groupNodes.some(n => excludedWords.has(cleanWord(n.word)) || recentExcludedAnswers.has(cleanWord(n.word)));
+
+                            return (
+                                <div 
+                                    key={`triple-${group.id}-${group.startIndex}`} 
+                                    className={`flex items-center gap-1 px-3 py-3 rounded-2xl border-2 shadow-inner relative ${
+                                        hasExcluded ? 'border-rose-300/90 bg-rose-50/50' : 'border-sky-300/80 bg-sky-50/40'
+                                    }`}
+                                >
+                                    <div className={`absolute -top-3 left-2 bg-white border rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm ${
+                                        hasExcluded ? 'text-rose-700 border-rose-200' : 'text-sky-700 border-sky-200'
+                                    }`}>
+                                        Overlap {group.displayCount}
+                                    </div>
+                                    {hasExcluded && (
+                                        <div className="absolute -top-3 right-2 bg-white text-rose-700 border border-rose-200 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm">
+                                            Excluded
+                                        </div>
+                                    )}
+                                    {groupNodes.map((gNode, gIdx) => {
+                                        const isForbidden = excludedWords.has(cleanWord(gNode.word)) || recentExcludedAnswers.has(cleanWord(gNode.word));
+                                        const tripleCount = gNode.tripleIds.length;
+                                        return (
+                                            <React.Fragment key={`g-${gIdx}-${gNode.word}-${gNode.itemIndex}`}>
+                                                {gIdx > 0 && renderInlineConnector(groupNodes[gIdx - 1], gNode, `triple-conn-${gIdx}-${group.id}`)}
+                                                <div className="relative">
+                                                    <button 
+                                                        onClick={() => removeNode(gNode)}
+                                                        className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-rose-500 border border-slate-200 shadow-sm p-1 rounded-full opacity-0 hover:opacity-100 transition-all z-20 hover:scale-110"
+                                                    >
+                                                        <X size={10} />
+                                                    </button>
+                                                    <div className={`px-4 py-3 bg-white rounded-xl shadow-sm border ${isForbidden ? 'border-rose-400 ring-1 ring-rose-100' : 'border-sky-200'}`}>
+                                                        <span className="font-bold text-slate-700">{gNode.word}</span>
+                                                        {tripleCount > 1 && (
+                                                            <span className="ml-2 text-[10px] uppercase text-sky-700 font-bold bg-sky-50 border border-sky-200 rounded px-1 py-0.5">
+                                                                T×{tripleCount}
+                                                            </span>
+                                                        )}
+                                                        {isForbidden && (
+                                                            <span className="ml-2 text-[10px] uppercase text-rose-600 font-bold">Excluded</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        };
+
                         const elements = [];
                         let lastNode = null;
-                        for (let i = 0; i < nodes.length; ) {
-                            const node = nodes[i];
-
-                            // If this node is part of a triple, render the entire triple group together
-                            if (node.tripleIds.length > 0) {
-                                const tripleId = node.tripleIds[0];
-                                const group = [];
-                                let j = i;
-                                while (j < nodes.length && nodes[j].tripleIds.includes(tripleId)) {
-                                    group.push(nodes[j]);
-                                    j++;
-                                }
-
-                                // Only treat as triple if we have at least 3 consecutive nodes with this id
-                                if (group.length >= 3) {
+                        let i = 0;
+                        while (i < nodes.length) {
+                            const triple = tripleStartMap.get(i);
+                            if (triple) {
+                                const tripleBlock = renderTripleGroup(triple);
+                                const tripleNodes = nodes.slice(triple.startIndex, triple.endIndex + 1);
+                                if (tripleBlock) {
                                     if (lastNode) {
-                                        elements.push(renderConnector(lastNode, group[0]));
+                                        elements.push(renderConnector(lastNode, tripleNodes[0]));
                                     }
-
-                                const ov1 = getOverlap(group[0].word, group[1].word, 1);
-                                const ov2 = getOverlap(group[1].word, group[2].word, 1);
-                                const sharedCount = (ov1 && ov2) ? Math.min(ov1.count, ov2.count) : 0;
-
-                                if (sharedCount > 0 && group.length >= 3) {
-                                    elements.push(
-                                        <div key={`triple-${tripleId}-${i}`} className="flex items-center gap-1 px-3 py-3 rounded-2xl border-2 border-sky-300/80 bg-sky-50/40 shadow-inner relative">
-                                            <div className="absolute -top-3 left-2 bg-white text-sky-700 border border-sky-200 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm">
-                                                Overlap {sharedCount}
-                                            </div>
-                                            {group.map((gNode, gIdx) => (
-                                                <React.Fragment key={`g-${gIdx}-${gNode.word}-${gNode.itemIndex}`}>
-                                                    {gIdx > 0 && (
-                                                        <div className="mx-1 relative flex flex-col items-center justify-center min-w-[2.5rem]">
-                                                            <div className={`${overlapBadgeClass(getOverlap(group[gIdx-1].word, gNode.word, 1)?.count || 0)} font-mono mb-0.5`}>
-                                                                {getOverlap(group[gIdx-1].word, gNode.word, 1)?.count || 0}
-                                                            </div>
-                                                            <div className="w-full h-0.5 bg-indigo-200 relative">
-                                                                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-400 rounded-full"></div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    <div className="relative">
-                                                        <button 
-                                                            onClick={() => removeNode(gNode)}
-                                                            className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-rose-500 border border-slate-200 shadow-sm p-1 rounded-full opacity-0 hover:opacity-100 transition-all z-20 hover:scale-110"
-                                                        >
-                                                            <X size={10} />
-                                                        </button>
-                                                        <div className="px-4 py-3 bg-white rounded-xl shadow-sm border border-sky-200">
-                                                            <span className="font-bold text-slate-700">{gNode.word}</span>
-                                                        </div>
-                                                    </div>
-                                                </React.Fragment>
-                                            ))}
-                                        </div>
-                                    );
-
-                                    lastNode = group[group.length - 1];
-                                    i = j;
-                                    continue;
-                                } else {
-                                    // Not a valid triple; render as normal nodes
-                                    for (let k = 0; k < group.length; k++) {
-                                        const gNode = group[k];
-                                        if (lastNode) {
-                                            elements.push(renderConnector(lastNode, gNode));
-                                        }
-                                        elements.push(renderNode(gNode, false, i + k));
-                                        lastNode = gNode;
-                                    }
-                                    i = j;
+                                    elements.push(tripleBlock);
+                                    lastNode = tripleNodes[tripleNodes.length - 1];
+                                    i = triple.endIndex + 1;
                                     continue;
                                 }
                             }
-                            }
 
-                            // Normal node
-                                if (lastNode) {
-                                    elements.push(renderConnector(lastNode, node));
-                                }
+                            const node = nodes[i];
+                            if (lastNode) {
+                                elements.push(renderConnector(lastNode, node));
+                            }
                             elements.push(renderNode(node, false, i));
                             lastNode = node;
                             i++;

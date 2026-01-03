@@ -320,13 +320,12 @@
     --puzzle-color-5: #ed553b;
 }
 
-
-
 body {
     margin: 0 auto;
     background: var(--background-default);
     color: var(--foreground-default);
     position: relative;
+    height: 100vh;
     height: 100svh;
     /* -webkit-user-select: none; */
     -webkit-tap-highlight-color: transparent;

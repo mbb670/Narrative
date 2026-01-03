@@ -2798,7 +2798,7 @@
 {
   "title": "Saturday, Jan 3, 2026",
   "type": "chain",
-  "palette": "greens",
+  "palette": "classic",
   "dateKey": "2026-01-03",
   "words": [
     {
@@ -2985,7 +2985,101 @@
       "start": 62
     }
   ]
+},
+{
+  "title": "Monday, Jan 5, 2026",
+  "type": "chain",
+  "palette": "greens",
+  "dateKey": "2026-01-05",
+  "words": [
+    {
+      "clue": "A good rhythm",
+      "answer": "GROOVE",
+      "start": 1
+    },
+    {
+      "clue": "Finished, as a game",
+      "answer": "OVER",
+      "start": 4
+    },
+    {
+      "clue": "Everyday speech",
+      "answer": "VERNACULAR",
+      "start": 5
+    },
+    {
+      "clue": "Nobility as a class",
+      "answer": "ARISTOCRACY",
+      "start": 13
+    },
+    {
+      "clue": "Go around again",
+      "answer": "CYCLE",
+      "start": 22
+    },
+    {
+      "clue": "Even, not tilted",
+      "answer": "LEVEL",
+      "start": 25
+    },
+    {
+      "clue": "One after tenth",
+      "answer": "ELEVENTH",
+      "start": 28
+    },
+    {
+      "clue": "Central idea",
+      "answer": "THEME",
+      "start": 34
+    },
+    {
+      "clue": "Total chaos",
+      "answer": "MESS",
+      "start": 37
+    },
+    {
+      "clue": "Core quality",
+      "answer": "ESSENCE",
+      "start": 38
+    },
+    {
+      "clue": "Block from release",
+      "answer": "CENSOR",
+      "start": 43
+    },
+    {
+      "clue": "Big group of musicians",
+      "answer": "ORCHESTRA",
+      "start": 47
+    },
+    {
+      "clue": "Pulled muscle",
+      "answer": "STRAIN",
+      "start": 52
+    },
+    {
+      "clue": "Going up, as prices",
+      "answer": "INCREASING",
+      "start": 56
+    },
+    {
+      "clue": "Making music with words",
+      "answer": "SINGING",
+      "start": 62
+    },
+    {
+      "clue": "Fancy clothing",
+      "answer": "GARB",
+      "start": 68
+    },
+    {
+      "clue": "In chains, figuratively",
+      "answer": "BONDAGE",
+      "start": 71
+    }
+  ]
 }
+
 
 
 ]
