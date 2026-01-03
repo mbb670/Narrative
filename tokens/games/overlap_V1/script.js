@@ -5381,7 +5381,7 @@ els.ftuePrev?.addEventListener("click", (e) => {
   e.preventDefault();
   if (ftueStep === 0) {
     closeFtue();
-    openSplash("default");
+    openSplash(splashState());
   } else {
     prevFtue();
   }
