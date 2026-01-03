@@ -985,6 +985,17 @@ body[data-chain-state="done"] .rangeClue-content {
     transform: translateX(-12px);
     pointer-events: none;
     transition: opacity 160ms ease, transform 160ms ease;
+    position: relative;
+
+    &::before{
+        content: '';
+        width: 140%;
+        height: 140%;
+        position: absolute;
+        top:-20%;
+        left: -20%;
+    }
+
 }
 
 .rangeClue.is-hint-visible .rangeClue-hint,
@@ -998,7 +1009,6 @@ body[data-chain-state="done"] .rangeClue-content {
 }
 
 @media (hover: hover) {
-
     .rangeClue .rangeClue-content:hover .rangeClue-hint,
     .rangeClue .rangeClue-string:hover~.rangeClue-hint {
         display: inline-flex;
