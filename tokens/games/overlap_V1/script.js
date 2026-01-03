@@ -4043,6 +4043,7 @@ function chooseAutoAdvanceTarget(prevIdx) {
   const prevSolved = prevEntry == null ? null : isWordCorrect(prevEntry);
   const nextSolved = nextEntry == null ? null : isWordCorrect(nextEntry);
 
+  const nextUnresolvedRight = findUnresolvedCell(prevIdx, +1);
   const unsolved = unresolvedEntries().sort((a, b) => a.start - b.start);
   const editableRight = findNextEditable(prevIdx + 1, +1);
   const editableLeft = findNextEditable(prevIdx - 1, -1);
@@ -4066,7 +4067,10 @@ function chooseAutoAdvanceTarget(prevIdx) {
       // Unsovled exists to the right
       if (prevSolved !== false) {
         // Case: prev solved + next solved + unsolved to the right -> jump right.
-        return { target: firstEditableCellInEntry(firstUnsolvedRight), suppress: false };
+        const tgt =
+          nextUnresolvedRight != null ? nextUnresolvedRight :
+          firstEditableCellInEntry(firstUnsolvedRight);
+        return { target: tgt, suppress: false };
       }
       // Case: prev unsolved + next solved -> stay put.
       return { target: null, suppress: true };
@@ -4075,6 +4079,9 @@ function chooseAutoAdvanceTarget(prevIdx) {
     // No unsolved to the right; if any unsolved to the left, jump left (regardless of prev solved).
     if (!firstUnsolvedRight && firstUnsolvedLeft) {
       // But if there is an editable cell to the right, honor it instead of jumping left.
+      if (nextUnresolvedRight != null && nextUnresolvedRight > prevIdx) {
+        return { target: nextUnresolvedRight, suppress: false };
+      }
       if (editableRight != null && editableRight > prevIdx) {
         return { target: editableRight, suppress: false };
       }
