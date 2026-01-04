@@ -3679,6 +3679,7 @@ function ensureChainResults() {
 function closeChainResults() {
   if (!chainResults) return;
   chainResults.wrap.classList.remove("is-open");
+  setResultsInert(false);
 }
 
 function fmtTime(sec) {
@@ -3819,6 +3820,7 @@ function openChainResults(stats, reason) {
   const r = ensureChainResults();
   if (!r) return;
   r.wrap.classList.add("is-open");
+  setResultsInert(true);
   const tSec = Math.max(0, Math.floor(chain.lastFinishElapsedSec || 0));
   const total = play.entries?.length || 0;
   const solved = Math.max(0, total - Math.max(0, chain.unsolvedCount || 0));
@@ -4413,6 +4415,32 @@ function openSuccess() {
 
 function closeSuccess() {
   els.resultsModal?.classList.remove("is-open");
+}
+
+function setResultsInert(isOpen) {
+  const body = document.body;
+  const root = document.documentElement;
+  if (!body) return;
+  const inertValue = isOpen ? "true" : null;
+  body.toggleAttribute("data-results-open", isOpen);
+  const block = (e) => {
+    if (!isOpen) return;
+    if (e.target && e.target.closest && e.target.closest("#results")) return;
+    e.stopPropagation();
+    e.preventDefault();
+  };
+  if (isOpen) {
+    window.addEventListener("focus", block, true);
+    window.addEventListener("pointerdown", block, true);
+    window.addEventListener("keydown", block, true);
+    body.style.overflow = "hidden";
+  } else {
+    window.removeEventListener("focus", block, true);
+    window.removeEventListener("pointerdown", block, true);
+    window.removeEventListener("keydown", block, true);
+    body.style.overflow = "";
+  }
+  root?.classList.toggle("results-open", isOpen);
 }
 
 function shareResult({ mode }) {
