@@ -26,7 +26,8 @@
   <header>
     <section class="header-content">
     <div class="logo logo-hover" id="logo">
-    <div class="logo-icon"></div>
+    <div class="logo-icon">
+    </div>
     <h1 class="text-subheadline-semibold-lg">Overlap</h1>
     </div>
 
@@ -228,15 +229,8 @@
     <div class="ftue-modal__dialog card elevation-overlay" role="dialog" aria-modal="true" aria-labelledby="ftueTitle">
 
       <div class="ftue-modal__header">
-        <button type="button" class="ftue-prev btn" aria-label="Previous step">
-          <span class="ftue-prev-icon text-system-regular-lg" aria-hidden="true">‹</span>
-          <span class="ftue-step-label">1/3</span>
-          <span class="text-subheadline-semibold-lg"> Overlap</span>
-
-        </button>
-        <div class="ftue-header-actions">
-          <button type="button" class="ftue-skip btn text-system-semibold-xs">Skip to game X</button>
-        </div>
+        <button type="button" class="ftue-prev btn text-system-semibold-xs" aria-label="Previous step">Back</button>
+        <button type="button" class="ftue-skip btn text-system-semibold-xs" aria-label="Skip to game">Skip to game</button>
       </div>
 
       <section class="ftue-modal__body">
@@ -285,19 +279,21 @@
           <div class="splash__text">
             <h1 class="splash__title text-display-semibold-lg" id="splashTitle">Overlap</h1>
             <p class="splash__subtitle text-system-regular-md" id="splashSubtitle">Horizontal Crossword Puzzle</p>
+            <p class="splash__date text-system-regular-md" id="splashDate"></p>
+
           </div>
         </div>
         <div class="splash__actions">
           <button class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
           <div class="splash__row">
-            <button class="btn text-system-semibold-md" id="splashPuzzleBtn" type="button">Puzzle mode</button>
-            <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">Tutorial</button>
+            <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button">Archive</button>
+            <button class="btn text-system-semibold-md" id="splashPuzzleBtn" type="button">Puzzles</button>
           </div>
         </div>
 
       </div>
       <footer class="splash__footer">
-        <p class="splash__date text-system-regular-md" id="splashDate"></p>
+        <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">How to play</button>
         <div class="splash__stats text-system-regular-sm">
           <div class="stat">
             <div class="stat-value text-subheadline-semibold-sm" id="splashAvgTime">---</div>
@@ -310,7 +306,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.89</span>
+            id="splashVersion">V3.895</span>
         </p>
       </footer>
     </div>
