@@ -107,10 +107,6 @@ Puzzle Colors
 Base Styles
 ----------------------------- */
 
-.token-swap {
-    display: none;
-}
-
 body {
     margin: 0 auto;
     background: var(--background-default);
@@ -347,10 +343,8 @@ header {
     align-items: center;
     justify-content: center;
     gap: var(--spacing-x2);
-
     button {
         aspect-ratio: 1;
-
         &::after {
             content: "";
             width: var(--spacing-x16);
@@ -370,7 +364,7 @@ header {
     }
 }
 
-#pClear {
+#pClear{
     display: none;
 }
 
@@ -384,7 +378,7 @@ header {
         display: none;
     }
 
-    #pClear {
+    #pClear{
         display: block;
     }
 }
@@ -1000,7 +994,7 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
         display: none;
     }
 
-    &::before {
+        &::before {
         content: '';
         width: 100%;
         border-left: calc(var(--border-w) / 2) solid var(--grid-line);
@@ -1187,6 +1181,15 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
     /* padding: var(--spacing-x8); */
     color: var(--foreground-default);
     /* text-transform: uppercase */
+}
+
+
+.range-swatch {
+    width: var(--spacing-x24);
+    aspect-ratio: 1;
+    border: var(--border-w) solid var(--color);
+    flex: 0 0 auto;
+    background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 85%), transparent var(--range-transparency-pc));
 }
 
 .helper {
@@ -1672,7 +1675,7 @@ body[data-view="play"] {
     display: none;
 }
 
-.results__dialog {
+.results__dialog{
     /* height: max-content; */
 }
 
@@ -1792,12 +1795,22 @@ body[data-view="play"] {
 }
 
 
+
+
+
+
+
+
+
+
+
+
 .ftue-modal,
 .splash {
     position: absolute;
-    height: 100vh !important;
+    height: 100vh!important;
     /* overflow-y: hidden; */
-
+    
 }
 
 
@@ -1809,12 +1822,10 @@ body[data-view="play"] {
 
 @supports (-webkit-touch-callout: none) {
     @media (hover: none) and (pointer: coarse) {
-
         .ftue-modal,
-        .splash {
-            place-content: start;
-        }
-
+.splash {
+    place-content: start;
+}
         .ftue-modal__dialog,
         .splash__dialog {
             /* iPhone/iPad (touch) fix here */
@@ -1824,175 +1835,98 @@ body[data-view="play"] {
 }
 
 
-
-/* -----------------------------
-Builder screen
------------------------------ */
-
-
-.builderTop {
-
-    width: max-content;
-    margin: 0 auto;
-
-    >* {
-        margin-inline: auto;
-    }
-
-    .builder-configs {
-        display: flex;
-        gap: var(--spacing-x8);
-        margin-block: var(--spacing-x16)
-
-    }
-}
-
-.builder-calendar{
-    min-width: 240px;
-    background: var(--background-muted);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-default);
-    padding: var(--spacing-x8);
-}
-
-.cal-header{
+/* Builder (kept intentionally simple + lightweight) */
+.bTop {
+    margin: 22px auto 10px;
     display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--spacing-x4);
-}
-
-.cal-month{
-    font-weight: 700;
-}
-
-.cal-weekdays,
-.cal-grid{
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    text-align: center;
-}
-
-.cal-pad{
-    visibility: hidden;
-}
-
-.cal-weekdays span{
-    font-size: 11px;
-    color: var(--foreground-subtle);
-}
-
-.cal-grid button{
-    padding: 6px 0;
-    border: 1px solid var(--border-subtle);
-    background: var(--background-default);
-    border-radius: var(--radius-soft);
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--foreground-default);
-}
-
-.cal-grid button.has-puzzle{
-    border-color: var(--border-strong);
-    background: var(--background-accent-subtle);
-    color: var(--foreground-strong);
-    position: relative;
-}
-
-.cal-grid button.is-active{
-    outline: 2px solid var(--border-strong);
-    background: var(--background-accent-subtle);
-}
-
-.cal-grid button:disabled{
-    opacity: 0.55;
-    cursor: default;
-}
-
-.cal-grid button.has-puzzle::after{
-    content: "";
-    position: absolute;
-    bottom: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    background: var(--foreground-strong);
+    justify-content: center
 }
 
 .sel,
-.ti,
-.mi,
-.ms {
+.ti {
     appearance: none;
-    border: 1px solid var(--border-muted);
-    background-color: transparent;
-    padding: var(--spacing-x12);
-    border-radius: var(--radius-soft);
-    font-family: var(--system-fontfamily);
-    font-weight: var(--system-strong);
-    width: 100%;
+    border: 1px solid rgba(0, 0, 0, .14);
+    background: rgba(255, 255, 255, .22);
+    padding: 10px 12px;
+    border-radius: 12px;
+    font: 600 13px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    color: var(--foreground-default)
+}
 
+.sel {
+    min-width: 240px;
+    padding-right: 38px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b675f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px
+}
+
+.ti {
+    min-width: 260px
 }
 
 .bBody {
     display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    justify-content: center;
+    margin-top: 14px;
+    margin: 0 auto;
+}
 
-    font-family: var(--system-fontfamily);
-    font-weight: var(--system-strong);
-    font-size: var(--system-fontsize-md);
+.previewBox,
+.box {
+    border: 1px solid var(--border-subtle);
 }
 
 .box {
-    border-right: 1px solid var(--border-subtle);
-    padding-inline: var(--layout-grid-margin);
+    padding: var(--spacing-x16);
 }
 
 .previewBox {
     position: sticky;
-    top: 0;
+    top: 18px;
     align-self: flex-start;
     width: 100%;
     overflow: hidden;
-    height: max-content;
 
     .gridScroll {
-        padding-bottom: var(--spacing-x56);
+        padding-inline: var(--spacing-x16);
 
         .rangeClue {
             display: block !important;
         }
     }
 
-    .preview-data{
-         padding: var(--spacing-x16);
+    h3,
+    .note {
+        padding: var(--spacing-x16);
+        margin: unset;
+        margin-top: var(--spacing-x12);
+    }
 
-    .status {
-    margin-top: var(--spacing-x8);
-     color: var(--foreground-muted);
-}
+    h3 {
+        color: var(--foreground-default);
 
-.bad {
-    color: var(--system-critical-default)
-}
+    }
 
+    .note {
+        color: var(--foreground-muted);
+        padding-top: unset;
     }
 }
 
-#panelBuild{
-padding-inline: unset;
+.puzzle_inputs {
+    max-width: 400px;
 }
 
-
-@media (max-width:768px) {
+@media (max-width:980px) {
     .bBody {
         flex-direction: column-reverse
-    }
-
-    .box{
-        border: unset;
     }
 
     .previewBox {
@@ -2008,71 +1942,130 @@ padding-inline: unset;
 
 }
 
+.boxt {
+    margin: 0 0 10px;
+    color: var(--foreground-muted);
+    font: 800 12px/1.1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    letter-spacing: .10em;
+    text-transform: uppercase
+}
+
+.rows {
+    display: grid;
+    gap: 10px
+}
+
 .row {
-    border: 1px solid var(--border-subtle);
-    padding: var(--spacing-x16);
-    border-radius: var(--radius-soft);
-    box-shadow: var(--unit-4) var(--spacing-x4) var(--spacing-x16) 0 var(--color-alpha-black-a100);
-    margin-top: var(--spacing-x16);
-    min-width: var(--layout-content-sm-max);
-}
-
-.puzzle-settings{
-    background-color: var(--background-muted);
-    .builder-puzzle-actions{
-        margin-bottom: var(--spacing-x24);
-    }
-    select, input{
-        margin: var(--spacing-x4) 0 var(--spacing-x12);
-
-    }
-}
-
-[data-builder-tab="wordchain"]{
-    .builder-title-input{
-        display: none;
-    }
-}
-
-[data-builder-tab="puzzle"]{
-    .builder-date-input{
-        display: none;
-    }
+    border: 1px solid rgba(0, 0, 0, .12);
+    background: rgba(255, 255, 255, .14);
+    padding: 10px;
+    display: grid;
+    gap: 10px
 }
 
 .rowTop {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    .left {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-x12);
-
-        .range-swatch {
-            border-radius: var(--radius-default);
-    width: var(--spacing-x24);
-    aspect-ratio: 1;
-    border: var(--border-w) solid var(--color);
-    background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 85%), transparent var(--range-transparency-pc));
-}
-    }
+    gap: 10px
 }
 
-.grid5{
-    >div{
-    margin-top: var(--spacing-x16);
+.rowTop .left {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacing-x4);
+    align-items: center;
+    gap: 10px;
+    font: 800 12px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    letter-spacing: .10em;
+    text-transform: uppercase
+}
+
+.rowTop .right {
+    display: flex;
+    gap: 8px
+}
+
+.grid5 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px
+}
+
+.grid5 .full {
+    grid-column: 1/-1
+}
+
+@media (max-width:980px) {
+    .grid5 {
+        grid-template-columns: 1fr 1fr
     }
 }
 
 .lab {
+    display: block;
+    margin: 0 0 6px;
     color: var(--foreground-muted);
+    font: 700 11px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    letter-spacing: .08em;
+    text-transform: uppercase
 }
 
+.mi,
+.ms {
+    width: 100%;
+    appearance: none;
+    border: 1px solid rgba(0, 0, 0, .14);
+    background: rgba(255, 255, 255, .20);
+    padding: 10px;
+    border-radius: 10px;
+    font: 600 13px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    color: var(--foreground-default)
+}
+
+.status {
+    margin-top: 8px;
+    color: var(--foreground-muted);
+    font: 600 12px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial
+}
+
+.bad {
+    color: #8b1d1d
+}
+
+.io {
+    margin-top: 12px
+}
+
+.io>summary {
+    cursor: pointer;
+    color: var(--foreground-muted);
+    font: 800 12px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    letter-spacing: .10em;
+    text-transform: uppercase
+}
+
+.ioTa {
+    width: 100%;
+    min-height: 160px;
+    resize: vertical;
+    margin-top: 10px;
+    font: 600 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: var(--foreground-default);
+    background: rgba(255, 255, 255, .20);
+    border: 1px solid rgba(0, 0, 0, .14);
+    padding: 10px
+}
+
+.ioBtns {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end
+}
+
+.token-swap {
+    display: none;
+}
 
 /* -----------------------------
 On-screen keyboard (touch)
