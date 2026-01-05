@@ -1,600 +1,520 @@
 [{
     "title": "Under the Surface",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Fury",
         "answer": "ANGER",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Tiny cause of illness",
         "answer": "GERM",
-        "start": 3,
-        "height": "mid"
+        "start": 3
       },
       {
         "clue": "Stoat in its winter coat",
         "answer": "ERMINE",
-        "start": 4,
-        "height": "inner"
+        "start": 4
       },
       {
         "clue": "Extracted from the ground",
         "answer": "MINED",
-        "start": 6,
-        "height": "full"
+        "start": 6
       }
     ]
   },
   {
     "title": "Moving Parts",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Representation",
         "answer": "MODEL",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "River-mouth landform",
         "answer": "DELTA",
-        "start": 3,
-        "height": "mid"
+        "start": 3
       },
       {
         "clue": "Fortune-telling deck",
         "answer": "TAROT",
-        "start": 6,
-        "height": "inner"
+        "start": 6
       },
       {
         "clue": "Spinning motor part",
         "answer": "ROTOR",
-        "start": 8,
-        "height": "full"
+        "start": 8
       }
     ]
   },
   {
     "title": "Just Right",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Path around a planet",
         "answer": "ORBIT",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "A small mouthful",
         "answer": "BITE",
-        "start": 3,
-        "height": "mid"
+        "start": 3
       },
       {
         "clue": "Lukewarm",
         "answer": "TEPID",
-        "start": 5,
-        "height": "inner"
+        "start": 5
       },
       {
         "clue": "Perfect",
         "answer": "IDEAL",
-        "start": 8,
-        "height": "full"
+        "start": 8
       }
     ]
   },
   {
     "title": "Quiet Company",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Backyard plot",
         "answer": "GARDEN",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Tooth-related",
         "answer": "DENTAL",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Bird's claw",
         "answer": "TALON",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "All alone",
         "answer": "LONELY",
-        "start": 9,
-        "height": "full"
+        "start": 9
       }
     ]
   },
   {
     "title": "Local Detail",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Tiny screen dot",
         "answer": "PIXEL",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Older adult",
         "answer": "ELDER",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "A horse race",
         "answer": "DERBY",
-        "start": 6,
-        "height": "inner"
+        "start": 6
       },
       {
         "clue": "Local ordinance",
         "answer": "BYLAW",
-        "start": 9,
-        "height": "full"
+        "start": 9
       }
     ]
   },
   {
     "title": "Hosted",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Milk container",
         "answer": "CARTON",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Taste organ",
         "answer": "TONGUE",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Visitor",
         "answer": "GUEST",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "Property (land + home)",
         "answer": "ESTATE",
-        "start": 9,
-        "height": "full"
+        "start": 9
       }
     ]
   },
   {
     "title": "Edges and Origins",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Safe port",
         "answer": "HARBOR",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Edge or boundary",
         "answer": "BORDER",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Draw from",
         "answer": "DERIVE",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "Climbing plants (plural)",
         "answer": "IVIES",
-        "start": 10,
-        "height": "full"
+        "start": 10
       }
     ]
   },
   {
     "title": "Mixed Signals",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Soft fiber",
         "answer": "COTTON",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Bitter mixer",
         "answer": "TONIC",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Five-cent coin (or metal)",
         "answer": "NICKEL",
-        "start": 6,
-        "height": "inner"
+        "start": 6
       },
       {
         "clue": "Seaweed",
         "answer": "KELP",
-        "start": 9,
-        "height": "full"
+        "start": 9
       }
     ]
   },
   {
     "title": "Keep It Down",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Ancient imprint",
         "answer": "FOSSIL",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Not noisy",
         "answer": "SILENT",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Complete",
         "answer": "ENTIRE",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "The Emerald Isle",
         "answer": "IRELAND",
-        "start": 10,
-        "height": "full"
+        "start": 10
       }
     ]
   },
   {
     "title": "Bounce Back",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "sunrise",
     "words": [{
         "clue": "Corkscrew shape",
         "answer": "SPIRAL",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Gather (or a pep talk)",
         "answer": "RALLY",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Song line",
         "answer": "LYRIC",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "Rebound",
         "answer": "RICOCHET",
-        "start": 9,
-        "height": "full"
+        "start": 9
       }
     ]
   },
   {
     "title": "A Place for Everything",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Gallery building",
         "answer": "MUSEUM",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Short recap",
         "answer": "SUMMARY",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "U.S. state",
         "answer": "MARYLAND",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "Scenery",
         "answer": "LANDSCAPE",
-        "start": 11,
-        "height": "full"
+        "start": 11
       }
     ]
   },
   {
     "title": "Bad Inbox",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Large body of water",
         "answer": "OCEAN",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Blacksmith block",
         "answer": "ANVIL",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Bad guy",
         "answer": "VILLAIN",
-        "start": 6,
-        "height": "inner"
+        "start": 6
       },
       {
         "clue": "Email folder",
         "answer": "INBOX",
-        "start": 11,
-        "height": "full"
+        "start": 11
       }
     ]
   },
   {
     "title": "Deep Cuts",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Underground chamber",
         "answer": "CAVERN",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "A boy's name meaning 'serious'",
         "answer": "ERNEST",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Baltic country",
         "answer": "ESTONIA",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "Famous falls, for short",
         "answer": "NIAGARA",
-        "start": 11,
-        "height": "full"
+        "start": 11
       }
     ]
   },
   {
     "title": "Points of Interest",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Bed cushion",
         "answer": "PILLOW",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Flat low area",
         "answer": "LOWLAND",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Famous site",
         "answer": "LANDMARK",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "Bazaar",
         "answer": "MARKET",
-        "start": 11,
-        "height": "full"
+        "start": 11
       }
     ]
   },
   {
     "title": "On Target",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Blue-tinted metal",
         "answer": "COBALT",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Religious table",
         "answer": "ALTAR",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Pointed projectile",
         "answer": "ARROW",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "River vessel",
         "answer": "ROWBOAT",
-        "start": 9,
-        "height": "full"
+        "start": 9
       }
     ]
   },
   {
     "title": "Night Out",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "sunrise",
     "words": [{
         "clue": "Bird of prey",
         "answer": "FALCON",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Live music show",
         "answer": "CONCERT",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Sure",
         "answer": "CERTAIN",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "Stain or corrupt",
         "answer": "TAINT",
-        "start": 10,
-        "height": "full"
+        "start": 10
       }
     ]
   },
   {
     "title": "At the Horizon",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Distant line",
         "answer": "HORIZON",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Layered vegetable",
         "answer": "ONION",
-        "start": 6,
-        "height": "mid"
+        "start": 6
       },
       {
         "clue": "Relating to ions",
         "answer": "IONIC",
-        "start": 8,
-        "height": "inner"
+        "start": 8
       },
       {
         "clue": "Alias",
         "answer": "NICKNAME",
-        "start": 10,
-        "height": "full"
+        "start": 10
       }
     ]
   },
   {
     "title": "Morning Routine",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Breakfast staple",
         "answer": "CEREAL",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Wake-up sound",
         "answer": "ALARM",
-        "start": 5,
-        "height": "mid"
+        "start": 5
       },
       {
         "clue": "Fleet of ships",
         "answer": "ARMADA",
-        "start": 7,
-        "height": "inner"
+        "start": 7
       },
       {
         "clue": "A polite title",
         "answer": "MADAM",
-        "start": 9,
-        "height": "full"
+        "start": 9
       }
     ]
   },
   {
     "title": "Guided Tour",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Admiration",
         "answer": "RESPECT",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "A striking display",
         "answer": "SPECTACLE",
-        "start": 3,
-        "height": "mid"
+        "start": 3
       },
       {
         "clue": "Merciful (or a name)",
         "answer": "CLEMENT",
-        "start": 9,
-        "height": "inner"
+        "start": 9
       },
       {
         "clue": "Guide",
         "answer": "MENTOR",
-        "start": 12,
-        "height": "full"
+        "start": 12
       }
     ]
   },
   {
     "title": "Weatherproof",
-    "type": "overlap",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Wet-weather jacket",
         "answer": "RAINCOAT",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Layer or cover",
         "answer": "COATING",
-        "start": 5,
-        "height": "mid"
+        "start": 5
       },
       {
         "clue": "Slight trace",
         "answer": "TINGE",
-        "start": 8,
-        "height": "inner"
+        "start": 8
       },
       {
         "clue": "Take in (as food)",
         "answer": "INGEST",
-        "start": 9,
-        "height": "full"
+        "start": 9
       }
     ]
   },
@@ -605,86 +525,72 @@
     "words": [{
         "clue": "Middle Eastern ruler",
         "answer": "SULTAN",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Off-topic aside",
         "answer": "TANGENT",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Main course",
         "answer": "ENTREE",
-        "start": 8,
-        "height": "inner"
+        "start": 8
       },
       {
         "clue": "Coral ridge",
         "answer": "REEF",
-        "start": 11,
-        "height": "full"
+        "start": 11
       },
       {
         "clue": "Attempt",
         "answer": "EFFORT",
-        "start": 13,
-        "height": "mid"
+        "start": 13
       },
       {
         "clue": "Traditional; conventional",
         "answer": "ORTHODOX",
-        "start": 16,
-        "height": "inner"
+        "start": 16
       },
       {
         "clue": "Posting private info",
         "answer": "DOXING",
-        "start": 21,
-        "height": "full"
+        "start": 21
       },
       {
         "clue": "Pungent bulb",
         "answer": "GARLIC",
-        "start": 26,
-        "height": "mid"
+        "start": 26
       },
       {
         "clue": "Hanging ice spike",
         "answer": "ICICLE",
-        "start": 30,
-        "height": "inner"
+        "start": 30
       },
       {
         "clue": "Witty; smart",
         "answer": "CLEVER",
-        "start": 33,
-        "height": "full"
+        "start": 33
       },
       {
         "clue": "Jury's decision",
         "answer": "VERDICT",
-        "start": 36,
-        "height": "mid"
+        "start": 36
       },
       {
         "clue": "Lay down orders",
         "answer": "DICTATE",
-        "start": 39,
-        "height": "inner"
+        "start": 39
       },
       {
         "clue": "Boring; tiring",
         "answer": "TEDIOUS",
-        "start": 44,
-        "height": "full"
+        "start": 44
       },
       {
         "clue": "Drive out",
         "answer": "OUST",
-        "start": 48,
-        "height": "mid"
+        "start": 48
       }
     ]
   },
@@ -695,86 +601,72 @@
     "words": [{
         "clue": "Rock",
         "answer": "STONE",
-        "start": 1,
-        "height": "inner"
+        "start": 1
       },
       {
         "clue": "Sound quality",
         "answer": "TONE",
-        "start": 2,
-        "height": "full"
+        "start": 2
       },
       {
         "clue": "Single-direction",
         "answer": "ONEWAY",
-        "start": 3,
-        "height": "mid"
+        "start": 3
       },
       {
         "clue": "Navigation aids/signage",
         "answer": "WAYFINDING",
-        "start": 6,
-        "height": "inner"
+        "start": 6
       },
       {
         "clue": "Inventiveness",
         "answer": "INGENUITY",
-        "start": 13,
-        "height": "full"
+        "start": 13
       },
       {
         "clue": "Cruel ruler",
         "answer": "TYRANT",
-        "start": 20,
-        "height": "mid"
+        "start": 20
       },
       {
         "clue": "Patriotic song",
         "answer": "ANTHEM",
-        "start": 23,
-        "height": "inner"
+        "start": 23
       },
       {
         "clue": "Half a globe",
         "answer": "HEMISPHERE",
-        "start": 26,
-        "height": "full"
+        "start": 26
       },
       {
         "clue": "Give a new look",
         "answer": "RESKIN",
-        "start": 34,
-        "height": "mid"
+        "start": 34
       },
       {
         "clue": "Realm",
         "answer": "KINGDOM",
-        "start": 37,
-        "height": "inner"
+        "start": 37
       },
       {
         "clue": "Legal residence",
         "answer": "DOMICILE",
-        "start": 41,
-        "height": "full"
+        "start": 41
       },
       {
         "clue": "Small-intestine part",
         "answer": "ILEUM",
-        "start": 46,
-        "height": "mid"
+        "start": 46
       },
       {
         "clue": "Rain shield",
         "answer": "UMBRELLA",
-        "start": 49,
-        "height": "inner"
+        "start": 49
       },
       {
         "clue": "Narrow road",
         "answer": "LANE",
-        "start": 55,
-        "height": "full"
+        "start": 55
       }
     ]
   },
@@ -785,80 +677,67 @@
     "words": [{
         "clue": "Low on iron, say",
         "answer": "ANEMIC",
-        "start": 1,
-        "height": "mid"
+        "start": 1
       },
       {
         "clue": "Tiny organisms",
         "answer": "MICROBES",
-        "start": 4,
-        "height": "inner"
+        "start": 4
       },
       {
         "clue": "Top-notch",
         "answer": "BEST",
-        "start": 9,
-        "height": "full"
+        "start": 9
       },
       {
         "clue": "Rough calculation",
         "answer": "ESTIMATE",
-        "start": 10,
-        "height": "mid"
+        "start": 10
       },
       {
         "clue": "Run-down apartment bldg.",
         "answer": "TENEMENT",
-        "start": 16,
-        "height": "inner"
+        "start": 16
       },
       {
         "clue": "Whole; complete",
         "answer": "ENTIRE",
-        "start": 21,
-        "height": "full"
+        "start": 21
       },
       {
         "clue": "Worn out",
         "answer": "TIRED",
-        "start": 23,
-        "height": "mid"
+        "start": 23
       },
       {
         "clue": "Giant California tree",
         "answer": "REDWOOD",
-        "start": 25,
-        "height": "inner"
+        "start": 25
       },
       {
         "clue": "Stiff; not flexible",
         "answer": "WOODEN",
-        "start": 28,
-        "height": "full"
+        "start": 28
       },
       {
         "clue": "Never-ending",
         "answer": "ENDLESS",
-        "start": 32,
-        "height": "mid"
+        "start": 32
       },
       {
         "clue": "Smaller; inferior",
         "answer": "LESSER",
-        "start": 35,
-        "height": "inner"
+        "start": 35
       },
       {
         "clue": "Soil wear-away",
         "answer": "EROSION",
-        "start": 39,
-        "height": "full"
+        "start": 39
       },
       {
         "clue": "Charge (atoms)",
         "answer": "IONIZE",
-        "start": 43,
-        "height": "mid"
+        "start": 43
       }
     ]
   },
@@ -869,248 +748,207 @@
     "words": [{
         "clue": "Middle Eastern ruler",
         "answer": "SULTAN",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Off-topic aside",
         "answer": "TANGENT",
-        "start": 4,
-        "height": "mid"
+        "start": 4
       },
       {
         "clue": "Main course",
         "answer": "ENTREE",
-        "start": 8,
-        "height": "inner"
+        "start": 8
       },
       {
         "clue": "Coral ridge",
         "answer": "REEF",
-        "start": 11,
-        "height": "full"
+        "start": 11
       },
       {
         "clue": "Attempt",
         "answer": "EFFORT",
-        "start": 13,
-        "height": "mid"
+        "start": 13
       },
       {
         "clue": "Traditional; conventional",
         "answer": "ORTHODOX",
-        "start": 16,
-        "height": "inner"
+        "start": 16
       },
       {
         "clue": "Posting private info",
         "answer": "DOXING",
-        "start": 21,
-        "height": "full"
+        "start": 21
       },
       {
         "clue": "Pungent bulb",
         "answer": "GARLIC",
-        "start": 26,
-        "height": "mid"
+        "start": 26
       },
       {
         "clue": "Hanging ice spike",
         "answer": "ICICLE",
-        "start": 30,
-        "height": "inner"
+        "start": 30
       },
       {
         "clue": "Witty; smart",
         "answer": "CLEVER",
-        "start": 33,
-        "height": "full"
+        "start": 33
       },
       {
         "clue": "Jury's decision",
         "answer": "VERDICT",
-        "start": 36,
-        "height": "mid"
+        "start": 36
       },
       {
         "clue": "Lay down orders",
         "answer": "DICTATE",
-        "start": 39,
-        "height": "inner"
+        "start": 39
       },
       {
         "clue": "Boring; tiring",
         "answer": "TEDIOUS",
-        "start": 44,
-        "height": "full"
+        "start": 44
       },
       {
         "clue": "Drive out",
         "answer": "OUST",
-        "start": 48,
-        "height": "mid"
+        "start": 48
       },
       {
         "clue": "Rock",
         "answer": "STONE",
-        "start": 50,
-        "height": "inner"
+        "start": 50
       },
       {
         "clue": "Sound quality",
         "answer": "TONE",
-        "start": 51,
-        "height": "full"
+        "start": 51
       },
       {
         "clue": "Single-direction",
         "answer": "ONEWAY",
-        "start": 52,
-        "height": "mid"
+        "start": 52
       },
       {
         "clue": "Navigation aids/signage",
         "answer": "WAYFINDING",
-        "start": 55,
-        "height": "inner"
+        "start": 55
       },
       {
         "clue": "Inventiveness",
         "answer": "INGENUITY",
-        "start": 62,
-        "height": "full"
+        "start": 62
       },
       {
         "clue": "Cruel ruler",
         "answer": "TYRANT",
-        "start": 69,
-        "height": "mid"
+        "start": 69
       },
       {
         "clue": "Patriotic song",
         "answer": "ANTHEM",
-        "start": 72,
-        "height": "inner"
+        "start": 72
       },
       {
         "clue": "Half a globe",
         "answer": "HEMISPHERE",
-        "start": 75,
-        "height": "full"
+        "start": 75
       },
       {
         "clue": "Give a new look",
         "answer": "RESKIN",
-        "start": 83,
-        "height": "mid"
+        "start": 83
       },
       {
         "clue": "Realm",
         "answer": "KINGDOM",
-        "start": 86,
-        "height": "inner"
+        "start": 86
       },
       {
         "clue": "Legal residence",
         "answer": "DOMICILE",
-        "start": 90,
-        "height": "full"
+        "start": 90
       },
       {
         "clue": "Small-intestine part",
         "answer": "ILEUM",
-        "start": 95,
-        "height": "mid"
+        "start": 95
       },
       {
         "clue": "Rain shield",
         "answer": "UMBRELLA",
-        "start": 98,
-        "height": "inner"
+        "start": 98
       },
       {
         "clue": "Narrow road",
         "answer": "LANE",
-        "start": 104,
-        "height": "full"
+        "start": 104
       },
       {
         "clue": "Low on iron, say",
         "answer": "ANEMIC",
-        "start": 105,
-        "height": "mid"
+        "start": 105
       },
       {
         "clue": "Tiny organisms",
         "answer": "MICROBES",
-        "start": 108,
-        "height": "inner"
+        "start": 108
       },
       {
         "clue": "Top-notch",
         "answer": "BEST",
-        "start": 113,
-        "height": "full"
+        "start": 113
       },
       {
         "clue": "Rough calculation",
         "answer": "ESTIMATE",
-        "start": 114,
-        "height": "mid"
+        "start": 114
       },
       {
         "clue": "Run-down apartment bldg.",
         "answer": "TENEMENT",
-        "start": 120,
-        "height": "inner"
+        "start": 120
       },
       {
         "clue": "Whole; complete",
         "answer": "ENTIRE",
-        "start": 125,
-        "height": "full"
+        "start": 125
       },
       {
         "clue": "Worn out",
         "answer": "TIRED",
-        "start": 127,
-        "height": "mid"
+        "start": 127
       },
       {
         "clue": "Giant California tree",
         "answer": "REDWOOD",
-        "start": 129,
-        "height": "inner"
+        "start": 129
       },
       {
         "clue": "Stiff; not flexible",
         "answer": "WOODEN",
-        "start": 132,
-        "height": "full"
+        "start": 132
       },
       {
         "clue": "Never-ending",
         "answer": "ENDLESS",
-        "start": 136,
-        "height": "mid"
+        "start": 136
       },
       {
         "clue": "Smaller; inferior",
         "answer": "LESSER",
-        "start": 139,
-        "height": "inner"
+        "start": 139
       },
       {
         "clue": "Soil wear-away",
         "answer": "EROSION",
-        "start": 143,
-        "height": "full"
+        "start": 143
       },
       {
         "clue": "Charge (atoms)",
         "answer": "IONIZE",
-        "start": 147,
-        "height": "mid"
+        "start": 147
       }
     ]
   },
@@ -1121,38 +959,32 @@
     "words": [{
         "clue": "Chain of sea islands",
         "answer": "ARCHIPELAGO",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Shallow pool behind a reef",
         "answer": "LAGOON",
-        "start": 8,
-        "height": "mid"
+        "start": 8
       },
       {
         "clue": "Heading toward shore, say",
         "answer": "ONTO",
-        "start": 12,
-        "height": "inner"
+        "start": 12
       },
       {
         "clue": "Vast body water",
         "answer": "OCEAN",
-        "start": 15,
-        "height": "full"
+        "start": 15
       },
       {
         "clue": "Heavy object dropped to hold a boat",
         "answer": "ANCHOR",
-        "start": 18,
-        "height": "mid"
+        "start": 18
       },
       {
         "clue": "Where sea seems to meet sky",
         "answer": "HORIZON",
-        "start": 21,
-        "height": "full"
+        "start": 21
       }
     ]
   },
@@ -1163,602 +995,503 @@
     "words": [{
         "clue": "Ręczna lampa",
         "answer": "LATARKA",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Przewód elektryczny",
         "answer": "KABEL",
-        "start": 6,
-        "height": "mid"
+        "start": 6
       },
       {
         "clue": "Poziomy element konstrukcji",
         "answer": "BELKA",
-        "start": 8,
-        "height": "inner"
+        "start": 8
       },
       {
         "clue": "Napój z palonych ziaren",
         "answer": "KAWA",
-        "start": 11,
-        "height": "full"
+        "start": 11
       },
       {
         "clue": "Naczynie na zupę",
         "answer": "WAZA",
-        "start": 13,
-        "height": "mid"
+        "start": 13
       },
       {
         "clue": "Warowna siedziba króla",
         "answer": "ZAMEK",
-        "start": 15,
-        "height": "inner"
+        "start": 15
       },
       {
         "clue": "Powierzchnia do wyświetlania obrazu",
         "answer": "EKRAN",
-        "start": 18,
-        "height": "full"
+        "start": 18
       },
       {
         "clue": "Egzotyczny owoc o kolczastej skórce",
         "answer": "ANANAS",
-        "start": 21,
-        "height": "mid"
+        "start": 21
       },
       {
         "clue": "Przewlekła choroba układu oddechowego",
         "answer": "ASTMA",
-        "start": 25,
-        "height": "inner"
+        "start": 25
       },
       {
         "clue": "Graficzny obraz terytorium",
         "answer": "MAPA",
-        "start": 28,
-        "height": "full"
+        "start": 28
       },
       {
         "clue": "Czarno-biały niedźwiedź z Chin",
         "answer": "PANDA",
-        "start": 30,
-        "height": "mid"
+        "start": 30
       },
       {
         "clue": "Elegancka pani",
         "answer": "DAMA",
-        "start": 33,
-        "height": "inner"
+        "start": 33
       },
       {
         "clue": "Osoba malująca obrazy",
         "answer": "MALARZ",
-        "start": 35,
-        "height": "full"
+        "start": 35
       },
       {
         "clue": "Przedmiot lub sprawa",
         "answer": "RZECZ",
-        "start": 39,
-        "height": "mid"
+        "start": 39
       },
       {
         "clue": "Nakrycie głowy na zimę",
         "answer": "CZAPKA",
-        "start": 42,
-        "height": "inner"
+        "start": 42
       }
     ]
   },
   {
     "dateKey": "2025-12-16",
-    "title": "Winter Thread",
     "type": "chain",
     "palette": "ocean",
     "words": [{
         "clue": "Permanently frozen ground",
         "answer": "PERMAFROST",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Depth where soil freezes",
         "answer": "FROSTLINE",
-        "start": 6,
-        "height": "mid"
+        "start": 6
       },
       {
         "clue": "Straight, like ski tracks",
         "answer": "LINEAR",
-        "start": 11,
-        "height": "full"
+        "start": 11
       },
       {
         "clue": "Hat piece that warms ears",
         "answer": "EARFLAP",
-        "start": 14,
-        "height": "inner"
+        "start": 14
       },
       {
         "clue": "Arctic region of Finland",
         "answer": "LAPLAND",
-        "start": 18,
-        "height": "full"
+        "start": 18
       },
       {
         "clue": "Snowy scene, broad view",
         "answer": "LANDSCAPE",
-        "start": 21,
-        "height": "mid"
+        "start": 21
       },
       {
         "clue": "Small Arctic forage fish",
         "answer": "CAPELIN",
-        "start": 26,
-        "height": "full"
+        "start": 26
       },
       {
         "clue": "Stay on, like winter chill",
         "answer": "LINGER",
-        "start": 30,
-        "height": "mid"
+        "start": 30
       },
       {
         "clue": "Cold-causing microbe",
         "answer": "GERM",
-        "start": 33,
-        "height": "full"
+        "start": 33
       },
       {
         "clue": "Stoat with white winter coat",
         "answer": "ERMINE",
-        "start": 34,
-        "height": "inner"
+        "start": 34
       },
       {
         "clue": "High alpine snowfield",
         "answer": "NEVE",
-        "start": 38,
-        "height": "full"
+        "start": 38
       },
       {
         "clue": "Pine that stays green in snow",
         "answer": "EVERGREEN",
-        "start": 39,
-        "height": "mid"
+        "start": 39
       },
       {
         "clue": "Large Arctic island nation",
         "answer": "GREENLAND",
-        "start": 43,
-        "height": "full"
+        "start": 43
       },
       {
         "clue": "Sudden downhill snow slide",
         "answer": "LANDSLIDE",
-        "start": 48,
-        "height": "inner"
+        "start": 48
       }
     ]
   },
   {
-    "title": "Snowy Sequence",
+    "dateKey": "2025-12-16",
     "type": "chain",
     "palette": "classic",
-    "dateKey": "2025-12-16",
     "words": [{
         "clue": "Season of snow",
         "answer": "WINTER",
-        "start": 1,
-        "height": "mid"
+        "start": 1
       },
       {
         "clue": "Landscape features",
         "answer": "TERRAIN",
-        "start": 4,
-        "height": "full"
+        "start": 4
       },
       {
         "clue": "Slicker for storms",
         "answer": "RAINCOAT",
-        "start": 7,
-        "height": "mid"
+        "start": 7
       },
       {
         "clue": "Layer of frost",
         "answer": "COATING",
-        "start": 11,
-        "height": "full"
+        "start": 11
       },
       {
         "clue": "Bar of gold",
         "answer": "INGOT",
-        "start": 15,
-        "height": "inner"
+        "start": 15
       },
       {
         "clue": "Pointed arch style",
         "answer": "GOTHIC",
-        "start": 17,
-        "height": "full"
+        "start": 17
       },
       {
         "clue": "Back country hillbilly",
         "answer": "HICK",
-        "start": 20,
-        "height": "mid"
+        "start": 20
       },
       {
         "clue": "Pot for tea water",
         "answer": "KETTLE",
-        "start": 23,
-        "height": "inner"
+        "start": 23
       },
       {
         "clue": "Citrus for tea",
         "answer": "LEMON",
-        "start": 27,
-        "height": "full"
+        "start": 27
       },
       {
         "clue": "Scary beast like a Yeti",
         "answer": "MONSTER",
-        "start": 29,
-        "height": "mid"
+        "start": 29
       },
       {
         "clue": "Sound system",
         "answer": "STEREO",
-        "start": 32,
-        "height": "inner"
+        "start": 32
       },
       {
         "clue": "Start business again",
         "answer": "REOPEN",
-        "start": 35,
-        "height": "full"
+        "start": 35
       },
       {
         "clue": "Tuxedoed bird",
         "answer": "PENGUIN",
-        "start": 38,
-        "height": "mid"
+        "start": 38
       },
       {
         "clue": "___ pig (small pet)",
         "answer": "GUINEA",
-        "start": 41,
-        "height": "inner"
+        "start": 41
       },
       {
         "clue": "Close by",
         "answer": "NEAR",
-        "start": 44,
-        "height": "full"
+        "start": 44
       },
       {
         "clue": "North Pole region",
         "answer": "ARCTIC",
-        "start": 46,
-        "height": "mid"
+        "start": 46
       }
     ]
   },
   {
-    "title": "Summer",
+    "dateKey": "2025-12-22",
     "type": "chain",
     "palette": "greens",
-    "dateKey": "2025-12-22",
     "words": [{
         "clue": "Midday summer snooze",
         "answer": "SIESTA",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Summer glow",
         "answer": "TAN",
-        "start": 5,
-        "height": "mid"
+        "start": 5
       },
       {
         "clue": "Keeps a boat in place",
         "answer": "ANCHOR",
-        "start": 6,
-        "height": "inner"
+        "start": 6
       },
       {
         "clue": "Citrus in a beach cooler",
         "answer": "ORANGE",
-        "start": 10,
-        "height": "full"
+        "start": 10
       },
       {
         "clue": "Italian-style summer scoop",
         "answer": "GELATO",
-        "start": 14,
-        "height": "mid"
+        "start": 14
       },
       {
         "clue": "Amphibian by a summer pond",
         "answer": "TOAD",
-        "start": 18,
-        "height": "full"
+        "start": 18
       },
       {
         "clue": "Big summer trip, say",
         "answer": "ADVENTURE",
-        "start": 20,
-        "height": "mid"
+        "start": 20
       },
       {
         "clue": "Hot dog topping at a cookout",
         "answer": "RELISH",
-        "start": 27,
-        "height": "full"
+        "start": 27
       },
       {
         "clue": "Where waves meet sand",
         "answer": "SHORE",
-        "start": 31,
-        "height": "mid"
+        "start": 31
       },
       {
         "clue": "Herb in a summer pizza",
         "answer": "OREGANO",
-        "start": 33,
-        "height": "full"
+        "start": 33
       },
       {
         "clue": "Often the day's hottest hour",
         "answer": "NOON",
-        "start": 38,
-        "height": "mid"
+        "start": 38
       },
       {
         "clue": "Burger add-on at a barbecue",
         "answer": "ONION",
-        "start": 40,
-        "height": "full"
+        "start": 40
       },
       {
         "clue": "Kind of radiation from strong sun",
         "answer": "IONIZING",
-        "start": 42,
-        "height": "mid"
+        "start": 42
       },
       {
         "clue": "Summer school subject, maybe",
         "answer": "GRAMMAR",
-        "start": 49,
-        "height": "full"
+        "start": 49
       },
       {
         "clue": "Dock full of boats",
         "answer": "MARINA",
-        "start": 53,
-        "height": "mid"
+        "start": 53
       },
       {
         "clue": "Short hammock rest",
         "answer": "NAP",
-        "start": 57,
-        "height": "full"
+        "start": 57
       },
       {
         "clue": "Stone fruit in summer jam",
         "answer": "APRICOT",
-        "start": 58,
-        "height": "inner"
+        "start": 58
       },
       {
         "clue": "Light fabric for warm-weather tees",
         "answer": "COTTON",
-        "start": 62,
-        "height": "full"
+        "start": 62
       },
       {
         "clue": "Part that tastes the ice cream",
         "answer": "TONGUE",
-        "start": 65,
-        "height": "mid"
+        "start": 65
       },
       {
         "clue": "Like an unforgettable summer trip",
         "answer": "EPIC",
-        "start": 70,
-        "height": "full"
+        "start": 70
       },
       {
         "clue": "Meal on a blanket",
         "answer": "PICNIC",
-        "start": 71,
-        "height": "mid"
+        "start": 71
       },
       {
         "clue": "Cooler filler",
         "answer": "ICE",
-        "start": 75,
-        "height": "full"
+        "start": 75
       },
       {
         "clue": "Fourth of July, e.g.",
         "answer": "CELEBRATION",
-        "start": 76,
-        "height": "inner"
+        "start": 76
       },
       {
         "clue": "Column style on a beach house",
         "answer": "IONIC",
-        "start": 84,
-        "height": "full"
+        "start": 84
       },
       {
         "clue": "Fishing bait tossed overboard",
         "answer": "CHUM",
-        "start": 88,
-        "height": "mid"
+        "start": 88
       },
       {
         "clue": "Muggy, like August air",
         "answer": "HUMID",
-        "start": 89,
-        "height": "full"
+        "start": 89
       },
       {
         "clue": "High-sun hour",
         "answer": "MIDDAY",
-        "start": 91,
-        "height": "inner"
+        "start": 91
       },
       {
         "clue": "What lasts late in June",
         "answer": "DAYLIGHT",
-        "start": 94,
-        "height": "full"
+        "start": 94
       },
       {
         "clue": "Flash in a summer storm",
         "answer": "LIGHTNING",
-        "start": 97,
-        "height": "mid"
+        "start": 97
       }
     ]
   },
   {
-    "title": "Sample",
+    "dateKey": "2025-12-23",
     "type": "chain",
     "palette": "greens",
-    "dateKey": "2025-12-23",
     "words": [{
         "clue": "Spy, perhaps",
         "answer": "AGENT",
-        "start": 1,
-        "height": "mid"
+        "start": 1
       },
       {
         "clue": "Doorway; submission",
         "answer": "ENTRY",
-        "start": 3,
-        "height": "inner"
+        "start": 3
       },
       {
         "clue": "Hard to endure",
         "answer": "TRYING",
-        "start": 5,
-        "height": "full"
+        "start": 5
       },
       {
         "clue": "Majestic splendor",
         "answer": "GRANDEUR",
-        "start": 10,
-        "height": "mid"
+        "start": 10
       },
       {
         "clue": "Paris's continent",
         "answer": "EUROPE",
-        "start": 15,
-        "height": "full"
+        "start": 15
       },
       {
         "clue": "Not shut",
         "answer": "OPEN",
-        "start": 18,
-        "height": "mid"
+        "start": 18
       },
       {
         "clue": "Coordinated outfit or group",
         "answer": "ENSEMBLE",
-        "start": 20,
-        "height": "inner"
+        "start": 20
       },
       {
         "clue": "45-minute class, maybe",
         "answer": "LESSON",
-        "start": 26,
-        "height": "full"
+        "start": 26
       },
       {
         "clue": "Multi-movement piano piece",
         "answer": "SONATA",
-        "start": 29,
-        "height": "mid"
+        "start": 29
       },
       {
         "clue": "Director's try",
         "answer": "TAKE",
-        "start": 33,
-        "height": "full"
+        "start": 33
       },
       {
         "clue": "Actress Karen ___",
         "answer": "AKERS",
-        "start": 34,
-        "height": "inner"
+        "start": 34
       },
       {
         "clue": "Clever",
         "answer": "SMART",
-        "start": 38,
-        "height": "full"
+        "start": 38
       },
       {
         "clue": "Painter, say",
         "answer": "ARTIST",
-        "start": 40,
-        "height": "mid"
+        "start": 40
       },
       {
         "clue": "Bus sign",
         "answer": "STOP",
-        "start": 44,
-        "height": "full"
+        "start": 44
       },
       {
         "clue": "Subject of discussion",
         "answer": "TOPIC",
-        "start": 45,
-        "height": "inner"
+        "start": 45
       },
       {
         "clue": "Movie, informally",
         "answer": "PICTURE",
-        "start": 47,
-        "height": "mid"
+        "start": 47
       },
       {
         "clue": "Background actor",
         "answer": "EXTRA",
-        "start": 53,
-        "height": "full"
+        "start": 53
       },
       {
         "clue": "Cross",
         "answer": "TRAVERSE",
-        "start": 55,
-        "height": "mid"
+        "start": 55
       },
       {
         "clue": "Oceans",
         "answer": "SEAS",
-        "start": 61,
-        "height": "full"
+        "start": 61
       },
       {
         "clue": "Toward sunrise",
         "answer": "EASTWARD",
-        "start": 62,
-        "height": "inner"
+        "start": 62
       }
     ]
   },
 {
-  "title": "one",
+  "dateKey": "2025-12-24",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2025-12-24",
   "words": [
     {
       "clue": "Whole bread unit",
@@ -1848,10 +1581,9 @@
   ]
 },
 {
-  "title": "minus",
+  "dateKey": "2025-12-25",
   "type": "chain",
   "palette": "classic",
-  "dateKey": "2025-12-25",
   "words": [
     {
       "clue": "Nature buff",
@@ -1936,131 +1668,110 @@
   ]
 },
 {
-    "title": "aa",
+    "dateKey": "2025-12-26",
     "type": "chain",
     "palette": "test",
-    "dateKey": "2025-12-26",
     "words": [{
         "clue": "Spaghetti, for one",
         "answer": "PASTA",
-        "start": 1,
-        "height": "full"
+        "start": 1
       },
       {
         "clue": "Postage square",
         "answer": "STAMP",
-        "start": 3,
-        "height": "mid"
+        "start": 3
       },
       {
         "clue": "More than enough",
         "answer": "AMPLE",
-        "start": 5,
-        "height": "inner"
+        "start": 5
       },
       {
         "clue": "Distance measurement",
         "answer": "LENGTH",
-        "start": 8,
-        "height": "full"
+        "start": 8
       },
       {
         "clue": "Force forward",
         "answer": "THRUST",
-        "start": 12,
-        "height": "mid"
+        "start": 12
       },
       {
         "clue": "Potato or rice component",
         "answer": "STARCH",
-        "start": 16,
-        "height": "inner"
+        "start": 16
       },
       {
         "clue": "Blacken on the grill",
         "answer": "CHAR",
-        "start": 20,
-        "height": "full"
+        "start": 20
       },
       {
         "clue": "Square footage, for one",
         "answer": "AREA",
-        "start": 22,
-        "height": "mid"
+        "start": 22
       },
       {
         "clue": "Extend an arm",
         "answer": "REACH",
-        "start": 23,
-        "height": "inner"
+        "start": 23
       },
       {
         "clue": "Cocoa-based treat",
         "answer": "CHOCOLATE",
-        "start": 26,
-        "height": "full"
+        "start": 26
       },
       {
         "clue": "Highest male voice",
         "answer": "TENOR",
-        "start": 33,
-        "height": "mid"
+        "start": 33
       },
       {
         "clue": "Path of a planet",
         "answer": "ORBIT",
-        "start": 36,
-        "height": "inner"
+        "start": 36
       },
       {
         "clue": "Nip or nibble",
         "answer": "BITE",
-        "start": 38,
-        "height": "full"
+        "start": 38
       },
       {
         "clue": "Not just theoretical, as details",
         "answer": "TECHNICAL",
-        "start": 40,
-        "height": "mid"
+        "start": 40
       },
       {
         "clue": "Ring on the phone",
         "answer": "CALL",
-        "start": 46,
-        "height": "inner"
+        "start": 46
       },
       {
         "clue": "Kids' weekly money, say",
         "answer": "ALLOWANCES",
-        "start": 47,
-        "height": "full"
+        "start": 47
       },
       {
         "clue": "Latin \"to be\"",
         "answer": "ESSE",
-        "start": 55,
-        "height": "mid"
+        "start": 55
       },
       {
         "clue": "Chair at a table",
         "answer": "SEAT",
-        "start": 57,
-        "height": "inner"
+        "start": 57
       },
       {
         "clue": "Dining",
         "answer": "EATING",
-        "start": 58,
-        "height": "full"
+        "start": 58
       }
     ]
   },
   {
-  "title": "two",
+  "dateKey": "2025-12-27",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2025-12-27",
   "words": [
     {
       "clue": "Way to obtain or enter.",
@@ -2170,10 +1881,9 @@
   ]
 },
 {
-  "title": "Three",
+  "dateKey": "2025-12-28",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2025-12-28",
   "words": [
     {
       "clue": "Baja California's country",
@@ -2273,10 +1983,9 @@
   ]
 },
 {
-  "title": "five",
+  "dateKey": "2025-12-29",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2025-12-29",
   "words": [
     {
       "clue": "Capital of India",
@@ -2371,10 +2080,9 @@
   ]
 },
 {
-  "title": "2025-12-30",
+  "dateKey": "2025-12-30",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2025-12-30",
   "words": [
     {
       "clue": "A long religious journey",
@@ -2479,10 +2187,9 @@
   ]
 },
 {
-  "title": "Wednesday, Dec 31, 2025",
+  "dateKey": "2025-12-31",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2025-12-31",
   "words": [
     {
       "clue": "Expel a foreigner",
@@ -2577,10 +2284,9 @@
   ]
 },
 {
-  "title": "Thrusday, Jan 1, 2026",
+  "dateKey": "2026-01-01",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2026-01-01",
   "words": [
     {
       "clue": "The universe in totality",
@@ -2678,7 +2384,6 @@
   "title": "FTUE",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "",
   "words": [
     {
       "clue": "common greeting",
@@ -2703,10 +2408,9 @@
   ]
 },
 {
-  "title": "Friday, Jan 2, 2026",
+  "dateKey": "2026-01-02",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2026-01-02",
   "words": [
     {
       "clue": "Way through the woods",
@@ -2796,10 +2500,9 @@
   ]
 },
 {
-  "title": "Saturday, Jan 3, 2026",
+  "dateKey": "2026-01-03",
   "type": "chain",
   "palette": "classic",
-  "dateKey": "2026-01-03",
   "words": [
     {
       "clue": "Apply color to a surface",
@@ -2894,10 +2597,9 @@
   ]
 },
 {
-  "title": "Sunday, Jan 4, 2026",
+  "dateKey": "2026-01-04",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2026-01-04",
   "words": [
     {
       "clue": "Painter's surface",
@@ -2987,10 +2689,9 @@
   ]
 },
 {
-  "title": "Monday, Jan 5, 2026",
+  "dateKey": "2026-01-05",
   "type": "chain",
   "palette": "greens",
-  "dateKey": "2026-01-05",
   "words": [
     {
       "clue": "A good rhythm",
@@ -3079,7 +2780,4 @@
     }
   ]
 }
-
-
-
 ]

@@ -13,7 +13,7 @@ const COLORS = [
 
 const HEIGHT_CYCLE = ["full", "mid", "inner"];
 
-const MODE = { OVERLAP: "overlap", CHAIN: "chain" };
+const MODE = { PUZZLE: "puzzle", CHAIN: "chain" };
 const VIEW = { PLAY: "play", CHAIN: "chain", BUILD: "build" };
 
 // ---- Remember last tab/view ----
@@ -654,6 +654,11 @@ const els = {
   builderTabChain: document.getElementById("builderTabChain"),
   builderTabPuzzle: document.getElementById("builderTabPuzzle"),
   builderTabOther: document.getElementById("builderTabOther"),
+  calWrap: document.getElementById("pCalendar"),
+  calGrid: document.getElementById("calGrid"),
+  calMonthLabel: document.getElementById("calMonthLabel"),
+  calPrev: document.getElementById("calPrev"),
+  calNext: document.getElementById("calNext"),
   logo: $("#logo"),
   panelPlay: $("#panelPlay"),
   panelBuild: $("#panelBuild"),
@@ -717,9 +722,6 @@ const els = {
   rows: $("#rows"),
   wAdd: $("#wAdd"),
   pDate: $("#pDate"),
-  ioTxt: $("#ioTxt"),
-  ioExp: $("#ioExp"),
-  ioImp: $("#ioImp"),
   bGrid: $("#bGrid"),
   status: $("#status"),
   solution: $("#solution"),
@@ -1573,7 +1575,7 @@ function clearAllUnlockedCells() {
 }
 
 function maybeToastPlayFilledWrong() {
-  if (play.mode !== MODE.OVERLAP || play.done) return;
+  if (play.mode !== MODE.PUZZLE || play.done) return;
   const filled = play.usr.every(Boolean);
   if (!filled) {
     lastPlayWarningKey = "";
@@ -2082,7 +2084,7 @@ const tr = (w) => {
   return v;
 };
 
-const isChainPuzzle = (p) => String(p?.type || MODE.OVERLAP) === MODE.CHAIN;
+const isChainPuzzle = (p) => String(p?.type || MODE.PUZZLE) === MODE.CHAIN;
 
 const inferDiffFromColor = () => "easy";
 
@@ -2163,7 +2165,8 @@ const normWord = (w, pType, opts = {}) => {
 
 
 const normPuzzle = (p) => {
-  const type = String(p?.type || MODE.OVERLAP);
+  const rawType = String(p?.type || MODE.PUZZLE);
+  const type = rawType === "overlap" ? MODE.PUZZLE : rawType; // legacy rename
   const wordsRaw = Array.isArray(p?.words) ? p.words : [];
   const fallback = { clue: "Clue", answer: "WORD", start: 1 };
   const timed = type === MODE.CHAIN ? false : true;
@@ -2190,9 +2193,14 @@ let lastNonBuildView = currentView === VIEW.BUILD ? VIEW.PLAY : currentView;
 let pausedForBuilder = false;
 const BUILDER_FILTER = { CHAIN: "chain", PUZZLE: "puzzle", OTHER: "other" };
 let builderFilterMode = BUILDER_FILTER.CHAIN;
+let builderCalMonth = (() => {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+})();
+const startOfMonthUtc = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
 
 const play = {
-  mode: MODE.OVERLAP,
+  mode: MODE.PUZZLE,
   entries: [],
   exp: [],
   usr: [],
@@ -2526,7 +2534,7 @@ function noteHardwareKeyboard() {
 
 // ---- Model ----
 function computed(p) {
-  const type = String(p?.type || MODE.OVERLAP);
+  const type = String(p?.type || MODE.PUZZLE);
 
   const entries = (p.words || [])
     .map((w, rawIdx) => {
@@ -2912,7 +2920,7 @@ function jumpToUnresolvedWord(delta) {
   });
 
   // Overlap mode: always jump by word starts, ignoring correctness/locks (done or not).
-  if (play.mode === MODE.OVERLAP) {
+  if (play.mode === MODE.PUZZLE) {
     const entries = (play.entries || []).slice().sort((a, b) => a.start - b.start);
     if (!entries.length) return;
     const idx = play.at;
@@ -3370,7 +3378,7 @@ function closeGiveUpModal() {
 function updatePlayControlsVisibility() {
   if (!els.reset || !els.reveal) return;
   // Only gate in play/overlap mode; otherwise leave visible.
-  if (play.mode !== MODE.OVERLAP || currentView !== VIEW.PLAY) {
+  if (play.mode !== MODE.PUZZLE || currentView !== VIEW.PLAY) {
     els.reset.style.display = "";
     els.reveal.style.display = "";
     if (els.nextPuzzleBtn) els.nextPuzzleBtn.style.display = "none";
@@ -3967,7 +3975,7 @@ function triggerSolveAnimation(entry) {
 }
 
 function triggerFullSolveAnimation() {
-  if (play.mode !== MODE.OVERLAP || !els.grid || play.fullSolveAnimated) return;
+  if (play.mode !== MODE.PUZZLE || !els.grid || play.fullSolveAnimated) return;
   const letters = Array.from(els.grid.querySelectorAll(".cell .letter")).sort((a, b) => {
     const pa = a.closest(".cell");
     const pb = b.closest(".cell");
@@ -4701,7 +4709,7 @@ function loadPuzzle(i) {
   applyPaletteToDom(p.palette);
   const m = computed(p);
 
-  play.mode = isChainPuzzle(p) ? MODE.CHAIN : MODE.OVERLAP;
+  play.mode = isChainPuzzle(p) ? MODE.CHAIN : MODE.PUZZLE;
   play.entries = m.entries;
 
   setCols(m.total);
@@ -4870,7 +4878,7 @@ function escapeAttr(s) {
 }
 
 function handleEnterKey() {
-  if (play.mode === MODE.OVERLAP) {
+  if (play.mode === MODE.PUZZLE) {
     if (play.done) return;
     const filled = play.usr.every(Boolean);
     if (!filled) {
@@ -4998,11 +5006,10 @@ function ensureBuilderModeUI() {
   if (!box) return;
 
   const wrap = document.createElement("div");
-  wrap.style.marginTop = "12px";
   wrap.innerHTML = `
     <label class="lab" for="pMode">Mode</label>
     <select class="sel" id="pMode">
-      <option value="${MODE.OVERLAP}">Overlap</option>
+      <option value="${MODE.PUZZLE}">Puzzle</option>
       <option value="${MODE.CHAIN}">Word Chain</option>
     </select>
 
@@ -5039,18 +5046,146 @@ function ensureBuilderModeUI() {
 
 }
 
-const filteredBuilderIndices = (mode = builderFilterMode) => {
+function builderDateFieldEls() {
+  return Array.from(document.querySelectorAll(".builder-date-input"));
+}
+
+function setBuilderDateFieldVisibility(show) {
+  builderDateFieldEls().forEach((el) => {
+    if (!el) return;
+    el.hidden = !show;
+  });
+}
+
+function chainPuzzleDateMap() {
+  const map = new Map();
+  puzzles.forEach((p, i) => {
+    if (!isChainPuzzle(p) || !p?.dateKey) return;
+    const key = p.dateKey;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(i);
+  });
+  return map;
+}
+
+function ensureBuilderCalMonth() {
+  if (!builderCalMonth || Number.isNaN(+builderCalMonth)) {
+    const d = new Date();
+    builderCalMonth = startOfMonthUtc(d);
+  }
+}
+
+function setBuilderCalMonthFromPuzzle(p) {
+  const key = p?.dateKey;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key || ""));
+  if (m) {
+    const y = +m[1];
+    const mo = +m[2] - 1;
+    if (y >= 1900 && mo >= 0 && mo <= 11) {
+      builderCalMonth = new Date(y, mo, 1);
+      return;
+    }
+  }
+  const dt = key ? dateFromKey(key) : null;
+  if (!dt || Number.isNaN(+dt)) return;
+  builderCalMonth = new Date(dt.getUTCFullYear(), dt.getUTCMonth(), 1);
+}
+
+function renderBuilderCalendar(activePuzzle = puzzles[pIdx]) {
+  if (!els.calGrid || !els.calMonthLabel) return;
+  ensureBuilderCalMonth();
+
+  const month = builderCalMonth;
+  const y = month.getFullYear();
+  const m = month.getMonth();
+  els.calMonthLabel.textContent = month.toLocaleString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+
+  const firstDow = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const map = chainPuzzleDateMap();
+  const activeKey = isChainPuzzle(activePuzzle) ? activePuzzle?.dateKey : null;
+  const pad = (n) => String(n).padStart(2, "0");
+
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < firstDow; i++) {
+    const padEl = document.createElement("span");
+    padEl.className = "cal-pad";
+    frag.appendChild(padEl);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${y}-${pad(m + 1)}-${pad(d)}`;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = d;
+    btn.dataset.date = key || "";
+    const matches = key ? map.get(key) : null;
+    if (matches?.length) {
+      btn.classList.add("has-puzzle");
+      btn.title = matches.map((idx) => puzzles[idx]?.title || "Untitled").join(", ");
+    } else {
+      btn.disabled = true;
+      btn.title = "No puzzle for this date";
+    }
+    if (activeKey && key === activeKey) {
+      btn.classList.add("is-active");
+      btn.setAttribute("aria-current", "date");
+    }
+    frag.appendChild(btn);
+  }
+
+  els.calGrid.replaceChildren(frag);
+}
+
+function showCalendar(activePuzzle = puzzles[pIdx]) {
+  if (!els.calWrap) return;
+  const firstDatedChainIdx = filteredBuilderIndices(BUILDER_FILTER.CHAIN)[0];
+  const fallbackPuzzle = typeof firstDatedChainIdx === "number" ? puzzles[firstDatedChainIdx] : null;
+  const target = isChainPuzzle(activePuzzle) && activePuzzle?.dateKey ? activePuzzle : fallbackPuzzle;
+  if (target?.dateKey) setBuilderCalMonthFromPuzzle(target);
+  else ensureBuilderCalMonth();
+
+  els.calWrap.hidden = false;
+  if (els.pSel) {
+    els.pSel.style.display = "none";
+    els.pSel.setAttribute("aria-hidden", "true");
+  }
+  renderBuilderCalendar(activePuzzle);
+}
+
+function hideCalendar() {
+  if (!els.calWrap) return;
+  els.calWrap.hidden = true;
+  if (els.pSel) {
+    els.pSel.style.display = "";
+    els.pSel.removeAttribute("aria-hidden");
+  }
+}
+
+function shiftBuilderCalendarMonth(deltaMonths) {
+  ensureBuilderCalMonth();
+  const y = builderCalMonth.getFullYear();
+  const m = builderCalMonth.getMonth();
+  builderCalMonth = new Date(y, m + deltaMonths, 1);
+  renderBuilderCalendar();
+}
+
+function filteredBuilderIndices(mode = builderFilterMode) {
   return puzzles
     .map((p, i) => ({ p, i }))
     .filter(({ p }) => {
-      const type = String(p?.type || MODE.OVERLAP);
-      if (mode === BUILDER_FILTER.CHAIN) return type === MODE.CHAIN;
+      const type = String(p?.type || MODE.PUZZLE);
+      const hasDate = !!p?.dateKey;
+      if (mode === BUILDER_FILTER.CHAIN) return type === MODE.CHAIN && hasDate;
       if (mode === BUILDER_FILTER.PUZZLE) return type !== MODE.CHAIN && type !== "other";
-      if (mode === BUILDER_FILTER.OTHER) return type === "other";
+      if (mode === BUILDER_FILTER.OTHER) return type === "other" || (type === MODE.CHAIN && !hasDate);
       return true;
     })
     .map(({ i }) => i);
-};
+}
 
 const updateBuilderTabsUI = () => {
   const set = (el, active) => {
@@ -5061,6 +5196,7 @@ const updateBuilderTabsUI = () => {
   set(els.builderTabChain, builderFilterMode === BUILDER_FILTER.CHAIN);
   set(els.builderTabPuzzle, builderFilterMode === BUILDER_FILTER.PUZZLE);
   set(els.builderTabOther, builderFilterMode === BUILDER_FILTER.OTHER);
+  document.documentElement?.setAttribute("data-builder-tab", builderFilterMode);
 };
 
 const setBuilderFilter = (mode) => {
@@ -5068,6 +5204,8 @@ const setBuilderFilter = (mode) => {
   builderFilterMode = mode;
   updateBuilderTabsUI();
   const filtered = filteredBuilderIndices(mode);
+  if (builderFilterMode === BUILDER_FILTER.CHAIN) showCalendar();
+  else hideCalendar();
   if (!filtered.length) {
     syncBuilder();
     return;
@@ -5106,8 +5244,15 @@ function syncBuilder() {
 
   const p = puzzles[pIdx];
   const chainMode = isChainPuzzle(p);
+  setBuilderDateFieldVisibility(chainMode);
 
-  if (bModeSel) bModeSel.value = p.type || MODE.OVERLAP;
+  if (builderFilterMode === BUILDER_FILTER.CHAIN) {
+    showCalendar(p);
+  } else {
+    hideCalendar();
+  }
+
+  if (bModeSel) bModeSel.value = p.type || MODE.PUZZLE;
   if (bPaletteSel) {
     const opts = PALETTES.map(
       (pal) => `<option value="${pal.id}" ${pal.id === p.palette ? "selected" : ""}>${escapeHtml(pal.label)}</option>`
@@ -5215,30 +5360,6 @@ els.pSave.addEventListener("click", () => {
   store.save();
   setDirty(false);
   loadPuzzle(pIdx);
-});
-
-// Export
-els.ioExp.addEventListener("click", async () => {
-  const t = JSON.stringify(stripHeightsFromPuzzles(puzzles), null, 2);
-  els.ioTxt.value = t;
-  try {
-    await navigator.clipboard.writeText(t);
-  } catch {}
-});
-
-// Import
-els.ioImp.addEventListener("click", () => {
-  try {
-    const arr = JSON.parse(els.ioTxt.value || "");
-    if (!Array.isArray(arr)) throw 0;
-    puzzles = arr.map((p) => normPuzzle(p));
-    store.save();
-    els.ioTxt.value = "";
-    loadPuzzle(0);
-    setTab(VIEW.BUILD);
-  } catch {
-    alert("Invalid JSON. Paste the exported puzzles JSON and try again.");
-  }
 });
 
 // Tabs
@@ -5448,7 +5569,7 @@ els.shareInline?.addEventListener("click", () => {
 const navActions = {
   cellPrev: () => {
     let tgt = null;
-    if (play.done || play.mode === MODE.OVERLAP) {
+    if (play.done || play.mode === MODE.PUZZLE) {
       tgt = clamp(play.at - 1, 0, play.n - 1);
     } else {
       tgt = findUnresolvedCell(play.at, -1);
@@ -5457,7 +5578,7 @@ const navActions = {
   },
   cellNext: () => {
     let tgt = null;
-    if (play.done || play.mode === MODE.OVERLAP) {
+    if (play.done || play.mode === MODE.PUZZLE) {
       tgt = clamp(play.at + 1, 0, play.n - 1);
     } else {
       tgt = findUnresolvedCell(play.at, +1);
@@ -5573,6 +5694,20 @@ els.resultsModal?.addEventListener("click", (e) => {
 });
 
 // Builder
+els.calPrev?.addEventListener("click", () => shiftBuilderCalendarMonth(-1));
+els.calNext?.addEventListener("click", () => shiftBuilderCalendarMonth(1));
+els.calGrid?.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-date]");
+  if (!btn || btn.disabled) return;
+  const key = btn.dataset.date;
+  if (!key) return;
+  const map = chainPuzzleDateMap();
+  const indices = map.get(key);
+  if (!indices?.length) return;
+  const targetIdx = indices.includes(pIdx) ? pIdx : indices[0];
+  loadPuzzle(targetIdx);
+});
+
 els.pSel.addEventListener("change", () => {
   pIdx = +els.pSel.value || 0;
   loadPuzzle(pIdx);
@@ -5593,14 +5728,18 @@ els.pDate?.addEventListener("input", () => {
   setDirty(true);
   store.save();
   setDirty(false);
+  if (builderFilterMode === BUILDER_FILTER.CHAIN && isChainPuzzle(puzzles[pIdx]) && puzzles[pIdx].dateKey) {
+    setBuilderCalMonthFromPuzzle(puzzles[pIdx]);
+  }
+  syncBuilder();
 });
 
 els.pNew.addEventListener("click", () => {
   const newType =
     builderFilterMode === BUILDER_FILTER.CHAIN
       ? MODE.CHAIN
-      : builderFilterMode === BUILDER_FILTER.PUZZLE
-      ? MODE.OVERLAP
+    : builderFilterMode === BUILDER_FILTER.PUZZLE
+      ? MODE.PUZZLE
       : "other";
   puzzles.push(
     normPuzzle({
