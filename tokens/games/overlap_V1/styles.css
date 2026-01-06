@@ -1686,10 +1686,6 @@ body[data-view="play"] {
     display: none;
 }
 
-.results__dialog{
-    /* height: max-content; */
-}
-
 .result-heading {
     text-align: center;
 }
@@ -1814,13 +1810,13 @@ body[data-view="play"] {
 
 
 
+/* Fix for shadow cutoff - but need to have a display: none; on the first thing to prevent the rest of the page from having a y scroll */
 
-
-.ftue-modal,
+/* .ftue-modal,
 .splash {
     position: absolute;
     height: 100vh!important;
-    /* overflow-y: hidden; */
+    display: none;
     
 }
 
@@ -1839,11 +1835,10 @@ body[data-view="play"] {
 }
         .ftue-modal__dialog,
         .splash__dialog {
-            /* iPhone/iPad (touch) fix here */
             height: calc(100svh - var(--layout-grid-margin)) !important;
         }
     }
-}
+} */
 
 
 /* Builder (kept intentionally simple + lightweight) */

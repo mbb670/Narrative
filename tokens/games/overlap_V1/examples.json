@@ -1,6 +1,6 @@
 [{
-    "title": "Under the Surface",
-    "type": "overlap",
+    "id": "Under the Surface",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Fury",
@@ -29,8 +29,8 @@
     ]
   },
   {
-    "title": "Moving Parts",
-    "type": "overlap",
+    "id": "Moving Parts",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Representation",
@@ -59,8 +59,8 @@
     ]
   },
   {
-    "title": "Just Right",
-    "type": "overlap",
+    "id": "Just Right",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Path around a planet",
@@ -89,8 +89,8 @@
     ]
   },
   {
-    "title": "Quiet Company",
-    "type": "overlap",
+    "id": "Quiet Company",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Backyard plot",
@@ -119,8 +119,8 @@
     ]
   },
   {
-    "title": "Local Detail",
-    "type": "overlap",
+    "id": "Local Detail",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Tiny screen dot",
@@ -149,8 +149,8 @@
     ]
   },
   {
-    "title": "Hosted",
-    "type": "overlap",
+    "id": "Hosted",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Milk container",
@@ -179,8 +179,8 @@
     ]
   },
   {
-    "title": "Edges and Origins",
-    "type": "overlap",
+    "id": "Edges and Origins",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Safe port",
@@ -209,8 +209,8 @@
     ]
   },
   {
-    "title": "Mixed Signals",
-    "type": "overlap",
+    "id": "Mixed Signals",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Soft fiber",
@@ -239,8 +239,8 @@
     ]
   },
   {
-    "title": "Keep It Down",
-    "type": "overlap",
+    "id": "Keep It Down",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Ancient imprint",
@@ -269,8 +269,8 @@
     ]
   },
   {
-    "title": "Bounce Back",
-    "type": "overlap",
+    "id": "Bounce Back",
+    "type": "puzzle",
     "palette": "sunrise",
     "words": [{
         "clue": "Corkscrew shape",
@@ -299,8 +299,8 @@
     ]
   },
   {
-    "title": "A Place for Everything",
-    "type": "overlap",
+    "id": "A Place for Everything",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Gallery building",
@@ -329,8 +329,8 @@
     ]
   },
   {
-    "title": "Bad Inbox",
-    "type": "overlap",
+    "id": "Bad Inbox",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Large body of water",
@@ -359,8 +359,8 @@
     ]
   },
   {
-    "title": "Deep Cuts",
-    "type": "overlap",
+    "id": "Deep Cuts",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Underground chamber",
@@ -389,8 +389,8 @@
     ]
   },
   {
-    "title": "Points of Interest",
-    "type": "overlap",
+    "id": "Points of Interest",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Bed cushion",
@@ -419,8 +419,8 @@
     ]
   },
   {
-    "title": "On Target",
-    "type": "overlap",
+    "id": "On Target",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Blue-tinted metal",
@@ -449,8 +449,8 @@
     ]
   },
   {
-    "title": "Night Out",
-    "type": "overlap",
+    "id": "Night Out",
+    "type": "puzzle",
     "palette": "sunrise",
     "words": [{
         "clue": "Bird of prey",
@@ -479,8 +479,8 @@
     ]
   },
   {
-    "title": "At the Horizon",
-    "type": "overlap",
+    "id": "At the Horizon",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Distant line",
@@ -509,8 +509,8 @@
     ]
   },
   {
-    "title": "Morning Routine",
-    "type": "overlap",
+    "id": "Morning Routine",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Breakfast staple",
@@ -539,8 +539,8 @@
     ]
   },
   {
-    "title": "Guided Tour",
-    "type": "overlap",
+    "id": "Guided Tour",
+    "type": "puzzle",
     "palette": "greens",
     "words": [{
         "clue": "Admiration",
@@ -569,8 +569,8 @@
     ]
   },
   {
-    "title": "Weatherproof",
-    "type": "overlap",
+    "id": "Weatherproof",
+    "type": "puzzle",
     "palette": "classic",
     "words": [{
         "clue": "Wet-weather jacket",
@@ -599,7 +599,7 @@
     ]
   },
   {
-    "title": "Super Long (Part 1/3)",
+    "id": "2025-12-16",
     "type": "chain",
     "palette": "greens",
     "words": [{
@@ -689,7 +689,7 @@
     ]
   },
   {
-    "title": "Super Long (Part 2/3)",
+    "id": "2025-12-17",
     "type": "chain",
     "palette": "sunrise",
     "words": [{
@@ -779,7 +779,7 @@
     ]
   },
   {
-    "title": "Super Long (Part 3/3)",
+    "id": "2025-12-18",
     "type": "chain",
     "palette": "classic",
     "words": [{
@@ -863,7 +863,7 @@
     ]
   },
   {
-    "title": "Super Long",
+    "id": "2025-12-19",
     "type": "chain",
     "palette": "classic",
     "words": [{
@@ -1115,7 +1115,7 @@
     ]
   },
   {
-    "title": "On the Water",
+    "id": "On the Water",
     "type": "chain",
     "palette": "classic",
     "words": [{
@@ -1157,7 +1157,7 @@
     ]
   },
   {
-    "title": "🇵🇱🇵🇱🇵🇱🇵🇱",
+    "id": "🇵🇱🇵🇱🇵🇱🇵🇱",
     "type": "chain",
     "palette": "greens",
     "words": [{
@@ -1253,8 +1253,7 @@
     ]
   },
   {
-    "dateKey": "2025-12-16",
-    "title": "Winter Thread",
+    "id": "2025-12-20",
     "type": "chain",
     "palette": "ocean",
     "words": [{
@@ -1344,10 +1343,9 @@
     ]
   },
   {
-    "title": "Snowy Sequence",
+    "id": "2025-12-21",
     "type": "chain",
     "palette": "classic",
-    "dateKey": "2025-12-16",
     "words": [{
         "clue": "Season of snow",
         "answer": "WINTER",
@@ -1447,10 +1445,9 @@
     ]
   },
   {
-    "title": "Summer",
+    "id": "2025-12-22",
     "type": "chain",
     "palette": "greens",
-    "dateKey": "2025-12-22",
     "words": [{
         "clue": "Midday summer snooze",
         "answer": "SIESTA",
@@ -1628,10 +1625,9 @@
     ]
   },
   {
-    "title": "Sample",
+    "id": "2025-12-23",
     "type": "chain",
     "palette": "greens",
-    "dateKey": "2025-12-23",
     "words": [{
         "clue": "Spy, perhaps",
         "answer": "AGENT",
@@ -1754,192 +1750,187 @@
       }
     ]
   },
-{
-  "title": "one",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2025-12-24",
-  "words": [
-    {
-      "clue": "Whole bread unit",
-      "answer": "LOAF",
-      "start": 1
-    },
-    {
-      "clue": "From a great distance",
-      "answer": "AFAR",
-      "start": 3
-    },
-    {
-      "clue": "Two-dimensional measure",
-      "answer": "AREA",
-      "start": 5
-    },
-    {
-      "clue": "Extend an arm",
-      "answer": "REACH",
-      "start": 6
-    },
-    {
-      "clue": "Relating to reactions in matter",
-      "answer": "CHEMICAL",
-      "start": 9
-    },
-    {
-      "clue": "First name of Rickman",
-      "answer": "ALAN",
-      "start": 15
-    },
-    {
-      "clue": "System of human speech",
-      "answer": "LANGUAGE",
-      "start": 16
-    },
-    {
-      "clue": "School subject with maps",
-      "answer": "GEOGRAPHY",
-      "start": 22
-    },
-    {
-      "clue": "Relating to the body",
-      "answer": "PHYSICAL",
-      "start": 28
-    },
-    {
-      "clue": "Related to food energy",
-      "answer": "CALORIC",
-      "start": 33
-    },
-    {
-      "clue": "Grain grown in paddies",
-      "answer": "RICE",
-      "start": 37
-    },
-    {
-      "clue": "Breakfast bowlful",
-      "answer": "CEREAL",
-      "start": 39
-    },
-    {
-      "clue": "First Greek letter",
-      "answer": "ALPHA",
-      "start": 43
-    },
-    {
-      "clue": "Safe harbor",
-      "answer": "HAVEN",
-      "start": 46
-    },
-    {
-      "clue": "Proteins that speed reactions",
-      "answer": "ENZYMES",
-      "start": 49
-    },
-    {
-      "clue": "Netlike material",
-      "answer": "MESH",
-      "start": 53
-    },
-    {
-      "clue": "Badminton birdie",
-      "answer": "SHUTTLE",
-      "start": 55
-    }
-  ]
-},
-{
-  "title": "minus",
-  "type": "chain",
-  "palette": "classic",
-  "dateKey": "2025-12-25",
-  "words": [
-    {
-      "clue": "Nature buff",
-      "answer": "NATURALIST",
-      "start": 1
-    },
-    {
-      "clue": "Plant support",
-      "answer": "STEM",
-      "start": 9
-    },
-    {
-      "clue": "Short fuse",
-      "answer": "TEMPER",
-      "start": 10
-    },
-    {
-      "clue": "Private",
-      "answer": "PERSONAL",
-      "start": 13
-    },
-    {
-      "clue": "Actor Rickman",
-      "answer": "ALAN",
-      "start": 19
-    },
-    {
-      "clue": "Scenic views",
-      "answer": "LANDSCAPES",
-      "start": 20
-    },
-    {
-      "clue": "Skin under hair",
-      "answer": "SCALP",
-      "start": 29
-    },
-    {
-      "clue": "Pack leader",
-      "answer": "ALPHA",
-      "start": 31
-    },
-    {
-      "clue": "Animal home",
-      "answer": "HABITAT",
-      "start": 34
-    },
-    {
-      "clue": "Traits",
-      "answer": "ATTRIBUTES",
-      "start": 39
-    },
-    {
-      "clue": "Pop quiz",
-      "answer": "TEST",
-      "start": 46
-    },
-    {
-      "clue": "Condition",
-      "answer": "STATE",
-      "start": 48
-    },
-    {
-      "clue": "Violent extremist",
-      "answer": "TERRORIST",
-      "start": 51
-    },
-    {
-      "clue": "Red light command",
-      "answer": "STOP",
-      "start": 58
-    },
-    {
-      "clue": "Land's contours",
-      "answer": "TOPOGRAPHY",
-      "start": 59
-    },
-    {
-      "clue": "Body-related",
-      "answer": "PHYSICAL",
-      "start": 66
-    }
-  ]
-},
-{
-    "title": "aa",
+  {
+    "id": "2025-12-24",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Whole bread unit",
+        "answer": "LOAF",
+        "start": 1
+      },
+      {
+        "clue": "From a great distance",
+        "answer": "AFAR",
+        "start": 3
+      },
+      {
+        "clue": "Two-dimensional measure",
+        "answer": "AREA",
+        "start": 5
+      },
+      {
+        "clue": "Extend an arm",
+        "answer": "REACH",
+        "start": 6
+      },
+      {
+        "clue": "Relating to reactions in matter",
+        "answer": "CHEMICAL",
+        "start": 9
+      },
+      {
+        "clue": "First name of Rickman",
+        "answer": "ALAN",
+        "start": 15
+      },
+      {
+        "clue": "System of human speech",
+        "answer": "LANGUAGE",
+        "start": 16
+      },
+      {
+        "clue": "School subject with maps",
+        "answer": "GEOGRAPHY",
+        "start": 22
+      },
+      {
+        "clue": "Relating to the body",
+        "answer": "PHYSICAL",
+        "start": 28
+      },
+      {
+        "clue": "Related to food energy",
+        "answer": "CALORIC",
+        "start": 33
+      },
+      {
+        "clue": "Grain grown in paddies",
+        "answer": "RICE",
+        "start": 37
+      },
+      {
+        "clue": "Breakfast bowlful",
+        "answer": "CEREAL",
+        "start": 39
+      },
+      {
+        "clue": "First Greek letter",
+        "answer": "ALPHA",
+        "start": 43
+      },
+      {
+        "clue": "Safe harbor",
+        "answer": "HAVEN",
+        "start": 46
+      },
+      {
+        "clue": "Proteins that speed reactions",
+        "answer": "ENZYMES",
+        "start": 49
+      },
+      {
+        "clue": "Netlike material",
+        "answer": "MESH",
+        "start": 53
+      },
+      {
+        "clue": "Badminton birdie",
+        "answer": "SHUTTLE",
+        "start": 55
+      }
+    ]
+  },
+  {
+    "id": "2025-12-25",
+    "type": "chain",
+    "palette": "classic",
+    "words": [{
+        "clue": "Nature buff",
+        "answer": "NATURALIST",
+        "start": 1
+      },
+      {
+        "clue": "Plant support",
+        "answer": "STEM",
+        "start": 9
+      },
+      {
+        "clue": "Short fuse",
+        "answer": "TEMPER",
+        "start": 10
+      },
+      {
+        "clue": "Private",
+        "answer": "PERSONAL",
+        "start": 13
+      },
+      {
+        "clue": "Actor Rickman",
+        "answer": "ALAN",
+        "start": 19
+      },
+      {
+        "clue": "Scenic views",
+        "answer": "LANDSCAPES",
+        "start": 20
+      },
+      {
+        "clue": "Skin under hair",
+        "answer": "SCALP",
+        "start": 29
+      },
+      {
+        "clue": "Pack leader",
+        "answer": "ALPHA",
+        "start": 31
+      },
+      {
+        "clue": "Animal home",
+        "answer": "HABITAT",
+        "start": 34
+      },
+      {
+        "clue": "Traits",
+        "answer": "ATTRIBUTES",
+        "start": 39
+      },
+      {
+        "clue": "Pop quiz",
+        "answer": "TEST",
+        "start": 46
+      },
+      {
+        "clue": "Condition",
+        "answer": "STATE",
+        "start": 48
+      },
+      {
+        "clue": "Violent extremist",
+        "answer": "TERRORIST",
+        "start": 51
+      },
+      {
+        "clue": "Red light command",
+        "answer": "STOP",
+        "start": 58
+      },
+      {
+        "clue": "Land's contours",
+        "answer": "TOPOGRAPHY",
+        "start": 59
+      },
+      {
+        "clue": "Body-related",
+        "answer": "PHYSICAL",
+        "start": 66
+      }
+    ]
+  },
+  {
+    "id": "2025-12-26",
     "type": "chain",
     "palette": "test",
-    "dateKey": "2025-12-26",
     "words": [{
         "clue": "Spaghetti, for one",
         "answer": "PASTA",
@@ -2057,1028 +2048,1481 @@
     ]
   },
   {
-  "title": "two",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2025-12-27",
-  "words": [
-    {
-      "clue": "Way to obtain or enter.",
-      "answer": "ACCESS",
-      "start": 1
-    },
-    {
-      "clue": "The nature of being.",
-      "answer": "ESSE",
-      "start": 4
-    },
-    {
-      "clue": "Pertaining to physical intimacy.",
-      "answer": "SEXUAL",
-      "start": 6
-    },
-    {
-      "clue": "Turing the cryptographer.",
-      "answer": "ALAN",
-      "start": 10
-    },
-    {
-      "clue": "A system of communication.",
-      "answer": "LANGUAGE",
-      "start": 11
-    },
-    {
-      "clue": "Lacking a trademark or brand.",
-      "answer": "GENERIC",
-      "start": 17
-    },
-    {
-      "clue": "North Atlantic island nation",
-      "answer": "ICELAND",
-      "start": 22
-    },
-    {
-      "clue": "Scenery of a region.",
-      "answer": "LANDSCAPE",
-      "start": 25
-    },
-    {
-      "clue": "The outer boundary or edge.",
-      "answer": "PERIMETER",
-      "start": 32
-    },
-    {
-      "clue": "Bomb-planting extremist.",
-      "answer": "TERRORIST",
-      "start": 38
-    },
-    {
-      "clue": "Main body of a plant.",
-      "answer": "STEM",
-      "start": 45
-    },
-    {
-      "clue": "Mood or disposition.",
-      "answer": "TEMPER",
-      "start": 46
-    },
-    {
-      "clue": "Private and individual.",
-      "answer": "PERSONAL",
-      "start": 49
-    },
-    {
-      "clue": "The first Greek letter.",
-      "answer": "ALPHA",
-      "start": 55
-    },
-    {
-      "clue": "Natural environment of an animal.",
-      "answer": "HABITAT",
-      "start": 58
-    },
-    {
-      "clue": "Character traits or qualities.",
-      "answer": "ATTRIBUTES",
-      "start": 63
-    },
-    {
-      "clue": "Examination",
-      "answer": "TEST",
-      "start": 70
-    },
-    {
-      "clue": "Condition of being, or a nation.",
-      "answer": "STATE",
-      "start": 72
-    },
-    {
-      "clue": "Relating to applied science.",
-      "answer": "TECHNICAL",
-      "start": 75
-    },
-    {
-      "clue": "Yell out, or use the phone.",
-      "answer": "CALL",
-      "start": 81
-    },
-    {
-      "clue": "Loyalty or commitment.",
-      "answer": "ALLEGIANCE",
-      "start": 82
-    }
-  ]
-},
-{
-  "title": "Three",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2025-12-28",
-  "words": [
-    {
-      "clue": "Baja California's country",
-      "answer": "MEXICO",
-      "start": 1
-    },
-    {
-      "clue": "Unconscious state",
-      "answer": "COMA",
-      "start": 5
-    },
-    {
-      "clue": "City on the Missouri River",
-      "answer": "OMAHA",
-      "start": 6
-    },
-    {
-      "clue": "Scholarly",
-      "answer": "ACADEMIC",
-      "start": 10
-    },
-    {
-      "clue": "Wealth used to generate more",
-      "answer": "CAPITAL",
-      "start": 17
-    },
-    {
-      "clue": "Story passed down",
-      "answer": "TALE",
-      "start": 21
-    },
-    {
-      "clue": "Inheritance for heirs",
-      "answer": "LEGACY",
-      "start": 23
-    },
-    {
-      "clue": "Produce, as returns",
-      "answer": "YIELD",
-      "start": 28
-    },
-    {
-      "clue": "One in the red",
-      "answer": "DEBTOR",
-      "start": 32
-    },
-    {
-      "clue": "By word of mouth",
-      "answer": "ORAL",
-      "start": 36
-    },
-    {
-      "clue": "Carolina capital",
-      "answer": "RALEIGH",
-      "start": 37
-    },
-    {
-      "clue": "Nail-driving tool",
-      "answer": "HAMMER",
-      "start": 43
-    },
-    {
-      "clue": "Capital on seven hills",
-      "answer": "ROME",
-      "start": 48
-    },
-    {
-      "clue": "Steakhouse offering",
-      "answer": "MEAT",
-      "start": 50
-    },
-    {
-      "clue": "Chow, casually",
-      "answer": "EATS",
-      "start": 51
-    },
-    {
-      "clue": "Postcard-perfect",
-      "answer": "SCENIC",
-      "start": 54
-    },
-    {
-      "clue": "Bit of web data or dessert",
-      "answer": "COOKIE",
-      "start": 59
-    },
-    {
-      "clue": "Ukriane Capital (old spelling)",
-      "answer": "KIEV",
-      "start": 62
-    },
-    {
-      "clue": "At all times",
-      "answer": "EVER",
-      "start": 64
-    }
-  ]
-},
-{
-  "title": "five",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2025-12-29",
-  "words": [
-    {
-      "clue": "Capital of India",
-      "answer": "DELHI",
-      "start": 1
-    },
-    {
-      "clue": "Short for \"history\"",
-      "answer": "HIST",
-      "start": 4
-    },
-    {
-      "clue": "Largest city in Turkey",
-      "answer": "ISTANBUL",
-      "start": 5
-    },
-    {
-      "clue": "Short news update",
-      "answer": "BULLETIN",
-      "start": 10
-    },
-    {
-      "clue": "Bring upon oneself",
-      "answer": "INCUR",
-      "start": 16
-    },
-    {
-      "clue": "City center",
-      "answer": "URBAN",
-      "start": 19
-    },
-    {
-      "clue": "Largest city in Alaska",
-      "answer": "ANCHORAGE",
-      "start": 22
-    },
-    {
-      "clue": "Swiss city on a lake",
-      "answer": "GENEVA",
-      "start": 29
-    },
-    {
-      "clue": "Tiny papal state",
-      "answer": "VATICAN",
-      "start": 33
-    },
-    {
-      "clue": "About human cultures",
-      "answer": "ANTHROPOLOGICAL",
-      "start": 38
-    },
-    {
-      "clue": "Chart of months and days",
-      "answer": "CALENDAR",
-      "start": 50
-    },
-    {
-      "clue": "Place for old records",
-      "answer": "ARCHIVE",
-      "start": 56
-    },
-    {
-      "clue": "\"Sin City\"",
-      "answer": "VEGAS",
-      "start": 61
-    },
-    {
-      "clue": "Help in an emergency",
-      "answer": "ASSISTANCE",
-      "start": 64
-    },
-    {
-      "clue": "Stretched out",
-      "answer": "ELONGATED",
-      "start": 73
-    },
-    {
-      "clue": "Completely lacking",
-      "answer": "DEVOID",
-      "start": 81
-    },
-    {
-      "clue": "Novel thought",
-      "answer": "IDEA",
-      "start": 85
-    },
-    {
-      "clue": "Bargain or arrangement",
-      "answer": "DEAL",
-      "start": 86
-    }
-  ]
-},
-{
-  "title": "2025-12-30",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2025-12-30",
-  "words": [
-    {
-      "clue": "A long religious journey",
-      "answer": "PILGRIMAGE",
-      "start": 1
-    },
-    {
-      "clue": "Someone acting for another",
-      "answer": "AGENT",
-      "start": 8
-    },
-    {
-      "clue": "A thing with independent existence",
-      "answer": "ENTITY",
-      "start": 10
-    },
-    {
-      "clue": "Kinds, categories, classifications",
-      "answer": "TYPES",
-      "start": 14
-    },
-    {
-      "clue": "Set up or found formally",
-      "answer": "ESTABLISH",
-      "start": 17
-    },
-    {
-      "clue": "Movement of goods",
-      "answer": "SHIPPING",
-      "start": 24
-    },
-    {
-      "clue": "A component in a recipe",
-      "answer": "INGREDIENT",
-      "start": 29
-    },
-    {
-      "clue": "Go into a room",
-      "answer": "ENTER",
-      "start": 36
-    },
-    {
-      "clue": "Political extremist using violence",
-      "answer": "TERRORIST",
-      "start": 38
-    },
-    {
-      "clue": "Vessel powered by hot, moist air",
-      "answer": "STEAMER",
-      "start": 45
-    },
-    {
-      "clue": "Nothing more than; simple",
-      "answer": "MERE",
-      "start": 49
-    },
-    {
-      "clue": "Arrive at a destination",
-      "answer": "REACH",
-      "start": 51
-    },
-    {
-      "clue": "Distinguishing trait or quality",
-      "answer": "CHARACTERISTIC",
-      "start": 54
-    },
-    {
-      "clue": "Admission pass or parking fine",
-      "answer": "TICKET",
-      "start": 65
-    },
-    {
-      "clue": "Guiding spirit of a culture",
-      "answer": "ETHOS",
-      "start": 69
-    },
-    {
-      "clue": "Friendly reception of visitors",
-      "answer": "HOSPITALITY",
-      "start": 71
-    },
-    {
-      "clue": "A particular sort or category",
-      "answer": "TYPE",
-      "start": 80
-    },
-    {
-      "clue": "A publication issued regularly",
-      "answer": "PERIODICAL",
-      "start": 82
-    },
-    {
-      "clue": "Make a phone connection",
-      "answer": "CALL",
-      "start": 89
-    },
-    {
-      "clue": "Symbolic story with a hidden meaning",
-      "answer": "ALLEGORY",
-      "start": 90
-    }
-  ]
-},
-{
-  "title": "Wednesday, Dec 31, 2025",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2025-12-31",
-  "words": [
-    {
-      "clue": "Expel a foreigner",
-      "answer": "DEPORT",
-      "start": 1
-    },
-    {
-      "clue": "Oregon's largest city",
-      "answer": "PORTLAND",
-      "start": 3
-    },
-    {
-      "clue": "Hidden explosive in dirt",
-      "answer": "LANDMINE",
-      "start": 7
-    },
-    {
-      "clue": "Interstellar cloud",
-      "answer": "NEBULA",
-      "start": 13
-    },
-    {
-      "clue": "Initiate; send off",
-      "answer": "LAUNCH",
-      "start": 17
-    },
-    {
-      "clue": "TikTok D'Amelio",
-      "answer": "CHARLI",
-      "start": 21
-    },
-    {
-      "clue": "Real-time internet broadcast",
-      "answer": "LIVESTREAM",
-      "start": 25
-    },
-    {
-      "clue": "Online video broadcaster",
-      "answer": "STREAMER",
-      "start": 29
-    },
-    {
-      "clue": "The United States",
-      "answer": "AMERICA",
-      "start": 33
-    },
-    {
-      "clue": "Nation bordering Thailand",
-      "answer": "CAMBODIA",
-      "start": 38
-    },
-    {
-      "clue": "Medical identification of illness",
-      "answer": "DIAGNOSIS",
-      "start": 43
-    },
-    {
-      "clue": "Vatican chapel",
-      "answer": "SISTINE",
-      "start": 49
-    },
-    {
-      "clue": "Israeli PM",
-      "answer": "NETANYAHU",
-      "start": 54
-    },
-    {
-      "clue": "Aid worker",
-      "answer": "HUMANITARIAN",
-      "start": 61
-    },
-    {
-      "clue": "Oscars Best Picture",
-      "answer": "ANORA",
-      "start": 71
-    },
-    {
-      "clue": "Hard to find",
-      "answer": "RARE",
-      "start": 74
-    },
-    {
-      "clue": "Large sports venue",
-      "answer": "ARENA",
-      "start": 75
-    },
-    {
-      "clue": "Pertaining to a whole country",
-      "answer": "NATIONAL",
-      "start": 78
-    }
-  ]
-},
-{
-  "title": "Thrusday, Jan 1, 2026",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2026-01-01",
-  "words": [
-    {
-      "clue": "The universe in totality",
-      "answer": "COSMOS",
-      "start": 1
-    },
-    {
-      "clue": "Norwegian capital",
-      "answer": "OSLO",
-      "start": 5
-    },
-    {
-      "clue": "Narrow opening or groove",
-      "answer": "SLOT",
-      "start": 6
-    },
-    {
-      "clue": "Canada's capital",
-      "answer": "OTTAWA",
-      "start": 8
-    },
-    {
-      "clue": "Rabbit burrow complex",
-      "answer": "WARREN",
-      "start": 12
-    },
-    {
-      "clue": "A set of reference volumes",
-      "answer": "ENCYCLOPEDIA",
-      "start": 16
-    },
-    {
-      "clue": "Regional form of a language",
-      "answer": "DIALECT",
-      "start": 25
-    },
-    {
-      "clue": "Quinine carbonated mixer",
-      "answer": "TONIC",
-      "start": 31
-    },
-    {
-      "clue": "Specialized",
-      "answer": "NICHE",
-      "start": 33
-    },
-    {
-      "clue": "Common Chinese surname",
-      "answer": "CHENG",
-      "start": 35
-    },
-    {
-      "clue": "Language spoken in London",
-      "answer": "ENGLISH",
-      "start": 37
-    },
-    {
-      "clue": "Severe suffering",
-      "answer": "HARDSHIPS",
-      "start": 43
-    },
-    {
-      "clue": "Extent of time or space",
-      "answer": "SPAN",
-      "start": 51
-    },
-    {
-      "clue": "Central American canal site",
-      "answer": "PANAMA",
-      "start": 52
-    },
-    {
-      "clue": "Financial profit",
-      "answer": "MARGIN",
-      "start": 56
-    },
-    {
-      "clue": "The inside; relating to home",
-      "answer": "INTERIOR",
-      "start": 60
-    },
-    {
-      "clue": "Central Florida tourist city",
-      "answer": "ORLANDO",
-      "start": 66
-    },
-    {
-      "clue": "Sphere of influence",
-      "answer": "DOMAIN",
-      "start": 71
-    }
-  ]
-},
-{
-  "title": "FTUE",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "",
-  "words": [
-    {
-      "clue": "common greeting",
-      "answer": "HELLO",
-      "start": 1
-    },
-    {
-      "clue": "A deep connection",
-      "answer": "LOVE",
-      "start": 4
-    },
-    {
-      "clue": "Our Home Planet",
-      "answer": "EARTH",
-      "start": 7
-    },
- {
-      "clue": "A seat for a king",
-      "answer": "THRONE",
-      "start": 10
-    }
-  ]
-},
-{
-  "title": "Friday, Jan 2, 2026",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2026-01-02",
-  "words": [
-    {
-      "clue": "Way through the woods",
-      "answer": "PATH",
-      "start": 1
-    },
-    {
-      "clue": "The thing you're pointing at",
-      "answer": "THIS",
-      "start": 3
-    },
-    {
-      "clue": "One who studies the past",
-      "answer": "HISTORIAN",
-      "start": 4
-    },
-    {
-      "clue": "Short personal story",
-      "answer": "ANECDOTE",
-      "start": 11
-    },
-    {
-      "clue": "Related to new gadgets",
-      "answer": "TECHNOLOGICAL",
-      "start": 17
-    },
-    {
-      "clue": "Letters from A to Z",
-      "answer": "ALPHABET",
-      "start": 28
-    },
-    {
-      "clue": "Once-imagined space medium",
-      "answer": "ETHER",
-      "start": 34
-    },
-    {
-      "clue": "Family legacy",
-      "answer": "HERITAGE",
-      "start": 36
-    },
-    {
-      "clue": "Meeting to-do list",
-      "answer": "AGENDA",
-      "start": 41
-    },
-    {
-      "clue": "Numbers and facts",
-      "answer": "DATA",
-      "start": 45
-    },
-    {
-      "clue": "System for classifying life",
-      "answer": "TAXONOMY",
-      "start": 47
-    },
-    {
-      "clue": "Magical in a spiritual way",
-      "answer": "MYSTICAL",
-      "start": 53
-    },
-    {
-      "clue": "Math with x's and y's",
-      "answer": "ALGEBRA",
-      "start": 59
-    },
-    {
-      "clue": "Limb on a tree",
-      "answer": "BRANCH",
-      "start": 63
-    },
-    {
-      "clue": "Record of events over time",
-      "answer": "CHRONICLE",
-      "start": 67
-    },
-    {
-      "clue": "Famous tale from long ago",
-      "answer": "LEGEND",
-      "start": 74
-    },
-    {
-      "clue": "Identity on many forms",
-      "answer": "GENDER",
-      "start": 76
-    }
-  ]
-},
-{
-  "title": "Saturday, Jan 3, 2026",
-  "type": "chain",
-  "palette": "classic",
-  "dateKey": "2026-01-03",
-  "words": [
-    {
-      "clue": "Apply color to a surface",
-      "answer": "PAINT",
-      "start": 1
-    },
-    {
-      "clue": "Secret governmental info",
-      "answer": "INTEL",
-      "start": 3
-    },
-    {
-      "clue": "Handset used to make calls",
-      "answer": "TELEPHONE",
-      "start": 5
-    },
-    {
-      "clue": "Strikingly unusual or foreign",
-      "answer": "EXOTIC",
-      "start": 13
-    },
-    {
-      "clue": "Reference a source",
-      "answer": "CITE",
-      "start": 18
-    },
-    {
-      "clue": "Single piece",
-      "answer": "ITEM",
-      "start": 19
-    },
-    {
-      "clue": "Newly rising or developing",
-      "answer": "EMERGENT",
-      "start": 21
-    },
-    {
-      "clue": "Necessarily involves",
-      "answer": "ENTAILS",
-      "start": 26
-    },
-    {
-      "clue": "Learned academic person",
-      "answer": "SCHOLAR",
-      "start": 32
-    },
-    {
-      "clue": "Eraser material",
-      "answer": "RUBBER",
-      "start": 38
-    },
-    {
-      "clue": "German capital",
-      "answer": "BERLIN",
-      "start": 41
-    },
-    {
-      "clue": "Queue",
-      "answer": "LINE",
-      "start": 44
-    },
-    {
-      "clue": "Local districts of a city",
-      "answer": "NEIGHBORHOODS",
-      "start": 46
-    },
-    {
-      "clue": "Things that rouse activity",
-      "answer": "STIMULI",
-      "start": 58
-    },
-    {
-      "clue": "The World Wide Web",
-      "answer": "INTERNET",
-      "start": 64
-    },
-    {
-      "clue": "Everlasting and ceaseless",
-      "answer": "ETERNAL",
-      "start": 70
-    },
-    {
-      "clue": "Largest city in New Mexico",
-      "answer": "ALBUQUERQUE",
-      "start": 75
-    },
-    {
-      "clue": "Large Canadian province",
-      "answer": "QUEBEC",
-      "start": 83
-    }
-  ]
-},
-{
-  "title": "Sunday, Jan 4, 2026",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2026-01-04",
-  "words": [
-    {
-      "clue": "Painter's surface",
-      "answer": "CANVAS",
-      "start": 1
-    },
-    {
-      "clue": "Huge in scope",
-      "answer": "VAST",
-      "start": 4
-    },
-    {
-      "clue": "Space for saving files",
-      "answer": "STORAGE",
-      "start": 6
-    },
-    {
-      "clue": "Category music",
-      "answer": "GENRE",
-      "start": 11
-    },
-    {
-      "clue": "Take a break",
-      "answer": "REST",
-      "start": 14
-    },
-    {
-      "clue": "Fashion sense",
-      "answer": "STYLE",
-      "start": 16
-    },
-    {
-      "clue": "First position in a race",
-      "answer": "LEAD",
-      "start": 19
-    },
-    {
-      "clue": "Ahead of the curve",
-      "answer": "ADVANCED",
-      "start": 21
-    },
-    {
-      "clue": "Sharp border",
-      "answer": "EDGE",
-      "start": 27
-    },
-    {
-      "clue": "Cogs and wheels",
-      "answer": "GEAR",
-      "start": 29
-    },
-    {
-      "clue": "Newspaper story",
-      "answer": "ARTICLE",
-      "start": 31
-    },
-    {
-      "clue": "Transparent",
-      "answer": "CLEAR",
-      "start": 35
-    },
-    {
-      "clue": "Terra",
-      "answer": "EARTH",
-      "start": 37
-    },
-    {
-      "clue": "Out-of-control panic",
-      "answer": "HYSTERIA",
-      "start": 41
-    },
-    {
-      "clue": "Cause-driven organizing",
-      "answer": "ACTIVISM",
-      "start": 48
-    },
-    {
-      "clue": "NYC borough",
-      "answer": "MANHATTAN",
-      "start": 55
-    },
-    {
-      "clue": "Corner in geometry",
-      "answer": "ANGLE",
-      "start": 62
-    }
-  ]
-},
-{
-  "title": "Monday, Jan 5, 2026",
-  "type": "chain",
-  "palette": "greens",
-  "dateKey": "2026-01-05",
-  "words": [
-    {
-      "clue": "A good rhythm",
-      "answer": "GROOVE",
-      "start": 1
-    },
-    {
-      "clue": "Finished, as a game",
-      "answer": "OVER",
-      "start": 4
-    },
-    {
-      "clue": "Everyday speech",
-      "answer": "VERNACULAR",
-      "start": 5
-    },
-    {
-      "clue": "Nobility as a class",
-      "answer": "ARISTOCRACY",
-      "start": 13
-    },
-    {
-      "clue": "Go around again",
-      "answer": "CYCLE",
-      "start": 22
-    },
-    {
-      "clue": "Even, not tilted",
-      "answer": "LEVEL",
-      "start": 25
-    },
-    {
-      "clue": "One after tenth",
-      "answer": "ELEVENTH",
-      "start": 28
-    },
-    {
-      "clue": "Central idea",
-      "answer": "THEME",
-      "start": 34
-    },
-    {
-      "clue": "Total chaos",
-      "answer": "MESS",
-      "start": 37
-    },
-    {
-      "clue": "Core quality",
-      "answer": "ESSENCE",
-      "start": 38
-    },
-    {
-      "clue": "Block from release",
-      "answer": "CENSOR",
-      "start": 43
-    },
-    {
-      "clue": "Big group of musicians",
-      "answer": "ORCHESTRA",
-      "start": 47
-    },
-    {
-      "clue": "Pulled muscle",
-      "answer": "STRAIN",
-      "start": 52
-    },
-    {
-      "clue": "Going up, as prices",
-      "answer": "INCREASING",
-      "start": 56
-    },
-    {
-      "clue": "Making music with words",
-      "answer": "SINGING",
-      "start": 62
-    },
-    {
-      "clue": "Fancy clothing",
-      "answer": "GARB",
-      "start": 68
-    },
-    {
-      "clue": "In chains, figuratively",
-      "answer": "BONDAGE",
-      "start": 71
-    }
-  ]
-}
+    "id": "2025-12-27",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Way to obtain or enter.",
+        "answer": "ACCESS",
+        "start": 1
+      },
+      {
+        "clue": "The nature of being.",
+        "answer": "ESSE",
+        "start": 4
+      },
+      {
+        "clue": "Pertaining to physical intimacy.",
+        "answer": "SEXUAL",
+        "start": 6
+      },
+      {
+        "clue": "Turing the cryptographer.",
+        "answer": "ALAN",
+        "start": 10
+      },
+      {
+        "clue": "A system of communication.",
+        "answer": "LANGUAGE",
+        "start": 11
+      },
+      {
+        "clue": "Lacking a trademark or brand.",
+        "answer": "GENERIC",
+        "start": 17
+      },
+      {
+        "clue": "North Atlantic island nation",
+        "answer": "ICELAND",
+        "start": 22
+      },
+      {
+        "clue": "Scenery of a region.",
+        "answer": "LANDSCAPE",
+        "start": 25
+      },
+      {
+        "clue": "The outer boundary or edge.",
+        "answer": "PERIMETER",
+        "start": 32
+      },
+      {
+        "clue": "Bomb-planting extremist.",
+        "answer": "TERRORIST",
+        "start": 38
+      },
+      {
+        "clue": "Main body of a plant.",
+        "answer": "STEM",
+        "start": 45
+      },
+      {
+        "clue": "Mood or disposition.",
+        "answer": "TEMPER",
+        "start": 46
+      },
+      {
+        "clue": "Private and individual.",
+        "answer": "PERSONAL",
+        "start": 49
+      },
+      {
+        "clue": "The first Greek letter.",
+        "answer": "ALPHA",
+        "start": 55
+      },
+      {
+        "clue": "Natural environment of an animal.",
+        "answer": "HABITAT",
+        "start": 58
+      },
+      {
+        "clue": "Character traits or qualities.",
+        "answer": "ATTRIBUTES",
+        "start": 63
+      },
+      {
+        "clue": "Examination",
+        "answer": "TEST",
+        "start": 70
+      },
+      {
+        "clue": "Condition of being, or a nation.",
+        "answer": "STATE",
+        "start": 72
+      },
+      {
+        "clue": "Relating to applied science.",
+        "answer": "TECHNICAL",
+        "start": 75
+      },
+      {
+        "clue": "Yell out, or use the phone.",
+        "answer": "CALL",
+        "start": 81
+      },
+      {
+        "clue": "Loyalty or commitment.",
+        "answer": "ALLEGIANCE",
+        "start": 82
+      }
+    ]
+  },
+  {
+    "id": "2025-12-28",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Baja California's country",
+        "answer": "MEXICO",
+        "start": 1
+      },
+      {
+        "clue": "Unconscious state",
+        "answer": "COMA",
+        "start": 5
+      },
+      {
+        "clue": "City on the Missouri River",
+        "answer": "OMAHA",
+        "start": 6
+      },
+      {
+        "clue": "Scholarly",
+        "answer": "ACADEMIC",
+        "start": 10
+      },
+      {
+        "clue": "Wealth used to generate more",
+        "answer": "CAPITAL",
+        "start": 17
+      },
+      {
+        "clue": "Story passed down",
+        "answer": "TALE",
+        "start": 21
+      },
+      {
+        "clue": "Inheritance for heirs",
+        "answer": "LEGACY",
+        "start": 23
+      },
+      {
+        "clue": "Produce, as returns",
+        "answer": "YIELD",
+        "start": 28
+      },
+      {
+        "clue": "One in the red",
+        "answer": "DEBTOR",
+        "start": 32
+      },
+      {
+        "clue": "By word of mouth",
+        "answer": "ORAL",
+        "start": 36
+      },
+      {
+        "clue": "Carolina capital",
+        "answer": "RALEIGH",
+        "start": 37
+      },
+      {
+        "clue": "Nail-driving tool",
+        "answer": "HAMMER",
+        "start": 43
+      },
+      {
+        "clue": "Capital on seven hills",
+        "answer": "ROME",
+        "start": 48
+      },
+      {
+        "clue": "Steakhouse offering",
+        "answer": "MEAT",
+        "start": 50
+      },
+      {
+        "clue": "Chow, casually",
+        "answer": "EATS",
+        "start": 51
+      },
+      {
+        "clue": "Postcard-perfect",
+        "answer": "SCENIC",
+        "start": 54
+      },
+      {
+        "clue": "Bit of web data or dessert",
+        "answer": "COOKIE",
+        "start": 59
+      },
+      {
+        "clue": "Ukriane Capital (old spelling)",
+        "answer": "KIEV",
+        "start": 62
+      },
+      {
+        "clue": "At all times",
+        "answer": "EVER",
+        "start": 64
+      }
+    ]
+  },
+  {
+    "id": "2025-12-29",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Capital of India",
+        "answer": "DELHI",
+        "start": 1
+      },
+      {
+        "clue": "Short for \"history\"",
+        "answer": "HIST",
+        "start": 4
+      },
+      {
+        "clue": "Largest city in Turkey",
+        "answer": "ISTANBUL",
+        "start": 5
+      },
+      {
+        "clue": "Short news update",
+        "answer": "BULLETIN",
+        "start": 10
+      },
+      {
+        "clue": "Bring upon oneself",
+        "answer": "INCUR",
+        "start": 16
+      },
+      {
+        "clue": "City center",
+        "answer": "URBAN",
+        "start": 19
+      },
+      {
+        "clue": "Largest city in Alaska",
+        "answer": "ANCHORAGE",
+        "start": 22
+      },
+      {
+        "clue": "Swiss city on a lake",
+        "answer": "GENEVA",
+        "start": 29
+      },
+      {
+        "clue": "Tiny papal state",
+        "answer": "VATICAN",
+        "start": 33
+      },
+      {
+        "clue": "About human cultures",
+        "answer": "ANTHROPOLOGICAL",
+        "start": 38
+      },
+      {
+        "clue": "Chart of months and days",
+        "answer": "CALENDAR",
+        "start": 50
+      },
+      {
+        "clue": "Place for old records",
+        "answer": "ARCHIVE",
+        "start": 56
+      },
+      {
+        "clue": "\"Sin City\"",
+        "answer": "VEGAS",
+        "start": 61
+      },
+      {
+        "clue": "Help in an emergency",
+        "answer": "ASSISTANCE",
+        "start": 64
+      },
+      {
+        "clue": "Stretched out",
+        "answer": "ELONGATED",
+        "start": 73
+      },
+      {
+        "clue": "Completely lacking",
+        "answer": "DEVOID",
+        "start": 81
+      },
+      {
+        "clue": "Novel thought",
+        "answer": "IDEA",
+        "start": 85
+      },
+      {
+        "clue": "Bargain or arrangement",
+        "answer": "DEAL",
+        "start": 86
+      }
+    ]
+  },
+  {
+    "id": "2025-12-30",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "A long religious journey",
+        "answer": "PILGRIMAGE",
+        "start": 1
+      },
+      {
+        "clue": "Someone acting for another",
+        "answer": "AGENT",
+        "start": 8
+      },
+      {
+        "clue": "A thing with independent existence",
+        "answer": "ENTITY",
+        "start": 10
+      },
+      {
+        "clue": "Kinds, categories, classifications",
+        "answer": "TYPES",
+        "start": 14
+      },
+      {
+        "clue": "Set up or found formally",
+        "answer": "ESTABLISH",
+        "start": 17
+      },
+      {
+        "clue": "Movement of goods",
+        "answer": "SHIPPING",
+        "start": 24
+      },
+      {
+        "clue": "A component in a recipe",
+        "answer": "INGREDIENT",
+        "start": 29
+      },
+      {
+        "clue": "Go into a room",
+        "answer": "ENTER",
+        "start": 36
+      },
+      {
+        "clue": "Political extremist using violence",
+        "answer": "TERRORIST",
+        "start": 38
+      },
+      {
+        "clue": "Vessel powered by hot, moist air",
+        "answer": "STEAMER",
+        "start": 45
+      },
+      {
+        "clue": "Nothing more than; simple",
+        "answer": "MERE",
+        "start": 49
+      },
+      {
+        "clue": "Arrive at a destination",
+        "answer": "REACH",
+        "start": 51
+      },
+      {
+        "clue": "Distinguishing trait or quality",
+        "answer": "CHARACTERISTIC",
+        "start": 54
+      },
+      {
+        "clue": "Admission pass or parking fine",
+        "answer": "TICKET",
+        "start": 65
+      },
+      {
+        "clue": "Guiding spirit of a culture",
+        "answer": "ETHOS",
+        "start": 69
+      },
+      {
+        "clue": "Friendly reception of visitors",
+        "answer": "HOSPITALITY",
+        "start": 71
+      },
+      {
+        "clue": "A particular sort or category",
+        "answer": "TYPE",
+        "start": 80
+      },
+      {
+        "clue": "A publication issued regularly",
+        "answer": "PERIODICAL",
+        "start": 82
+      },
+      {
+        "clue": "Make a phone connection",
+        "answer": "CALL",
+        "start": 89
+      },
+      {
+        "clue": "Symbolic story with a hidden meaning",
+        "answer": "ALLEGORY",
+        "start": 90
+      }
+    ]
+  },
+  {
+    "id": "2025-12-31",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Expel a foreigner",
+        "answer": "DEPORT",
+        "start": 1
+      },
+      {
+        "clue": "Oregon's largest city",
+        "answer": "PORTLAND",
+        "start": 3
+      },
+      {
+        "clue": "Hidden explosive in dirt",
+        "answer": "LANDMINE",
+        "start": 7
+      },
+      {
+        "clue": "Interstellar cloud",
+        "answer": "NEBULA",
+        "start": 13
+      },
+      {
+        "clue": "Initiate; send off",
+        "answer": "LAUNCH",
+        "start": 17
+      },
+      {
+        "clue": "TikTok D'Amelio",
+        "answer": "CHARLI",
+        "start": 21
+      },
+      {
+        "clue": "Real-time internet broadcast",
+        "answer": "LIVESTREAM",
+        "start": 25
+      },
+      {
+        "clue": "Online video broadcaster",
+        "answer": "STREAMER",
+        "start": 29
+      },
+      {
+        "clue": "The United States",
+        "answer": "AMERICA",
+        "start": 33
+      },
+      {
+        "clue": "Nation bordering Thailand",
+        "answer": "CAMBODIA",
+        "start": 38
+      },
+      {
+        "clue": "Medical identification of illness",
+        "answer": "DIAGNOSIS",
+        "start": 43
+      },
+      {
+        "clue": "Vatican chapel",
+        "answer": "SISTINE",
+        "start": 49
+      },
+      {
+        "clue": "Israeli PM",
+        "answer": "NETANYAHU",
+        "start": 54
+      },
+      {
+        "clue": "Aid worker",
+        "answer": "HUMANITARIAN",
+        "start": 61
+      },
+      {
+        "clue": "Oscars Best Picture",
+        "answer": "ANORA",
+        "start": 71
+      },
+      {
+        "clue": "Hard to find",
+        "answer": "RARE",
+        "start": 74
+      },
+      {
+        "clue": "Large sports venue",
+        "answer": "ARENA",
+        "start": 75
+      },
+      {
+        "clue": "Pertaining to a whole country",
+        "answer": "NATIONAL",
+        "start": 78
+      }
+    ]
+  },
+  {
+    "id": "2026-01-01",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "The universe in totality",
+        "answer": "COSMOS",
+        "start": 1
+      },
+      {
+        "clue": "Norwegian capital",
+        "answer": "OSLO",
+        "start": 5
+      },
+      {
+        "clue": "Narrow opening or groove",
+        "answer": "SLOT",
+        "start": 6
+      },
+      {
+        "clue": "Canada's capital",
+        "answer": "OTTAWA",
+        "start": 8
+      },
+      {
+        "clue": "Rabbit burrow complex",
+        "answer": "WARREN",
+        "start": 12
+      },
+      {
+        "clue": "A set of reference volumes",
+        "answer": "ENCYCLOPEDIA",
+        "start": 16
+      },
+      {
+        "clue": "Regional form of a language",
+        "answer": "DIALECT",
+        "start": 25
+      },
+      {
+        "clue": "Quinine carbonated mixer",
+        "answer": "TONIC",
+        "start": 31
+      },
+      {
+        "clue": "Specialized",
+        "answer": "NICHE",
+        "start": 33
+      },
+      {
+        "clue": "Common Chinese surname",
+        "answer": "CHENG",
+        "start": 35
+      },
+      {
+        "clue": "Language spoken in London",
+        "answer": "ENGLISH",
+        "start": 37
+      },
+      {
+        "clue": "Severe suffering",
+        "answer": "HARDSHIPS",
+        "start": 43
+      },
+      {
+        "clue": "Extent of time or space",
+        "answer": "SPAN",
+        "start": 51
+      },
+      {
+        "clue": "Central American canal site",
+        "answer": "PANAMA",
+        "start": 52
+      },
+      {
+        "clue": "Financial profit",
+        "answer": "MARGIN",
+        "start": 56
+      },
+      {
+        "clue": "The inside; relating to home",
+        "answer": "INTERIOR",
+        "start": 60
+      },
+      {
+        "clue": "Central Florida tourist city",
+        "answer": "ORLANDO",
+        "start": 66
+      },
+      {
+        "clue": "Sphere of influence",
+        "answer": "DOMAIN",
+        "start": 71
+      }
+    ]
+  },
+  {
+    "id": "FTUE",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "common greeting",
+        "answer": "HELLO",
+        "start": 1
+      },
+      {
+        "clue": "A deep connection",
+        "answer": "LOVE",
+        "start": 4
+      },
+      {
+        "clue": "Our Home Planet",
+        "answer": "EARTH",
+        "start": 7
+      },
+      {
+        "clue": "A seat for a king",
+        "answer": "THRONE",
+        "start": 10
+      }
+    ]
+  },
+  {
+    "id": "2026-01-02",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Way through the woods",
+        "answer": "PATH",
+        "start": 1
+      },
+      {
+        "clue": "The thing you're pointing at",
+        "answer": "THIS",
+        "start": 3
+      },
+      {
+        "clue": "One who studies the past",
+        "answer": "HISTORIAN",
+        "start": 4
+      },
+      {
+        "clue": "Short personal story",
+        "answer": "ANECDOTE",
+        "start": 11
+      },
+      {
+        "clue": "Related to new gadgets",
+        "answer": "TECHNOLOGICAL",
+        "start": 17
+      },
+      {
+        "clue": "Letters from A to Z",
+        "answer": "ALPHABET",
+        "start": 28
+      },
+      {
+        "clue": "Once-imagined space medium",
+        "answer": "ETHER",
+        "start": 34
+      },
+      {
+        "clue": "Family legacy",
+        "answer": "HERITAGE",
+        "start": 36
+      },
+      {
+        "clue": "Meeting to-do list",
+        "answer": "AGENDA",
+        "start": 41
+      },
+      {
+        "clue": "Numbers and facts",
+        "answer": "DATA",
+        "start": 45
+      },
+      {
+        "clue": "System for classifying life",
+        "answer": "TAXONOMY",
+        "start": 47
+      },
+      {
+        "clue": "Magical in a spiritual way",
+        "answer": "MYSTICAL",
+        "start": 53
+      },
+      {
+        "clue": "Math with x's and y's",
+        "answer": "ALGEBRA",
+        "start": 59
+      },
+      {
+        "clue": "Limb on a tree",
+        "answer": "BRANCH",
+        "start": 63
+      },
+      {
+        "clue": "Record of events over time",
+        "answer": "CHRONICLE",
+        "start": 67
+      },
+      {
+        "clue": "Famous tale from long ago",
+        "answer": "LEGEND",
+        "start": 74
+      },
+      {
+        "clue": "Identity on many forms",
+        "answer": "GENDER",
+        "start": 76
+      }
+    ]
+  },
+  {
+    "id": "2026-01-03",
+    "type": "chain",
+    "palette": "classic",
+    "words": [{
+        "clue": "Apply color to a surface",
+        "answer": "PAINT",
+        "start": 1
+      },
+      {
+        "clue": "Secret governmental info",
+        "answer": "INTEL",
+        "start": 3
+      },
+      {
+        "clue": "Handset used to make calls",
+        "answer": "TELEPHONE",
+        "start": 5
+      },
+      {
+        "clue": "Strikingly unusual or foreign",
+        "answer": "EXOTIC",
+        "start": 13
+      },
+      {
+        "clue": "Reference a source",
+        "answer": "CITE",
+        "start": 18
+      },
+      {
+        "clue": "Single piece",
+        "answer": "ITEM",
+        "start": 19
+      },
+      {
+        "clue": "Newly rising or developing",
+        "answer": "EMERGENT",
+        "start": 21
+      },
+      {
+        "clue": "Necessarily involves",
+        "answer": "ENTAILS",
+        "start": 26
+      },
+      {
+        "clue": "Learned academic person",
+        "answer": "SCHOLAR",
+        "start": 32
+      },
+      {
+        "clue": "Eraser material",
+        "answer": "RUBBER",
+        "start": 38
+      },
+      {
+        "clue": "German capital",
+        "answer": "BERLIN",
+        "start": 41
+      },
+      {
+        "clue": "Queue",
+        "answer": "LINE",
+        "start": 44
+      },
+      {
+        "clue": "Local districts of a city",
+        "answer": "NEIGHBORHOODS",
+        "start": 46
+      },
+      {
+        "clue": "Things that rouse activity",
+        "answer": "STIMULI",
+        "start": 58
+      },
+      {
+        "clue": "The World Wide Web",
+        "answer": "INTERNET",
+        "start": 64
+      },
+      {
+        "clue": "Everlasting and ceaseless",
+        "answer": "ETERNAL",
+        "start": 70
+      },
+      {
+        "clue": "Largest city in New Mexico",
+        "answer": "ALBUQUERQUE",
+        "start": 75
+      },
+      {
+        "clue": "Large Canadian province",
+        "answer": "QUEBEC",
+        "start": 83
+      }
+    ]
+  },
+  {
+    "id": "2026-01-04",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Painter's surface",
+        "answer": "CANVAS",
+        "start": 1
+      },
+      {
+        "clue": "Huge in scope",
+        "answer": "VAST",
+        "start": 4
+      },
+      {
+        "clue": "Space for saving files",
+        "answer": "STORAGE",
+        "start": 6
+      },
+      {
+        "clue": "Category music",
+        "answer": "GENRE",
+        "start": 11
+      },
+      {
+        "clue": "Take a break",
+        "answer": "REST",
+        "start": 14
+      },
+      {
+        "clue": "Fashion sense",
+        "answer": "STYLE",
+        "start": 16
+      },
+      {
+        "clue": "First position in a race",
+        "answer": "LEAD",
+        "start": 19
+      },
+      {
+        "clue": "Ahead of the curve",
+        "answer": "ADVANCED",
+        "start": 21
+      },
+      {
+        "clue": "Sharp border",
+        "answer": "EDGE",
+        "start": 27
+      },
+      {
+        "clue": "Cogs and wheels",
+        "answer": "GEAR",
+        "start": 29
+      },
+      {
+        "clue": "Newspaper story",
+        "answer": "ARTICLE",
+        "start": 31
+      },
+      {
+        "clue": "Transparent",
+        "answer": "CLEAR",
+        "start": 35
+      },
+      {
+        "clue": "Terra",
+        "answer": "EARTH",
+        "start": 37
+      },
+      {
+        "clue": "Out-of-control panic",
+        "answer": "HYSTERIA",
+        "start": 41
+      },
+      {
+        "clue": "Cause-driven organizing",
+        "answer": "ACTIVISM",
+        "start": 48
+      },
+      {
+        "clue": "NYC borough",
+        "answer": "MANHATTAN",
+        "start": 55
+      },
+      {
+        "clue": "Corner in geometry",
+        "answer": "ANGLE",
+        "start": 62
+      }
+    ]
+  },
+  {
+    "id": "2026-01-05",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "A good rhythm",
+        "answer": "GROOVE",
+        "start": 1
+      },
+      {
+        "clue": "Finished, as a game",
+        "answer": "OVER",
+        "start": 4
+      },
+      {
+        "clue": "Everyday speech",
+        "answer": "VERNACULAR",
+        "start": 5
+      },
+      {
+        "clue": "Nobility as a class",
+        "answer": "ARISTOCRACY",
+        "start": 13
+      },
+      {
+        "clue": "Go around again",
+        "answer": "CYCLE",
+        "start": 22
+      },
+      {
+        "clue": "Even, not tilted",
+        "answer": "LEVEL",
+        "start": 25
+      },
+      {
+        "clue": "One after tenth",
+        "answer": "ELEVENTH",
+        "start": 28
+      },
+      {
+        "clue": "Central idea",
+        "answer": "THEME",
+        "start": 34
+      },
+      {
+        "clue": "Total chaos",
+        "answer": "MESS",
+        "start": 37
+      },
+      {
+        "clue": "Core quality",
+        "answer": "ESSENCE",
+        "start": 38
+      },
+      {
+        "clue": "Block from release",
+        "answer": "CENSOR",
+        "start": 43
+      },
+      {
+        "clue": "Big group of musicians",
+        "answer": "ORCHESTRA",
+        "start": 47
+      },
+      {
+        "clue": "Pulled muscle",
+        "answer": "STRAIN",
+        "start": 52
+      },
+      {
+        "clue": "Going up, as prices",
+        "answer": "INCREASING",
+        "start": 56
+      },
+      {
+        "clue": "Making music with words",
+        "answer": "SINGING",
+        "start": 62
+      },
+      {
+        "clue": "Fancy clothing",
+        "answer": "GARB",
+        "start": 68
+      },
+      {
+        "clue": "In chains, figuratively",
+        "answer": "BONDAGE",
+        "start": 71
+      }
+    ]
+  },
+  {
+    "id": "2026-01-06",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Set of connected parts",
+        "answer": "SYSTEM",
+        "start": 1
+      },
+      {
+        "clue": "Speed of the beat",
+        "answer": "TEMPO",
+        "start": 4
+      },
+      {
+        "clue": "Sharp tip",
+        "answer": "POINT",
+        "start": 7
+      },
+      {
+        "clue": "Inside",
+        "answer": "INTO",
+        "start": 9
+      },
+      {
+        "clue": "Workshop gear",
+        "answer": "TOOLS",
+        "start": 11
+      },
+      {
+        "clue": "High opera voice",
+        "answer": "SOPRANO",
+        "start": 15
+      },
+      {
+        "clue": "Post-it, say",
+        "answer": "NOTE",
+        "start": 20
+      },
+      {
+        "clue": "Phone message",
+        "answer": "TEXT",
+        "start": 22
+      },
+      {
+        "clue": "How far it goes",
+        "answer": "EXTENT",
+        "start": 23
+      },
+      {
+        "clue": "Cigarette leaf",
+        "answer": "TOBACCO",
+        "start": 28
+      },
+      {
+        "clue": "To point north",
+        "answer": "COMPASS",
+        "start": 33
+      },
+      {
+        "clue": "Book excerpt",
+        "answer": "PASSAGE",
+        "start": 36
+      },
+      {
+        "clue": "Genus plural",
+        "answer": "GENERA",
+        "start": 41
+      },
+      {
+        "clue": "From low to high",
+        "answer": "RANGE",
+        "start": 45
+      },
+      {
+        "clue": "In your DNA",
+        "answer": "GENETIC",
+        "start": 48
+      },
+      {
+        "clue": "App symbol",
+        "answer": "ICON",
+        "start": 53
+      },
+      {
+        "clue": "Related to atoms",
+        "answer": "NUCLEAR",
+        "start": 56
+      }
+    ]
+  },
+  {
+    "id": "2026-01-07",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Gone by",
+        "answer": "PAST",
+        "start": 1
+      },
+      {
+        "clue": "One stair, say",
+        "answer": "STEP",
+        "start": 3
+      },
+      {
+        "clue": "TV installment",
+        "answer": "EPISODE",
+        "start": 5
+      },
+      {
+        "clue": "Storm leftovers",
+        "answer": "DEBRIS",
+        "start": 10
+      },
+      {
+        "clue": "Go up",
+        "answer": "RISE",
+        "start": 13
+      },
+      {
+        "clue": "More than a few",
+        "answer": "SEVERAL",
+        "start": 15
+      },
+      {
+        "clue": "Big public gatherings",
+        "answer": "RALLIES",
+        "start": 19
+      },
+      {
+        "clue": "One at sea",
+        "answer": "SAILOR",
+        "start": 25
+      },
+      {
+        "clue": "Old legends",
+        "answer": "LORE",
+        "start": 28
+      },
+      {
+        "clue": "Fantasy world",
+        "answer": "REALM",
+        "start": 30
+      },
+      {
+        "clue": "Pop icon with a single name",
+        "answer": "MADONNA",
+        "start": 34
+      },
+      {
+        "clue": "Concerning",
+        "answer": "ABOUT",
+        "start": 40
+      },
+      {
+        "clue": "Not inner",
+        "answer": "OUTER",
+        "start": 42
+      },
+      {
+        "clue": "Word in a glossary",
+        "answer": "TERM",
+        "start": 44
+      },
+      {
+        "clue": "Total chaos",
+        "answer": "MADNESS",
+        "start": 47
+      },
+      {
+        "clue": "Time alone",
+        "answer": "SOLITUDE",
+        "start": 53
+      },
+      {
+        "clue": "Way down",
+        "answer": "DEEP",
+        "start": 59
+      }
+    ]
+  },
+  {
+    "id": "2026-01-08",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Washbowl",
+        "answer": "BASIN",
+        "start": 1
+      },
+      {
+        "clue": "Carry a tune",
+        "answer": "SING",
+        "start": 3
+      },
+      {
+        "clue": "Recipe parts",
+        "answer": "INGREDIENTS",
+        "start": 4
+      },
+      {
+        "clue": "Mixed greens",
+        "answer": "SALAD",
+        "start": 14
+      },
+      {
+        "clue": "Speak to",
+        "answer": "ADDRESS",
+        "start": 17
+      },
+      {
+        "clue": "Salad topper",
+        "answer": "DRESSING",
+        "start": 19
+      },
+      {
+        "clue": "Vocal performer",
+        "answer": "SINGER",
+        "start": 23
+      },
+      {
+        "clue": "Circle-related",
+        "answer": "RADIAL",
+        "start": 28
+      },
+      {
+        "clue": "Peru capital",
+        "answer": "LIMA",
+        "start": 33
+      },
+      {
+        "clue": "Ship's pole",
+        "answer": "MAST",
+        "start": 35
+      },
+      {
+        "clue": "Study of stars",
+        "answer": "ASTRONOMY",
+        "start": 36
+      },
+      {
+        "clue": "Lawn area",
+        "answer": "YARD",
+        "start": 44
+      },
+      {
+        "clue": "Stage genre",
+        "answer": "DRAMA",
+        "start": 47
+      },
+      {
+        "clue": "Number class",
+        "answer": "MATH",
+        "start": 50
+      },
+      {
+        "clue": "Greek capital",
+        "answer": "ATHENS",
+        "start": 51
+      },
+      {
+        "clue": "Mountain range",
+        "answer": "SIERRA",
+        "start": 56
+      },
+      {
+        "clue": "Way of speaking",
+        "answer": "ACCENT",
+        "start": 61
+      },
+      {
+        "clue": "In the middle",
+        "answer": "CENTER",
+        "start": 63
+      },
+      {
+        "clue": "Controlled region",
+        "answer": "TERRITORY",
+        "start": 66
+      }
+    ]
+  },
+  {
+    "id": "2026-01-09",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Bus-and-train travel",
+        "answer": "TRANSIT",
+        "start": 1
+      },
+      {
+        "clue": "Location",
+        "answer": "SITE",
+        "start": 5
+      },
+      {
+        "clue": "Applied science",
+        "answer": "TECH",
+        "start": 7
+      },
+      {
+        "clue": "Dairy product aged",
+        "answer": "CHEESE",
+        "start": 9
+      },
+      {
+        "clue": "Look for",
+        "answer": "SEARCH",
+        "start": 13
+      },
+      {
+        "clue": "Jaw's tip",
+        "answer": "CHIN",
+        "start": 17
+      },
+      {
+        "clue": "Ahead of the curve",
+        "answer": "INNOVATIVE",
+        "start": 19
+      },
+      {
+        "clue": "Carrot or celery",
+        "answer": "VEGETABLE",
+        "start": 27
+      },
+      {
+        "clue": "Lawful",
+        "answer": "LEGAL",
+        "start": 34
+      },
+      {
+        "clue": "By now",
+        "answer": "ALREADY",
+        "start": 37
+      },
+      {
+        "clue": "How forces interact",
+        "answer": "DYNAMICS",
+        "start": 42
+      },
+      {
+        "clue": "Silhouette on a wall",
+        "answer": "SHADOW",
+        "start": 49
+      },
+      {
+        "clue": "If it is so",
+        "answer": "WHETHER",
+        "start": 54
+      },
+      {
+        "clue": "In this place",
+        "answer": "HERE",
+        "start": 58
+      },
+      {
+        "clue": "Stand upright",
+        "answer": "ERECT",
+        "start": 59
+      },
+      {
+        "clue": "Playfully annoy",
+        "answer": "TEASE",
+        "start": 63
+      },
+      {
+        "clue": "Not first",
+        "answer": "SECOND",
+        "start": 66
+      }
+    ]
+  },
+  {
+    "id": "2026-01-10",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Secret ciphers",
+        "answer": "CODES",
+        "start": 1
+      },
+      {
+        "clue": "Create a layout",
+        "answer": "DESIGN",
+        "start": 3
+      },
+      {
+        "clue": "Importance, meaning",
+        "answer": "SIGNIFICANCE",
+        "start": 5
+      },
+      {
+        "clue": "Pottery material",
+        "answer": "CERAMIC",
+        "start": 15
+      },
+      {
+        "clue": "Lab rodents",
+        "answer": "MICE",
+        "start": 19
+      },
+      {
+        "clue": "100-year span",
+        "answer": "CENTURY",
+        "start": 21
+      },
+      {
+        "clue": "Not as old",
+        "answer": "YOUNGER",
+        "start": 27
+      },
+      {
+        "clue": "Theme park spins",
+        "answer": "RIDES",
+        "start": 33
+      },
+      {
+        "clue": "Office surface",
+        "answer": "DESK",
+        "start": 35
+      },
+      {
+        "clue": "Natural ability",
+        "answer": "SKILL",
+        "start": 37
+      },
+      {
+        "clue": "Lower-back area",
+        "answer": "LUMBAR",
+        "start": 41
+      },
+      {
+        "clue": "Protective gear",
+        "answer": "ARMOR",
+        "start": 45
+      },
+      {
+        "clue": "Additional",
+        "answer": "MORE",
+        "start": 47
+      },
+      {
+        "clue": "Genuine",
+        "answer": "REAL",
+        "start": 49
+      },
+      {
+        "clue": "Distant, reserved",
+        "answer": "ALOOF",
+        "start": 51
+      },
+      {
+        "clue": "Gridiron sport",
+        "answer": "FOOTBALL",
+        "start": 55
+      },
+      {
+        "clue": "Classical dance",
+        "answer": "BALLET",
+        "start": 59
+      },
+      {
+        "clue": "Written note",
+        "answer": "LETTER",
+        "start": 62
+      }
+    ]
+  }
+
+
+
+
+
 
 
 

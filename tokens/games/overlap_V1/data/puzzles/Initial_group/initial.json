@@ -1,0 +1,601 @@
+[{
+    "id": "Under the Surface",
+    "type": "puzzle",
+    "palette": "greens",
+    "words": [{
+        "clue": "Fury",
+        "answer": "ANGER",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Tiny cause of illness",
+        "answer": "GERM",
+        "start": 3,
+        "height": "mid"
+      },
+      {
+        "clue": "Stoat in its winter coat",
+        "answer": "ERMINE",
+        "start": 4,
+        "height": "inner"
+      },
+      {
+        "clue": "Extracted from the ground",
+        "answer": "MINED",
+        "start": 6,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Moving Parts",
+    "type": "puzzle",
+    "palette": "greens",
+    "words": [{
+        "clue": "Representation",
+        "answer": "MODEL",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "River-mouth landform",
+        "answer": "DELTA",
+        "start": 3,
+        "height": "mid"
+      },
+      {
+        "clue": "Fortune-telling deck",
+        "answer": "TAROT",
+        "start": 6,
+        "height": "inner"
+      },
+      {
+        "clue": "Spinning motor part",
+        "answer": "ROTOR",
+        "start": 8,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Just Right",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Path around a planet",
+        "answer": "ORBIT",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "A small mouthful",
+        "answer": "BITE",
+        "start": 3,
+        "height": "mid"
+      },
+      {
+        "clue": "Lukewarm",
+        "answer": "TEPID",
+        "start": 5,
+        "height": "inner"
+      },
+      {
+        "clue": "Perfect",
+        "answer": "IDEAL",
+        "start": 8,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Quiet Company",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Backyard plot",
+        "answer": "GARDEN",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Tooth-related",
+        "answer": "DENTAL",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Bird's claw",
+        "answer": "TALON",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "All alone",
+        "answer": "LONELY",
+        "start": 9,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Local Detail",
+    "type": "puzzle",
+    "palette": "greens",
+    "words": [{
+        "clue": "Tiny screen dot",
+        "answer": "PIXEL",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Older adult",
+        "answer": "ELDER",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "A horse race",
+        "answer": "DERBY",
+        "start": 6,
+        "height": "inner"
+      },
+      {
+        "clue": "Local ordinance",
+        "answer": "BYLAW",
+        "start": 9,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Hosted",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Milk container",
+        "answer": "CARTON",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Taste organ",
+        "answer": "TONGUE",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Visitor",
+        "answer": "GUEST",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "Property (land + home)",
+        "answer": "ESTATE",
+        "start": 9,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Edges and Origins",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Safe port",
+        "answer": "HARBOR",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Edge or boundary",
+        "answer": "BORDER",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Draw from",
+        "answer": "DERIVE",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "Climbing plants (plural)",
+        "answer": "IVIES",
+        "start": 10,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Mixed Signals",
+    "type": "puzzle",
+    "palette": "greens",
+    "words": [{
+        "clue": "Soft fiber",
+        "answer": "COTTON",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Bitter mixer",
+        "answer": "TONIC",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Five-cent coin (or metal)",
+        "answer": "NICKEL",
+        "start": 6,
+        "height": "inner"
+      },
+      {
+        "clue": "Seaweed",
+        "answer": "KELP",
+        "start": 9,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Keep It Down",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Ancient imprint",
+        "answer": "FOSSIL",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Not noisy",
+        "answer": "SILENT",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Complete",
+        "answer": "ENTIRE",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "The Emerald Isle",
+        "answer": "IRELAND",
+        "start": 10,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Bounce Back",
+    "type": "puzzle",
+    "palette": "sunrise",
+    "words": [{
+        "clue": "Corkscrew shape",
+        "answer": "SPIRAL",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Gather (or a pep talk)",
+        "answer": "RALLY",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Song line",
+        "answer": "LYRIC",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "Rebound",
+        "answer": "RICOCHET",
+        "start": 9,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "A Place for Everything",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Gallery building",
+        "answer": "MUSEUM",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Short recap",
+        "answer": "SUMMARY",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "U.S. state",
+        "answer": "MARYLAND",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "Scenery",
+        "answer": "LANDSCAPE",
+        "start": 11,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Bad Inbox",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Large body of water",
+        "answer": "OCEAN",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Blacksmith block",
+        "answer": "ANVIL",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Bad guy",
+        "answer": "VILLAIN",
+        "start": 6,
+        "height": "inner"
+      },
+      {
+        "clue": "Email folder",
+        "answer": "INBOX",
+        "start": 11,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Deep Cuts",
+    "type": "puzzle",
+    "palette": "greens",
+    "words": [{
+        "clue": "Underground chamber",
+        "answer": "CAVERN",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "A boy's name meaning 'serious'",
+        "answer": "ERNEST",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Baltic country",
+        "answer": "ESTONIA",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "Famous falls, for short",
+        "answer": "NIAGARA",
+        "start": 11,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Points of Interest",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Bed cushion",
+        "answer": "PILLOW",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Flat low area",
+        "answer": "LOWLAND",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Famous site",
+        "answer": "LANDMARK",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "Bazaar",
+        "answer": "MARKET",
+        "start": 11,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "On Target",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Blue-tinted metal",
+        "answer": "COBALT",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Religious table",
+        "answer": "ALTAR",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Pointed projectile",
+        "answer": "ARROW",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "River vessel",
+        "answer": "ROWBOAT",
+        "start": 9,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Night Out",
+    "type": "puzzle",
+    "palette": "sunrise",
+    "words": [{
+        "clue": "Bird of prey",
+        "answer": "FALCON",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Live music show",
+        "answer": "CONCERT",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Sure",
+        "answer": "CERTAIN",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "Stain or corrupt",
+        "answer": "TAINT",
+        "start": 10,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "At the Horizon",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Distant line",
+        "answer": "HORIZON",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Layered vegetable",
+        "answer": "ONION",
+        "start": 6,
+        "height": "mid"
+      },
+      {
+        "clue": "Relating to ions",
+        "answer": "IONIC",
+        "start": 8,
+        "height": "inner"
+      },
+      {
+        "clue": "Alias",
+        "answer": "NICKNAME",
+        "start": 10,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Morning Routine",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Breakfast staple",
+        "answer": "CEREAL",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Wake-up sound",
+        "answer": "ALARM",
+        "start": 5,
+        "height": "mid"
+      },
+      {
+        "clue": "Fleet of ships",
+        "answer": "ARMADA",
+        "start": 7,
+        "height": "inner"
+      },
+      {
+        "clue": "A polite title",
+        "answer": "MADAM",
+        "start": 9,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Guided Tour",
+    "type": "puzzle",
+    "palette": "greens",
+    "words": [{
+        "clue": "Admiration",
+        "answer": "RESPECT",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "A striking display",
+        "answer": "SPECTACLE",
+        "start": 3,
+        "height": "mid"
+      },
+      {
+        "clue": "Merciful (or a name)",
+        "answer": "CLEMENT",
+        "start": 9,
+        "height": "inner"
+      },
+      {
+        "clue": "Guide",
+        "answer": "MENTOR",
+        "start": 12,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "Weatherproof",
+    "type": "puzzle",
+    "palette": "classic",
+    "words": [{
+        "clue": "Wet-weather jacket",
+        "answer": "RAINCOAT",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Layer or cover",
+        "answer": "COATING",
+        "start": 5,
+        "height": "mid"
+      },
+      {
+        "clue": "Slight trace",
+        "answer": "TINGE",
+        "start": 8,
+        "height": "inner"
+      },
+      {
+        "clue": "Take in (as food)",
+        "answer": "INGEST",
+        "start": 9,
+        "height": "full"
+      }
+    ]
+  }
+]

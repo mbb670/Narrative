@@ -1,0 +1,98 @@
+[
+    {
+    "id": "🇵🇱🇵🇱🇵🇱🇵🇱",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+        "clue": "Ręczna lampa",
+        "answer": "LATARKA",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Przewód elektryczny",
+        "answer": "KABEL",
+        "start": 6,
+        "height": "mid"
+      },
+      {
+        "clue": "Poziomy element konstrukcji",
+        "answer": "BELKA",
+        "start": 8,
+        "height": "inner"
+      },
+      {
+        "clue": "Napój z palonych ziaren",
+        "answer": "KAWA",
+        "start": 11,
+        "height": "full"
+      },
+      {
+        "clue": "Naczynie na zupę",
+        "answer": "WAZA",
+        "start": 13,
+        "height": "mid"
+      },
+      {
+        "clue": "Warowna siedziba króla",
+        "answer": "ZAMEK",
+        "start": 15,
+        "height": "inner"
+      },
+      {
+        "clue": "Powierzchnia do wyświetlania obrazu",
+        "answer": "EKRAN",
+        "start": 18,
+        "height": "full"
+      },
+      {
+        "clue": "Egzotyczny owoc o kolczastej skórce",
+        "answer": "ANANAS",
+        "start": 21,
+        "height": "mid"
+      },
+      {
+        "clue": "Przewlekła choroba układu oddechowego",
+        "answer": "ASTMA",
+        "start": 25,
+        "height": "inner"
+      },
+      {
+        "clue": "Graficzny obraz terytorium",
+        "answer": "MAPA",
+        "start": 28,
+        "height": "full"
+      },
+      {
+        "clue": "Czarno-biały niedźwiedź z Chin",
+        "answer": "PANDA",
+        "start": 30,
+        "height": "mid"
+      },
+      {
+        "clue": "Elegancka pani",
+        "answer": "DAMA",
+        "start": 33,
+        "height": "inner"
+      },
+      {
+        "clue": "Osoba malująca obrazy",
+        "answer": "MALARZ",
+        "start": 35,
+        "height": "full"
+      },
+      {
+        "clue": "Przedmiot lub sprawa",
+        "answer": "RZECZ",
+        "start": 39,
+        "height": "mid"
+      },
+      {
+        "clue": "Nakrycie głowy na zimę",
+        "answer": "CZAPKA",
+        "start": 42,
+        "height": "inner"
+      }
+    ]
+  }
+]

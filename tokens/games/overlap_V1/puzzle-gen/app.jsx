@@ -587,7 +587,7 @@ const isCommonEnough = (entry, minFreq = 2.0) => {
 const countTriples = (sequence = []) => sequence.reduce((acc, item) => acc + (item?.type === 'triple' ? 1 : 0), 0);
 
 // Pathfinder for Multi-Chain organization
-const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set()) => {
+const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set(), maxDepth = 20) => {
   if (items.length === 0) return [];
 
   const adj = {};
@@ -608,7 +608,7 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
   };
 
       const dfs = (currentPath, currentUsedWords) => {
-      if (currentPath.length > 15) return; 
+      if (currentPath.length >= maxDepth) return; 
 
       const currentScore = getScore(currentPath);
       if (currentScore > maxScore) {
@@ -667,7 +667,7 @@ const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set())
     let loopCount = 0;
     while (pool.length > 0 && finalSequence.length < limit && loopCount < 20) {
         loopCount++;
-        const chainSegment = findLongestChainInInventory(pool, globalUsedWords, devalueWords);
+        const chainSegment = findLongestChainInInventory(pool, globalUsedWords, devalueWords, 15);
         
         if (chainSegment.length === 0) break;
 
@@ -801,6 +801,7 @@ export default function App() {
   const nodeRefs = useRef([]);
   const containerRef = useRef(null);
   const [tripleOverlays, setTripleOverlays] = useState([]);
+  const wordBankRef = useRef([]);
   const STORAGE_KEY = "puzzleGenChainState";
   const [stateLoaded, setStateLoaded] = useState(false);
   const initialSaveSkipped = useRef(false);
@@ -944,25 +945,26 @@ export default function App() {
               const now = Date.now();
               const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
               (data || []).forEach(p => {
-                  if (p.dateKey) {
-                      dateKeys.push(p.dateKey);
+                  const dateIso = typeof p.id === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.id) ? p.id : null;
+                  if (dateIso) {
+                      dateKeys.push(dateIso);
                   }
                   let isRecent = false;
-                  if (p.dateKey) {
-                      const t = Date.parse(p.dateKey);
+                  if (dateIso) {
+                      const t = Date.parse(dateIso);
                       if (!Number.isNaN(t) && (now - t) <= THIRTY_DAYS) {
                           isRecent = true;
+                      }
+                  }
+                  (p.words || []).forEach(w => {
+                      if (w.answer) {
+                          const cw = cleanWord(w.answer);
+                          if (cw) {
+                              answers.push(cw);
+                              if (isRecent) recent.push(cw);
                           }
                       }
-                      (p.words || []).forEach(w => {
-                          if (w.answer) {
-                              const cw = cleanWord(w.answer);
-                              if (cw) {
-                                  answers.push(cw);
-                                  if (isRecent) recent.push(cw);
-                              }
-                          }
-                      });
+                  });
               });
                   if (!cancelled) {
                       setDevalueWords(new Set(answers.filter(Boolean)));
@@ -1326,36 +1328,72 @@ Words: ${flat.join(', ')}`;
   };
   
 const fetchRandomWords = async () => {
-    const TOPICS = ["nature", "city", "technology", "food", "travel", "music", "science", "abstract", "history", "art", "ocean", "space"];
-    const shuffledTopics = shuffleArray(TOPICS).slice(0, 3);
-    
-    let allWords = [];
-    try {
-        const promises = shuffledTopics.map(topic => 
+    const TOPICS = ["nature", "city", "technology", "food", "travel", "music", "science", "abstract", "history", "art", "ocean", "space", "sports", "animals", "objects"];
+    const TARGET_UNIQUE = 2000;
+    const BATCH_TOPICS = 5;
+    const MAX_BATCHES = 6;
+    const MAX_BANK = 5000;
+
+    const collected = new Set();
+
+    const fetchTopics = async (topics) => {
+        const promises = topics.map(topic => 
             fetch(`https://api.datamuse.com/words?ml=${topic}&max=600&md=f`)
                 .then(res => res.json())
+                .catch(() => [])
         );
-        
         const results = await Promise.all(promises);
         results.forEach(data => {
-            const words = data
-                .filter(d => {
-                    if (!d.tags) return false;
-                    if (isProperNounTag(d)) return false;
-                    const freq = getFreqFromDatamuse(d);
-                    return freq && freq >= 3; // favor common words
-                })
-                .map(d => d.word);
-            allWords.push(...words);
+            data.forEach(d => {
+                if (!d.tags) return;
+                if (isProperNounTag(d)) return;
+                const freq = getFreqFromDatamuse(d);
+                if (!freq || freq < 2) return; // allow slightly lower freq to expand pool
+                collected.add(d.word);
+            });
         });
+    };
+
+    try {
+        let batch = 0;
+        while (collected.size < TARGET_UNIQUE && batch < MAX_BATCHES) {
+            const topics = shuffleArray(TOPICS).slice(0, BATCH_TOPICS);
+            await fetchTopics(topics);
+            batch++;
+        }
     } catch (e) {
         console.error("Fetch failed", e);
     }
     
-    allWords = [...new Set(allWords)];
-    allWords = filterBadWords(allWords);
-    allWords = applyExclusions(allWords);
-    return shuffleArray(allWords).slice(0, 1000);
+    let incoming = [...collected];
+    incoming = filterBadWords(incoming);
+    incoming = applyExclusions(incoming);
+
+    // Merge with existing bank, drop newly excluded, dedupe, and cap size
+    const seen = new Set();
+    const bank = [];
+    const pushWord = (w) => {
+        const cw = cleanWord(w);
+        if (!cw) return;
+        if (seen.has(cw)) return;
+        if (excludedWords.has(cw) || recentExcludedAnswers.has(cw)) return;
+        seen.add(cw);
+        bank.push(w);
+    };
+
+    (wordBankRef.current || []).forEach(pushWord);
+    incoming.forEach(pushWord);
+
+    if (bank.length > MAX_BANK) {
+        const excess = bank.length - MAX_BANK;
+        bank.splice(0, excess); // remove oldest
+    }
+
+    wordBankRef.current = bank;
+
+    const TARGET_SAMPLE = 2000;
+    const sampleSize = Math.min(bank.length, TARGET_SAMPLE);
+    return shuffleArray(bank).slice(0, sampleSize);
   };
 
   const handleGenerateAndBuild = async () => {
@@ -1369,9 +1407,15 @@ const fetchRandomWords = async () => {
     
     try {
         const MIN_TRIPLES = 2;
-        const MAX_ATTEMPTS = 6;
+        const MAX_DURATION_MS = 5_000;
+        const startTime = Date.now();
         let best = null;
-        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        let attempt = 0;
+
+        while (Date.now() - startTime < MAX_DURATION_MS) {
+            attempt++;
+            setProgress(15);
+
             const words = await fetchRandomWords();
             setInputText(words.join(" "));
             setProgress(30);
@@ -1384,13 +1428,20 @@ const fetchRandomWords = async () => {
             const organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords);
             const tripleCount = countTriples(organizedChain);
 
-            if (!best || tripleCount > best.tripleCount) {
+            const lenDiff = Math.abs((organizedChain?.length || 0) - targetLength);
+            const bestLenDiff = best ? Math.abs((best.chain?.length || 0) - targetLength) : Infinity;
+            const isBetter =
+                !best ||
+                tripleCount > best.tripleCount ||
+                (tripleCount === best.tripleCount && lenDiff < bestLenDiff) ||
+                (tripleCount === best.tripleCount && lenDiff === bestLenDiff && organizedChain.length > best.chain.length);
+            if (isBetter) {
                 best = { words, inventory: result.inventory, chain: organizedChain, tripleCount };
             }
 
-            if (tripleCount >= MIN_TRIPLES) {
-                break;
-            }
+            const elapsed = Date.now() - startTime;
+            const pct = Math.min(90, 30 + Math.floor((elapsed / MAX_DURATION_MS) * 60));
+            setProgress(pct);
         }
 
         if (best) {
@@ -1398,7 +1449,7 @@ const fetchRandomWords = async () => {
             setInventory(best.inventory);
             setChain(best.chain);
             if (best.tripleCount < MIN_TRIPLES) {
-                showToast("Could not guarantee 2 triples after multiple tries; showing best found.", "warning");
+                showToast("Could not guarantee 2 triples within ~5s; showing best found.", "warning");
             }
         } else {
             showToast("Failed to generate chain.", "warning");
@@ -1488,13 +1539,11 @@ const fetchRandomWords = async () => {
           dateObj = new Date();
       }
       const safeDateKey = dateObj.toISOString().split('T')[0];
-      const formattedTitle = dateObj.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
       const finalOutput = {
-          title: formattedTitle,
+          id: safeDateKey,
           type: "chain",
           palette: "greens",
-          dateKey: safeDateKey,
           words: cleanWords
       };
       

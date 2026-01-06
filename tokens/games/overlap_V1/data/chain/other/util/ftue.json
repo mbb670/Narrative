@@ -1,0 +1,26 @@
+[{
+    "id": "FTUE",
+    "type": "chain",
+    "palette": "greens",
+    "words": [{
+            "clue": "common greeting",
+            "answer": "HELLO",
+            "start": 1
+        },
+        {
+            "clue": "A deep connection",
+            "answer": "LOVE",
+            "start": 4
+        },
+        {
+            "clue": "Our Home Planet",
+            "answer": "EARTH",
+            "start": 7
+        },
+        {
+            "clue": "A seat for a king",
+            "answer": "THRONE",
+            "start": 10
+        }
+    ]
+}]

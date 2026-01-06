@@ -13,7 +13,7 @@ const COLORS = [
 
 const HEIGHT_CYCLE = ["full", "mid", "inner"];
 
-const MODE = { OVERLAP: "overlap", CHAIN: "chain" };
+const MODE = { PUZZLE: "puzzle", CHAIN: "chain" };
 const VIEW = { PLAY: "play", CHAIN: "chain", BUILD: "build" };
 
 // ---- Remember last tab/view ----
@@ -632,7 +632,7 @@ function updateSliderUI() {
 }
 
 // ---- Defaults loading (robust + cache-bust) ----
-const DEFAULTS_VERSION = "2025-12-02"; // <-- bump this any time you edit examples.json
+const DEFAULTS_VERSION = "2026-01-24"; // <-- bump this any time you edit examples.json or puzzle schema
 const DEFAULTS_VER_KEY = `${KEY}__defaults_version`;
 
 // Cache-bust + bypass browser HTTP cache differences
@@ -716,7 +716,6 @@ const els = {
   pTitle: $("#pTitle"),
   rows: $("#rows"),
   wAdd: $("#wAdd"),
-  pDate: $("#pDate"),
   ioTxt: $("#ioTxt"),
   ioExp: $("#ioExp"),
   ioImp: $("#ioImp"),
@@ -1152,7 +1151,7 @@ function ftuePlay() {
 function ensureFtueBoard() {
   if (!els.ftueGrid) return null;
   const ftuePuzzle = puzzles.find(
-    (p) => String(p.title || "").trim().toLowerCase() === "ftue"
+    (p) => String(p.id || p.title || "").trim().toLowerCase() === "ftue"
   );
   if (!ftuePuzzle) return null;
   const model = computed(ftuePuzzle);
@@ -1573,7 +1572,7 @@ function clearAllUnlockedCells() {
 }
 
 function maybeToastPlayFilledWrong() {
-  if (play.mode !== MODE.OVERLAP || play.done) return;
+  if (play.mode !== MODE.PUZZLE || play.done) return;
   const filled = play.usr.every(Boolean);
   if (!filled) {
     lastPlayWarningKey = "";
@@ -1615,13 +1614,16 @@ function bindGridScrollCancels() {
 }
 
 const stripHeightsFromPuzzles = (arr = []) =>
-  arr.map((p) => ({
-    ...p,
-    words: (p?.words || []).map((w) => {
-      const { height, h, ...rest } = w || {};
-      return { ...rest };
-    }),
-  }));
+  arr.map((p) => {
+    const { words = [], height, h, dateKey, title, ...restPuzzle } = p || {};
+    return {
+      ...restPuzzle,
+      words: words.map((w) => {
+        const { height: wHeight, h: wH, ...rest } = w || {};
+        return { ...rest };
+      }),
+    };
+  });
 
 // ---- Storage ----
 const store = {
@@ -1657,20 +1659,26 @@ const store = {
 };
 
 // ---- Per-puzzle chain progress persistence ----
-const CHAIN_PROGRESS_KEY = `${KEY}__chain_progress_v1`;
-const CHAIN_STATS_KEY = `${KEY}__chain_stats_v1`;
+const CHAIN_PROGRESS_KEY = `${KEY}__chain_progress_v2`;
+const CHAIN_STATS_KEY = `${KEY}__chain_stats_v2`;
+const clearLegacyChainStorage = () => {
+  const legacy = [`${KEY}__chain_progress_v1`, `${KEY}__chain_stats_v1`];
+  try {
+    legacy.forEach((k) => localStorage.removeItem(k));
+  } catch {}
+};
 
 const todayKey = () => toDateKey(new Date());
 
 function chainPuzzleKey(p) {
   if (!p || !isChainPuzzle(p)) return null;
-  const wordSig = (p.words || [])
-    .map((w) => `${cleanA(w.answer)}@${Math.max(1, Math.floor(+w.start || 1))}`)
-    .join(";");
-  return `${p.dateKey || "nodate"}||${(p.title || "").toLowerCase()}||${wordSig}`;
+  const wordSig = puzzleWordSignature(p);
+  const id = normalizePuzzleId(p).id || "no-id";
+  return `${MODE.CHAIN}||${id}||${wordSig || "words"}`;
 }
 
 function loadChainProgressStore() {
+  clearLegacyChainStorage();
   try {
     const raw = JSON.parse(localStorage.getItem(CHAIN_PROGRESS_KEY) || "{}");
     const base = raw && typeof raw === "object" ? raw : {};
@@ -1693,8 +1701,13 @@ function pruneStaleChainProgress() {
   let changed = false;
   Object.keys(store.puzzles || {}).forEach((k) => {
     const v = store.puzzles[k];
-    const savedDay = v?.savedDayKey || v?.puzzleDateKey;
-    if (t && savedDay && savedDay !== t) {
+    const savedDay = v?.savedDayKey;
+    const id = v?.puzzleId || v?.id || null;
+    const type = v?.puzzleType || v?.type || null;
+    const daily =
+      !!v?.puzzleIdIsDate ||
+      (String(type || MODE.PUZZLE) === MODE.CHAIN && isDateId(id));
+    if (daily && t && savedDay && savedDay !== t) {
       delete store.puzzles[k];
       changed = true;
     }
@@ -1727,6 +1740,7 @@ let _ftueNoAnimRestore = null;
 
 // ---- Chain stats (completed games only) ----
 function loadChainStatsStore() {
+  clearLegacyChainStorage();
   try {
     const raw = JSON.parse(localStorage.getItem(CHAIN_STATS_KEY) || "{}");
     if (!raw || typeof raw !== "object") throw 0;
@@ -1942,12 +1956,16 @@ function chainProgressSnapshot(p) {
   if (play.mode !== MODE.CHAIN) return null;
   const key = chainPuzzleKey(p);
   if (!key) return null;
+  const normalizedId = normalizePuzzleId(p);
+  const puzzleType = MODE.CHAIN;
   const hasInput = Array.isArray(play.usr) && play.usr.some(Boolean);
   const elapsed = chain.running ? (Date.now() - chain.startAt) / 1000 : chain.elapsed || 0;
   const score = scoreChain();
   const snap = {
     puzzleKey: key,
-    puzzleDateKey: p.dateKey || null,
+    puzzleId: normalizedId.id || null,
+    puzzleType,
+    puzzleIdIsDate: !!normalizedId.isDate,
     savedDayKey: todayKey(),
     usr: (play.usr || []).slice(0, play.n),
     at: clamp(play.at ?? 0, 0, Math.max(0, play.n - 1)),
@@ -2008,12 +2026,13 @@ function restoreChainProgressForCurrentPuzzle() {
   const store = loadChainProgressStore();
   const data = store.puzzles?.[key];
   const today = todayKey();
+  const isDaily = isDailyChainPuzzle(p);
   const stale =
     data &&
+    isDaily &&
     today &&
     data.savedDayKey &&
-    data.savedDayKey !== today &&
-    data.puzzleDateKey !== today;
+    data.savedDayKey !== today;
 
   if (stale) {
     delete store.puzzles[key];
@@ -2082,9 +2101,11 @@ const tr = (w) => {
   return v;
 };
 
-const isChainPuzzle = (p) => String(p?.type || MODE.OVERLAP) === MODE.CHAIN;
+const isChainPuzzle = (p) => String(p?.type || MODE.PUZZLE) === MODE.CHAIN;
 
 const inferDiffFromColor = () => "easy";
+
+const DATE_ID_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const toDateKey = (d) => {
   if (!(d instanceof Date) || Number.isNaN(+d)) return null;
@@ -2095,7 +2116,7 @@ const toDateKey = (d) => {
   return `${y}-${pad(m)}-${pad(day)}`;
 };
 
-const normalizePuzzleDate = (val) => {
+const normalizeDateKey = (val) => {
   const raw = String(val || "").trim();
   if (!raw) return { dateKey: null };
 
@@ -2137,12 +2158,39 @@ const dateFromKey = (key) => {
   return null;
 };
 
+const normalizeIdCandidate = (val) => {
+  const raw = String(val ?? "").trim();
+  if (!raw) return { id: null, isDate: false };
+  const { dateKey } = normalizeDateKey(raw);
+  if (dateKey) return { id: dateKey, isDate: true };
+  return { id: raw, isDate: DATE_ID_RE.test(raw) };
+};
+
+const puzzleWordSignature = (p) =>
+  (p?.words || [])
+    .map((w) => `${cleanA(w.answer)}@${Math.max(1, Math.floor(+w.start || 1))}`)
+    .join(";");
+
+const normalizePuzzleId = (p) => {
+  const candidates = [p?.id, p?.dateKey, p?.date, p?.title];
+  for (const cand of candidates) {
+    const norm = normalizeIdCandidate(cand);
+    if (norm.id) return norm;
+  }
+  const sig = puzzleWordSignature(p);
+  const fallback = sig || "puzzle";
+  return { id: fallback, isDate: DATE_ID_RE.test(fallback) };
+};
+
+const isDateId = (id) => DATE_ID_RE.test(String(id || "").trim());
+
 const puzzleDateLabel = (p) => {
-  if (!p) return null;
-  const dt = p.dateKey ? dateFromKey(p.dateKey) : null;
-  const src = dt;
-  if (!src || Number.isNaN(+src)) return null;
-  return src.toLocaleDateString(undefined, {
+  const raw = typeof p === "string" ? p : p?.id;
+  const id = String(raw || "").trim();
+  if (!isDateId(id)) return null;
+  const dt = dateFromKey(id);
+  if (!dt || Number.isNaN(+dt)) return null;
+  return dt.toLocaleDateString(undefined, {
     weekday: "long",
     year: "numeric",
     month: "short",
@@ -2150,6 +2198,14 @@ const puzzleDateLabel = (p) => {
     timeZone: "UTC",
   });
 };
+
+const puzzleLabel = (p) => {
+  const id = String(p?.id || "").trim();
+  return id || "Untitled";
+};
+
+const isDailyChainPuzzle = (p) => isChainPuzzle(p) && isDateId(p?.id);
+const isCustomChainPuzzle = (p) => isChainPuzzle(p) && !isDateId(p?.id);
 
 const normWord = (w, pType, opts = {}) => {
   const out = {
@@ -2163,20 +2219,21 @@ const normWord = (w, pType, opts = {}) => {
 
 
 const normPuzzle = (p) => {
-  const type = String(p?.type || MODE.OVERLAP);
+  let type = String(p?.type || MODE.PUZZLE).toLowerCase();
+  if (type === "overlap") type = MODE.PUZZLE;
   const wordsRaw = Array.isArray(p?.words) ? p.words : [];
   const fallback = { clue: "Clue", answer: "WORD", start: 1 };
   const timed = type === MODE.CHAIN ? false : true;
   const words = (wordsRaw.length ? wordsRaw : [fallback]).map((w) => normWord(w, type, { timed }));
-  const { dateKey } = normalizePuzzleDate(p?.dateKey || p?.date);
-
+  const { id } = normalizePuzzleId({ ...p, type });
 
   const out = {
-    title: String(p?.title || "Untitled"),
+    id,
+    // legacy title retained in memory only; UI uses id instead
+    title: String(p?.title || ""),
     type,
     palette: normalizePaletteId(p?.palette),
     words,
-    dateKey,
   };
   return out;
 };
@@ -2192,7 +2249,7 @@ const BUILDER_FILTER = { CHAIN: "chain", PUZZLE: "puzzle", OTHER: "other" };
 let builderFilterMode = BUILDER_FILTER.CHAIN;
 
 const play = {
-  mode: MODE.OVERLAP,
+  mode: MODE.PUZZLE,
   entries: [],
   exp: [],
   usr: [],
@@ -2526,7 +2583,8 @@ function noteHardwareKeyboard() {
 
 // ---- Model ----
 function computed(p) {
-  const type = String(p?.type || MODE.OVERLAP);
+  let type = String(p?.type || MODE.PUZZLE).toLowerCase();
+  if (type === "overlap") type = MODE.PUZZLE;
 
   const entries = (p.words || [])
     .map((w, rawIdx) => {
@@ -2912,7 +2970,7 @@ function jumpToUnresolvedWord(delta) {
   });
 
   // Overlap mode: always jump by word starts, ignoring correctness/locks (done or not).
-  if (play.mode === MODE.OVERLAP) {
+  if (play.mode === MODE.PUZZLE) {
     const entries = (play.entries || []).slice().sort((a, b) => a.start - b.start);
     if (!entries.length) return;
     const idx = play.at;
@@ -3370,7 +3428,7 @@ function closeGiveUpModal() {
 function updatePlayControlsVisibility() {
   if (!els.reset || !els.reveal) return;
   // Only gate in play/overlap mode; otherwise leave visible.
-  if (play.mode !== MODE.OVERLAP || currentView !== VIEW.PLAY) {
+  if (play.mode !== MODE.PUZZLE || currentView !== VIEW.PLAY) {
     els.reset.style.display = "";
     els.reveal.style.display = "";
     if (els.nextPuzzleBtn) els.nextPuzzleBtn.style.display = "none";
@@ -3427,7 +3485,7 @@ function findTodayChainIndex() {
   if (!todayKey) return null;
   for (let i = 0; i < puzzles.length; i++) {
     const p = puzzles[i];
-    if (isChainPuzzle(p) && p.dateKey && p.dateKey === todayKey) return i;
+    if (isDailyChainPuzzle(p) && p.id === todayKey) return i;
   }
   return null;
 }
@@ -3830,7 +3888,7 @@ function openChainResults(stats, reason) {
   r.title.textContent = allSolved ? "Success!" : "Overlap";
 
   const p = puzzles[pIdx];
-  const label = puzzleDateLabel(p) || new Date().toLocaleDateString(undefined, {
+  const label = puzzleLabel(p) || new Date().toLocaleDateString(undefined, {
     weekday: "long",
     year: "numeric",
     month: "short",
@@ -3967,7 +4025,7 @@ function triggerSolveAnimation(entry) {
 }
 
 function triggerFullSolveAnimation() {
-  if (play.mode !== MODE.OVERLAP || !els.grid || play.fullSolveAnimated) return;
+  if (play.mode !== MODE.PUZZLE || !els.grid || play.fullSolveAnimated) return;
   const letters = Array.from(els.grid.querySelectorAll(".cell .letter")).sort((a, b) => {
     const pa = a.closest(".cell");
     const pb = b.closest(".cell");
@@ -4446,15 +4504,15 @@ function setResultsInert(isOpen) {
 function shareResult({ mode }) {
   const puzzle = puzzles[pIdx];
   const shareDateLabel = (() => {
-    const src = mode === MODE.CHAIN && puzzle?.dateKey ? dateFromKey(puzzle.dateKey) : null;
+    const lbl = puzzleLabel(puzzle);
+    if (lbl) return lbl;
     const opts = {
       weekday: "short",
       year: "numeric",
       month: "short",
       day: "numeric",
     };
-    if (src) opts.timeZone = "UTC";
-    const d = src || new Date();
+    const d = new Date();
     const label = d.toLocaleDateString(undefined, opts);
     return label ? label.replace(/^([A-Za-z]{3})/, (m) => m.toUpperCase()) : label;
   })();
@@ -4701,7 +4759,7 @@ function loadPuzzle(i) {
   applyPaletteToDom(p.palette);
   const m = computed(p);
 
-  play.mode = isChainPuzzle(p) ? MODE.CHAIN : MODE.OVERLAP;
+  play.mode = isChainPuzzle(p) ? MODE.CHAIN : MODE.PUZZLE;
   play.entries = m.entries;
 
   setCols(m.total);
@@ -4762,10 +4820,10 @@ function loadPuzzle(i) {
   const posText = list.length ? `${(pos >= 0 ? pos : 0) + 1} / ${list.length}` : `1 / ${puzzles.length}`;
 
   els.meta.replaceChildren(
-  document.createTextNode(p.title || "Untitled"),
-  document.createTextNode(" "),
-  Object.assign(document.createElement("span"), { textContent: `• ${posText}` })
-);
+    document.createTextNode(puzzleLabel(p)),
+    document.createTextNode(" "),
+    Object.assign(document.createElement("span"), { textContent: `• ${posText}` })
+  );
 
 
   updatePlayUI();
@@ -4870,7 +4928,7 @@ function escapeAttr(s) {
 }
 
 function handleEnterKey() {
-  if (play.mode === MODE.OVERLAP) {
+  if (play.mode === MODE.PUZZLE) {
     if (play.done) return;
     const filled = play.usr.every(Boolean);
     if (!filled) {
@@ -5002,7 +5060,7 @@ function ensureBuilderModeUI() {
   wrap.innerHTML = `
     <label class="lab" for="pMode">Mode</label>
     <select class="sel" id="pMode">
-      <option value="${MODE.OVERLAP}">Overlap</option>
+      <option value="${MODE.PUZZLE}">Puzzle</option>
       <option value="${MODE.CHAIN}">Word Chain</option>
     </select>
 
@@ -5043,7 +5101,8 @@ const filteredBuilderIndices = (mode = builderFilterMode) => {
   return puzzles
     .map((p, i) => ({ p, i }))
     .filter(({ p }) => {
-      const type = String(p?.type || MODE.OVERLAP);
+      let type = String(p?.type || MODE.PUZZLE).toLowerCase();
+      if (type === "overlap") type = MODE.PUZZLE;
       if (mode === BUILDER_FILTER.CHAIN) return type === MODE.CHAIN;
       if (mode === BUILDER_FILTER.PUZZLE) return type !== MODE.CHAIN && type !== "other";
       if (mode === BUILDER_FILTER.OTHER) return type === "other";
@@ -5097,17 +5156,16 @@ function syncBuilder() {
   els.pSel.innerHTML = indices
     .map((i) => {
       const p = puzzles[i];
-      return `<option value="${i}" ${i === pIdx ? "selected" : ""}>${escapeHtml(p.title || "Untitled")}</option>`;
+      return `<option value="${i}" ${i === pIdx ? "selected" : ""}>${escapeHtml(puzzleLabel(p))}</option>`;
     })
     .join("");
 
-  els.pTitle.value = puzzles[pIdx]?.title || "";
-  els.pDate.value = puzzles[pIdx]?.dateKey || "";
+  els.pTitle.value = puzzles[pIdx]?.id || "";
 
   const p = puzzles[pIdx];
   const chainMode = isChainPuzzle(p);
 
-  if (bModeSel) bModeSel.value = p.type || MODE.OVERLAP;
+  if (bModeSel) bModeSel.value = isChainPuzzle(p) ? MODE.CHAIN : MODE.PUZZLE;
   if (bPaletteSel) {
     const opts = PALETTES.map(
       (pal) => `<option value="${pal.id}" ${pal.id === p.palette ? "selected" : ""}>${escapeHtml(pal.label)}</option>`
@@ -5448,7 +5506,7 @@ els.shareInline?.addEventListener("click", () => {
 const navActions = {
   cellPrev: () => {
     let tgt = null;
-    if (play.done || play.mode === MODE.OVERLAP) {
+    if (play.done || play.mode === MODE.PUZZLE) {
       tgt = clamp(play.at - 1, 0, play.n - 1);
     } else {
       tgt = findUnresolvedCell(play.at, -1);
@@ -5457,7 +5515,7 @@ const navActions = {
   },
   cellNext: () => {
     let tgt = null;
-    if (play.done || play.mode === MODE.OVERLAP) {
+    if (play.done || play.mode === MODE.PUZZLE) {
       tgt = clamp(play.at + 1, 0, play.n - 1);
     } else {
       tgt = findUnresolvedCell(play.at, +1);
@@ -5579,20 +5637,14 @@ els.pSel.addEventListener("change", () => {
 });
 
 els.pTitle.addEventListener("input", () => {
-  puzzles[pIdx].title = els.pTitle.value;
+  const { id } = normalizePuzzleId({ ...puzzles[pIdx], id: els.pTitle.value });
+  puzzles[pIdx].id = id;
   const opt = Array.from(els.pSel.options).find((o) => +o.value === pIdx);
-  if (opt) opt.text = els.pTitle.value || "Untitled";
+  if (opt) opt.text = puzzleLabel(puzzles[pIdx]);
   setDirty(true);
   store.save();
   setDirty(false);
   renderPreview();
-});
-els.pDate?.addEventListener("input", () => {
-  const { dateKey } = normalizePuzzleDate(els.pDate.value);
-  puzzles[pIdx].dateKey = dateKey;
-  setDirty(true);
-  store.save();
-  setDirty(false);
 });
 
 els.pNew.addEventListener("click", () => {
@@ -5600,11 +5652,14 @@ els.pNew.addEventListener("click", () => {
     builderFilterMode === BUILDER_FILTER.CHAIN
       ? MODE.CHAIN
       : builderFilterMode === BUILDER_FILTER.PUZZLE
-      ? MODE.OVERLAP
+      ? MODE.PUZZLE
       : "other";
   puzzles.push(
     normPuzzle({
-      title: "Untitled",
+      id:
+        newType === MODE.CHAIN
+          ? todayKey() || "chain"
+          : `puzzle-${puzzles.length + 1}`,
       type: newType,
       palette: FIRST_PALETTE_ID,
       words: [{ clue: "Clue", answer: "WORD", start: 1 }],

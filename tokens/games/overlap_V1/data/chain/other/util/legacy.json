@@ -1,0 +1,295 @@
+ [ {
+    "id": "First Chain",
+    "type": "chain",
+    "palette": "classic",
+    "words": [{
+        "clue": "Chain of sea islands",
+        "answer": "ARCHIPELAGO",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Shallow pool behind a reef",
+        "answer": "LAGOON",
+        "start": 8,
+        "height": "mid"
+      },
+      {
+        "clue": "Heading toward shore, say",
+        "answer": "ONTO",
+        "start": 12,
+        "height": "inner"
+      },
+      {
+        "clue": "Vast body water",
+        "answer": "OCEAN",
+        "start": 15,
+        "height": "full"
+      },
+      {
+        "clue": "Heavy object dropped to hold a boat",
+        "answer": "ANCHOR",
+        "start": 18,
+        "height": "mid"
+      },
+      {
+        "clue": "Where sea seems to meet sky",
+        "answer": "HORIZON",
+        "start": 21,
+        "height": "full"
+      }
+    ]
+  },
+  {
+    "id": "super long",
+    "type": "chain",
+    "palette": "classic",
+    "words": [{
+        "clue": "Middle Eastern ruler",
+        "answer": "SULTAN",
+        "start": 1,
+        "height": "full"
+      },
+      {
+        "clue": "Off-topic aside",
+        "answer": "TANGENT",
+        "start": 4,
+        "height": "mid"
+      },
+      {
+        "clue": "Main course",
+        "answer": "ENTREE",
+        "start": 8,
+        "height": "inner"
+      },
+      {
+        "clue": "Coral ridge",
+        "answer": "REEF",
+        "start": 11,
+        "height": "full"
+      },
+      {
+        "clue": "Attempt",
+        "answer": "EFFORT",
+        "start": 13,
+        "height": "mid"
+      },
+      {
+        "clue": "Traditional; conventional",
+        "answer": "ORTHODOX",
+        "start": 16,
+        "height": "inner"
+      },
+      {
+        "clue": "Posting private info",
+        "answer": "DOXING",
+        "start": 21,
+        "height": "full"
+      },
+      {
+        "clue": "Pungent bulb",
+        "answer": "GARLIC",
+        "start": 26,
+        "height": "mid"
+      },
+      {
+        "clue": "Hanging ice spike",
+        "answer": "ICICLE",
+        "start": 30,
+        "height": "inner"
+      },
+      {
+        "clue": "Witty; smart",
+        "answer": "CLEVER",
+        "start": 33,
+        "height": "full"
+      },
+      {
+        "clue": "Jury's decision",
+        "answer": "VERDICT",
+        "start": 36,
+        "height": "mid"
+      },
+      {
+        "clue": "Lay down orders",
+        "answer": "DICTATE",
+        "start": 39,
+        "height": "inner"
+      },
+      {
+        "clue": "Boring; tiring",
+        "answer": "TEDIOUS",
+        "start": 44,
+        "height": "full"
+      },
+      {
+        "clue": "Drive out",
+        "answer": "OUST",
+        "start": 48,
+        "height": "mid"
+      },
+      {
+        "clue": "Rock",
+        "answer": "STONE",
+        "start": 50,
+        "height": "inner"
+      },
+      {
+        "clue": "Sound quality",
+        "answer": "TONE",
+        "start": 51,
+        "height": "full"
+      },
+      {
+        "clue": "Single-direction",
+        "answer": "ONEWAY",
+        "start": 52,
+        "height": "mid"
+      },
+      {
+        "clue": "Navigation aids/signage",
+        "answer": "WAYFINDING",
+        "start": 55,
+        "height": "inner"
+      },
+      {
+        "clue": "Inventiveness",
+        "answer": "INGENUITY",
+        "start": 62,
+        "height": "full"
+      },
+      {
+        "clue": "Cruel ruler",
+        "answer": "TYRANT",
+        "start": 69,
+        "height": "mid"
+      },
+      {
+        "clue": "Patriotic song",
+        "answer": "ANTHEM",
+        "start": 72,
+        "height": "inner"
+      },
+      {
+        "clue": "Half a globe",
+        "answer": "HEMISPHERE",
+        "start": 75,
+        "height": "full"
+      },
+      {
+        "clue": "Give a new look",
+        "answer": "RESKIN",
+        "start": 83,
+        "height": "mid"
+      },
+      {
+        "clue": "Realm",
+        "answer": "KINGDOM",
+        "start": 86,
+        "height": "inner"
+      },
+      {
+        "clue": "Legal residence",
+        "answer": "DOMICILE",
+        "start": 90,
+        "height": "full"
+      },
+      {
+        "clue": "Small-intestine part",
+        "answer": "ILEUM",
+        "start": 95,
+        "height": "mid"
+      },
+      {
+        "clue": "Rain shield",
+        "answer": "UMBRELLA",
+        "start": 98,
+        "height": "inner"
+      },
+      {
+        "clue": "Narrow road",
+        "answer": "LANE",
+        "start": 104,
+        "height": "full"
+      },
+      {
+        "clue": "Low on iron, say",
+        "answer": "ANEMIC",
+        "start": 105,
+        "height": "mid"
+      },
+      {
+        "clue": "Tiny organisms",
+        "answer": "MICROBES",
+        "start": 108,
+        "height": "inner"
+      },
+      {
+        "clue": "Top-notch",
+        "answer": "BEST",
+        "start": 113,
+        "height": "full"
+      },
+      {
+        "clue": "Rough calculation",
+        "answer": "ESTIMATE",
+        "start": 114,
+        "height": "mid"
+      },
+      {
+        "clue": "Run-down apartment bldg.",
+        "answer": "TENEMENT",
+        "start": 120,
+        "height": "inner"
+      },
+      {
+        "clue": "Whole; complete",
+        "answer": "ENTIRE",
+        "start": 125,
+        "height": "full"
+      },
+      {
+        "clue": "Worn out",
+        "answer": "TIRED",
+        "start": 127,
+        "height": "mid"
+      },
+      {
+        "clue": "Giant California tree",
+        "answer": "REDWOOD",
+        "start": 129,
+        "height": "inner"
+      },
+      {
+        "clue": "Stiff; not flexible",
+        "answer": "WOODEN",
+        "start": 132,
+        "height": "full"
+      },
+      {
+        "clue": "Never-ending",
+        "answer": "ENDLESS",
+        "start": 136,
+        "height": "mid"
+      },
+      {
+        "clue": "Smaller; inferior",
+        "answer": "LESSER",
+        "start": 139,
+        "height": "inner"
+      },
+      {
+        "clue": "Soil wear-away",
+        "answer": "EROSION",
+        "start": 143,
+        "height": "full"
+      },
+      {
+        "clue": "Charge (atoms)",
+        "answer": "IONIZE",
+        "start": 147,
+        "height": "mid"
+      }
+    ]
+  }
+]
