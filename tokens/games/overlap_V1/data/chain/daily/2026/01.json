@@ -1,5 +1,4 @@
-[
-    {
+[{
         "id": "2026-01-01",
         "type": "chain",
         "palette": "greens",
@@ -933,6 +932,196 @@
                 "start": 62
             }
         ]
+    },
+    {
+        "id": "2026-01-11",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Unchanging",
+                "answer": "CONSTANT",
+                "start": 1
+            },
+            {
+                "clue": "Against",
+                "answer": "ANTI",
+                "start": 6
+            },
+            {
+                "clue": "Clock measure",
+                "answer": "TIME",
+                "start": 8
+            },
+            {
+                "clue": "Internal note",
+                "answer": "MEMORANDUM",
+                "start": 10
+            },
+            {
+                "clue": "Practice model",
+                "answer": "DUMMY",
+                "start": 17
+            },
+            {
+                "clue": "A great many",
+                "answer": "MYRIAD",
+                "start": 20
+            },
+            {
+                "clue": "Food preservative, say",
+                "answer": "ADDITIVE",
+                "start": 24
+            },
+            {
+                "clue": "Let off steam",
+                "answer": "VENT",
+                "start": 30
+            },
+            {
+                "clue": "Organizations, for example",
+                "answer": "ENTITIES",
+                "start": 31
+            },
+            {
+                "clue": "Bit of waste",
+                "answer": "SCRAP",
+                "start": 38
+            },
+            {
+                "clue": "Kids' recess area",
+                "answer": "PLAYGROUND",
+                "start": 42
+            },
+            {
+                "clue": "Not allowed to go out",
+                "answer": "GROUNDED",
+                "start": 46
+            },
+            {
+                "clue": "Logic-based",
+                "answer": "DEDUCTIVE",
+                "start": 51
+            },
+            {
+                "clue": "Carrots and peas, for example",
+                "answer": "VEGETABLES",
+                "start": 58
+            },
+            {
+                "clue": "Absolutely necessary",
+                "answer": "ESSENTIAL",
+                "start": 66
+            },
+            {
+                "clue": "Photo collection",
+                "answer": "ALBUM",
+                "start": 73
+            },
+            {
+                "clue": "Page edges",
+                "answer": "MARGINS",
+                "start": 77
+            },
+            {
+                "clue": "Tools or musical gear",
+                "answer": "INSTRUMENTS",
+                "start": 81
+            }
+        ]
+    },
+    {
+  "id": "2026-01-12",
+  "type": "chain",
+  "palette": "greens",
+  "words": [
+    {
+      "clue": "Display at a museum",
+      "answer": "EXHIBIT",
+      "start": 1
+    },
+    {
+      "clue": "Need to scratch",
+      "answer": "ITCH",
+      "start": 6
+    },
+    {
+      "clue": "Group of notes",
+      "answer": "CHORD",
+      "start": 8
+    },
+    {
+      "clue": "Put in sequence",
+      "answer": "ORDER",
+      "start": 10
+    },
+    {
+      "clue": "Bowler hat",
+      "answer": "DERBY",
+      "start": 12
+    },
+    {
+      "clue": "Alt. Jewish language",
+      "answer": "YIDDISH",
+      "start": 16
+    },
+    {
+      "clue": "Safe place for ships",
+      "answer": "HARBOR",
+      "start": 22
+    },
+    {
+      "clue": "Came into life",
+      "answer": "BORN",
+      "start": 25
+    },
+    {
+      "clue": "Holiday tree decor",
+      "answer": "ORNAMENTS",
+      "start": 26
+    },
+    {
+      "clue": "Not general",
+      "answer": "SPECIFIC",
+      "start": 34
+    },
+    {
+      "clue": "Contract provision",
+      "answer": "CLAUSE",
+      "start": 41
+    },
+    {
+      "clue": "Employs",
+      "answer": "USES",
+      "start": 44
+    },
+    {
+      "clue": "Known by a few",
+      "answer": "ESOTERIC",
+      "start": 46
+    },
+    {
+      "clue": "Punctuation mark",
+      "answer": "COMMA",
+      "start": 53
+    },
+    {
+      "clue": "Pairs up",
+      "answer": "MATCHES",
+      "start": 56
+    },
+    {
+      "clue": "Holiday roasting nut",
+      "answer": "CHESTNUT",
+      "start": 59
+    },
+    {
+      "clue": "Practical, not fancy",
+      "answer": "UTILITARIAN",
+      "start": 65
     }
+  ]
+}
+
+
 
 ]

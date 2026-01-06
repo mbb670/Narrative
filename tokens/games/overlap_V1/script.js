@@ -631,16 +631,71 @@ function updateSliderUI() {
   updateThumbFromScroll();
 }
 
-// ---- Defaults loading (robust + cache-bust) ----
-const DEFAULTS_VERSION = "2026-01-24"; // <-- bump this any time you edit examples.json or puzzle schema
+// ---- Defaults loading (modular data files) ----
+const DEFAULTS_VERSION = "2026-01-24"; // <-- bump this any time you edit puzzle data layout
 const DEFAULTS_VER_KEY = `${KEY}__defaults_version`;
 
-// Cache-bust + bypass browser HTTP cache differences
-const defaultsURL = new URL("./examples.json", import.meta.url);
-defaultsURL.searchParams.set("v", DEFAULTS_VERSION);
+const JSON_FETCH_OPTS = { cache: "no-store" };
 
-// "no-store" helps with browser cache; the ?v= param helps across browsers + SW caches
-const DEF = await (await fetch(defaultsURL, { cache: "no-store" })).json();
+async function fetchJson(url, fallback = null) {
+  try {
+    const res = await fetch(url, JSON_FETCH_OPTS);
+    if (!res?.ok) throw new Error(`Failed ${url}`);
+    return await res.json();
+  } catch {
+    return fallback;
+  }
+}
+
+async function loadJsonArraysFromList(baseUrl, paths = []) {
+  const results = await Promise.all(
+    paths.map(async (p) => {
+      const url = new URL(p, baseUrl);
+      const data = await fetchJson(url, []);
+      return Array.isArray(data) ? data : [];
+    })
+  );
+  return results.flat();
+}
+
+async function loadPuzzleModeDefaults() {
+  const base = new URL("./data/puzzles/", import.meta.url);
+  const manifest = await fetchJson(new URL("./data/puzzles/index.json", import.meta.url), null);
+  const list =
+    Array.isArray(manifest?.files) ? manifest.files :
+    Array.isArray(manifest) ? manifest :
+    ["Initial_group/initial.json"];
+  return loadJsonArraysFromList(base, list);
+}
+
+async function loadChainOtherDefaults() {
+  const base = new URL("./data/chain/other/", import.meta.url);
+  const manifest = await fetchJson(new URL("./data/chain/other/index.json", import.meta.url), null);
+  const list =
+    Array.isArray(manifest?.files) ? manifest.files :
+    Array.isArray(manifest) ? manifest :
+    ["util/ftue.json", "custom/personal.json"];
+  return loadJsonArraysFromList(base, list);
+}
+
+async function loadDailyChainDefaults(date = new Date()) {
+  const base = new URL("./data/chain/daily/", import.meta.url);
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const monthPath = `${y}/${String(m).padStart(2, "0")}.json`;
+  return loadJsonArraysFromList(base, [monthPath]);
+}
+
+async function loadDefaultPuzzles() {
+  const [daily, chainOther, puzzleModes] = await Promise.all([
+    loadDailyChainDefaults(),
+    loadChainOtherDefaults(),
+    loadPuzzleModeDefaults(),
+  ]);
+  return [...daily, ...chainOther, ...puzzleModes];
+}
+
+const DEF = await loadDefaultPuzzles();
 
 
 // ---- DOM ----
@@ -1634,7 +1689,7 @@ const store = {
 
       const savedDefaultsVer = localStorage.getItem(DEFAULTS_VER_KEY);
 
-      // If defaults changed (or you force reset), discard saved puzzles so you get fresh examples.json
+      // If defaults changed (or you force reset), discard saved puzzles so you get fresh data files
       if (forceReset || savedDefaultsVer !== DEFAULTS_VERSION) {
         localStorage.setItem(DEFAULTS_VER_KEY, DEFAULTS_VERSION);
         localStorage.removeItem(KEY);

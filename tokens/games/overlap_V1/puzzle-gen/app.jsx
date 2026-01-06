@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-import { Plus, Trash2, ArrowRight, Link as LinkIcon, RefreshCw, GripVertical, AlertTriangle, Wand2, Hammer, X, Globe, AlertCircle, Sparkles, Layers, Type, CheckCircle2, ArrowUp, ArrowDown, Square, RotateCw, Percent, AlignLeft, ArrowLeft, Copy, Check, ChevronDown, ChevronUp, Undo, PenTool, ArrowLeftCircle, Book, Redo } from "https://esm.sh/lucide-react@0.468.0?dev&deps=react@18.3.1";
+import { Trash2, ArrowRight, Link as LinkIcon, RefreshCw, GripVertical, AlertTriangle, Wand2, Hammer, X, Globe, AlertCircle, Sparkles, Layers, Type, CheckCircle2, ArrowUp, ArrowDown, Square, RotateCw, Percent, AlignLeft, ArrowLeft, Copy, Check, ChevronDown, ChevronUp, Undo, PenTool, ArrowLeftCircle, Book, Redo, Calendar } from "https://esm.sh/lucide-react@0.468.0?dev&deps=react@18.3.1";
 
 const Card = ({ children, className = "" }) => (
   <div className={`bg-white rounded-xl shadow-sm border border-slate-200 ${className}`}>
@@ -586,8 +586,20 @@ const isCommonEnough = (entry, minFreq = 2.0) => {
 
 const countTriples = (sequence = []) => sequence.reduce((acc, item) => acc + (item?.type === 'triple' ? 1 : 0), 0);
 
+const fetchMonthEntries = async (year, monthIndex) => {
+    const monthStr = String(monthIndex + 1).padStart(2, '0');
+    try {
+        const res = await fetch(`../data/chain/daily/${year}/${monthStr}.json`);
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) return data;
+        }
+    } catch {}
+    return [];
+};
+
 // Pathfinder for Multi-Chain organization
-const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set(), maxDepth = 20) => {
+const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set(), maxDepth = 25) => {
   if (items.length === 0) return [];
 
   const adj = {};
@@ -603,7 +615,8 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
   const getScore = (path) => {
       return path.reduce((acc, item) => {
           const penalty = item.words.some(w => devalueWords.has(cleanWord(w))) ? 10 : 0;
-          return acc + (item.type === 'triple' ? 50 : item.totalOverlap) - penalty;
+          const tripleBonus = item.type === 'triple' ? 120 : 0;
+          return acc + tripleBonus + item.totalOverlap - penalty;
       }, 0);
   };
 
@@ -625,7 +638,7 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
           return b.totalOverlap - a.totalOverlap;
       });
 
-      candidates = candidates.slice(0, 10);
+      candidates = candidates.slice(0, 30);
 
       for (const item of candidates) {
           const newWords = item.words.slice(1).map(w => cleanWord(w));
@@ -644,7 +657,7 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
       return b.totalOverlap - a.totalOverlap;
   });
 
-  const starters = sortedItems.slice(0, 50);
+  const starters = shuffleArray(sortedItems).slice(0, 100);
 
   for (const startItem of starters) {
       const itemWords = startItem.words.map(w => cleanWord(w));
@@ -660,7 +673,7 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
 };
 
 const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set()) => {
-    let pool = [...allItems];
+    let pool = shuffleArray([...allItems]);
     let finalSequence = [];
     let globalUsedWords = new Set();
 
@@ -780,7 +793,7 @@ export default function App() {
   const [prepUseAI, setPrepUseAI] = useState(false);
   const [prepDifficulty, setPrepDifficulty] = useState('medium');
   const [prepApiKey, setPrepApiKey] = useState("");
-  const [showExportModal, setShowExportModal] = useState(false);
+  const [chainDate, setChainDate] = useState("");
   const [exportDate, setExportDate] = useState(() => {
       const today = new Date();
       return today.toISOString().split('T')[0];
@@ -805,6 +818,12 @@ export default function App() {
   const STORAGE_KEY = "puzzleGenChainState";
   const [stateLoaded, setStateLoaded] = useState(false);
   const initialSaveSkipped = useRef(false);
+  
+  const formattedChainDate = useMemo(() => {
+      if (!chainDate) return "Pick Date";
+      const d = new Date(`${chainDate}T00:00:00Z`);
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  }, [chainDate]);
   
   // --- Actions ---
   
@@ -921,12 +940,12 @@ export default function App() {
       } catch {}
   }, [chain, clues, definitions, stateLoaded]);
 
-  // Load excluded words (manual list) and devalue list (past answers)
+  // Load excluded words and recent answers based on the selected chain date (current + previous month for 30-day window)
   useEffect(() => {
       let cancelled = false;
       const loadLists = async () => {
       try {
-          const exclRes = await fetch("../excluded-words.json");
+          const exclRes = await fetch("../data/chain/other/util/excluded-words.json");
           if (exclRes.ok) {
               const data = await exclRes.json();
               if (!cancelled && Array.isArray(data)) {
@@ -936,62 +955,86 @@ export default function App() {
       } catch {}
 
       try {
-          const exRes = await fetch("../examples.json");
-          if (exRes.ok) {
-              const data = await exRes.json();
-              const answers = [];
-              const dateKeys = [];
-              const recent = [];
-              const now = Date.now();
-              const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-              (data || []).forEach(p => {
-                  const dateIso = typeof p.id === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.id) ? p.id : null;
-                  if (dateIso) {
-                      dateKeys.push(dateIso);
-                  }
-                  let isRecent = false;
-                  if (dateIso) {
-                      const t = Date.parse(dateIso);
-                      if (!Number.isNaN(t) && (now - t) <= THIRTY_DAYS) {
-                          isRecent = true;
-                      }
-                  }
-                  (p.words || []).forEach(w => {
-                      if (w.answer) {
-                          const cw = cleanWord(w.answer);
-                          if (cw) {
-                              answers.push(cw);
-                              if (isRecent) recent.push(cw);
-                          }
-                      }
-                  });
-              });
-                  if (!cancelled) {
-                      setDevalueWords(new Set(answers.filter(Boolean)));
-                      setRecentExcludedAnswers(new Set(recent));
-                      const usedSet = new Set(dateKeys.filter(Boolean));
-                      setUsedDateKeys(usedSet);
-                      // Default export date to the first open date on/after today
-                      if (exportDate === "" || exportDate === new Date().toISOString().split('T')[0]) {
-                          const usedIso = new Set(Array.from(usedSet));
-                          let cursor = new Date();
-                          cursor.setUTCHours(0, 0, 0, 0);
-                          let candidateIso = cursor.toISOString().split('T')[0];
-                          while (usedIso.has(candidateIso)) {
-                              cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
-                              candidateIso = cursor.toISOString().split('T')[0];
-                          }
-                          setExportDate(candidateIso);
-                          const [cy, cm] = candidateIso.split('-').map(Number);
-                          setExportMonth(new Date(Date.UTC(cy, cm - 1, 1)));
-                      }
+          const refDate = (() => {
+              if (chainDate && /^\d{4}-\d{2}-\d{2}$/.test(chainDate)) {
+                  const [y, m, d] = chainDate.split('-').map(Number);
+                  return new Date(Date.UTC(y, m - 1, d));
+              }
+              return new Date();
+          })();
+
+          const currYear = refDate.getUTCFullYear();
+          const currMonth = refDate.getUTCMonth();
+          const prevMonthDate = new Date(Date.UTC(currYear, currMonth - 1, 1));
+          const nextMonthDate = new Date(Date.UTC(currYear, currMonth + 1, 1));
+
+          const monthsToLoad = [
+              { year: currYear, month: currMonth },
+              { year: prevMonthDate.getUTCFullYear(), month: prevMonthDate.getUTCMonth() },
+              { year: nextMonthDate.getUTCFullYear(), month: nextMonthDate.getUTCMonth() }
+          ];
+
+          const monthData = [];
+          for (const m of monthsToLoad) {
+              const data = await fetchMonthEntries(m.year, m.month);
+              monthData.push(...data);
+          }
+
+          const answers = [];
+          const recent = [];
+          const dateKeys = [];
+          const refMs = refDate.getTime();
+          const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+
+          monthData.forEach(p => {
+              const dateIso = typeof p.id === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.id) ? p.id : null;
+              if (dateIso) {
+                  dateKeys.push(dateIso);
+              }
+              let isRecent = false;
+              if (dateIso) {
+                  const t = Date.parse(dateIso);
+                  if (!Number.isNaN(t) && t <= refMs && (refMs - t) <= THIRTY_DAYS) {
+                      isRecent = true;
                   }
               }
-          } catch {}
+              (p.words || []).forEach(w => {
+                  if (w.answer) {
+                      const cw = cleanWord(w.answer);
+                      if (cw) {
+                          answers.push(cw);
+                          if (isRecent) recent.push(cw);
+                      }
+                  }
+              });
+          });
+
+          if (!cancelled) {
+              setDevalueWords(new Set(answers.filter(Boolean)));
+              setRecentExcludedAnswers(new Set(recent));
+
+              // Default chain/export date to first open date on/after today
+              const usedSet = new Set(dateKeys.filter(Boolean));
+              if (!chainDate) {
+                  const usedIso = new Set(Array.from(usedSet));
+                  let cursor = new Date();
+                  cursor.setUTCHours(0, 0, 0, 0);
+                  let candidateIso = cursor.toISOString().split('T')[0];
+                  while (usedIso.has(candidateIso)) {
+                      cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
+                      candidateIso = cursor.toISOString().split('T')[0];
+                  }
+                  setChainDate(candidateIso);
+                  setExportDate(candidateIso);
+                  const [cy, cm] = candidateIso.split('-').map(Number);
+                  setExportMonth(new Date(Date.UTC(cy, cm - 1, 1)));
+              }
+          }
+      } catch {}
       };
       loadLists();
       return () => { cancelled = true; };
-  }, []);
+  }, [chainDate]);
 
   const persistApiConfig = (next, remember = rememberApiConfig, nextUseAI = useAI) => {
       setApiConfig(next);
@@ -1008,6 +1051,23 @@ export default function App() {
       setToast({ message, type });
       setTimeout(() => setToast(null), 4000);
   };
+
+  // Load used dates for the currently viewed export month
+  useEffect(() => {
+      let cancelled = false;
+      const loadMonthDates = async () => {
+          const year = exportMonth.getUTCFullYear();
+          const month = exportMonth.getUTCMonth();
+          const data = await fetchMonthEntries(year, month);
+          if (cancelled) return;
+          const dates = data
+              .map(p => (typeof p.id === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.id)) ? p.id : null)
+              .filter(Boolean);
+          setUsedDateKeys(new Set(dates));
+      };
+      loadMonthDates();
+      return () => { cancelled = true; };
+  }, [exportMonth]);
 
   // Broken Chain Check
   const hasBrokenLinks = useMemo(() => {
@@ -1407,7 +1467,7 @@ const fetchRandomWords = async () => {
     
     try {
         const MIN_TRIPLES = 2;
-        const MAX_DURATION_MS = 5_000;
+        const MAX_DURATION_MS = 10_000;
         const startTime = Date.now();
         let best = null;
         let attempt = 0;
@@ -1416,17 +1476,29 @@ const fetchRandomWords = async () => {
             attempt++;
             setProgress(15);
 
-            const words = await fetchRandomWords();
+            let words = await fetchRandomWords();
             setInputText(words.join(" "));
             setProgress(30);
 
-            const result = await processWordsToInventory(words, targetLength, setProgress, true); 
+            let result = await processWordsToInventory(words, targetLength, setProgress, true); 
             setInventory(result.inventory);
             
             setProgress(60);
 
-            const organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords);
-            const tripleCount = countTriples(organizedChain);
+            let organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords);
+            let tripleCount = countTriples(organizedChain);
+
+            // If we still have fewer than MIN_TRIPLES, try enriching with another batch and re-evaluate
+            if (tripleCount < MIN_TRIPLES && (Date.now() - startTime) < MAX_DURATION_MS) {
+                const extra = await fetchRandomWords();
+                const mergedWords = Array.from(new Set([...words, ...extra]));
+                words = mergedWords;
+                const mergedResult = await processWordsToInventory(mergedWords, targetLength, setProgress, true);
+                result = mergedResult;
+                setInventory(mergedResult.inventory);
+                organizedChain = processInventoryToMultiChain(mergedResult.inventory, targetLength, devalueWords);
+                tripleCount = countTriples(organizedChain);
+            }
 
             const lenDiff = Math.abs((organizedChain?.length || 0) - targetLength);
             const bestLenDiff = best ? Math.abs((best.chain?.length || 0) - targetLength) : Infinity;
@@ -1549,6 +1621,7 @@ const fetchRandomWords = async () => {
       
       copyToClipboard(JSON.stringify(finalOutput, null, 2));
       setCopied(true);
+      showToast("JSON copied to clipboard", "success");
       setTimeout(() => setCopied(false), 2000);
   };
 
@@ -2491,94 +2564,6 @@ const fetchRandomWords = async () => {
         </div>
       )}
 
-      {/* Export Date Modal */}
-      {showExportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                <Copy size={18} className="text-indigo-600" />
-                Export JSON
-              </h3>
-              <button onClick={() => setShowExportModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">Date</label>
-                <div className="flex items-center justify-between mb-2">
-                  <button 
-                    className="text-xs px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100"
-                    onClick={() => setExportMonth(prev => new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() - 1, 1)))}
-                  >
-                    ◀
-                  </button>
-                  <div className="text-sm font-semibold text-slate-700">
-                    {exportMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' })}
-                  </div>
-                  <button 
-                    className="text-xs px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100"
-                    onClick={() => setExportMonth(prev => new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth() + 1, 1)))}
-                  >
-                    ▶
-                  </button>
-                </div>
-                <div className="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-400 mb-1">
-                  {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => <div key={d}>{d}</div>)}
-                </div>
-                {(() => {
-                  const year = exportMonth.getUTCFullYear();
-                  const month = exportMonth.getUTCMonth();
-                  const firstDay = new Date(Date.UTC(year, month, 1));
-                  const startWeekday = firstDay.getUTCDay();
-                  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-                  const cells = [];
-                  for (let i = 0; i < startWeekday; i++) cells.push(null);
-                  for (let d = 1; d <= daysInMonth; d++) {
-                    cells.push(d);
-                  }
-                  return (
-                    <div className="grid grid-cols-7 gap-1">
-                      {cells.map((day, idx) => {
-                        if (day === null) return <div key={`blank-${idx}`} />;
-                        const iso = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                        const isUsed = usedDateKeys.has(iso);
-                        const isSelected = exportDate === iso;
-                        return (
-                          <button
-                            key={iso}
-                            onClick={() => setExportDate(iso)}
-                            className={`h-8 text-sm rounded border transition ${
-                              isSelected ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                            } ${isUsed && !isSelected ? 'ring-2 ring-amber-300' : ''}`}
-                            title={isUsed ? 'Already used' : ''}
-                          >
-                            {day}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
-                {exportDate && usedDateKeys.has(exportDate) && (
-                  <div className="mt-2 text-xs text-amber-600 flex items-center gap-2">
-                    <AlertCircle size={14} />
-                    <span>This date is already used in examples.</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="secondary" onClick={() => setShowExportModal(false)}>Cancel</Button>
-                <Button onClick={() => { performExportJSON(exportDate); setShowExportModal(false); }} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                  Copy JSON
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -2611,7 +2596,7 @@ const fetchRandomWords = async () => {
             </Button>
                 <Button 
               variant="ghost" 
-              onClick={() => setShowExportModal(true)} 
+              onClick={() => performExportJSON(chainDate)} 
               className={`text-sm h-9 px-3 border border-slate-200 ${copied ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-slate-600'}`}
               title="Copy JSON"
             >
@@ -2653,7 +2638,7 @@ const fetchRandomWords = async () => {
                             </div>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
                             <Button 
                                 onClick={handleGenerateAndBuild} 
                                 disabled={isProcessing} 
@@ -2661,6 +2646,13 @@ const fetchRandomWords = async () => {
                             >
                             {isProcessing ? <RefreshCw className="animate-spin" size={18} /> : <Wand2 size={18} />}
                             Generate Random
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"
+                            >
+                                <Calendar size={18} className="text-indigo-600" />
+                                {formattedChainDate}
                             </Button>
                             <Button 
                                 onClick={handleBuildFromText} 
@@ -2975,7 +2967,7 @@ const fetchRandomWords = async () => {
                                 ))}
                             </div>
                             <Button 
-                                onClick={() => setShowExportModal(true)} 
+                                onClick={() => performExportJSON(chainDate)} 
                                 className={`text-sm h-9 px-4 ${copied ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white shadow-md`}
                             >
                                 {copied ? <Check size={16} /> : <Copy size={16} />}
