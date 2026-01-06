@@ -62,29 +62,27 @@ const getOverlap = (w1, w2, minLen = 2) => {
   return null;
 };
 
-// Calculate a true triple intersection: both adjacent overlaps must exist and
-// overlap inside the middle word. Returns the letters shared by all 3 (first/last).
 const getTripleDetails = (w1, w2, w3) => {
   const overlapAB = getOverlap(w1, w2, 1);
   const overlapBC = getOverlap(w2, w3, 1);
   if (!overlapAB || !overlapBC) return null;
 
-  const mid = cleanWord(w2);
-  const intersectionStart = mid.length - overlapBC.count; // where the second overlap begins in the middle word
-  const intersectionEnd = overlapAB.count; // where the first overlap ends in the middle word
-  const sharedCount = intersectionEnd - intersectionStart;
-  if (sharedCount <= 0) return null; // overlaps don't collide, so no triple
-
-  const sharedStr = mid.slice(intersectionStart, intersectionEnd);
+  // A triple exists when both adjacent overlaps exist AND the first/last
+  // words also overlap (even by 1 letter). This matches the gameplay rule
+  // that all three words share an overlapping letter span.
   const directOverlap = getOverlap(w1, w3, 1);
+  if (!directOverlap) return null;
+
+  const sharedCount = directOverlap.count;
+  const sharedStr = directOverlap.overlapStr;
 
   return {
     overlapAB: overlapAB.count,
     overlapBC: overlapBC.count,
     sharedCount,
     sharedStr,
-    displayCount: directOverlap?.count || sharedCount,
-    displayStr: directOverlap?.overlapStr || sharedStr
+    displayCount: sharedCount,
+    displayStr: sharedStr
   };
 };
 
@@ -672,12 +670,14 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
 };
 
 const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set(), targetLen = null) => {
+    const lowerBound = Math.max(3, limit - 3);
+    const upperBound = limit + 3;
     let pool = shuffleArray([...allItems]);
     let finalSequence = [];
     let globalUsedWords = new Set();
 
     let loopCount = 0;
-    while (pool.length > 0 && finalSequence.length < limit && loopCount < 20) {
+    while (pool.length > 0 && finalSequence.length < upperBound && loopCount < 20) {
         loopCount++;
         const chainSegment = findLongestChainInInventory(pool, globalUsedWords, devalueWords, targetLen || limit);
         
@@ -693,9 +693,15 @@ const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set(),
             return !item.words.some(w => globalUsedWords.has(cleanWord(w)));
         });
         
-        if (finalSequence.length >= limit) break;
+        if (finalSequence.length >= upperBound) break;
     }
 
+    if (finalSequence.length >= lowerBound && finalSequence.length <= upperBound) {
+        return finalSequence;
+    }
+    if (finalSequence.length > upperBound) {
+        return finalSequence.slice(0, upperBound);
+    }
     return finalSequence;
 };
 
@@ -760,7 +766,7 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [copiedCSV, setCopiedCSV] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [targetLength, setTargetLength] = useState(15);
+  const [targetLength, setTargetLength] = useState(17);
   const [showInput, setShowInput] = useState(false);
   
   // Clue State
@@ -809,6 +815,7 @@ export default function App() {
       const today = new Date();
       return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
   });
+  const [targetLengthTotal, setTargetLengthTotal] = useState(200);
   const [usedDateKeys, setUsedDateKeys] = useState(new Set());
   const nodeRefs = useRef([]);
   const containerRef = useRef(null);
@@ -822,6 +829,16 @@ export default function App() {
       if (!chainDate) return "Pick Date";
       const d = new Date(`${chainDate}T00:00:00Z`);
       return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  }, [chainDate]);
+
+  const remainingDaySlots = useMemo(() => {
+      if (!chainDate || !/^\d{4}-\d{2}-\d{2}$/.test(chainDate)) return Infinity;
+      const [y, m, d] = chainDate.split('-').map(Number);
+      const start = new Date(Date.UTC(y, m - 1, d));
+      const endOfMonth = new Date(Date.UTC(y, m, 0)); // day 0 of next month is last day of current
+      const days = endOfMonth.getUTCDate();
+      const remaining = days - start.getUTCDate() + 1;
+      return Math.max(1, remaining);
   }, [chainDate]);
   
   // --- Actions ---
@@ -854,19 +871,12 @@ export default function App() {
   const flattenChain = useMemo(() => {
       if (chain.length === 0) return [];
       let flatWords = [];
-      if (chain[0].words.length > 0) {
-          flatWords.push(chain[0].words[0]);
-      }
-
       for (let i = 0; i < chain.length; i++) {
           const item = chain[i];
-          let startIndex = 0;
-          const lastFlat = flatWords[flatWords.length - 1];
-          if (lastFlat && cleanWord(lastFlat) === cleanWord(item.words[0])) {
-              startIndex = 1;
-          }
-          for (let j = startIndex; j < item.words.length; j++) {
-              flatWords.push(item.words[j]);
+          for (let j = 0; j < item.words.length; j++) {
+              const w = item.words[j];
+              if (flatWords.length > 0 && cleanWord(flatWords[flatWords.length - 1]) === cleanWord(w)) continue;
+              flatWords.push(w);
           }
       }
       return flatWords;
@@ -1110,19 +1120,11 @@ export default function App() {
   const { nodes: displayedNodes, triples: tripleGroups } = useMemo(() => {
       const nodes = [];
       chain.forEach((item, itemIndex) => {
-          const nextItem = chain[itemIndex + 1];
-          const isTriple = item.type === 'triple';
           item.words.forEach((w) => {
               const cleanW = cleanWord(w);
-              if (
-                  nextItem &&
-                  nextItem.type === 'triple' &&
-                  cleanWord(nextItem.words[0]) === cleanW &&
-                  item.type !== 'triple'
-              ) {
-                  return;
+              if (nodes.length > 0 && cleanWord(nodes[nodes.length - 1].word) === cleanW) {
+                  return; // prevent immediate duplicates regardless of type
               }
-              if (!isTriple && nodes.length > 0 && cleanWord(nodes[nodes.length - 1].word) === cleanW) return;
               nodes.push({ word: w, itemIndex, tripleIds: [] });
           });
       });
@@ -1140,6 +1142,45 @@ export default function App() {
 
       return { nodes, triples };
   }, [chain]);
+
+  // Segments based on target length and triple presence
+  const segments = useMemo(() => {
+      if (displayedNodes.length === 0) return [{ start: 0, end: -1, triples: 0, count: 0 }];
+
+      const countTriplesInRange = (start, end) => {
+          let c = 0;
+          for (const t of tripleGroups) {
+              if (t.startIndex >= start && t.endIndex <= end) c++;
+          }
+          return c;
+      };
+
+      const segments = [];
+      let start = 0;
+      while (start < displayedNodes.length) {
+          const end = Math.min(displayedNodes.length - 1, start + targetLength - 1);
+          const segObj = {
+              start,
+              end,
+              triples: countTriplesInRange(start, end),
+              count: end - start + 1
+          };
+          segments.push(segObj);
+          start = end + 1;
+      }
+
+      return segments;
+  }, [displayedNodes, tripleGroups, targetLength]);
+
+  const allowedWordIndices = useMemo(() => {
+      const allowed = new Set();
+      segments.forEach((seg, idx) => {
+          if (idx < remainingDaySlots) {
+              for (let i = seg.start; i <= seg.end; i++) allowed.add(i);
+          }
+      });
+      return allowed;
+  }, [segments, remainingDaySlots]);
 
   const tripleGroupsByStart = useMemo(() => {
       const map = new Map();
@@ -1232,8 +1273,14 @@ export default function App() {
       const flat = flattenChain;
       if (!flat.length) return;
 
+      const allowedList = flat.map((word, index) => ({ word, index })).filter(item => allowedWordIndices.has(item.index));
+      if (!allowedList.length) {
+          showToast("No eligible words to clue.", "warning");
+          return;
+      }
+
       const loadingState = {};
-      flat.forEach((_, i) => loadingState[i] = true);
+      allowedList.forEach(({ index }) => loadingState[index] = true);
       setLoadingClues(loadingState);
 
       const prompt = `You are generating crossword clues for a word chain. Return ONLY valid JSON array of objects like [{"word":"WORD","clue":"CLUE"}].
@@ -1241,7 +1288,7 @@ Rules:
 - Keep clues <= 35 characters.
 - Do NOT repeat the answer word in the clue.
 - Provide one entry per word in order.
-Words: ${flat.join(', ')}`;
+Words: ${allowedList.map(item => item.word).join(', ')}`;
 
       const { text: aiText, error } = await requestAI(prompt, apiConfig, useAI);
       if (error || !aiText) {
@@ -1259,15 +1306,15 @@ Words: ${flat.join(', ')}`;
       const clueMap = {};
       parsed.forEach(item => {
           if (item?.word && item?.clue) {
-              const idx = flat.findIndex(w => cleanWord(w) === cleanWord(item.word));
-              if (idx >= 0) clueMap[idx] = item.clue;
+              const match = allowedList.find(a => cleanWord(a.word) === cleanWord(item.word));
+              if (match) clueMap[match.index] = item.clue;
           }
       });
 
       // Fetch definitions separately
-      const defEntries = await Promise.all(flat.map(async (w, i) => {
-          const def = await fetchDefinitionOnly(w);
-          return [i, def];
+      const defEntries = await Promise.all(allowedList.map(async ({ word, index }) => {
+          const def = await fetchDefinitionOnly(word);
+          return [index, def];
       }));
       const defMap = Object.fromEntries(defEntries);
 
@@ -1279,6 +1326,7 @@ Words: ${flat.join(', ')}`;
 
   const generateClues = async (forceRegenIndex = null, allowBatch = true, regenerateExisting = false) => {
       const flat = flattenChain;
+      if (forceRegenIndex !== null && !allowedWordIndices.has(forceRegenIndex)) return;
       
       if (allowBatch && forceRegenIndex === null && Object.keys(clues).length === 0) {
           await generateBatchClues();
@@ -1287,7 +1335,9 @@ Words: ${flat.join(', ')}`;
 
       const wordsToProcess = forceRegenIndex !== null 
           ? [ { word: flat[forceRegenIndex], index: forceRegenIndex } ]
-          : flat.map((w, i) => ({ word: w, index: i })).filter(item => regenerateExisting || !clues[item.index]);
+          : flat.map((w, i) => ({ word: w, index: i }))
+              .filter(item => allowedWordIndices.has(item.index))
+              .filter(item => regenerateExisting || !clues[item.index]);
 
       // Set Loading
       setLoadingClues(prev => {
@@ -1501,22 +1551,22 @@ const fetchRandomWords = async () => {
             setInputText(words.join(" "));
             setProgress(30);
 
-            let result = await processWordsToInventory(words, targetLength, setProgress, true); 
+            let result = await processWordsToInventory(words, targetLengthTotal, setProgress, true); 
             setInventory(result.inventory);
             
             setProgress(60);
 
-            let organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords, targetLength);
+            let organizedChain = processInventoryToMultiChain(result.inventory, targetLengthTotal, devalueWords, targetLength);
             let tripleCount = countTriples(organizedChain);
 
             // If we still have fewer than MIN_TRIPLES, try enriching with another batch and re-evaluate
             if (tripleCount < MIN_TRIPLES && (Date.now() - startTime) < MAX_DURATION_MS) {
                 // Top up bank and retry with expanded pool
                 const mergedWords = await fetchRandomWords();
-                const mergedResult = await processWordsToInventory(mergedWords, targetLength, setProgress, true);
+                const mergedResult = await processWordsToInventory(mergedWords, targetLengthTotal, setProgress, true);
                 result = mergedResult;
                 setInventory(mergedResult.inventory);
-                organizedChain = processInventoryToMultiChain(mergedResult.inventory, targetLength, devalueWords, targetLength);
+                organizedChain = processInventoryToMultiChain(mergedResult.inventory, targetLengthTotal, devalueWords, targetLength);
                 tripleCount = countTriples(organizedChain);
             }
 
@@ -1526,7 +1576,7 @@ const fetchRandomWords = async () => {
                     ...result.inventory.filter(i => i.type === 'triple'),
                     ...result.inventory
                 ];
-                const altChain = processInventoryToMultiChain(tripleHeavyInv, targetLength, devalueWords, targetLength);
+                const altChain = processInventoryToMultiChain(tripleHeavyInv, targetLengthTotal, devalueWords, targetLength);
                 const altTripleCount = countTriples(altChain);
                 if (altTripleCount > tripleCount) {
                     organizedChain = altChain;
@@ -1534,8 +1584,8 @@ const fetchRandomWords = async () => {
                 }
             }
 
-            const lenDiff = Math.abs((organizedChain?.length || 0) - targetLength);
-            const bestLenDiff = best ? Math.abs((best.chain?.length || 0) - targetLength) : Infinity;
+            const lenDiff = Math.abs((organizedChain?.length || 0) - targetLengthTotal);
+            const bestLenDiff = best ? Math.abs((best.chain?.length || 0) - targetLengthTotal) : Infinity;
             const isBetter =
                 !best ||
                 tripleCount > best.tripleCount ||
@@ -1603,57 +1653,64 @@ const fetchRandomWords = async () => {
   };
 
   const performExportJSON = (dateKey) => {
-      if (chain.length === 0) return;
+      if (chain.length === 0) {
+          showToast("No chain to export.", "warning");
+          return;
+      }
 
       const flatWords = flattenChain;
-      let currentIndex = 1;
-      const exportData = flatWords.map((word, idx) => {
-          const wLen = word.length;
-          const thisStart = currentIndex;
-          
-          if (idx < flatWords.length - 1) {
-              const nextWord = flatWords[idx + 1];
-              const ov = getOverlap(word, nextWord, 1);
+      const exportSegments = segments.length ? segments : [{ start: 0, end: flatWords.length - 1, count: flatWords.length }];
+
+      const buildSegmentExport = (wordsSlice, startDate, offset) => {
+          let cursor = 1;
+          const exportData = wordsSlice.map((word, idx) => {
+              const globalIdx = offset + idx;
+              const nextWord = wordsSlice[idx + 1];
+              const ov = nextWord ? getOverlap(word, nextWord, 1) : null;
               const overlapCount = ov ? ov.count : 0;
-              
-              currentIndex = currentIndex + wLen - overlapCount;
-          }
-          
+
+              const entry = {
+                  clue: clues[globalIdx] || "", 
+                  answer: word.toUpperCase(),
+                  start: cursor
+              };
+              cursor = cursor + word.length - overlapCount;
+              return entry;
+          });
+
+          const dateObj = new Date(startDate);
+          const safeDateKey = dateObj.toISOString().split('T')[0];
+
           return {
-              clue: clues[idx] || "", 
-              answer: word.toUpperCase(),
-              start: thisStart
+              id: safeDateKey,
+              type: "chain",
+              palette: "greens",
+              words: exportData
           };
-      });
-
-      exportData.forEach(d => {
-          d.end = d.start + d.answer.length - 1;
-      });
-
-      exportData.forEach((item) => {
-          delete item.end;
-      });
-
-      const cleanWords = exportData.map(({ end, ...rest }) => rest);
-
-      // Parse date in UTC to avoid TZ off-by-one
-      let dateObj;
-      if (dateKey && /^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
-          const [y, m, d] = dateKey.split('-').map(Number);
-          dateObj = new Date(Date.UTC(y, m - 1, d));
-      } else {
-          dateObj = new Date();
-      }
-      const safeDateKey = dateObj.toISOString().split('T')[0];
-
-      const finalOutput = {
-          id: safeDateKey,
-          type: "chain",
-          palette: "greens",
-          words: cleanWords
       };
-      
-      copyToClipboard(JSON.stringify(finalOutput, null, 2));
+
+      const outputs = [];
+      const baseDate = (() => {
+          if (dateKey && /^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+              const [y, m, d] = dateKey.split('-').map(Number);
+              return new Date(Date.UTC(y, m - 1, d));
+          }
+          return new Date();
+      })();
+
+      exportSegments.forEach((seg, segIdx) => {
+          if (segIdx >= remainingDaySlots) return; // extras beyond month boundary are not exported
+          if (seg.end < seg.start) return;
+          const slice = flatWords.slice(seg.start, seg.end + 1);
+          const segDate = new Date(baseDate.getTime() + segIdx * 24 * 60 * 60 * 1000);
+          outputs.push(buildSegmentExport(slice, segDate, seg.start));
+      });
+
+      // Export without surrounding array brackets so it can be pasted directly into monthly files.
+      const exportString = outputs.length === 1
+          ? JSON.stringify(outputs[0], null, 2)
+          : outputs.map(o => JSON.stringify(o, null, 2)).join(",\n");
+      copyToClipboard(exportString);
       setCopied(true);
       showToast("JSON copied to clipboard", "success");
       setTimeout(() => setCopied(false), 2000);
@@ -1667,6 +1724,47 @@ const fetchRandomWords = async () => {
   const removeFromChain = (index) => {
       saveToHistory();
       setChain(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const buildNodesFromChain = useCallback((c) => {
+      const nodes = [];
+      c.forEach((item, itemIndex) => {
+          item.words.forEach(w => {
+              if (nodes.length > 0 && cleanWord(nodes[nodes.length - 1].word) === cleanWord(w)) return;
+              nodes.push({ word: w, itemIndex });
+          });
+      });
+      return nodes;
+  }, []);
+
+  const normalizeChainItems = (seq) => {
+      const normalized = [];
+      let prevLast = null;
+      for (const it of seq) {
+          const words = [...it.words];
+          while (words.length && prevLast && cleanWord(words[0]) === prevLast) {
+              words.shift();
+          }
+          if (!words.length) continue;
+
+          const overlaps = [];
+          for (let i = 0; i < words.length - 1; i++) {
+              overlaps.push(getOverlap(words[i], words[i + 1], 1) || { overlapStr: '', count: 0 });
+          }
+
+          const newItem = {
+              ...it,
+              words,
+              startWord: words[0],
+              endWord: words[words.length - 1],
+              overlaps,
+              totalOverlap: overlaps.reduce((acc, o) => acc + (o?.count || 0), 0),
+              type: words.length === 1 ? 'bridge' : it.type
+          };
+          normalized.push(newItem);
+          prevLast = cleanWord(newItem.endWord);
+      }
+      return normalized;
   };
 
   const removeNode = (node) => {
@@ -1709,6 +1807,108 @@ const fetchRandomWords = async () => {
       saveToHistory();
       setChain([]);
       setClues({});
+  };
+
+  const moveTripleWords = (tripleWords, direction) => {
+      saveToHistory();
+      setChain(prev => {
+          const idx = prev.findIndex(item => {
+              if (item.type !== 'triple' || item.words.length !== tripleWords.length) return false;
+              return item.words.every((w, i) => cleanWord(w) === cleanWord(tripleWords[i]));
+          });
+          if (idx === -1) return prev;
+          const newIdx = Math.max(0, Math.min(prev.length - 1, idx + direction));
+          if (newIdx === idx) return prev;
+          const next = [...prev];
+          const [item] = next.splice(idx, 1);
+          next.splice(newIdx, 0, item);
+          return normalizeChainItems(next);
+      });
+  };
+
+  const moveTripleToDay = (tripleWords, direction) => {
+      saveToHistory();
+      setChain(prev => {
+          const nodes = buildNodesFromChain(prev);
+          const tripleIdx = prev.findIndex(item => item.type === 'triple' && item.words.length === tripleWords.length && item.words.every((w,i)=>cleanWord(w)===cleanWord(tripleWords[i])));
+          if (tripleIdx === -1) return prev;
+          const startIdx = nodes.findIndex(n => n.itemIndex === tripleIdx && cleanWord(n.word) === cleanWord(tripleWords[0]));
+          if (startIdx === -1) return prev;
+          const segIdx = segments.findIndex(s => s.start <= startIdx && s.end >= startIdx);
+          if (segIdx === -1) return prev;
+          const targetSegIdx = segIdx + direction;
+          if (targetSegIdx < 0 || targetSegIdx >= segments.length) return prev;
+
+          // Determine min/max item index inside target segment
+          const targetSeg = segments[targetSegIdx];
+          const itemsInTarget = new Set();
+          for (let i = targetSeg.start; i <= targetSeg.end; i++) {
+              const node = nodes[i];
+              if (node) itemsInTarget.add(node.itemIndex);
+          }
+          const minIdx = itemsInTarget.size ? Math.min(...itemsInTarget) : 0;
+          const maxIdx = itemsInTarget.size ? Math.max(...itemsInTarget) : prev.length - 1;
+          const insertIdx = direction < 0 ? minIdx : maxIdx + 1;
+
+          const next = [...prev];
+          const [item] = next.splice(tripleIdx, 1);
+          const targetInsert = insertIdx > tripleIdx ? insertIdx - 1 : insertIdx;
+          next.splice(Math.max(0, Math.min(next.length, targetInsert)), 0, item);
+          return normalizeChainItems(next);
+      });
+  };
+
+  const deleteSegment = (segIdx) => {
+      if (segIdx < 0 || segIdx >= segments.length) return;
+      saveToHistory();
+      setChain(prev => {
+          const nodes = buildNodesFromChain(prev);
+          const seg = segments[segIdx];
+          const itemSpan = new Map();
+          nodes.forEach((n, idx) => {
+              const span = itemSpan.get(n.itemIndex) || { min: idx, max: idx };
+              span.min = Math.min(span.min, idx);
+              span.max = Math.max(span.max, idx);
+              itemSpan.set(n.itemIndex, span);
+          });
+          const toRemove = new Set();
+          itemSpan.forEach((span, itemIdx) => {
+              if (span.min >= seg.start && span.max <= seg.end) {
+                  toRemove.add(itemIdx);
+              }
+          });
+          const next = prev.filter((_, idx) => !toRemove.has(idx));
+          return next;
+      });
+  };
+
+  const deleteExtras = () => {
+      const extraSegs = segments.filter((_, idx) => idx >= remainingDaySlots);
+      if (!extraSegs.length) return;
+      saveToHistory();
+      setChain(prev => {
+          const nodes = buildNodesFromChain(prev);
+          const itemSpan = new Map();
+          nodes.forEach((n, idx) => {
+              const span = itemSpan.get(n.itemIndex) || { min: idx, max: idx };
+              span.min = Math.min(span.min, idx);
+              span.max = Math.max(span.max, idx);
+              itemSpan.set(n.itemIndex, span);
+          });
+          const toRemove = new Set();
+          extraSegs.forEach(seg => {
+              itemSpan.forEach((span, itemIdx) => {
+                  if (span.min >= seg.start && span.max <= seg.end) {
+                      toRemove.add(itemIdx);
+                  }
+              });
+          });
+          return prev.filter((_, idx) => !toRemove.has(idx));
+      });
+      setClues({});
+      setDefinitions({});
+      setClueHistory({});
+      showToast("Extras deleted and clues cleared.", "info");
   };
 
   const BASE_BRIDGE_BATCH = 15;
@@ -2658,7 +2858,7 @@ const fetchRandomWords = async () => {
                 <div className="flex flex-col gap-4">
                     <div className="flex flex-wrap items-end gap-4">
                         <div className="flex-1 min-w-[200px]">
-                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Target Length</label>
+                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Target Length (segment)</label>
                             <div className="flex items-center gap-4 bg-white p-2 rounded-lg border border-slate-200">
                                 <input 
                                     type="range" 
@@ -2669,6 +2869,21 @@ const fetchRandomWords = async () => {
                                     className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                 />
                                 <span className="text-sm font-bold text-indigo-600 w-8 text-center">{targetLength}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 min-w-[200px]">
+                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Chain Length (total)</label>
+                            <div className="flex items-center gap-4 bg-white p-2 rounded-lg border border-slate-200">
+                                <input 
+                                    type="range" 
+                                    min="5" 
+                                    max="200" 
+                                    value={targetLengthTotal}
+                                    onChange={(e) => setTargetLengthTotal(parseInt(e.target.value))}
+                                    className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                />
+                                <span className="text-sm font-bold text-indigo-600 w-12 text-center">{targetLengthTotal}</span>
                             </div>
                         </div>
 
@@ -2748,6 +2963,16 @@ const fetchRandomWords = async () => {
                         <span className="ml-2 hidden sm:inline">List</span>
                     </Button>
                     
+                    <Button 
+                        variant="ghost" 
+                        onClick={deleteExtras} 
+                        className="text-sm h-9 px-3 border border-amber-200 text-amber-700 hover:bg-amber-50" 
+                        title="Remove extra segments (end-of-month overflow)"
+                    >
+                        <Trash2 size={16} />
+                        <span className="ml-2 hidden sm:inline">Delete Extras</span>
+                    </Button>
+
                     <Button variant="ghost" onClick={clearChain} disabled={chain.length === 0} className="text-sm h-9 px-3 text-rose-500 hover:bg-rose-50 hover:text-rose-600">
                         <Trash2 size={16} /> <span className="ml-2 hidden sm:inline">Clear</span>
                     </Button>
@@ -2789,6 +3014,8 @@ const fetchRandomWords = async () => {
                         };
 
                         const nodes = displayedNodes;
+                        const segmentBounds = new Map(segments.map(s => [s.end, s]));
+                        const segmentStarts = new Map(segments.map((s, idx) => [s.start, { ...s, idx }]));
                         const tripleStartMap = tripleGroupsByStart;
 
                         const renderNode = (node, isBroken, idxKey) => {
@@ -2901,6 +3128,22 @@ const fetchRandomWords = async () => {
                                             Excluded
                                         </div>
                                     )}
+                                    {!hasExcluded && (
+                                        <div className="absolute -top-3 right-2 flex gap-1 z-20">
+                                            <Button size="small" variant="secondary" onClick={() => moveTripleWords(groupNodes.map(n => n.word), -1)} className="text-[10px] h-6 px-2 py-0 shadow-sm" title="Move triple left">
+                                                <ArrowLeft size={14} />
+                                            </Button>
+                                            <Button size="small" variant="secondary" onClick={() => moveTripleWords(groupNodes.map(n => n.word), 1)} className="text-[10px] h-6 px-2 py-0 shadow-sm" title="Move triple right">
+                                                <ArrowRight size={14} />
+                                            </Button>
+                                            <Button size="small" variant="ghost" onClick={() => moveTripleToDay(groupNodes.map(n => n.word), -1)} className="text-[10px] h-6 px-2 py-0 border border-emerald-200 bg-white shadow-sm" title="Move triple to previous day">
+                                                <ArrowUp size={14} />
+                                            </Button>
+                                            <Button size="small" variant="ghost" onClick={() => moveTripleToDay(groupNodes.map(n => n.word), 1)} className="text-[10px] h-6 px-2 py-0 border border-emerald-200 bg-white shadow-sm" title="Move triple to next day">
+                                                <ArrowDown size={14} />
+                                            </Button>
+                                        </div>
+                                    )}
                                     {groupNodes.map((gNode, gIdx) => {
                                         const isForbidden = isWordExcluded(gNode.word);
                                         const tripleCount = gNode.tripleIds.length;
@@ -2937,15 +3180,81 @@ const fetchRandomWords = async () => {
                         let lastNode = null;
                         let i = 0;
                         while (i < nodes.length) {
+                            if (segmentStarts.has(i)) {
+                                const seg = segmentStarts.get(i);
+                                const isExtra = seg.idx >= remainingDaySlots;
+                                let label = "Extra";
+                                if (!isExtra) {
+                                    const base = chainDate && /^\d{4}-\d{2}-\d{2}$/.test(chainDate)
+                                        ? new Date(chainDate + "T00:00:00Z")
+                                        : new Date();
+                                    const segDate = new Date(base.getTime() + seg.idx * 24 * 60 * 60 * 1000);
+                                    label = segDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+                                }
+                                elements.push(
+                                    <div key={`seg-divider-start-${i}`} className="w-full mb-4 flex items-center gap-3 relative z-10">
+                                        <div className="h-0.5 flex-1 bg-emerald-200 rounded-full"></div>
+                                        <span className={`text-xs font-semibold whitespace-nowrap ${isExtra ? 'text-slate-600' : 'text-emerald-700'}`}>
+                                            {label} · {seg.count} words
+                                        </span>
+                                        <Button 
+                                            size="small" 
+                                            variant="ghost" 
+                                            className="text-[10px] h-6 px-2 py-0 border border-emerald-200 text-emerald-700" 
+                                            onClick={() => deleteSegment(seg.idx)}
+                                            title="Delete this day"
+                                        >
+                                            Delete day
+                                        </Button>
+                                        <div className="h-0.5 flex-1 bg-emerald-200 rounded-full"></div>
+                                    </div>
+                                );
+                            }
+
                             const triple = tripleStartMap.get(i);
                             if (triple) {
                                 const tripleBlock = renderTripleGroup(triple);
                                 const tripleNodes = nodes.slice(triple.startIndex, triple.endIndex + 1);
+                                const missedStarts = [];
+                                for (let s = i + 1; s <= triple.endIndex; s++) {
+                                    if (segmentStarts.has(s)) missedStarts.push(s);
+                                }
                                 if (tripleBlock) {
                                     if (lastNode) {
                                         elements.push(renderConnector(lastNode, tripleNodes[0]));
                                     }
                                     elements.push(tripleBlock);
+                                    missedStarts.forEach(ms => {
+                                        const seg = segmentStarts.get(ms);
+                                        if (!seg) return;
+                                        const isExtra = seg.idx >= remainingDaySlots;
+                                        let label = "Extra";
+                                        if (!isExtra) {
+                                            const base = chainDate && /^\d{4}-\d{2}-\d{2}$/.test(chainDate)
+                                                ? new Date(chainDate + "T00:00:00Z")
+                                                : new Date();
+                                            const segDate = new Date(base.getTime() + seg.idx * 24 * 60 * 60 * 1000);
+                                            label = segDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+                                        }
+                                        elements.push(
+                                            <div key={`seg-divider-start-${ms}`} className="w-full mb-4 flex items-center gap-3 relative z-10">
+                                                <div className="h-0.5 flex-1 bg-emerald-200 rounded-full"></div>
+                                                <span className={`text-xs font-semibold whitespace-nowrap ${isExtra ? 'text-slate-600' : 'text-emerald-700'}`}>
+                                                    {label} · {seg.count} words
+                                                </span>
+                                                <Button 
+                                                    size="small" 
+                                                    variant="ghost" 
+                                                    className="text-[10px] h-6 px-2 py-0 border border-emerald-200 text-emerald-700" 
+                                                    onClick={() => deleteSegment(seg.idx)}
+                                                    title="Delete this day"
+                                                >
+                                                    Delete day
+                                                </Button>
+                                                <div className="h-0.5 flex-1 bg-emerald-200 rounded-full"></div>
+                                            </div>
+                                        );
+                                    });
                                     lastNode = tripleNodes[tripleNodes.length - 1];
                                     i = triple.endIndex + 1;
                                     continue;

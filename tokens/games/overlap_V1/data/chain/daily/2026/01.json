@@ -1030,98 +1030,643 @@
         ]
     },
     {
-  "id": "2026-01-12",
-  "type": "chain",
-  "palette": "greens",
-  "words": [
-    {
-      "clue": "Display at a museum",
-      "answer": "EXHIBIT",
-      "start": 1
+        "id": "2026-01-12",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Display at a museum",
+                "answer": "EXHIBIT",
+                "start": 1
+            },
+            {
+                "clue": "Need to scratch",
+                "answer": "ITCH",
+                "start": 6
+            },
+            {
+                "clue": "Group of notes",
+                "answer": "CHORD",
+                "start": 8
+            },
+            {
+                "clue": "Put in sequence",
+                "answer": "ORDER",
+                "start": 10
+            },
+            {
+                "clue": "Bowler hat",
+                "answer": "DERBY",
+                "start": 12
+            },
+            {
+                "clue": "Alt. Jewish language",
+                "answer": "YIDDISH",
+                "start": 16
+            },
+            {
+                "clue": "Safe place for ships",
+                "answer": "HARBOR",
+                "start": 22
+            },
+            {
+                "clue": "Came into life",
+                "answer": "BORN",
+                "start": 25
+            },
+            {
+                "clue": "Holiday tree decor",
+                "answer": "ORNAMENTS",
+                "start": 26
+            },
+            {
+                "clue": "Not general",
+                "answer": "SPECIFIC",
+                "start": 34
+            },
+            {
+                "clue": "Contract provision",
+                "answer": "CLAUSE",
+                "start": 41
+            },
+            {
+                "clue": "Employs",
+                "answer": "USES",
+                "start": 44
+            },
+            {
+                "clue": "Known by a few",
+                "answer": "ESOTERIC",
+                "start": 46
+            },
+            {
+                "clue": "Punctuation mark",
+                "answer": "COMMA",
+                "start": 53
+            },
+            {
+                "clue": "Pairs up",
+                "answer": "MATCHES",
+                "start": 56
+            },
+            {
+                "clue": "Holiday roasting nut",
+                "answer": "CHESTNUT",
+                "start": 59
+            },
+            {
+                "clue": "Practical, not fancy",
+                "answer": "UTILITARIAN",
+                "start": 65
+            }
+        ]
     },
     {
-      "clue": "Need to scratch",
-      "answer": "ITCH",
-      "start": 6
+        "id": "2026-01-13",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "TV show",
+                "answer": "PROGRAM",
+                "start": 1
+            },
+            {
+                "clue": "Bible prophet",
+                "answer": "AMOS",
+                "start": 6
+            },
+            {
+                "clue": "Tile artwork",
+                "answer": "MOSAIC",
+                "start": 7
+            },
+            {
+                "clue": "Important warning",
+                "answer": "CAVEAT",
+                "start": 12
+            },
+            {
+                "clue": "Map book",
+                "answer": "ATLAS",
+                "start": 16
+            },
+            {
+                "clue": "Light beam device",
+                "answer": "LASER",
+                "start": 18
+            },
+            {
+                "clue": "Shown in episodes",
+                "answer": "SERIAL",
+                "start": 20
+            },
+            {
+                "clue": "Line up",
+                "answer": "ALIGN",
+                "start": 24
+            },
+            {
+                "clue": "Scandinavian",
+                "answer": "NORDIC",
+                "start": 28
+            },
+            {
+                "clue": "Skilled workers",
+                "answer": "CRAFTSMEN",
+                "start": 33
+            },
+            {
+                "clue": "List of dishes",
+                "answer": "MENU",
+                "start": 39
+            },
+            {
+                "clue": "Raising with care",
+                "answer": "NURTURING",
+                "start": 41
+            },
+            {
+                "clue": "Visually explicit",
+                "answer": "GRAPHIC",
+                "start": 49
+            },
+            {
+                "clue": "Welsh capital",
+                "answer": "CARDIFF",
+                "start": 55
+            },
+            {
+                "clue": "Picture border",
+                "answer": "FRAME",
+                "start": 61
+            },
+            {
+                "clue": "City subway",
+                "answer": "METRO",
+                "start": 64
+            },
+            {
+                "clue": "Love story",
+                "answer": "ROMANCE",
+                "start": 67
+            }
+        ]
     },
     {
-      "clue": "Group of notes",
-      "answer": "CHORD",
-      "start": 8
+        "id": "2026-01-14",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Roman ruler",
+                "answer": "EMPEROR",
+                "start": 1
+            },
+            {
+                "clue": "Parentless child",
+                "answer": "ORPHAN",
+                "start": 6
+            },
+            {
+                "clue": "Golf stroke advantage",
+                "answer": "HANDICAP",
+                "start": 9
+            },
+            {
+                "clue": "Small container",
+                "answer": "CAPSULE",
+                "start": 14
+            },
+            {
+                "clue": "Tanned hide",
+                "answer": "LEATHER",
+                "start": 19
+            },
+            {
+                "clue": "Healing treatment",
+                "answer": "THERAPY",
+                "start": 22
+            },
+            {
+                "clue": "Shout",
+                "answer": "YELL",
+                "start": 28
+            },
+            {
+                "clue": "Existence",
+                "answer": "LIFE",
+                "start": 31
+            },
+            {
+                "clue": "Go get",
+                "answer": "FETCH",
+                "start": 33
+            },
+            {
+                "clue": "Brave and bold",
+                "answer": "HEROIC",
+                "start": 37
+            },
+            {
+                "clue": "Crunchy",
+                "answer": "CRISP",
+                "start": 42
+            },
+            {
+                "clue": "Encourage",
+                "answer": "SPUR",
+                "start": 45
+            },
+            {
+                "clue": "Unmixed",
+                "answer": "PURE",
+                "start": 46
+            },
+            {
+                "clue": "Witherspoon's name",
+                "answer": "REESE",
+                "start": 48
+            },
+            {
+                "clue": "Follow-up film",
+                "answer": "SEQUEL",
+                "start": 51
+            },
+            {
+                "clue": "Digital, not analog",
+                "answer": "ELECTRONIC",
+                "start": 55
+            },
+            {
+                "clue": "Morning brew",
+                "answer": "COFFEE",
+                "start": 64
+            }
+        ]
     },
     {
-      "clue": "Put in sequence",
-      "answer": "ORDER",
-      "start": 10
+        "id": "2026-01-15",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Give chow to",
+                "answer": "FEED",
+                "start": 1
+            },
+            {
+                "clue": "Printing run",
+                "answer": "EDITION",
+                "start": 3
+            },
+            {
+                "clue": "Based on numbers",
+                "answer": "NUMERIC",
+                "start": 9
+            },
+            {
+                "clue": "Movie theater",
+                "answer": "CINEMA",
+                "start": 15
+            },
+            {
+                "clue": "Church service",
+                "answer": "MASS",
+                "start": 19
+            },
+            {
+                "clue": "Valuable resource",
+                "answer": "ASSET",
+                "start": 20
+            },
+            {
+                "clue": "African nation",
+                "answer": "ETHIOPIA",
+                "start": 23
+            },
+            {
+                "clue": "Book writers",
+                "answer": "AUTHORS",
+                "start": 30
+            },
+            {
+                "clue": "Stable animals",
+                "answer": "HORSES",
+                "start": 33
+            },
+            {
+                "clue": "Meeting period",
+                "answer": "SESSION",
+                "start": 36
+            },
+            {
+                "clue": "Still happening",
+                "answer": "ONGOING",
+                "start": 41
+            },
+            {
+                "clue": "World sphere",
+                "answer": "GLOBE",
+                "start": 47
+            },
+            {
+                "clue": "Grizzly",
+                "answer": "BEAR",
+                "start": 50
+            },
+            {
+                "clue": "Ahead of time",
+                "answer": "EARLY",
+                "start": 51
+            },
+            {
+                "clue": "Ivy in CT",
+                "answer": "YALE",
+                "start": 55
+            },
+            {
+                "clue": "Power from a wall outlet",
+                "answer": "ELECTRICITY",
+                "start": 58
+            },
+            {
+                "clue": "Study of types",
+                "answer": "TYPOLOGY",
+                "start": 67
+            }
+        ]
     },
-    {
-      "clue": "Bowler hat",
-      "answer": "DERBY",
-      "start": 12
-    },
-    {
-      "clue": "Alt. Jewish language",
-      "answer": "YIDDISH",
-      "start": 16
-    },
-    {
-      "clue": "Safe place for ships",
-      "answer": "HARBOR",
-      "start": 22
-    },
-    {
-      "clue": "Came into life",
-      "answer": "BORN",
-      "start": 25
-    },
-    {
-      "clue": "Holiday tree decor",
-      "answer": "ORNAMENTS",
-      "start": 26
-    },
-    {
-      "clue": "Not general",
-      "answer": "SPECIFIC",
-      "start": 34
-    },
-    {
-      "clue": "Contract provision",
-      "answer": "CLAUSE",
-      "start": 41
-    },
-    {
-      "clue": "Employs",
-      "answer": "USES",
-      "start": 44
-    },
-    {
-      "clue": "Known by a few",
-      "answer": "ESOTERIC",
-      "start": 46
-    },
-    {
-      "clue": "Punctuation mark",
-      "answer": "COMMA",
-      "start": 53
-    },
-    {
-      "clue": "Pairs up",
-      "answer": "MATCHES",
-      "start": 56
-    },
-    {
-      "clue": "Holiday roasting nut",
-      "answer": "CHESTNUT",
-      "start": 59
-    },
-    {
-      "clue": "Practical, not fancy",
-      "answer": "UTILITARIAN",
-      "start": 65
-    }
-  ]
-}
 
+    {
+        "id": "2026-01-16",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Scholarly book on one topic",
+                "answer": "MONOGRAPH",
+                "start": 1
+            },
+            {
+                "clue": "Study of truth and meaning",
+                "answer": "PHILOSOPHY",
+                "start": 8
+            },
+            {
+                "clue": "Cleanliness practices",
+                "answer": "HYGIENE",
+                "start": 16
+            },
+            {
+                "clue": "Require",
+                "answer": "NEED",
+                "start": 21
+            },
+            {
+                "clue": "Fit to eat",
+                "answer": "EDIBLE",
+                "start": 23
+            },
+            {
+                "clue": "Go away",
+                "answer": "LEAVE",
+                "start": 27
+            },
+            {
+                "clue": "Animals with backbones",
+                "answer": "VERTEBRATES",
+                "start": 30
+            },
+            {
+                "clue": "Went with, as a guide",
+                "answer": "ESCORTED",
+                "start": 39
+            },
+            {
+                "clue": "Incredulity",
+                "answer": "DISBELIEF",
+                "start": 46
+            },
+            {
+                "clue": "Muscle tissue",
+                "answer": "FLESH",
+                "start": 54
+            },
+            {
+                "clue": "Retail store",
+                "answer": "SHOP",
+                "start": 57
+            },
+            {
+                "clue": "Sung stage drama",
+                "answer": "OPERA",
+                "start": 59
+            },
+            {
+                "clue": "Train line",
+                "answer": "RAILROAD",
+                "start": 62
+            },
+            {
+                "clue": "Describing word",
+                "answer": "ADJECTIVE",
+                "start": 68
+            },
+            {
+                "clue": "Action words",
+                "answer": "VERBS",
+                "start": 75
+            },
+            {
+                "clue": "Mood-related neurotransmitter",
+                "answer": "SEROTONIN",
+                "start": 79
+            },
+            {
+                "clue": "Inside, not outside",
+                "answer": "INDOOR",
+                "start": 86
+            }
+        ]
+    },
+    {
+        "id": "2026-01-17",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Internal body part",
+                "answer": "ORGAN",
+                "start": 1
+            },
+            {
+                "clue": "Nonhuman creature",
+                "answer": "ANIMAL",
+                "start": 4
+            },
+            {
+                "clue": "Men, biologically",
+                "answer": "MALES",
+                "start": 7
+            },
+            {
+                "clue": "Accompany as a guard",
+                "answer": "ESCORT",
+                "start": 10
+            },
+            {
+                "clue": "Hollow pipe",
+                "answer": "TUBE",
+                "start": 15
+            },
+            {
+                "clue": "Rhythmic pulse",
+                "answer": "BEAT",
+                "start": 17
+            },
+            {
+                "clue": "Sports competitor",
+                "answer": "ATHLETE",
+                "start": 19
+            },
+            {
+                "clue": "Inform",
+                "answer": "TELL",
+                "start": 24
+            },
+            {
+                "clue": "Jeans brand",
+                "answer": "LEVI",
+                "start": 27
+            },
+            {
+                "clue": "Luxury house",
+                "answer": "VILLA",
+                "start": 29
+            },
+            {
+                "clue": "North-south coordinate",
+                "answer": "LATITUDE",
+                "start": 32
+            },
+            {
+                "clue": "How deep it is",
+                "answer": "DEPTH",
+                "start": 38
+            },
+            {
+                "clue": "Based on ideas, not practice",
+                "answer": "THEORETICAL",
+                "start": 41
+            },
+            {
+                "clue": "Hardened by calcium",
+                "answer": "CALCIFIED",
+                "start": 49
+            },
+            {
+                "clue": "Round plate",
+                "answer": "DISC",
+                "start": 57
+            },
+            {
+                "clue": "Systematic study",
+                "answer": "SCIENCE",
+                "start": 59
+            },
+            {
+                "clue": "Definite",
+                "answer": "CERTAIN",
+                "start": 64
+            }
+        ]
+    },
+    {
+        "id": "2026-01-18",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Notoriously bad",
+                "answer": "INFAMOUS",
+                "start": 1
+            },
+            {
+                "clue": "Alone",
+                "answer": "SOLO",
+                "start": 8
+            },
+            {
+                "clue": "Not tight",
+                "answer": "LOOSE",
+                "start": 10
+            },
+            {
+                "clue": "Keep apart",
+                "answer": "SEPARATE",
+                "start": 13
+            },
+            {
+                "clue": "Court racket sport",
+                "answer": "TENNIS",
+                "start": 19
+            },
+            {
+                "clue": "Not deep",
+                "answer": "SHALLOW",
+                "start": 24
+            },
+            {
+                "clue": "At what time",
+                "answer": "WHEN",
+                "start": 30
+            },
+            {
+                "clue": "Motor",
+                "answer": "ENGINE",
+                "start": 32
+            },
+            {
+                "clue": "Current events",
+                "answer": "NEWS",
+                "start": 36
+            },
+            {
+                "clue": "Exclusive story",
+                "answer": "SCOOP",
+                "start": 39
+            },
+            {
+                "clue": "Investigate",
+                "answer": "PROBE",
+                "start": 43
+            },
+            {
+                "clue": "Cattle meat",
+                "answer": "BEEF",
+                "start": 46
+            },
+            {
+                "clue": "Result",
+                "answer": "EFFECT",
+                "start": 48
+            },
+            {
+                "clue": "Journey",
+                "answer": "TRIP",
+                "start": 53
+            },
+            {
+                "clue": "Intention",
+                "answer": "PURPOSE",
+                "start": 56
+            },
+            {
+                "clue": "Part of a whole",
+                "answer": "SECTION",
+                "start": 61
+            },
+            {
+                "clue": "Just",
+                "answer": "ONLY",
+                "start": 66
+            }
+        ]
+    }
 
 
 ]

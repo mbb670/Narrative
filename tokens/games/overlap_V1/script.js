@@ -632,7 +632,7 @@ function updateSliderUI() {
 }
 
 // ---- Defaults loading (modular data files) ----
-const DEFAULTS_VERSION = "2026-01-24"; // <-- bump this any time you edit puzzle data layout
+const DEFAULTS_VERSION = "2026-01-26"; // <-- bump this any time you edit puzzle data layout
 const DEFAULTS_VER_KEY = `${KEY}__defaults_version`;
 
 const JSON_FETCH_OPTS = { cache: "no-store" };
@@ -1683,6 +1683,7 @@ const stripHeightsFromPuzzles = (arr = []) =>
 // ---- Storage ----
 const store = {
   load() {
+    const defaults = structuredClone(DEF);
     try {
       const url = new URL(location.href);
       const forceReset = url.searchParams.has("reset") || url.searchParams.has("fresh");
@@ -1698,13 +1699,22 @@ const store = {
       const raw = localStorage.getItem(KEY);
       const v = raw ? JSON.parse(raw) : null;
 
-      if (Array.isArray(v) && v.length) return v;
+      if (Array.isArray(v) && v.length) {
+        const byId = new Map();
+        const add = (p, allowOverwrite = true) => {
+          const id = String(p?.id || "").trim() || `__noid__${byId.size}`;
+          if (!byId.has(id) || allowOverwrite) byId.set(id, p);
+        };
+        v.forEach((p) => add(p, true));       // saved takes priority
+        defaults.forEach((p) => add(p, false)); // fill in any new defaults
+        return Array.from(byId.values());
+      }
 
       // No saved puzzles => use shipped defaults
       localStorage.setItem(DEFAULTS_VER_KEY, DEFAULTS_VERSION);
-      return structuredClone(DEF);
+      return defaults;
     } catch {
-      return structuredClone(DEF);
+      return defaults;
     }
   },
   save() {
@@ -3558,6 +3568,16 @@ function loadByViewOffset(delta) {
 function ensureCurrentPuzzleMatchesView() {
   const list = indicesForView(currentView);
   if (!list.length) return false;
+  if (currentView === VIEW.CHAIN) {
+    const todayIdx = findTodayChainIndex();
+    if (todayIdx != null) {
+      if (pIdx !== todayIdx) {
+        loadPuzzle(todayIdx);
+        return true;
+      }
+      return true;
+    }
+  }
   if (list.includes(pIdx)) return true;
   if (currentView === VIEW.CHAIN) {
     const todayIdx = findTodayChainIndex();
