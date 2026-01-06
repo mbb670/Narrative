@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "https://esm.sh/react@18.3.1";
+import React, { useEffect, useMemo, useState, useRef, useCallback } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { Trash2, ArrowRight, Link as LinkIcon, RefreshCw, GripVertical, AlertTriangle, Wand2, Hammer, X, Globe, AlertCircle, Sparkles, Layers, Type, CheckCircle2, ArrowUp, ArrowDown, Square, RotateCw, Percent, AlignLeft, ArrowLeft, Copy, Check, ChevronDown, ChevronUp, Undo, PenTool, ArrowLeftCircle, Book, Redo, Calendar } from "https://esm.sh/lucide-react@0.468.0?dev&deps=react@18.3.1";
 
@@ -599,7 +599,7 @@ const fetchMonthEntries = async (year, monthIndex) => {
 };
 
 // Pathfinder for Multi-Chain organization
-const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set(), maxDepth = 25) => {
+const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set(), targetLen = 15) => {
   if (items.length === 0) return [];
 
   const adj = {};
@@ -611,11 +611,12 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
 
   let bestPath = [];
   let maxScore = 0;
+  const maxDepth = Math.max(10, Math.min(25, targetLen + 5));
   
   const getScore = (path) => {
       return path.reduce((acc, item) => {
           const penalty = item.words.some(w => devalueWords.has(cleanWord(w))) ? 10 : 0;
-          const tripleBonus = item.type === 'triple' ? 120 : 0;
+          const tripleBonus = item.type === 'triple' ? 200 : 0;
           return acc + tripleBonus + item.totalOverlap - penalty;
       }, 0);
   };
@@ -638,7 +639,7 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
           return b.totalOverlap - a.totalOverlap;
       });
 
-      candidates = candidates.slice(0, 30);
+      candidates = candidates.slice(0, 20);
 
       for (const item of candidates) {
           const newWords = item.words.slice(1).map(w => cleanWord(w));
@@ -652,12 +653,10 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
       }
   };
 
-  const sortedItems = [...items].sort((a, b) => {
-      if (a.type !== b.type) return a.type === 'triple' ? -1 : 1;
-      return b.totalOverlap - a.totalOverlap;
-  });
-
-  const starters = shuffleArray(sortedItems).slice(0, 100);
+  const triplesFirst = items.filter(i => i.type === 'triple');
+  const others = items.filter(i => i.type !== 'triple');
+  const sortedItems = [...triplesFirst.sort((a,b) => b.totalOverlap - a.totalOverlap), ...others.sort((a,b)=>b.totalOverlap - a.totalOverlap)];
+  const starters = shuffleArray(sortedItems).slice(0, 80);
 
   for (const startItem of starters) {
       const itemWords = startItem.words.map(w => cleanWord(w));
@@ -672,7 +671,7 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
   return bestPath;
 };
 
-const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set()) => {
+const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set(), targetLen = null) => {
     let pool = shuffleArray([...allItems]);
     let finalSequence = [];
     let globalUsedWords = new Set();
@@ -680,7 +679,7 @@ const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set())
     let loopCount = 0;
     while (pool.length > 0 && finalSequence.length < limit && loopCount < 20) {
         loopCount++;
-        const chainSegment = findLongestChainInInventory(pool, globalUsedWords, devalueWords, 15);
+        const chainSegment = findLongestChainInInventory(pool, globalUsedWords, devalueWords, targetLen || limit);
         
         if (chainSegment.length === 0) break;
 
@@ -1052,6 +1051,28 @@ export default function App() {
       setTimeout(() => setToast(null), 4000);
   };
 
+  const isWordExcluded = useCallback((word) => {
+      const cw = cleanWord(word);
+      if (!cw) return false;
+      const stem = (w) => {
+          if (w.length <= 3) return w;
+          if (w.endsWith("ing") && w.length > 5) return w.slice(0, -3);
+          if (w.endsWith("ed") && w.length > 4) return w.slice(0, -2);
+          if (w.endsWith("es") && w.length > 4) return w.slice(0, -2);
+          if (w.endsWith("s") && w.length > 3) return w.slice(0, -1);
+          return w;
+      };
+      const cwStem = stem(cw);
+      const combined = [...excludedWords, ...recentExcludedAnswers];
+      return combined.some(ex => {
+          const ce = cleanWord(ex);
+          if (!ce) return false;
+          if (ce === cw) return true;
+          if (stem(ce) === cwStem) return true;
+          return isDerivative(ce, cw);
+      });
+  }, [excludedWords, recentExcludedAnswers]);
+
   // Load used dates for the currently viewed export month
   useEffect(() => {
       let cancelled = false;
@@ -1383,15 +1404,14 @@ Words: ${flat.join(', ')}`;
 
   const applyExclusions = (words) => {
       if (!words || words.length === 0) return [];
-      const combinedExcl = new Set([...excludedWords, ...recentExcludedAnswers]);
-      return words.filter(w => !combinedExcl.has(cleanWord(w)));
+      return words.filter(w => !isWordExcluded(w));
   };
   
 const fetchRandomWords = async () => {
-    const TOPICS = ["nature", "city", "technology", "food", "travel", "music", "science", "abstract", "history", "art", "ocean", "space", "sports", "animals", "objects"];
-    const TARGET_UNIQUE = 2000;
-    const BATCH_TOPICS = 5;
-    const MAX_BATCHES = 6;
+    const TOPICS = ["nature", "city", "technology", "food", "travel", "music", "science", "abstract", "history", "art", "ocean", "space", "sports", "animals", "objects", "literature", "geography", "crafts", "games"];
+    const TARGET_UNIQUE = 2500;
+    const BATCH_TOPICS = 6;
+    const MAX_BATCHES = 8;
     const MAX_BANK = 5000;
 
     const collected = new Set();
@@ -1436,7 +1456,7 @@ const fetchRandomWords = async () => {
         const cw = cleanWord(w);
         if (!cw) return;
         if (seen.has(cw)) return;
-        if (excludedWords.has(cw) || recentExcludedAnswers.has(cw)) return;
+        if (isWordExcluded(w)) return;
         seen.add(cw);
         bank.push(w);
     };
@@ -1451,7 +1471,7 @@ const fetchRandomWords = async () => {
 
     wordBankRef.current = bank;
 
-    const TARGET_SAMPLE = 2000;
+    const TARGET_SAMPLE = 2500;
     const sampleSize = Math.min(bank.length, TARGET_SAMPLE);
     return shuffleArray(bank).slice(0, sampleSize);
   };
@@ -1467,7 +1487,7 @@ const fetchRandomWords = async () => {
     
     try {
         const MIN_TRIPLES = 2;
-        const MAX_DURATION_MS = 10_000;
+        const MAX_DURATION_MS = 4_000;
         const startTime = Date.now();
         let best = null;
         let attempt = 0;
@@ -1476,6 +1496,7 @@ const fetchRandomWords = async () => {
             attempt++;
             setProgress(15);
 
+            // Always pull a fresh sampled pool (fetch merges into the bank and returns a sample)
             let words = await fetchRandomWords();
             setInputText(words.join(" "));
             setProgress(30);
@@ -1485,19 +1506,32 @@ const fetchRandomWords = async () => {
             
             setProgress(60);
 
-            let organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords);
+            let organizedChain = processInventoryToMultiChain(result.inventory, targetLength, devalueWords, targetLength);
             let tripleCount = countTriples(organizedChain);
 
             // If we still have fewer than MIN_TRIPLES, try enriching with another batch and re-evaluate
             if (tripleCount < MIN_TRIPLES && (Date.now() - startTime) < MAX_DURATION_MS) {
-                const extra = await fetchRandomWords();
-                const mergedWords = Array.from(new Set([...words, ...extra]));
-                words = mergedWords;
+                // Top up bank and retry with expanded pool
+                const mergedWords = await fetchRandomWords();
                 const mergedResult = await processWordsToInventory(mergedWords, targetLength, setProgress, true);
                 result = mergedResult;
                 setInventory(mergedResult.inventory);
-                organizedChain = processInventoryToMultiChain(mergedResult.inventory, targetLength, devalueWords);
+                organizedChain = processInventoryToMultiChain(mergedResult.inventory, targetLength, devalueWords, targetLength);
                 tripleCount = countTriples(organizedChain);
+            }
+
+            // If still low triples, force a triple-priority build pass
+            if (tripleCount < MIN_TRIPLES) {
+                const tripleHeavyInv = [
+                    ...result.inventory.filter(i => i.type === 'triple'),
+                    ...result.inventory
+                ];
+                const altChain = processInventoryToMultiChain(tripleHeavyInv, targetLength, devalueWords, targetLength);
+                const altTripleCount = countTriples(altChain);
+                if (altTripleCount > tripleCount) {
+                    organizedChain = altChain;
+                    tripleCount = altTripleCount;
+                }
             }
 
             const lenDiff = Math.abs((organizedChain?.length || 0) - targetLength);
@@ -1753,7 +1787,7 @@ const fetchRandomWords = async () => {
         if (avoid2 && w === cleanWord(avoid2)) return false;
         if (avoid1 && isDerivative(w, avoid1)) return false;
         if (avoid2 && isDerivative(w, avoid2)) return false;
-        if (excludedWords.has(w) || usedWords.has(w)) return false;
+        if (isWordExcluded(w) || usedWords.has(w)) return false;
         if (isProperNounTag(d)) return false; // avoid proper nouns
         // reuse existing bad-word filter
         if (filterBadWords([d.word]).length === 0) return false;
@@ -1968,7 +2002,7 @@ const fetchRandomWords = async () => {
             if (!w) return false;
             const cw = cleanWord(w);
             if (!cw) return false;
-            if (excludedWords.has(cw) || usedWords.has(cw)) return false;
+            if (isWordExcluded(cw) || usedWords.has(cw)) return false;
             if (cw === cleanStart || cw === cleanEnd) return false;
             if (filterBadWords([cw]).length === 0) return false;
             const freq = wordFreq[cw] || 0;
@@ -2142,7 +2176,7 @@ const fetchRandomWords = async () => {
     if (!raw) return;
     const cleaned = cleanWord(raw);
     if (!cleaned) return;
-    if (excludedWords.has(cleaned)) return;
+    if (isWordExcluded(cleaned)) return;
     if (filterBadWords([raw]).length === 0) return;
     const manualItem = {
         id: `manual-${Date.now()}`,
@@ -2216,7 +2250,7 @@ const fetchRandomWords = async () => {
                         {showBridgeModal.solutions && showBridgeModal.solutions.length > 0 ? (
                             showBridgeModal.solutions.map(sol => (
                                 (() => {
-                                    const isExcludedWord = (w) => excludedWords.has(cleanWord(w)) || recentExcludedAnswers.has(cleanWord(w));
+                                    const isExcludedWord = (w) => isWordExcluded(w);
                                     const hasExcluded = sol.words.some(isExcludedWord);
                                     const wordBadges = (w) => (
                                         <span className="inline-flex items-center gap-1">
@@ -2314,7 +2348,7 @@ const fetchRandomWords = async () => {
                                                             {entries.map(entry => {
                                                                 const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
                                                                 const word = entry.item.words[0];
-                                                                const isExcludedWord = excludedWords.has(cleanWord(word)) || recentExcludedAnswers.has(cleanWord(word));
+                                                                const isExcludedWord = isWordExcluded(word);
                                                                 return (
                                                                     <button key={key} onClick={() => insertBridge(entry.item)} className={`w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between ${isExcludedWord ? 'ring-1 ring-rose-100 border-rose-200' : ''}`}>
                                                                         <span className="inline-flex items-center gap-1">
@@ -2376,7 +2410,7 @@ const fetchRandomWords = async () => {
                                                             {entries.map(entry => {
                                                                 const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
                                                                 const word = entry.item.words[0];
-                                                                const isExcludedWord = excludedWords.has(cleanWord(word)) || recentExcludedAnswers.has(cleanWord(word));
+                                                                const isExcludedWord = isWordExcluded(word);
                                                                 return (
                                                                     <button key={key} onClick={() => insertBridge(entry.item)} className={`w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between ${isExcludedWord ? 'ring-1 ring-rose-100 border-rose-200' : ''}`}>
                                                                         <span className="inline-flex items-center gap-1">
@@ -2758,7 +2792,7 @@ const fetchRandomWords = async () => {
                         const tripleStartMap = tripleGroupsByStart;
 
                         const renderNode = (node, isBroken, idxKey) => {
-                            const isForbidden = excludedWords.has(cleanWord(node.word)) || recentExcludedAnswers.has(cleanWord(node.word));
+                            const isForbidden = isWordExcluded(node.word);
                             const tripleCount = node.tripleIds.length;
                             return (
                             <div key={`node-${idxKey}-${node.word}-${node.itemIndex}`} className="relative group animate-in slide-in-from-bottom-2 duration-500">
@@ -2848,7 +2882,7 @@ const fetchRandomWords = async () => {
                         const renderTripleGroup = (group) => {
                             const groupNodes = nodes.slice(group.startIndex, group.endIndex + 1);
                             if (groupNodes.length < 3) return null;
-                            const hasExcluded = groupNodes.some(n => excludedWords.has(cleanWord(n.word)) || recentExcludedAnswers.has(cleanWord(n.word)));
+                            const hasExcluded = groupNodes.some(n => isWordExcluded(n.word));
 
                             return (
                                 <div 
@@ -2868,7 +2902,7 @@ const fetchRandomWords = async () => {
                                         </div>
                                     )}
                                     {groupNodes.map((gNode, gIdx) => {
-                                        const isForbidden = excludedWords.has(cleanWord(gNode.word)) || recentExcludedAnswers.has(cleanWord(gNode.word));
+                                        const isForbidden = isWordExcluded(gNode.word);
                                         const tripleCount = gNode.tripleIds.length;
                                         return (
                                             <React.Fragment key={`g-${gIdx}-${gNode.word}-${gNode.itemIndex}`}>
