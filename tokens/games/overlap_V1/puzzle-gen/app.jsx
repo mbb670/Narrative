@@ -456,69 +456,164 @@ const findBridges = (startWord, endWord, allUniqueWords) => {
 };
 
 // --- Core Processing Function ---
-const processWordsToInventory = async (wordList, targetLength, targetTriplePct, setProgress, skipPathfinding = false) => {
-  const uniqueWords = [...new Set(wordList)];
-  let pairs = [];
-  
-  const chunkSize = 500;
-  for (let i = 0; i < uniqueWords.length; i += chunkSize) {
-      await new Promise(r => setTimeout(r, 0));
-      const chunk = uniqueWords.slice(i, i + chunkSize);
-      
-      for (let w1 of chunk) {
-          for (let w2 of uniqueWords) {
-             if (w1 === w2) continue;
-             if (w1[0].toLowerCase() === w2[0].toLowerCase()) continue;
-             if (isDerivative(w1, w2)) continue; 
+// Build triples using the working reference algorithm (A and C overlap, B spans that overlap, unique start/end letters).
+const buildTriplesFromWords = (words, minOverlap = 1, maxResults = 20000, maxMs = 2000) => {
+  const cleanToOrig = new Map();
+  const unique = [];
+  words.forEach(w => {
+      const c = cleanWord(w);
+      if (!c) return;
+      if (!cleanToOrig.has(c)) {
+          cleanToOrig.set(c, w);
+          unique.push(c);
+      }
+  });
+  const wordSet = new Set(unique);
+  const startsWithMap = new Map();
+  unique.forEach(w => {
+      for (let i = 1; i <= w.length; i++) {
+          const prefix = w.substring(0, i);
+          if (!startsWithMap.has(prefix)) startsWithMap.set(prefix, []);
+          startsWithMap.get(prefix).push(w);
+      }
+  });
 
-             const overlap = getOverlap(w1, w2);
-             if (overlap) { 
-                const ratio1 = overlap.count / w1.length;
-                const ratio2 = overlap.count / w2.length;
-                if (ratio1 > 0.75 || ratio2 > 0.75) continue; 
+  const triples = [];
+  const seen = new Set();
+  const deadline = Date.now() + maxMs;
 
-                pairs.push({
-                  id: `pair-${w1}-${w2}`,
-                  words: [w1, w2],
-                  overlaps: [overlap],
-                  totalOverlap: overlap.count,
-                  startWord: w1,
-                  endWord: w2,
-                  type: 'pair'
-                });
-             }
+  const addTriple = (a, b, c, overlapLen, overlapStr) => {
+      const key = `${a}|${b}|${c}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      triples.push({
+          id: `triple-${a}-${b}-${c}`,
+          words: [cleanToOrig.get(a) || a, cleanToOrig.get(b) || b, cleanToOrig.get(c) || c],
+          overlaps: [{ overlapStr, count: overlapLen }, { overlapStr, count: overlapLen }],
+          totalOverlap: overlapLen,
+          sharedOverlap: overlapLen,
+          startWord: cleanToOrig.get(a) || a,
+          endWord: cleanToOrig.get(c) || c,
+          type: 'triple'
+      });
+  };
+
+  for (const wordA of unique) {
+      if (Date.now() > deadline || triples.length >= maxResults) break;
+      for (let len = 1; len <= wordA.length; len++) {
+          if (Date.now() > deadline || triples.length >= maxResults) break;
+          const overlapStr = wordA.substring(wordA.length - len);
+          const candidatesC = startsWithMap.get(overlapStr);
+          if (!candidatesC) continue;
+
+          for (const wordC of candidatesC) {
+              if (Date.now() > deadline || triples.length >= maxResults) break;
+              if (wordA === wordC) continue;
+
+              const portTail = wordC.substring(len);
+              const portmanteau = wordA + portTail;
+              const overlapStart = wordA.length - len;
+              const overlapEnd = wordA.length;
+
+              for (const wordB of unique) {
+                  if (wordB === wordA || wordB === wordC) continue;
+                  const pos = portmanteau.indexOf(wordB);
+                  if (pos === -1) continue;
+                  const posEnd = pos + wordB.length;
+                  const intersectStart = Math.max(pos, overlapStart);
+                  const intersectEnd = Math.min(posEnd, overlapEnd);
+                  const tripleOverlapCount = Math.max(0, intersectEnd - intersectStart);
+                  if (tripleOverlapCount < minOverlap) continue;
+
+                  const starts = new Set([wordA[0], wordB[0], wordC[0]]);
+                  const ends = new Set([wordA[wordA.length - 1], wordB[wordB.length - 1], wordC[wordC.length - 1]]);
+                  if (starts.size !== 3 || ends.size !== 3) continue;
+
+                  addTriple(wordA, wordB, wordC, tripleOverlapCount, overlapStr);
+              }
           }
       }
   }
 
-  let triples = [];
-  const pairsByStart = {};
-  pairs.forEach(p => {
-      if(!pairsByStart[p.startWord]) pairsByStart[p.startWord] = [];
-      pairsByStart[p.startWord].push(p);
-  });
+  return triples;
+};
 
-  for (let p1 of pairs) {
-      const candidates = pairsByStart[p1.endWord] || [];
-      for (let p2 of candidates) {
-        if (p1.startWord !== p2.endWord) {
-            if (isDerivative(p1.startWord, p2.endWord)) continue;
-            const tripleDetails = getTripleDetails(p1.startWord, p1.endWord, p2.endWord);
-            if (!tripleDetails) continue;
+// --- Core Processing Function ---
+const processWordsToInventory = async (wordList, targetLength, targetTriplePct, setProgress, skipPathfinding = false, minOverlap = 2, maxPairs = 25000, maxMs = 2000) => {
+  const uniqueWords = shuffleArray([...new Set(wordList)]);
+  const prefixMap = new Map(); // key `${len}|${prefix}` -> array of words
+  const deadline = Date.now() + maxMs;
 
-            triples.push({
-                id: `triple-${p1.startWord}-${p1.endWord}-${p2.endWord}`,
-                words: [p1.startWord, p1.endWord, p2.endWord],
-                overlaps: [p1.overlaps[0], p2.overlaps[0]],
-                totalOverlap: tripleDetails.displayCount,
-                sharedOverlap: tripleDetails.displayCount,
-                startWord: p1.startWord,
-                endWord: p2.endWord,
-                type: 'triple'
-            });
-        }
+  // Index prefixes for every word so we can match suffixes quickly.
+  for (const w of uniqueWords) {
+      const cw = cleanWord(w);
+      if (!cw) continue;
+      const maxLen = cw.length;
+      for (let len = minOverlap; len <= maxLen; len++) {
+          const key = `${len}|${cw.slice(0, len)}`;
+          if (!prefixMap.has(key)) prefixMap.set(key, []);
+          prefixMap.get(key).push(w);
       }
   }
+
+  const pairMap = new Map(); // keep best (longest) overlap per ordered pair
+  let pairCount = 0;
+  const chunkSize = 300;
+
+  for (let i = 0; i < uniqueWords.length; i += chunkSize) {
+      if (Date.now() > deadline) break;
+      await new Promise(r => setTimeout(r, 0));
+      const chunk = uniqueWords.slice(i, i + chunkSize);
+      
+      for (let w1 of chunk) {
+          if (Date.now() > deadline) break;
+          const cw1 = cleanWord(w1);
+          if (!cw1) continue;
+          const maxLen = cw1.length;
+
+          for (let len = maxLen; len >= minOverlap; len--) {
+              if (Date.now() > deadline) break;
+              const suffix = cw1.slice(-len);
+              const key = `${len}|${suffix}`;
+              const candidates = prefixMap.get(key);
+              if (!candidates) continue;
+
+              for (const w2 of candidates) {
+                  if (w1 === w2) continue;
+                  if (isDerivative(w1, w2)) continue; 
+
+                  const ratio1 = len / w1.length;
+                  const ratio2 = len / w2.length;
+                  if (ratio1 > 0.75 || ratio2 > 0.75) continue; 
+
+                  const pairKey = `${w1}|${w2}`;
+                  const existing = pairMap.get(pairKey);
+                  if (existing && existing.overlaps[0].count >= len) continue; // keep longest overlap only
+
+                  const overlapObj = { overlapStr: suffix, count: len };
+                  pairMap.set(pairKey, {
+                    id: `pair-${w1}-${w2}`,
+                    words: [w1, w2],
+                    overlaps: [overlapObj],
+                    totalOverlap: len,
+                    startWord: w1,
+                    endWord: w2,
+                    type: 'pair'
+                  });
+                  pairCount++;
+                  if (pairCount >= maxPairs) break;
+              }
+              if (pairCount >= maxPairs) break;
+          }
+          if (pairCount >= maxPairs) break;
+      }
+      if (pairCount >= maxPairs) break;
+  }
+
+  const pairs = Array.from(pairMap.values());
+
+  // Build triples using dedicated algorithm with its own budget.
+  const triples = buildTriplesFromWords(uniqueWords, 1, 20000, Math.max(800, Math.floor(maxMs * 0.8)));
 
   const allItems = [...triples, ...pairs].sort((a, b) => {
      if (a.type !== b.type) return a.type === 'triple' ? -1 : 1;
@@ -597,7 +692,7 @@ const fetchMonthEntries = async (year, monthIndex) => {
 };
 
 // Pathfinder for Multi-Chain organization
-const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set(), targetLen = 15) => {
+const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set(), targetLen = 15, maxDepthOverride = null) => {
   if (items.length === 0) return [];
 
   const adj = {};
@@ -609,7 +704,7 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
 
   let bestPath = [];
   let maxScore = 0;
-  const maxDepth = Math.max(10, Math.min(25, targetLen + 5));
+  const maxDepth = maxDepthOverride ?? Math.max(10, Math.min(25, targetLen + 5));
   
   const getScore = (path) => {
       return path.reduce((acc, item) => {
@@ -679,7 +774,13 @@ const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set(),
     let loopCount = 0;
     while (pool.length > 0 && finalSequence.length < upperBound && loopCount < 20) {
         loopCount++;
-        const chainSegment = findLongestChainInInventory(pool, globalUsedWords, devalueWords, targetLen || limit);
+        const chainSegment = findLongestChainInInventory(
+            pool,
+            globalUsedWords,
+            devalueWords,
+            targetLen || limit,
+            Math.min(Math.max(limit + 10, 40), 180) // allow long paths but keep search bounded
+        );
         
         if (chainSegment.length === 0) break;
 
@@ -1551,7 +1652,7 @@ const fetchRandomWords = async () => {
             setInputText(words.join(" "));
             setProgress(30);
 
-            let result = await processWordsToInventory(words, targetLengthTotal, setProgress, true); 
+            let result = await processWordsToInventory(words, targetLengthTotal, setProgress, true, 2, 25000, 2000); 
             setInventory(result.inventory);
             
             setProgress(60);
@@ -1563,7 +1664,7 @@ const fetchRandomWords = async () => {
             if (tripleCount < MIN_TRIPLES && (Date.now() - startTime) < MAX_DURATION_MS) {
                 // Top up bank and retry with expanded pool
                 const mergedWords = await fetchRandomWords();
-                const mergedResult = await processWordsToInventory(mergedWords, targetLengthTotal, setProgress, true);
+                const mergedResult = await processWordsToInventory(mergedWords, targetLengthTotal, setProgress, true, 2, 25000, 2000);
                 result = mergedResult;
                 setInventory(mergedResult.inventory);
                 organizedChain = processInventoryToMultiChain(mergedResult.inventory, targetLengthTotal, devalueWords, targetLength);
@@ -1572,9 +1673,10 @@ const fetchRandomWords = async () => {
 
             // If still low triples, force a triple-priority build pass
             if (tripleCount < MIN_TRIPLES) {
+                const relaxedResult = await processWordsToInventory(result.uniqueWords || mergedWords || words, targetLengthTotal, setProgress, true, 1, 12000, 1500);
                 const tripleHeavyInv = [
-                    ...result.inventory.filter(i => i.type === 'triple'),
-                    ...result.inventory
+                    ...relaxedResult.inventory.filter(i => i.type === 'triple'),
+                    ...relaxedResult.inventory
                 ];
                 const altChain = processInventoryToMultiChain(tripleHeavyInv, targetLengthTotal, devalueWords, targetLength);
                 const altTripleCount = countTriples(altChain);
@@ -1628,10 +1730,10 @@ const fetchRandomWords = async () => {
       setDefinitions({});
       setProgress(20);
       
-      setTimeout(async () => {
-          let words = inputText.split(/[\s,\n]+/).filter(w => w.length > 1);
-          words = applyExclusions(words);
-          const result = await processWordsToInventory(words, targetLength, setProgress, true);
+          setTimeout(async () => {
+              let words = inputText.split(/[\s,\n]+/).filter(w => w.length > 1);
+              words = applyExclusions(words);
+          const result = await processWordsToInventory(words, targetLength, setProgress, true, 2, 25000, 2000);
           setInventory(result.inventory);
           
           setProgress(70);

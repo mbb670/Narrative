@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Pattern Matcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom scrollbar for the output area */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #1f2937; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #4b5563; 
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; 
+        }
+
+        /* Loader animation */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col p-4 md:p-8 text-gray-800">
+
+    <div class="max-w-6xl mx-auto w-full h-full flex flex-col gap-6">
+        
+        <!-- Header -->
+        <header class="flex flex-col gap-2">
+            <h1 class="text-3xl font-bold text-gray-900">Word Group Finder</h1>
+            <p class="text-gray-600">
+                Finds triplets (A, B, C) where A and C overlap, B bridges them, and all share at least one spot.
+            </p>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col md:flex-row gap-6 min-h-0">
+            
+            <!-- Input Section -->
+            <div class="flex-1 flex flex-col gap-3 min-h-0">
+                <div class="flex justify-between items-end">
+                    <label for="inputWords" class="font-semibold text-gray-700">Input Words</label>
+                    <span class="text-xs text-gray-500">Separated by spaces, commas, or newlines</span>
+                </div>
+                <textarea 
+                    id="inputWords" 
+                    class="flex-1 w-full p-4 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none resize-none shadow-sm transition-all code-font text-sm"
+                    placeholder="Paste your list of words here..."
+                >anger
+germ
+ermine
+stone
+lonely
+one
+start
+art
+artist</textarea>
+                
+                <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-3">
+                    <button 
+                        onclick="runProcessing()" 
+                        id="processBtn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2"
+                    >
+                        Find Groups
+                    </button>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="flex-1 flex flex-col gap-3 min-h-0">
+                <div class="flex justify-between items-end">
+                    <label class="font-semibold text-gray-700">JSON Output</label>
+                    <div class="flex gap-2 items-center">
+                         <span id="loadingIndicator" class="hidden"><div class="loader mr-2"></div> Processing...</span>
+                         <span id="resultCount" class="text-xs text-gray-500 py-1">Ready</span>
+                    </div>
+                </div>
+                
+                <div class="flex-1 relative rounded-lg overflow-hidden shadow-sm border border-gray-700 bg-gray-900">
+                    <textarea 
+                        id="outputJson" 
+                        readonly 
+                        class="w-full h-full p-4 bg-gray-900 text-green-400 code-font text-sm resize-none outline-none custom-scroll"
+                    ></textarea>
+                    
+                    <button 
+                        onclick="copyToClipboard()" 
+                        class="absolute top-4 right-4 bg-gray-700 hover:bg-gray-600 text-white text-xs px-3 py-1.5 rounded border border-gray-600 transition-colors flex items-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy JSON
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        function runProcessing() {
+            const btn = document.getElementById('processBtn');
+            const loader = document.getElementById('loadingIndicator');
+            const countLabel = document.getElementById('resultCount');
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            loader.classList.remove('hidden');
+            countLabel.textContent = "";
+
+            setTimeout(() => {
+                try {
+                    processWordsPortmanteau();
+                } catch (e) {
+                    console.error(e);
+                    alert("An error occurred during processing.");
+                } finally {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75');
+                    loader.classList.add('hidden');
+                }
+            }, 50);
+        }
+
+        function processWordsPortmanteau() {
+            const rawInput = document.getElementById('inputWords').value;
+            // Hardcoded settings as requested
+            const minOverlap = 1; 
+            const maxResults = 10000;
+            
+            // 1. Parse and Clean Words
+            const wordList = rawInput.split(/[\s,]+/)
+                .map(w => w.trim().toLowerCase())
+                .filter(w => w.length > 0);
+            
+            const words = [...new Set(wordList)]; // Unique array
+            const wordSet = new Set(words); // Fast lookup
+            
+            const groups = [];
+            const seenGroups = new Set();
+            
+            // 2. Precompute StartsWith Map for A->C Lookup
+            // Key: prefix string, Value: Array of words starting with that prefix
+            const startsWithMap = new Map();
+            words.forEach(w => {
+                for (let i = 1; i <= w.length; i++) {
+                    const prefix = w.substring(0, i);
+                    if (!startsWithMap.has(prefix)) startsWithMap.set(prefix, []);
+                    startsWithMap.get(prefix).push(w);
+                }
+            });
+
+            // 3. Main Loop
+            // We iterate Word A and find overlaps with Word C.
+            // Then we form the "Portmanteau" (A+C) and search for B inside it.
+            
+            mainLoop:
+            for (const wordA of words) {
+                
+                // Try every possible overlap length from wordA
+                // We start from 1 up to wordA length
+                for (let len = 1; len <= wordA.length; len++) {
+                    const overlapStr = wordA.substring(wordA.length - len);
+                    
+                    // Optimization: Check if this suffix actually starts any words
+                    const candidatesC = startsWithMap.get(overlapStr);
+                    if (!candidatesC) continue;
+
+                    for (const wordC of candidatesC) {
+                        if (wordA === wordC) continue;
+                        
+                        // Construct Portmanteau P
+                        // P = wordA + wordC without duplicating the overlap
+                        // wordC starts with overlapStr, so we remove overlapStr from wordC part
+                        const pPartC = wordC.substring(len);
+                        const portmanteau = wordA + pPartC;
+                        
+                        // Calculate the "Overlap Region" indices relative to P
+                        // The overlap exists in P from [wordA.length - len] to [wordA.length]
+                        const overlapStart = wordA.length - len;
+                        const overlapEnd = wordA.length;
+                        
+                        // Now find B.
+                        // Instead of iterating all Words (O(N)), we iterate all substrings of P (O(L^2))
+                        // and check if they are in wordSet.
+                        for (let i = 0; i < portmanteau.length; i++) {
+                            for (let j = i + 1; j <= portmanteau.length; j++) {
+                                const sub = portmanteau.substring(i, j);
+                                
+                                // B must be a valid word
+                                if (wordSet.has(sub)) {
+                                    const wordB = sub;
+                                    
+                                    // B must be distinct
+                                    if (wordB === wordA || wordB === wordC) continue;
+                                    
+                                    // Constraint: Start/End letters must be unique
+                                    const starts = new Set([wordA[0], wordB[0], wordC[0]]);
+                                    const ends = new Set([
+                                        wordA[wordA.length - 1], 
+                                        wordB[wordB.length - 1], 
+                                        wordC[wordC.length - 1]
+                                    ]);
+                                    
+                                    if (starts.size !== 3 || ends.size !== 3) continue;
+
+                                    // Constraint: No word can be a substring of another
+                                    if (wordA.includes(wordB) || wordB.includes(wordA) ||
+                                        wordA.includes(wordC) || wordC.includes(wordA) ||
+                                        wordB.includes(wordC) || wordC.includes(wordB)) {
+                                        continue;
+                                    }
+
+                                    // Check Triple Overlap Count
+                                    // B spans [i, j) in P
+                                    // A/C Overlap spans [overlapStart, overlapEnd) in P
+                                    // We need the intersection of B's range and the A/C Overlap range
+                                    const intersectStart = Math.max(i, overlapStart);
+                                    const intersectEnd = Math.min(j, overlapEnd);
+                                    const tripleOverlapCount = Math.max(0, intersectEnd - intersectStart);
+                                    
+                                    // User requirement: "share at least one letter"
+                                    // The middle word must actually touch the bridge between A and C
+                                    if (tripleOverlapCount >= minOverlap) {
+                                        
+                                        const outputKey = `${wordA}-${wordB}-${wordC}`;
+                                        
+                                        if (!seenGroups.has(outputKey)) {
+                                            seenGroups.add(outputKey);
+                                            
+                                            groups.push({
+                                                words: [wordA, wordB, wordC],
+                                                overlap: tripleOverlapCount
+                                            });
+                                            
+                                            if (groups.length >= maxResults) break mainLoop;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Output
+            document.getElementById('outputJson').value = JSON.stringify(groups, null, 4);
+            
+            const countLabel = document.getElementById('resultCount');
+            if (groups.length === 0) {
+                countLabel.textContent = "No matches found";
+                countLabel.className = "text-xs text-red-500 py-1 font-semibold";
+            } else {
+                countLabel.textContent = `Found ${groups.length} group${groups.length === 1 ? '' : 's'}${groups.length >= maxResults ? ' (Limit Reached)' : ''}`;
+                countLabel.className = "text-xs text-green-600 py-1 font-semibold";
+            }
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("outputJson");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                const btn = document.querySelector("button[onclick='copyToClipboard()']");
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!`;
+                setTimeout(() => btn.innerHTML = originalText, 2000);
+            } catch (err) {
+                console.error('Failed to copy', err);
+            }
+        }
+    </script>
+</body>
+</html>
