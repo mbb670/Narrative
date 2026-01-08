@@ -57,7 +57,7 @@
         <header class="flex flex-col gap-2">
             <h1 class="text-3xl font-bold text-gray-900">Word Group Finder</h1>
             <p class="text-gray-600">
-                Finds triplets (A, B, C) where A and C overlap, B bridges them, and all share at least one spot.
+                Finds triplets (A, B, C) with evenly distributed overlaps (100k each of 4, 3, 2, 1).
             </p>
         </header>
 
@@ -131,45 +131,62 @@ artist</textarea>
             const btn = document.getElementById('processBtn');
             const loader = document.getElementById('loadingIndicator');
             const countLabel = document.getElementById('resultCount');
+            const outputArea = document.getElementById('outputJson');
             
             btn.disabled = true;
             btn.classList.add('opacity-75');
             loader.classList.remove('hidden');
-            countLabel.textContent = "";
+            countLabel.textContent = "Analyzing... (100k quota per overlap)";
+            outputArea.value = ""; 
 
             setTimeout(() => {
                 try {
                     processWordsPortmanteau();
                 } catch (e) {
                     console.error(e);
-                    alert("An error occurred during processing.");
+                    alert("An error occurred. The browser memory might be full.");
                 } finally {
                     btn.disabled = false;
                     btn.classList.remove('opacity-75');
                     loader.classList.add('hidden');
                 }
-            }, 50);
+            }, 100);
         }
 
         function processWordsPortmanteau() {
             const rawInput = document.getElementById('inputWords').value;
-            // Hardcoded settings as requested
+            
+            // --- SETTINGS ---
+            const limitPerCategory = 100000; // 100k per overlap length
             const minOverlap = 1; 
-            const maxResults = 10000;
+            const maxOverlapSearch = 4;
             
             // 1. Parse and Clean Words
             const wordList = rawInput.split(/[\s,]+/)
                 .map(w => w.trim().toLowerCase())
                 .filter(w => w.length > 0);
             
-            const words = [...new Set(wordList)]; // Unique array
-            const wordSet = new Set(words); // Fast lookup
+            const words = [...new Set(wordList)]; 
+            const wordSet = new Set(words); 
             
             const groups = [];
             const seenGroups = new Set();
             
-            // 2. Precompute StartsWith Map for A->C Lookup
-            // Key: prefix string, Value: Array of words starting with that prefix
+            // Quota Tracking
+            const counts = {
+                4: 0,
+                3: 0,
+                2: 0,
+                1: 0
+            };
+
+            // Max word length for iteration safety
+            let maxWordLen = 0;
+            for(const w of words) {
+                if(w.length > maxWordLen) maxWordLen = w.length;
+            }
+
+            // 2. Precompute StartsWith Map
             const startsWithMap = new Map();
             words.forEach(w => {
                 for (let i = 1; i <= w.length; i++) {
@@ -180,50 +197,52 @@ artist</textarea>
             });
 
             // 3. Main Loop
-            // We iterate Word A and find overlaps with Word C.
-            // Then we form the "Portmanteau" (A+C) and search for B inside it.
+            const startLen = Math.min(maxWordLen, maxOverlapSearch);
             
-            mainLoop:
-            for (const wordA of words) {
+            // Loop from 4 down to 1
+            outerLoop:
+            for (let len = startLen; len >= minOverlap; len--) {
                 
-                // Try every possible overlap length from wordA
-                // We start from 1 up to wordA length
-                for (let len = 1; len <= wordA.length; len++) {
+                // PERFORMANCE OPTIMIZATION: 
+                // If we already met the quota for this length, SKIP scanning for it entirely.
+                // This prevents hanging on 300k lists once we have enough matches.
+                if (counts[len] >= limitPerCategory) continue;
+
+                for (const wordA of words) {
+                    // Check quota again periodically inside the loop or just rely on the outer skip.
+                    // (Outer skip is usually sufficient for major speedups, but checking here breaks early)
+                    if (counts[len] >= limitPerCategory) break; 
+
+                    if (wordA.length < len) continue;
+
                     const overlapStr = wordA.substring(wordA.length - len);
                     
-                    // Optimization: Check if this suffix actually starts any words
                     const candidatesC = startsWithMap.get(overlapStr);
                     if (!candidatesC) continue;
 
                     for (const wordC of candidatesC) {
                         if (wordA === wordC) continue;
                         
-                        // Construct Portmanteau P
-                        // P = wordA + wordC without duplicating the overlap
-                        // wordC starts with overlapStr, so we remove overlapStr from wordC part
+                        // Constraint 1
+                        if (wordA.includes(wordC) || wordC.includes(wordA)) continue;
+
                         const pPartC = wordC.substring(len);
                         const portmanteau = wordA + pPartC;
                         
-                        // Calculate the "Overlap Region" indices relative to P
-                        // The overlap exists in P from [wordA.length - len] to [wordA.length]
                         const overlapStart = wordA.length - len;
                         const overlapEnd = wordA.length;
                         
-                        // Now find B.
-                        // Instead of iterating all Words (O(N)), we iterate all substrings of P (O(L^2))
-                        // and check if they are in wordSet.
+                        // Find B
                         for (let i = 0; i < portmanteau.length; i++) {
                             for (let j = i + 1; j <= portmanteau.length; j++) {
                                 const sub = portmanteau.substring(i, j);
                                 
-                                // B must be a valid word
                                 if (wordSet.has(sub)) {
                                     const wordB = sub;
                                     
-                                    // B must be distinct
                                     if (wordB === wordA || wordB === wordC) continue;
                                     
-                                    // Constraint: Start/End letters must be unique
+                                    // Constraint 2: Start/End unique
                                     const starts = new Set([wordA[0], wordB[0], wordC[0]]);
                                     const ends = new Set([
                                         wordA[wordA.length - 1], 
@@ -233,36 +252,34 @@ artist</textarea>
                                     
                                     if (starts.size !== 3 || ends.size !== 3) continue;
 
-                                    // Constraint: No word can be a substring of another
+                                    // Constraint 3: Substrings
                                     if (wordA.includes(wordB) || wordB.includes(wordA) ||
-                                        wordA.includes(wordC) || wordC.includes(wordA) ||
-                                        wordB.includes(wordC) || wordC.includes(wordB)) {
+                                        wordC.includes(wordB) || wordB.includes(wordC)) {
                                         continue;
                                     }
 
-                                    // Check Triple Overlap Count
-                                    // B spans [i, j) in P
-                                    // A/C Overlap spans [overlapStart, overlapEnd) in P
-                                    // We need the intersection of B's range and the A/C Overlap range
+                                    // Calc Overlap
                                     const intersectStart = Math.max(i, overlapStart);
                                     const intersectEnd = Math.min(j, overlapEnd);
                                     const tripleOverlapCount = Math.max(0, intersectEnd - intersectStart);
                                     
-                                    // User requirement: "share at least one letter"
-                                    // The middle word must actually touch the bridge between A and C
-                                    if (tripleOverlapCount >= minOverlap) {
+                                    // ADD TO GROUPS LOGIC
+                                    // Only add if it falls within our search range AND we have space in quota
+                                    if (tripleOverlapCount <= maxOverlapSearch && tripleOverlapCount >= minOverlap) {
                                         
-                                        const outputKey = `${wordA}-${wordB}-${wordC}`;
-                                        
-                                        if (!seenGroups.has(outputKey)) {
-                                            seenGroups.add(outputKey);
+                                        if (counts[tripleOverlapCount] < limitPerCategory) {
+                                            const outputKey = `${wordA}-${wordB}-${wordC}`;
                                             
-                                            groups.push({
-                                                words: [wordA, wordB, wordC],
-                                                overlap: tripleOverlapCount
-                                            });
-                                            
-                                            if (groups.length >= maxResults) break mainLoop;
+                                            if (!seenGroups.has(outputKey)) {
+                                                seenGroups.add(outputKey);
+                                                
+                                                groups.push({
+                                                    words: [wordA, wordB, wordC],
+                                                    overlap: tripleOverlapCount
+                                                });
+                                                
+                                                counts[tripleOverlapCount]++;
+                                            }
                                         }
                                     }
                                 }
@@ -272,15 +289,26 @@ artist</textarea>
                 }
             }
 
-            // Output
+            // 4. Sort Results
+            groups.sort((a, b) => {
+                if (b.overlap !== a.overlap) {
+                    return b.overlap - a.overlap;
+                }
+                const strA = a.words.join('-');
+                const strB = b.words.join('-');
+                return strA.localeCompare(strB);
+            });
+
             document.getElementById('outputJson').value = JSON.stringify(groups, null, 4);
             
             const countLabel = document.getElementById('resultCount');
-            if (groups.length === 0) {
+            const totalFound = groups.length;
+            
+            if (totalFound === 0) {
                 countLabel.textContent = "No matches found";
                 countLabel.className = "text-xs text-red-500 py-1 font-semibold";
             } else {
-                countLabel.textContent = `Found ${groups.length} group${groups.length === 1 ? '' : 's'}${groups.length >= maxResults ? ' (Limit Reached)' : ''}`;
+                countLabel.textContent = `Found ${totalFound} groups (4s: ${counts[4]}, 3s: ${counts[3]}, 2s: ${counts[2]}, 1s: ${counts[1]})`;
                 countLabel.className = "text-xs text-green-600 py-1 font-semibold";
             }
         }
@@ -288,7 +316,7 @@ artist</textarea>
         function copyToClipboard() {
             const copyText = document.getElementById("outputJson");
             copyText.select();
-            copyText.setSelectionRange(0, 99999);
+            copyText.setSelectionRange(0, 9999999); 
             
             try {
                 document.execCommand('copy');
@@ -298,6 +326,7 @@ artist</textarea>
                 setTimeout(() => btn.innerHTML = originalText, 2000);
             } catch (err) {
                 console.error('Failed to copy', err);
+                alert("Failed to copy. List is too large.");
             }
         }
     </script>

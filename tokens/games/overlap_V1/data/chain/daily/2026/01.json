@@ -1666,7 +1666,100 @@
                 "start": 66
             }
         ]
+    },
+    {
+  "id": "2026-01-19",
+  "type": "chain",
+  "palette": "greens",
+  "words": [
+    {
+      "clue": "Split in two",
+      "answer": "DIVIDE",
+      "start": 1
+    },
+    {
+      "clue": "Recorded clip",
+      "answer": "VIDEO",
+      "start": 3
+    },
+    {
+      "clue": "System of beliefs",
+      "answer": "IDEOLOGY",
+      "start": 4
+    },
+    {
+      "clue": "Uh-huh",
+      "answer": "YEAH",
+      "start": 11
+    },
+    {
+      "clue": "In front",
+      "answer": "AHEAD",
+      "start": 13
+    },
+    {
+      "clue": "Coin side, plural",
+      "answer": "HEADS",
+      "start": 14
+    },
+    {
+      "clue": "Woolly grazer",
+      "answer": "SHEEP",
+      "start": 18
+    },
+    {
+      "clue": "Biased messaging",
+      "answer": "PROPAGANDA",
+      "start": 22
+    },
+    {
+      "clue": "Move to music",
+      "answer": "DANCE",
+      "start": 30
+    },
+    {
+      "clue": "Family lineage",
+      "answer": "ANCESTRY",
+      "start": 31
+    },
+    {
+      "clue": "Pulled hard",
+      "answer": "YANKED",
+      "start": 38
+    },
+    {
+      "clue": "Church officer",
+      "answer": "DEACON",
+      "start": 43
+    },
+    {
+      "clue": "Show difference",
+      "answer": "CONTRAST",
+      "start": 46
+    },
+    {
+      "clue": "Rocks, informally",
+      "answer": "STONES",
+      "start": 52
+    },
+    {
+      "clue": "Tucked inside",
+      "answer": "NESTED",
+      "start": 55
+    },
+    {
+      "clue": "Unit of angle",
+      "answer": "DEGREE",
+      "start": 60
+    },
+    {
+      "clue": "Coral ridge",
+      "answer": "REEF",
+      "start": 63
     }
+  ]
+}
+
 
 
 ]
