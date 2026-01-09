@@ -281,11 +281,14 @@
 
           </div>
         </div>
-        <div class="splash__actions">
+          <div class="splash__actions">
           <button class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
           <div class="splash__row">
-            <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button">Archive</button>
+            <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button" aria-expanded="false" aria-controls="splashArchiveMenu">Archive</button>
             <button class="btn text-system-semibold-md" id="splashPuzzleBtn" type="button">Puzzles</button>
+          </div>
+          <div class="splash__archive" id="splashArchiveMenu" hidden>
+            <select class="sel text-system-regular-md" id="splashArchiveSelect" aria-label="Archive puzzles"></select>
           </div>
         </div>
 
@@ -304,7 +307,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.9</span>
+            id="splashVersion">V3.91</span>
         </p>
       </footer>
     </div>

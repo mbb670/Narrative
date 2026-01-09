@@ -1336,6 +1336,17 @@ body[data-view="play"] {
 
 
 #splashArchiveBtn{
+    position: relative;
+}
+
+#splashArchiveBtn:disabled{
+    color: var(--foreground-disabled);
+    border-color: var(--border-disabled);
+    cursor: not-allowed;
+}
+
+
+#splashArchiveBtn{
     color: var(--foreground-disabled);
     border-color: var(--border-disabled);
     pointer-events: none;
@@ -1393,6 +1404,15 @@ body[data-view="play"] {
 
             button {
                 flex: 1;
+            }
+        }
+
+        .splash__archive {
+            margin-top: var(--spacing-x8);
+
+            .sel {
+                width: 100%;
+                min-width: 0;
             }
         }
     }

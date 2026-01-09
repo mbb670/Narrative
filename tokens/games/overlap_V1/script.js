@@ -730,6 +730,9 @@ const els = {
   splash: $("#splashModal"),
   splashPrimary: $("#splashPrimary"),
   splashPuzzleBtn: $("#splashPuzzleBtn"),
+  splashArchiveBtn: $("#splashArchiveBtn"),
+  splashArchiveMenu: $("#splashArchiveMenu"),
+  splashArchiveSelect: $("#splashArchiveSelect"),
   splashTutorialBtn: $("#splashTutorialBtn"),
   splashDate: $("#splashDate"),
   splashTitle: $("#splashTitle"),
@@ -1767,12 +1770,13 @@ function pruneStaleChainProgress() {
   Object.keys(store.puzzles || {}).forEach((k) => {
     const v = store.puzzles[k];
     const savedDay = v?.savedDayKey;
-    const id = v?.puzzleId || v?.id || null;
+    const id = String(v?.puzzleId || v?.id || "").trim();
     const type = v?.puzzleType || v?.type || null;
     const daily =
       !!v?.puzzleIdIsDate ||
       (String(type || MODE.PUZZLE) === MODE.CHAIN && isDateId(id));
-    if (daily && t && savedDay && savedDay !== t) {
+    const isCurrentDaily = daily && t && id === t;
+    if (isCurrentDaily && savedDay && savedDay !== t) {
       delete store.puzzles[k];
       changed = true;
     }
@@ -1868,6 +1872,12 @@ function chainSummaryFromStore() {
   if (!key) return null;
   const store = loadChainProgressStore();
   const data = store.puzzles?.[key];
+  const today = todayKey();
+  const puzzleId = normalizePuzzleId(p).id;
+  const isCurrentDaily = isDailyChainPuzzle(p) && today && puzzleId === today;
+  if (isCurrentDaily && data?.savedDayKey && data.savedDayKey !== today) {
+    return { state: "default", solved: 0, total: computed(p).entries?.length || 0 };
+  }
   if (!data) return { state: "default", solved: 0, total: computed(p).entries?.length || 0 };
 
   const model = computed(p);
@@ -1958,9 +1968,65 @@ function updateSplashContent(forceState) {
   }
 }
 
+function archivePuzzleList() {
+  return puzzles
+    .map((p, idx) => ({ idx, puzzle: p }))
+    .filter(({ puzzle }) => isDailyChainPuzzle(puzzle))
+    .sort((a, b) => String(b.puzzle.id).localeCompare(String(a.puzzle.id)));
+}
+
+function archiveOptionLabel(puzzle) {
+  return puzzleDateLabel(puzzle) || puzzleLabel(puzzle);
+}
+
+function syncArchiveSelect() {
+  const sel = els.splashArchiveSelect;
+  const btn = els.splashArchiveBtn;
+  const menu = els.splashArchiveMenu;
+  if (!sel || !btn || !menu) return;
+
+  const list = archivePuzzleList();
+  sel.innerHTML = "";
+
+  if (!list.length) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "No archive puzzles";
+    sel.appendChild(opt);
+    sel.disabled = true;
+    btn.disabled = true;
+    menu.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+    return;
+  }
+
+  btn.disabled = false;
+  sel.disabled = false;
+
+  list.forEach(({ idx, puzzle }) => {
+    const opt = document.createElement("option");
+    opt.value = String(idx);
+    opt.textContent = archiveOptionLabel(puzzle);
+    sel.appendChild(opt);
+  });
+
+  const currentIdx = isChainPuzzle(puzzles[pIdx]) ? pIdx : findTodayChainIndex();
+  const hasCurrent = list.some((item) => item.idx === currentIdx);
+  sel.value = String(hasCurrent ? currentIdx : list[0].idx);
+}
+
+function setArchiveMenuOpen(open) {
+  if (!els.splashArchiveMenu || !els.splashArchiveBtn) return;
+  if (open) syncArchiveSelect();
+  els.splashArchiveMenu.hidden = !open;
+  els.splashArchiveBtn.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
 function openSplash(forceState) {
   if (!els.splash) return;
   updateSplashContent(forceState);
+  syncArchiveSelect();
+  setArchiveMenuOpen(false);
   els.splash.hidden = false;
   els.splash.setAttribute("aria-hidden", "false");
   document.documentElement.classList.add("is-modal-open");
@@ -1974,6 +2040,7 @@ function closeSplash() {
   els.splash.classList.remove("is-open");
   els.splash.setAttribute("aria-hidden", "true");
   els.splash.hidden = true;
+  setArchiveMenuOpen(false);
   document.documentElement.classList.remove("is-modal-open");
   document.body.style.overflow = "";
   document.body.style.touchAction = "";
@@ -2092,12 +2159,9 @@ function restoreChainProgressForCurrentPuzzle() {
   const data = store.puzzles?.[key];
   const today = todayKey();
   const isDaily = isDailyChainPuzzle(p);
-  const stale =
-    data &&
-    isDaily &&
-    today &&
-    data.savedDayKey &&
-    data.savedDayKey !== today;
+  const puzzleId = normalizePuzzleId(p).id;
+  const isCurrentDaily = isDaily && today && puzzleId === today;
+  const stale = data && isCurrentDaily && data.savedDayKey && data.savedDayKey !== today;
 
   if (stale) {
     delete store.puzzles[key];
@@ -5540,6 +5604,35 @@ els.splashPrimary?.addEventListener("click", (e) => {
   e.preventDefault();
   handleSplashPrimary();
 });
+els.splashArchiveBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (els.splashArchiveBtn.disabled) return;
+  const menu = els.splashArchiveMenu;
+  if (!menu) return;
+  const willOpen = menu.hidden;
+  setArchiveMenuOpen(willOpen);
+  if (willOpen) {
+    try {
+      els.splashArchiveSelect?.focus({ preventScroll: true });
+    } catch {
+      els.splashArchiveSelect?.focus();
+    }
+  }
+});
+els.splashArchiveSelect?.addEventListener("change", (e) => {
+  const idx = Number.parseInt(e.target.value, 10);
+  if (Number.isNaN(idx)) return;
+  closeSplash();
+  setArchiveMenuOpen(false);
+  setTab(VIEW.CHAIN);
+  loadPuzzle(idx);
+});
+document.addEventListener("click", (e) => {
+  if (!els.splashArchiveMenu || els.splashArchiveMenu.hidden) return;
+  if (e.target.closest("#splashArchiveMenu")) return;
+  if (e.target.closest("#splashArchiveBtn")) return;
+  setArchiveMenuOpen(false);
+});
 els.giveUpConfirm?.addEventListener("click", () => {
   markInteracted();
   closeGiveUpModal();
@@ -5754,9 +5847,9 @@ els.pDel.addEventListener("click", () => {
 });
 
 els.pClear?.addEventListener("click", () => {
-  clearChainProgressForPuzzle(puzzles[pIdx]);
+  clearAllChainProgress();
   clearChainStats();
-  resetPlay({ clearPersist: true });
+  resetPlay({ clearPersist: false });
   chainForceIdleZero();
 });
 
