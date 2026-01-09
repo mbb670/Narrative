@@ -47,6 +47,7 @@ const FORCE_FTUE = (() => {
   }
 })();
 const FTUE_SEEN_KEY = `${KEY}__ftue_seen`;
+const LAST_PLAYED_CHAIN_KEY = `${KEY}__last_chain_played`;
 
 function loadLastView() {
   try {
@@ -731,8 +732,6 @@ const els = {
   splashPrimary: $("#splashPrimary"),
   splashPuzzleBtn: $("#splashPuzzleBtn"),
   splashArchiveBtn: $("#splashArchiveBtn"),
-  splashArchiveMenu: $("#splashArchiveMenu"),
-  splashArchiveSelect: $("#splashArchiveSelect"),
   splashTutorialBtn: $("#splashTutorialBtn"),
   splashDate: $("#splashDate"),
   splashTitle: $("#splashTitle"),
@@ -740,6 +739,18 @@ const els = {
   splashAvgTime: $("#splashAvgTime"),
   splashGamesPlayed: $("#splashGamesPlayed"),
   splashVersion: $("#splashVersion"),
+  archiveModal: $("#archiveModal"),
+  archiveDialog: document.querySelector(".archive__dialog"),
+  archiveBackBtn: $("#archiveBackBtn"),
+  archivePrevMonth: $("#archivePrevMonth"),
+  archiveNextMonth: $("#archiveNextMonth"),
+  archiveMonthSelect: $("#archiveMonthSelect"),
+  archiveYearSelect: $("#archiveYearSelect"),
+  archiveCalendar: $("#archiveCalendar"),
+  archiveTodayBtn: $("#archiveTodayBtn"),
+  archiveActionBtn: $("#archiveActionBtn"),
+  archiveActionLabel: $("#archiveActionLabel"),
+  archiveActionMeta: $("#archiveActionMeta"),
   giveUpModal: $("#giveUpModal"),
   giveUpSubtitle: document.querySelector(".giveUpSubtitle"),
   giveUpWordsCount: document.querySelector(".giveUpWordsCount"),
@@ -782,6 +793,7 @@ const els = {
   solution: $("#solution"),
   helper: $(".helper"),
   keyboard: $(".keyboard"),
+  archiveDate: $("#archiveDate"),
   toastSuccess: $("#toastSuccess"),
   toastWarning: $("#toastWarning"),
   toastError: $("#toastError"),
@@ -1968,65 +1980,409 @@ function updateSplashContent(forceState) {
   }
 }
 
-function archivePuzzleList() {
-  return puzzles
-    .map((p, idx) => ({ idx, puzzle: p }))
-    .filter(({ puzzle }) => isDailyChainPuzzle(puzzle))
-    .sort((a, b) => String(b.puzzle.id).localeCompare(String(a.puzzle.id)));
+// ---- Archive modal ----
+const ARCHIVE_MONTH_LABELS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const archiveState = {
+  ready: false,
+  loadingPromise: null,
+  years: [],
+  monthsByYear: new Map(),
+  availableMonths: [],
+  monthCache: new Map(),
+  current: { year: null, month: null },
+  monthData: null,
+  selectedDateKey: null,
+  selectedPuzzle: null,
+  selectedPlayable: false,
+  selectedAction: "none",
+  renderToken: 0,
+};
+
+const pad2 = (n) => String(n).padStart(2, "0");
+const archiveMonthKey = (year, month) => `${year}-${pad2(month)}`;
+const archiveDateKey = (year, month, day) => `${year}-${pad2(month)}-${pad2(day)}`;
+
+async function loadArchiveIndex() {
+  if (archiveState.ready) return;
+  if (archiveState.loadingPromise) return archiveState.loadingPromise;
+
+  archiveState.loadingPromise = (async () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    const idxUrl = new URL("./data/chain/daily/index.json", import.meta.url);
+    const idx = await fetchJson(idxUrl, null);
+    let years = [];
+    if (Array.isArray(idx?.years)) years = idx.years;
+    else if (Array.isArray(idx?.files)) years = idx.files;
+
+    years = years
+      .map((y) => String(y).split("/")[0])
+      .map((y) => Number.parseInt(y, 10))
+      .filter((y) => Number.isFinite(y));
+
+    if (!years.length) {
+      const derived = puzzles
+        .filter(isDailyChainPuzzle)
+        .map((p) => normalizePuzzleId(p).id)
+        .filter(isDateId);
+      years = derived
+        .map((id) => Number.parseInt(String(id).slice(0, 4), 10))
+        .filter((y) => Number.isFinite(y));
+    }
+
+    years = Array.from(new Set(years))
+      .filter((y) => y <= currentYear)
+      .sort((a, b) => a - b);
+
+    const monthsByYear = new Map();
+    for (const year of years) {
+      const yearIdxUrl = new URL(`./data/chain/daily/${year}/index.json`, import.meta.url);
+      const yearIdx = await fetchJson(yearIdxUrl, null);
+      let months = [];
+      if (Array.isArray(yearIdx?.months)) months = yearIdx.months;
+      else if (Array.isArray(yearIdx?.files)) months = yearIdx.files;
+
+      months = months
+        .map((m) => {
+          const raw = String(m);
+          const match = raw.match(/(\d{2})(?:\.json)?$/);
+          return match ? Number.parseInt(match[1], 10) : Number.parseInt(raw, 10);
+        })
+        .filter((m) => Number.isFinite(m) && m >= 1 && m <= 12);
+
+      if (!months.length) {
+        months = puzzles
+          .filter(isDailyChainPuzzle)
+          .map((p) => normalizePuzzleId(p).id)
+          .filter((id) => String(id).startsWith(`${year}-`))
+          .map((id) => Number.parseInt(String(id).slice(5, 7), 10))
+          .filter((m) => Number.isFinite(m) && m >= 1 && m <= 12);
+      }
+
+      months = Array.from(new Set(months))
+        .filter((m) => year < currentYear || (year === currentYear && m <= currentMonth))
+        .sort((a, b) => a - b);
+
+      if (months.length) monthsByYear.set(year, months);
+    }
+
+    const availableMonths = [];
+    monthsByYear.forEach((months, year) => {
+      months.forEach((month) => availableMonths.push({ year, month }));
+    });
+    availableMonths.sort((a, b) => (a.year - b.year) || (a.month - b.month));
+
+    archiveState.years = Array.from(monthsByYear.keys()).sort((a, b) => a - b);
+    archiveState.monthsByYear = monthsByYear;
+    archiveState.availableMonths = availableMonths;
+    archiveState.ready = true;
+    archiveState.loadingPromise = null;
+  })();
+
+  return archiveState.loadingPromise;
 }
 
-function archiveOptionLabel(puzzle) {
-  return puzzleDateLabel(puzzle) || puzzleLabel(puzzle);
+async function loadArchiveMonth(year, month) {
+  const key = archiveMonthKey(year, month);
+  if (archiveState.monthCache.has(key)) return archiveState.monthCache.get(key);
+
+  const url = new URL(`./data/chain/daily/${year}/${pad2(month)}.json`, import.meta.url);
+  const data = await fetchJson(url, []);
+  const list = Array.isArray(data) ? data : [];
+  const byDate = new Map();
+  list.forEach((raw) => {
+    const p = normPuzzle(raw);
+    const id = normalizePuzzleId(p).id;
+    if (isDateId(id)) byDate.set(id, p);
+  });
+
+  const monthData = { year, month, puzzles: list, byDate };
+  archiveState.monthCache.set(key, monthData);
+  return monthData;
 }
 
-function syncArchiveSelect() {
-  const sel = els.splashArchiveSelect;
-  const btn = els.splashArchiveBtn;
-  const menu = els.splashArchiveMenu;
-  if (!sel || !btn || !menu) return;
+function archiveDefaultSelection(year, month, monthData) {
+  const today = toDateKey(new Date());
+  const monthPrefix = `${year}-${pad2(month)}-`;
+  if (today && today.startsWith(monthPrefix)) return today;
+  const dates = Array.from(monthData?.byDate?.keys?.() || []).sort();
+  if (dates.length) return dates[0];
+  return archiveDateKey(year, month, 1);
+}
 
-  const list = archivePuzzleList();
-  sel.innerHTML = "";
+function renderArchiveControls() {
+  const yearSel = els.archiveYearSelect;
+  const monthSel = els.archiveMonthSelect;
+  const prevBtn = els.archivePrevMonth;
+  const nextBtn = els.archiveNextMonth;
+  if (!yearSel || !monthSel || !prevBtn || !nextBtn) return;
 
-  if (!list.length) {
+  const years = [...archiveState.years].sort((a, b) => b - a);
+  yearSel.innerHTML = "";
+  years.forEach((y) => {
     const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "No archive puzzles";
-    sel.appendChild(opt);
-    sel.disabled = true;
+    opt.value = String(y);
+    opt.textContent = String(y);
+    yearSel.appendChild(opt);
+  });
+
+  const curYear = archiveState.current.year ?? years[0];
+  const yearMonths = archiveState.monthsByYear.get(curYear) || [];
+  const curMonth = archiveState.current.month ?? yearMonths[0];
+
+  yearSel.value = curYear != null ? String(curYear) : "";
+  monthSel.innerHTML = "";
+  yearMonths.forEach((m) => {
+    const opt = document.createElement("option");
+    opt.value = String(m);
+    opt.textContent = ARCHIVE_MONTH_LABELS[m - 1] || String(m);
+    monthSel.appendChild(opt);
+  });
+  monthSel.value = curMonth != null ? String(curMonth) : "";
+
+  yearSel.disabled = !years.length;
+  monthSel.disabled = !yearMonths.length;
+
+  const idx = archiveState.availableMonths.findIndex(
+    (m) => m.year === curYear && m.month === curMonth
+  );
+  prevBtn.disabled = idx <= 0;
+  nextBtn.disabled = idx < 0 || idx >= archiveState.availableMonths.length - 1;
+}
+
+function renderArchiveCalendar() {
+  const grid = els.archiveCalendar;
+  if (!grid) return;
+  grid.innerHTML = "";
+
+  const data = archiveState.monthData;
+  if (!data) return;
+
+  const { year, month, byDate } = data;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+
+  const progressStore = loadChainProgressStore();
+  const todayKey = toDateKey(new Date());
+
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < totalCells; i++) {
+    const dayNum = i - firstDay + 1;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "archive-day";
+
+    if (dayNum < 1 || dayNum > daysInMonth) {
+      btn.classList.add("is-empty");
+      btn.setAttribute("aria-hidden", "true");
+      btn.disabled = true;
+      frag.appendChild(btn);
+      continue;
+    }
+
+    const dateKey = archiveDateKey(year, month, dayNum);
+    const puzzle = byDate.get(dateKey) || null;
+    const hasPuzzle = !!puzzle;
+    const isFuture = !!(todayKey && dateKey > todayKey);
+
+    let state = "hidden";
+    if (hasPuzzle && !isFuture) {
+      const key = chainPuzzleKey(puzzle);
+      const data = key ? progressStore.puzzles?.[key] : null;
+      const hasInput = Array.isArray(data?.usr) && data.usr.some(Boolean);
+      if (data?.done) state = "complete";
+      else if (data?.started || hasInput) state = "progress";
+      else state = "not-started";
+    }
+
+    const isPlayable = hasPuzzle && (!isFuture || DEV_MODE);
+    btn.dataset.archiveDate = dateKey;
+    btn.dataset.state = state;
+    btn.dataset.hasPuzzle = hasPuzzle ? "true" : "false";
+    btn.dataset.future = isFuture ? "true" : "false";
+    const metaSpan = document.createElement("span");
+    metaSpan.className = "archive-day-meta";
+    const labelSpan = document.createElement("span");
+    labelSpan.className = "archive-day-label";
+    labelSpan.textContent = String(dayNum);
+    btn.append(metaSpan, labelSpan);
+    btn.disabled = !isPlayable;
+
+    if (todayKey && dateKey === todayKey) btn.classList.add("is-today");
+    if (archiveState.selectedDateKey === dateKey) btn.classList.add("is-selected");
+
+    frag.appendChild(btn);
+  }
+
+  grid.appendChild(frag);
+}
+
+function updateArchiveAction() {
+  const btn = els.archiveActionBtn;
+  if (!btn) return;
+  const label = els.archiveActionLabel;
+  const meta = els.archiveActionMeta;
+
+  const dateKey = archiveState.selectedDateKey;
+  const monthData = archiveState.monthData;
+  const todayKey = toDateKey(new Date());
+
+  const puzzle = monthData?.byDate?.get?.(dateKey) || null;
+  const isFuture = !!(todayKey && dateKey && dateKey > todayKey);
+  const playable = !!puzzle && (!isFuture || DEV_MODE);
+
+  archiveState.selectedPuzzle = puzzle;
+  archiveState.selectedPlayable = playable;
+  archiveState.selectedAction = "none";
+
+  if (!puzzle) {
+    if (label) label.textContent = "No puzzle";
+    if (meta) meta.textContent = "";
     btn.disabled = true;
-    menu.hidden = true;
-    btn.setAttribute("aria-expanded", "false");
     return;
   }
 
-  btn.disabled = false;
-  sel.disabled = false;
+  const store = loadChainProgressStore();
+  const key = chainPuzzleKey(puzzle);
+  const data = key ? store.puzzles?.[key] : null;
+  const usr = Array.isArray(data?.usr) ? data.usr : [];
+  const hasInput = usr.some(Boolean);
+  const model = computed(puzzle);
+  const total = model.entries?.length || 0;
+  const solved = (model.entries || []).filter((e) => {
+    for (let i = 0; i < e.len; i++) {
+      const idx = e.start + i;
+      if (!usr[idx]) return false;
+      if (usr[idx] !== model.exp[idx]) return false;
+    }
+    return true;
+  }).length;
 
-  list.forEach(({ idx, puzzle }) => {
-    const opt = document.createElement("option");
-    opt.value = String(idx);
-    opt.textContent = archiveOptionLabel(puzzle);
-    sel.appendChild(opt);
-  });
+  if (data?.done) {
+    archiveState.selectedAction = "admire";
+    if (label) label.textContent = "Admire puzzle";
+    const timeSec = Math.max(0, Math.floor(data?.stats?.timeSec || data?.lastFinishElapsedSec || 0));
+    if (meta) meta.textContent = fmtTime(timeSec);
+  } else if (data?.started || hasInput) {
+    archiveState.selectedAction = "continue";
+    if (label) label.textContent = "Continue puzzle";
+    if (meta) meta.textContent = `(${solved}/${total})`;
+  } else {
+    archiveState.selectedAction = "play";
+    if (label) label.textContent = "Play";
+    if (meta) meta.textContent = "";
+  }
 
-  const currentIdx = isChainPuzzle(puzzles[pIdx]) ? pIdx : findTodayChainIndex();
-  const hasCurrent = list.some((item) => item.idx === currentIdx);
-  sel.value = String(hasCurrent ? currentIdx : list[0].idx);
+  btn.disabled = !playable;
 }
 
-function setArchiveMenuOpen(open) {
-  if (!els.splashArchiveMenu || !els.splashArchiveBtn) return;
-  if (open) syncArchiveSelect();
-  els.splashArchiveMenu.hidden = !open;
-  els.splashArchiveBtn.setAttribute("aria-expanded", open ? "true" : "false");
+async function setArchiveMonth(year, month, opts = {}) {
+  const token = ++archiveState.renderToken;
+  await loadArchiveIndex();
+  if (token !== archiveState.renderToken) return;
+
+  if (!archiveState.availableMonths.length) {
+    archiveState.current = { year: null, month: null };
+    archiveState.monthData = null;
+    archiveState.selectedDateKey = null;
+    renderArchiveControls();
+    renderArchiveCalendar();
+    updateArchiveAction();
+    return;
+  }
+
+  const requestedParts = opts.selectDateKey ? datePartsFromKey(opts.selectDateKey) : null;
+  const targetYear = requestedParts?.year ?? year;
+  const targetMonth = requestedParts?.month ?? month;
+  const exact = archiveState.availableMonths.find((m) => m.year === targetYear && m.month === targetMonth);
+  const fallback = exact || archiveState.availableMonths[archiveState.availableMonths.length - 1];
+
+  archiveState.current = { year: fallback.year, month: fallback.month };
+  renderArchiveControls();
+
+  const monthData = await loadArchiveMonth(fallback.year, fallback.month);
+  if (token !== archiveState.renderToken) return;
+  archiveState.monthData = monthData;
+
+  const nextSelection = opts.selectDateKey || archiveDefaultSelection(fallback.year, fallback.month, monthData);
+  archiveState.selectedDateKey = nextSelection;
+
+  renderArchiveCalendar();
+  updateArchiveAction();
+}
+
+function selectArchiveDate(dateKey) {
+  if (!dateKey) return;
+  archiveState.selectedDateKey = dateKey;
+  els.archiveCalendar?.querySelectorAll?.(".archive-day.is-selected")
+    ?.forEach((el) => el.classList.remove("is-selected"));
+  const btn = els.archiveCalendar?.querySelector?.(`[data-archive-date="${dateKey}"]`);
+  btn?.classList.add("is-selected");
+  updateArchiveAction();
+}
+
+function ensurePuzzleInList(puzzle) {
+  const id = normalizePuzzleId(puzzle).id;
+  const idx = puzzles.findIndex((p) => isChainPuzzle(p) && normalizePuzzleId(p).id === id);
+  if (idx >= 0) return idx;
+  puzzles.push(normPuzzle(puzzle));
+  return puzzles.length - 1;
+}
+
+const isArchiveDailyPuzzle = (p) => {
+  const id = normalizePuzzleId(p).id;
+  const today = todayKey();
+  return isDailyChainPuzzle(p) && id && today && id !== today;
+};
+
+async function openArchiveModal(opts = {}) {
+  if (!els.archiveModal) return;
+  const now = new Date();
+  if (!els.archiveModal.hidden) return;
+  if (els.splash && !els.splash.hidden) closeSplash();
+  els.archiveModal.hidden = false;
+  els.archiveModal.setAttribute("aria-hidden", "false");
+  document.documentElement.classList.add("is-modal-open");
+  document.body.style.overflow = "hidden";
+  document.body.style.touchAction = "none";
+  requestAnimationFrame(() => els.archiveModal?.classList.add("is-open"));
+  const dateKey = typeof opts.dateKey === "string" ? opts.dateKey : toDateKey(now);
+  const parts = dateKey ? datePartsFromKey(dateKey) : null;
+  const targetYear = parts?.year ?? now.getFullYear();
+  const targetMonth = parts?.month ?? (now.getMonth() + 1);
+  setArchiveMonth(targetYear, targetMonth, { selectDateKey: dateKey });
+}
+
+function closeArchiveModal() {
+  if (!els.archiveModal) return;
+  els.archiveModal.classList.remove("is-open");
+  els.archiveModal.setAttribute("aria-hidden", "true");
+  els.archiveModal.hidden = true;
+  document.documentElement.classList.remove("is-modal-open");
+  document.body.style.overflow = "";
+  document.body.style.touchAction = "";
 }
 
 function openSplash(forceState) {
   if (!els.splash) return;
   updateSplashContent(forceState);
-  syncArchiveSelect();
-  setArchiveMenuOpen(false);
   els.splash.hidden = false;
   els.splash.setAttribute("aria-hidden", "false");
   document.documentElement.classList.add("is-modal-open");
@@ -2040,7 +2396,6 @@ function closeSplash() {
   els.splash.classList.remove("is-open");
   els.splash.setAttribute("aria-hidden", "true");
   els.splash.hidden = true;
-  setArchiveMenuOpen(false);
   document.documentElement.classList.remove("is-modal-open");
   document.body.style.overflow = "";
   document.body.style.touchAction = "";
@@ -2081,6 +2436,12 @@ function handleSplashPrimary() {
 function maybeShowSplashOnLoad() {
   if (_splashShown || SUPPRESS_SPLASH) return;
   _splashShown = true;
+  const last = getLastPlayedChain();
+  const today = todayKey();
+  if (last?.isDate && last.id && today && last.id !== today) {
+    openArchiveModal({ dateKey: last.id });
+    return;
+  }
   openSplash();
 }
 
@@ -2135,6 +2496,7 @@ function persistChainProgressImmediate() {
   const store = loadChainProgressStore();
   store.puzzles[snap.puzzleKey] = snap;
   saveChainProgressStore(store);
+  setLastPlayedChain(p);
   _persistTickLastTs = performance.now ? performance.now() : Date.now();
 }
 
@@ -2287,12 +2649,48 @@ const dateFromKey = (key) => {
   return null;
 };
 
+const datePartsFromKey = (key) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key || ""));
+  if (!m) return null;
+  const y = +m[1];
+  const mo = +m[2];
+  const d = +m[3];
+  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return null;
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+  return { year: y, month: mo, day: d };
+};
+
 const normalizeIdCandidate = (val) => {
   const raw = String(val ?? "").trim();
   if (!raw) return { id: null, isDate: false };
   const { dateKey } = normalizeDateKey(raw);
   if (dateKey) return { id: dateKey, isDate: true };
   return { id: raw, isDate: DATE_ID_RE.test(raw) };
+};
+
+const getLastPlayedChain = () => {
+  try {
+    const raw = localStorage.getItem(LAST_PLAYED_CHAIN_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== "object") return null;
+    const id = String(data.id || "").trim();
+    if (!id) return null;
+    return { id, isDate: !!data.isDate };
+  } catch {
+    return null;
+  }
+};
+
+const setLastPlayedChain = (puzzle) => {
+  const norm = normalizePuzzleId(puzzle);
+  if (!norm.id) return;
+  try {
+    localStorage.setItem(
+      LAST_PLAYED_CHAIN_KEY,
+      JSON.stringify({ id: norm.id, isDate: !!norm.isDate, at: Date.now() })
+    );
+  } catch {}
 };
 
 const puzzleWordSignature = (p) =>
@@ -2322,7 +2720,7 @@ const puzzleDateLabel = (p) => {
   return dt.toLocaleDateString(undefined, {
     weekday: "long",
     year: "numeric",
-    month: "short",
+    month: "long",
     day: "numeric",
     timeZone: "UTC",
   });
@@ -3756,7 +4154,12 @@ function chainPauseWithOpts(opts = {}) {
   chain.running = false;
   chainSetUIState(CHAIN_UI.PAUSED, ui);
   if (opts.showSplash) {
-    openSplash("paused");
+    const p = puzzles[pIdx];
+    if (isArchiveDailyPuzzle(p)) {
+      openArchiveModal({ dateKey: normalizePuzzleId(p).id });
+    } else {
+      openSplash("paused");
+    }
   }
   requestPersistChainProgress();
 }
@@ -4027,12 +4430,15 @@ function openChainResults(stats, reason) {
   r.title.textContent = allSolved ? "Success!" : "Overlap";
 
   const p = puzzles[pIdx];
-  const label = puzzleLabel(p) || new Date().toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const label =
+    puzzleDateLabel(p) ||
+    puzzleLabel(p) ||
+    new Date().toLocaleDateString(undefined, {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   r.subtitle.textContent = label;
 
   r.statTime.textContent = fmtTime(tSec);
@@ -4384,6 +4790,24 @@ function updateChainClues() {
   }
 }
 
+function updateArchiveDateBanner(p = puzzles[pIdx]) {
+  if (!els.archiveDate) return;
+  const show = isArchiveDailyPuzzle(p);
+  if (!show) {
+    els.archiveDate.hidden = true;
+    els.archiveDate.textContent = "";
+    return;
+  }
+  const label = puzzleDateLabel(p);
+  if (!label) {
+    els.archiveDate.hidden = true;
+    els.archiveDate.textContent = "";
+    return;
+  }
+  els.archiveDate.textContent = label;
+  els.archiveDate.hidden = false;
+}
+
 
 // ---- Play UI ----
 function updatePlayUI() {
@@ -4643,17 +5067,16 @@ function setResultsInert(isOpen) {
 function shareResult({ mode }) {
   const puzzle = puzzles[pIdx];
   const shareDateLabel = (() => {
+    const dateLabel = puzzleDateLabel(puzzle);
+    if (dateLabel) return dateLabel;
     const lbl = puzzleLabel(puzzle);
     if (lbl) return lbl;
-    const opts = {
-      weekday: "short",
+    return new Date().toLocaleDateString(undefined, {
+      weekday: "long",
       year: "numeric",
-      month: "short",
+      month: "long",
       day: "numeric",
-    };
-    const d = new Date();
-    const label = d.toLocaleDateString(undefined, opts);
-    return label ? label.replace(/^([A-Za-z]{3})/, (m) => m.toUpperCase()) : label;
+    });
   })();
   const baseUrl =
     SHARE_URL_OVERRIDE && SHARE_URL_OVERRIDE.trim()
@@ -4964,7 +5387,7 @@ function loadPuzzle(i) {
     Object.assign(document.createElement("span"), { textContent: `• ${posText}` })
   );
 
-
+  updateArchiveDateBanner(p);
   updatePlayUI();
   updatePlayControlsVisibility();
   updatePuzzleActionsVisibility();
@@ -5606,32 +6029,76 @@ els.splashPrimary?.addEventListener("click", (e) => {
 });
 els.splashArchiveBtn?.addEventListener("click", (e) => {
   e.preventDefault();
-  if (els.splashArchiveBtn.disabled) return;
-  const menu = els.splashArchiveMenu;
-  if (!menu) return;
-  const willOpen = menu.hidden;
-  setArchiveMenuOpen(willOpen);
-  if (willOpen) {
-    try {
-      els.splashArchiveSelect?.focus({ preventScroll: true });
-    } catch {
-      els.splashArchiveSelect?.focus();
-    }
-  }
-});
-els.splashArchiveSelect?.addEventListener("change", (e) => {
-  const idx = Number.parseInt(e.target.value, 10);
-  if (Number.isNaN(idx)) return;
   closeSplash();
-  setArchiveMenuOpen(false);
+  openArchiveModal();
+});
+els.archiveBackBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  closeArchiveModal();
+  openSplash(splashState());
+});
+els.archivePrevMonth?.addEventListener("click", (e) => {
+  e.preventDefault();
+  const list = archiveState.availableMonths;
+  const cur = archiveState.current;
+  const idx = list.findIndex((m) => m.year === cur.year && m.month === cur.month);
+  if (idx <= 0) return;
+  const prev = list[idx - 1];
+  setArchiveMonth(prev.year, prev.month);
+});
+els.archiveNextMonth?.addEventListener("click", (e) => {
+  e.preventDefault();
+  const list = archiveState.availableMonths;
+  const cur = archiveState.current;
+  const idx = list.findIndex((m) => m.year === cur.year && m.month === cur.month);
+  if (idx < 0 || idx >= list.length - 1) return;
+  const next = list[idx + 1];
+  setArchiveMonth(next.year, next.month);
+});
+els.archiveYearSelect?.addEventListener("change", (e) => {
+  const year = Number.parseInt(e.target.value, 10);
+  if (Number.isNaN(year)) return;
+  const months = archiveState.monthsByYear.get(year) || [];
+  const currentMonth = archiveState.current.month;
+  const nextMonth = months.includes(currentMonth) ? currentMonth : months[months.length - 1];
+  setArchiveMonth(year, nextMonth);
+});
+els.archiveMonthSelect?.addEventListener("change", (e) => {
+  const month = Number.parseInt(e.target.value, 10);
+  if (Number.isNaN(month)) return;
+  const year = archiveState.current.year;
+  if (!year) return;
+  setArchiveMonth(year, month);
+});
+els.archiveCalendar?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".archive-day");
+  if (!btn || btn.disabled) return;
+  const dateKey = btn.dataset.archiveDate;
+  if (!dateKey) return;
+  selectArchiveDate(dateKey);
+});
+els.archiveTodayBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const dateKey = toDateKey(now);
+  setArchiveMonth(year, month, { selectDateKey: dateKey });
+});
+els.archiveActionBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (!archiveState.selectedPuzzle || !archiveState.selectedPlayable) return;
+  const action = archiveState.selectedAction;
+  const idx = ensurePuzzleInList(archiveState.selectedPuzzle);
+  closeArchiveModal();
   setTab(VIEW.CHAIN);
   loadPuzzle(idx);
-});
-document.addEventListener("click", (e) => {
-  if (!els.splashArchiveMenu || els.splashArchiveMenu.hidden) return;
-  if (e.target.closest("#splashArchiveMenu")) return;
-  if (e.target.closest("#splashArchiveBtn")) return;
-  setArchiveMenuOpen(false);
+  if (action === "play" || action === "continue") {
+    if (play.mode === MODE.CHAIN && !play.done) {
+      if (!chain.started) chainStartNow();
+      else if (!chain.running) chainResume();
+    }
+  }
 });
 els.giveUpConfirm?.addEventListener("click", () => {
   markInteracted();

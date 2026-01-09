@@ -59,6 +59,7 @@
 
   <!-- PLAY -->
   <section class="panel is-active" id="panelPlay" role="tabpanel" aria-labelledby="tabPlay">
+    <p id="archiveDate" class="text-system-regular-sm" hidden></p>
     <div class="stage" id="stage" tabindex="0" role="application" aria-label="Overlap puzzle">
       <div class="game-data">
         <div class="puzzle-cycle">
@@ -268,6 +269,47 @@
   </div>
 
 
+
+  <!-- Archive -->
+  <div class="archive" id="archiveModal" aria-hidden="true" role="dialog" aria-modal="true" hidden>
+    <div class="archive__dialog card elevation-overlay">
+      <div class="archive__header">
+        <button class="btn text-system-semibold-xs" id="archiveBackBtn" type="button">Back</button>
+        <h2 class="archive__title text-subheadline-semibold-sm">Archive</h2>
+        <button class="btn text-system-semibold-xs" id="archiveTodayBtn" type="button">Today</button>
+      </div>
+      <div class="archive__main">
+      <div class="archive__controls">
+        <button class="btn icon" id="archivePrevMonth" type="button" aria-label="Previous month">‹</button>
+        <div class="archive__calendar-select">
+        <select class="dropdown text-system-regular-sm" id="archiveMonthSelect" aria-label="Month"></select>
+        <select class="dropdown text-system-regular-sm" id="archiveYearSelect" aria-label="Year"></select>
+        </div>
+        <button class="btn icon" id="archiveNextMonth" type="button" aria-label="Next month">›</button>
+      </div>
+      <div class="archive__calendar">
+        <div class="archive__weekdays text-system-regular-sm">
+          <span>S</span>
+          <span>M</span>
+          <span>T</span>
+          <span>W</span>
+          <span>T</span>
+          <span>F</span>
+          <span>S</span>
+        </div>
+        <div class="archive__grid text-system-regular-sm" id="archiveCalendar"></div>
+      </div>
+      </div>
+      <div class="archive__footer">
+        <button class="btn primary text-system-semibold-md" id="archiveActionBtn" type="button">
+          <span class="archiveActionLabel" id="archiveActionLabel">Play</span>
+          <span class="archiveActionMeta" id="archiveActionMeta"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
  <!-- Splash -->
   <div class="splash" id="splashModal" aria-hidden="true" role="dialog" aria-modal="true" hidden>
     <div class="splash__dialog card elevation-overlay">
@@ -281,14 +323,11 @@
 
           </div>
         </div>
-          <div class="splash__actions">
+        <div class="splash__actions">
           <button class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
           <div class="splash__row">
-            <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button" aria-expanded="false" aria-controls="splashArchiveMenu">Archive</button>
+            <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button">Archive</button>
             <button class="btn text-system-semibold-md" id="splashPuzzleBtn" type="button">Puzzles</button>
-          </div>
-          <div class="splash__archive" id="splashArchiveMenu" hidden>
-            <select class="sel text-system-regular-md" id="splashArchiveSelect" aria-label="Archive puzzles"></select>
           </div>
         </div>
 
@@ -307,7 +346,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.91</span>
+            id="splashVersion">V3.95</span>
         </p>
       </footer>
     </div>
