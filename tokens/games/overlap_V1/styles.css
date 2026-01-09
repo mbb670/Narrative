@@ -1702,7 +1702,9 @@ FTUE
 Archive
 ----------------------------- */
 
-
+#splashArchiveBtn{
+    pointer-events: all;
+}
 
 .archive__dialog {
     display: flex;
