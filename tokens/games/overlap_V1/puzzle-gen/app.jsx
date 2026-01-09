@@ -1854,6 +1854,35 @@ const fetchRandomWords = async () => {
       return nodes;
   }, []);
 
+  const buildBridgeChainFromWords = useCallback((words) => {
+      const stamp = Date.now();
+      return words.map((w, idx) => ({
+          id: `bridge-${stamp}-${idx}`,
+          words: [w],
+          type: 'bridge',
+          startWord: w,
+          endWord: w,
+          overlaps: [],
+          totalOverlap: 0
+      }));
+  }, []);
+
+  const findTripleStartIndex = (nodes, tripleWords, startIndexHint = null) => {
+      if (!Array.isArray(tripleWords) || tripleWords.length !== 3) return -1;
+      const matchesAt = (idx) => {
+          if (idx < 0 || idx + 2 >= nodes.length) return false;
+          for (let i = 0; i < 3; i++) {
+              if (cleanWord(nodes[idx + i].word) !== cleanWord(tripleWords[i])) return false;
+          }
+          return true;
+      };
+      if (typeof startIndexHint === 'number' && matchesAt(startIndexHint)) return startIndexHint;
+      for (let i = 0; i <= nodes.length - 3; i++) {
+          if (matchesAt(i)) return i;
+      }
+      return -1;
+  };
+
   const normalizeChainItems = (seq) => {
       const normalized = [];
       let prevLast = null;
@@ -1926,52 +1955,57 @@ const fetchRandomWords = async () => {
       setClues({});
   };
 
-  const moveTripleWords = (tripleWords, direction) => {
+  const moveTripleWords = (tripleWords, direction, startIndexHint = null) => {
       saveToHistory();
       setChain(prev => {
-          const idx = prev.findIndex(item => {
-              if (item.type !== 'triple' || item.words.length !== tripleWords.length) return false;
-              return item.words.every((w, i) => cleanWord(w) === cleanWord(tripleWords[i]));
-          });
-          if (idx === -1) return prev;
-          const newIdx = Math.max(0, Math.min(prev.length - 1, idx + direction));
-          if (newIdx === idx) return prev;
-          const next = [...prev];
-          const [item] = next.splice(idx, 1);
-          next.splice(newIdx, 0, item);
-          return normalizeChainItems(next);
+          if (!direction) return prev;
+          const nodes = buildNodesFromChain(prev);
+          const words = nodes.map(n => n.word);
+          const startIndex = findTripleStartIndex(nodes, tripleWords, startIndexHint);
+          if (startIndex === -1) return prev;
+          if (direction < 0 && startIndex === 0) return prev;
+          if (direction > 0 && startIndex + 3 >= words.length) return prev;
+
+          const block = words.slice(startIndex, startIndex + 3);
+          const remaining = [...words.slice(0, startIndex), ...words.slice(startIndex + 3)];
+          const insertIndex = direction < 0 ? startIndex - 1 : startIndex + 1;
+          const nextWords = [
+              ...remaining.slice(0, insertIndex),
+              ...block,
+              ...remaining.slice(insertIndex)
+          ];
+          return buildBridgeChainFromWords(nextWords);
       });
   };
 
-  const moveTripleToDay = (tripleWords, direction) => {
+  const moveTripleToDay = (tripleWords, direction, startIndexHint = null) => {
       saveToHistory();
       setChain(prev => {
+          if (!direction) return prev;
           const nodes = buildNodesFromChain(prev);
-          const tripleIdx = prev.findIndex(item => item.type === 'triple' && item.words.length === tripleWords.length && item.words.every((w,i)=>cleanWord(w)===cleanWord(tripleWords[i])));
-          if (tripleIdx === -1) return prev;
-          const startIdx = nodes.findIndex(n => n.itemIndex === tripleIdx && cleanWord(n.word) === cleanWord(tripleWords[0]));
+          const words = nodes.map(n => n.word);
+          const startIdx = findTripleStartIndex(nodes, tripleWords, startIndexHint);
           if (startIdx === -1) return prev;
+          const endIdx = startIdx + 2;
           const segIdx = segments.findIndex(s => s.start <= startIdx && s.end >= startIdx);
           if (segIdx === -1) return prev;
           const targetSegIdx = segIdx + direction;
           if (targetSegIdx < 0 || targetSegIdx >= segments.length) return prev;
 
-          // Determine min/max item index inside target segment
           const targetSeg = segments[targetSegIdx];
-          const itemsInTarget = new Set();
-          for (let i = targetSeg.start; i <= targetSeg.end; i++) {
-              const node = nodes[i];
-              if (node) itemsInTarget.add(node.itemIndex);
+          const block = words.slice(startIdx, endIdx + 1);
+          const remaining = [...words.slice(0, startIdx), ...words.slice(endIdx + 1)];
+          let insertIndex = direction < 0 ? targetSeg.start : targetSeg.end + 1;
+          if (direction > 0 && startIdx < insertIndex) {
+              insertIndex = Math.max(0, insertIndex - block.length);
           }
-          const minIdx = itemsInTarget.size ? Math.min(...itemsInTarget) : 0;
-          const maxIdx = itemsInTarget.size ? Math.max(...itemsInTarget) : prev.length - 1;
-          const insertIdx = direction < 0 ? minIdx : maxIdx + 1;
-
-          const next = [...prev];
-          const [item] = next.splice(tripleIdx, 1);
-          const targetInsert = insertIdx > tripleIdx ? insertIdx - 1 : insertIdx;
-          next.splice(Math.max(0, Math.min(next.length, targetInsert)), 0, item);
-          return normalizeChainItems(next);
+          insertIndex = Math.max(0, Math.min(remaining.length, insertIndex));
+          const nextWords = [
+              ...remaining.slice(0, insertIndex),
+              ...block,
+              ...remaining.slice(insertIndex)
+          ];
+          return buildBridgeChainFromWords(nextWords);
       });
   };
 
@@ -3247,16 +3281,16 @@ const fetchRandomWords = async () => {
                                     )}
                                     {!hasExcluded && (
                                         <div className="absolute -top-3 right-2 flex gap-1 z-20">
-                                            <Button size="small" variant="secondary" onClick={() => moveTripleWords(groupNodes.map(n => n.word), -1)} className="text-[10px] h-6 px-2 py-0 shadow-sm" title="Move triple left">
+                                            <Button size="small" variant="secondary" onClick={() => moveTripleWords(groupNodes.map(n => n.word), -1, group.startIndex)} className="text-[10px] h-6 px-2 py-0 shadow-sm" title="Move triple left">
                                                 <ArrowLeft size={14} />
                                             </Button>
-                                            <Button size="small" variant="secondary" onClick={() => moveTripleWords(groupNodes.map(n => n.word), 1)} className="text-[10px] h-6 px-2 py-0 shadow-sm" title="Move triple right">
+                                            <Button size="small" variant="secondary" onClick={() => moveTripleWords(groupNodes.map(n => n.word), 1, group.startIndex)} className="text-[10px] h-6 px-2 py-0 shadow-sm" title="Move triple right">
                                                 <ArrowRight size={14} />
                                             </Button>
-                                            <Button size="small" variant="ghost" onClick={() => moveTripleToDay(groupNodes.map(n => n.word), -1)} className="text-[10px] h-6 px-2 py-0 border border-emerald-200 bg-white shadow-sm" title="Move triple to previous day">
+                                            <Button size="small" variant="ghost" onClick={() => moveTripleToDay(groupNodes.map(n => n.word), -1, group.startIndex)} className="text-[10px] h-6 px-2 py-0 border border-emerald-200 bg-white shadow-sm" title="Move triple to previous day">
                                                 <ArrowUp size={14} />
                                             </Button>
-                                            <Button size="small" variant="ghost" onClick={() => moveTripleToDay(groupNodes.map(n => n.word), 1)} className="text-[10px] h-6 px-2 py-0 border border-emerald-200 bg-white shadow-sm" title="Move triple to next day">
+                                            <Button size="small" variant="ghost" onClick={() => moveTripleToDay(groupNodes.map(n => n.word), 1, group.startIndex)} className="text-[10px] h-6 px-2 py-0 border border-emerald-200 bg-white shadow-sm" title="Move triple to next day">
                                                 <ArrowDown size={14} />
                                             </Button>
                                         </div>

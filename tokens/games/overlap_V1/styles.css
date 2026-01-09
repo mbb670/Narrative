@@ -1334,6 +1334,23 @@ body[data-view="play"] {
 
 /* Success */
 
+
+#splashArchiveBtn{
+    color: var(--foreground-disabled);
+    border-color: var(--border-disabled);
+    pointer-events: none;
+    position: relative;
+    &::after{
+        content: 'Coming soon!';
+        position: absolute;
+        top:110%;
+        left: 50%;
+        transform: translate(-50%);
+        width: 100%;
+        font-weight: var(--system-regular);
+    }
+}
+
 .splash {
     .splash__top {
         flex: 1;

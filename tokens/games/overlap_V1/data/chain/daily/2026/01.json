@@ -1668,98 +1668,276 @@
         ]
     },
     {
-  "id": "2026-01-19",
-  "type": "chain",
-  "palette": "greens",
-  "words": [
-    {
-      "clue": "Split in two",
-      "answer": "DIVIDE",
-      "start": 1
+        "id": "2026-01-19",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Split in two",
+                "answer": "DIVIDE",
+                "start": 1
+            },
+            {
+                "clue": "Recorded clip",
+                "answer": "VIDEO",
+                "start": 3
+            },
+            {
+                "clue": "System of beliefs",
+                "answer": "IDEOLOGY",
+                "start": 4
+            },
+            {
+                "clue": "Uh-huh",
+                "answer": "YEAH",
+                "start": 11
+            },
+            {
+                "clue": "In front",
+                "answer": "AHEAD",
+                "start": 13
+            },
+            {
+                "clue": "Coin side, plural",
+                "answer": "HEADS",
+                "start": 14
+            },
+            {
+                "clue": "Woolly grazer",
+                "answer": "SHEEP",
+                "start": 18
+            },
+            {
+                "clue": "Biased messaging",
+                "answer": "PROPAGANDA",
+                "start": 22
+            },
+            {
+                "clue": "Move to music",
+                "answer": "DANCE",
+                "start": 30
+            },
+            {
+                "clue": "Family lineage",
+                "answer": "ANCESTRY",
+                "start": 31
+            },
+            {
+                "clue": "Pulled hard",
+                "answer": "YANKED",
+                "start": 38
+            },
+            {
+                "clue": "Church officer",
+                "answer": "DEACON",
+                "start": 43
+            },
+            {
+                "clue": "Show difference",
+                "answer": "CONTRAST",
+                "start": 46
+            },
+            {
+                "clue": "Rocks, informally",
+                "answer": "STONES",
+                "start": 52
+            },
+            {
+                "clue": "Tucked inside",
+                "answer": "NESTED",
+                "start": 55
+            },
+            {
+                "clue": "Unit of angle",
+                "answer": "DEGREE",
+                "start": 60
+            },
+            {
+                "clue": "Coral ridge",
+                "answer": "REEF",
+                "start": 63
+            }
+        ]
     },
     {
-      "clue": "Recorded clip",
-      "answer": "VIDEO",
-      "start": 3
+        "id": "2026-01-20",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Grooming tool",
+                "answer": "BRUSH",
+                "start": 1
+            },
+            {
+                "clue": "Form or outline",
+                "answer": "SHAPE",
+                "start": 4
+            },
+            {
+                "clue": "Gasoline, in Britain",
+                "answer": "PETROL",
+                "start": 7
+            },
+            {
+                "clue": "Rotate",
+                "answer": "ROLL",
+                "start": 10
+            },
+            {
+                "clue": "Secures with a key",
+                "answer": "LOCKS",
+                "start": 13
+            },
+            {
+                "clue": "Lunch between slices",
+                "answer": "SANDWICH",
+                "start": 17
+            },
+            {
+                "clue": "German port city",
+                "answer": "HAMBURG",
+                "start": 24
+            },
+            {
+                "clue": "Vandal's wall art",
+                "answer": "GRAFFITI",
+                "start": 30
+            },
+            {
+                "clue": "Ocean rise",
+                "answer": "TIDE",
+                "start": 36
+            },
+            {
+                "clue": "Leave",
+                "answer": "DEPART",
+                "start": 38
+            },
+            {
+                "clue": "Social gatherings",
+                "answer": "PARTIES",
+                "start": 40
+            },
+            {
+                "clue": "Omit",
+                "answer": "SKIP",
+                "start": 46
+            },
+            {
+                "clue": "Block of text",
+                "answer": "PARAGRAPH",
+                "start": 49
+            },
+            {
+                "clue": "Art of taking pictures",
+                "answer": "PHOTOGRAPHY",
+                "start": 56
+            },
+            {
+                "clue": "Imagined, not real",
+                "answer": "HYPOTHETICAL",
+                "start": 65
+            },
+            {
+                "clue": "Former students",
+                "answer": "ALUMNI",
+                "start": 75
+            },
+            {
+                "clue": "Not working",
+                "answer": "IDLE",
+                "start": 80
+            }
+        ]
     },
     {
-      "clue": "System of beliefs",
-      "answer": "IDEOLOGY",
-      "start": 4
-    },
-    {
-      "clue": "Uh-huh",
-      "answer": "YEAH",
-      "start": 11
-    },
-    {
-      "clue": "In front",
-      "answer": "AHEAD",
-      "start": 13
-    },
-    {
-      "clue": "Coin side, plural",
-      "answer": "HEADS",
-      "start": 14
-    },
-    {
-      "clue": "Woolly grazer",
-      "answer": "SHEEP",
-      "start": 18
-    },
-    {
-      "clue": "Biased messaging",
-      "answer": "PROPAGANDA",
-      "start": 22
-    },
-    {
-      "clue": "Move to music",
-      "answer": "DANCE",
-      "start": 30
-    },
-    {
-      "clue": "Family lineage",
-      "answer": "ANCESTRY",
-      "start": 31
-    },
-    {
-      "clue": "Pulled hard",
-      "answer": "YANKED",
-      "start": 38
-    },
-    {
-      "clue": "Church officer",
-      "answer": "DEACON",
-      "start": 43
-    },
-    {
-      "clue": "Show difference",
-      "answer": "CONTRAST",
-      "start": 46
-    },
-    {
-      "clue": "Rocks, informally",
-      "answer": "STONES",
-      "start": 52
-    },
-    {
-      "clue": "Tucked inside",
-      "answer": "NESTED",
-      "start": 55
-    },
-    {
-      "clue": "Unit of angle",
-      "answer": "DEGREE",
-      "start": 60
-    },
-    {
-      "clue": "Coral ridge",
-      "answer": "REEF",
-      "start": 63
+        "id": "2026-01-21",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Table supports",
+                "answer": "LEGS",
+                "start": 1
+            },
+            {
+                "clue": "Outer layer",
+                "answer": "SKIN",
+                "start": 4
+            },
+            {
+                "clue": "Preschool class",
+                "answer": "KINDERGARTEN",
+                "start": 5
+            },
+            {
+                "clue": "Tooth coating",
+                "answer": "ENAMEL",
+                "start": 15
+            },
+            {
+                "clue": "Tune",
+                "answer": "MELODY",
+                "start": 18
+            },
+            {
+                "clue": "School photo annual",
+                "answer": "YEARBOOK",
+                "start": 23
+            },
+            {
+                "clue": "Cutting tool",
+                "answer": "KNIFE",
+                "start": 30
+            },
+            {
+                "clue": "Emotion",
+                "answer": "FEELING",
+                "start": 33
+            },
+            {
+                "clue": "Study of language",
+                "answer": "LINGUISTICS",
+                "start": 36
+            },
+            {
+                "clue": "Digestive organ",
+                "answer": "STOMACH",
+                "start": 46
+            },
+            {
+                "clue": "Pursue",
+                "answer": "CHASE",
+                "start": 51
+            },
+            {
+                "clue": "Meaning",
+                "answer": "SENSE",
+                "start": 54
+            },
+            {
+                "clue": "____ Rogen",
+                "answer": "SETH",
+                "start": 57
+            },
+            {
+                "clue": "Opposable digit",
+                "answer": "THUMB",
+                "start": 59
+            },
+            {
+                "clue": "Dad in Turkish",
+                "answer": "BABA",
+                "start": 63
+            },
+            {
+                "clue": "Infant",
+                "answer": "BABY",
+                "start": 65
+            },
+            {
+                "clue": "Bottomless pit",
+                "answer": "ABYSS",
+                "start": 66
+            }
+        ]
     }
-  ]
-}
-
-
-
 ]
