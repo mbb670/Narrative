@@ -516,6 +516,7 @@ const buildTriplesFromWords = (words, minOverlap = 1, maxResults = 20000, maxMs 
               const overlapEnd = wordA.length;
 
               for (const wordB of unique) {
+                  if (Date.now() > deadline || triples.length >= maxResults) return triples;
                   if (wordB === wordA || wordB === wordC) continue;
                   const pos = portmanteau.indexOf(wordB);
                   if (pos === -1) continue;
@@ -692,8 +693,16 @@ const fetchMonthEntries = async (year, monthIndex) => {
 };
 
 // Pathfinder for Multi-Chain organization
-const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set(), targetLen = 15, maxDepthOverride = null) => {
+const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalueWords = new Set(), targetLen = 15, maxDepthOverride = null, maxMs = null) => {
   if (items.length === 0) return [];
+
+  const itemCount = items.length;
+  const timeBudget = maxMs ?? Math.min(1200, Math.max(250, Math.floor(itemCount / 30)));
+  const deadline = Date.now() + timeBudget;
+  const candidateLimit = itemCount > 20000 ? 8 : itemCount > 10000 ? 12 : 20;
+  const starterLimit = itemCount > 20000 ? 40 : itemCount > 10000 ? 60 : 80;
+  const maxSteps = Math.max(4000, Math.min(20000, itemCount * 2));
+  let steps = 0;
 
   const adj = {};
   items.forEach(item => {
@@ -715,6 +724,7 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
   };
 
       const dfs = (currentPath, currentUsedWords) => {
+      if (Date.now() > deadline || steps++ > maxSteps) return;
       if (currentPath.length >= maxDepth) return; 
 
       const currentScore = getScore(currentPath);
@@ -732,9 +742,10 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
           return b.totalOverlap - a.totalOverlap;
       });
 
-      candidates = candidates.slice(0, 20);
+      candidates = candidates.slice(0, candidateLimit);
 
       for (const item of candidates) {
+          if (Date.now() > deadline || steps++ > maxSteps) return;
           const newWords = item.words.slice(1).map(w => cleanWord(w));
           const hasConflict = newWords.some(w => currentUsedWords.has(w));
           
@@ -749,9 +760,10 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
   const triplesFirst = items.filter(i => i.type === 'triple');
   const others = items.filter(i => i.type !== 'triple');
   const sortedItems = [...triplesFirst.sort((a,b) => b.totalOverlap - a.totalOverlap), ...others.sort((a,b)=>b.totalOverlap - a.totalOverlap)];
-  const starters = shuffleArray(sortedItems).slice(0, 80);
+  const starters = shuffleArray(sortedItems).slice(0, starterLimit);
 
   for (const startItem of starters) {
+      if (Date.now() > deadline || steps > maxSteps) break;
       const itemWords = startItem.words.map(w => cleanWord(w));
       if (itemWords.some(w => usedWordsGlobal.has(w))) continue;
 
@@ -774,12 +786,14 @@ const processInventoryToMultiChain = (allItems, limit, devalueWords = new Set(),
     let loopCount = 0;
     while (pool.length > 0 && finalSequence.length < upperBound && loopCount < 20) {
         loopCount++;
+        const desiredLen = targetLen || limit;
+        const maxDepth = Math.min(Math.max(desiredLen + 5, 12), 50);
         const chainSegment = findLongestChainInInventory(
             pool,
             globalUsedWords,
             devalueWords,
-            targetLen || limit,
-            Math.min(Math.max(limit + 10, 40), 180) // allow long paths but keep search bounded
+            desiredLen,
+            maxDepth
         );
         
         if (chainSegment.length === 0) break;
@@ -1646,13 +1660,14 @@ const fetchRandomWords = async () => {
         while (Date.now() - startTime < MAX_DURATION_MS) {
             attempt++;
             setProgress(15);
+            let mergedWords = null;
 
             // Always pull a fresh sampled pool (fetch merges into the bank and returns a sample)
             let words = await fetchRandomWords();
             setInputText(words.join(" "));
             setProgress(30);
 
-            let result = await processWordsToInventory(words, targetLengthTotal, setProgress, true, 2, 25000, 2000); 
+            let result = await processWordsToInventory(words, targetLengthTotal, null, setProgress, true, 2, 25000, 2000); 
             setInventory(result.inventory);
             
             setProgress(60);
@@ -1663,8 +1678,8 @@ const fetchRandomWords = async () => {
             // If we still have fewer than MIN_TRIPLES, try enriching with another batch and re-evaluate
             if (tripleCount < MIN_TRIPLES && (Date.now() - startTime) < MAX_DURATION_MS) {
                 // Top up bank and retry with expanded pool
-                const mergedWords = await fetchRandomWords();
-                const mergedResult = await processWordsToInventory(mergedWords, targetLengthTotal, setProgress, true, 2, 25000, 2000);
+                mergedWords = await fetchRandomWords();
+                const mergedResult = await processWordsToInventory(mergedWords, targetLengthTotal, null, setProgress, true, 2, 25000, 2000);
                 result = mergedResult;
                 setInventory(mergedResult.inventory);
                 organizedChain = processInventoryToMultiChain(mergedResult.inventory, targetLengthTotal, devalueWords, targetLength);
@@ -1673,7 +1688,7 @@ const fetchRandomWords = async () => {
 
             // If still low triples, force a triple-priority build pass
             if (tripleCount < MIN_TRIPLES) {
-                const relaxedResult = await processWordsToInventory(result.uniqueWords || mergedWords || words, targetLengthTotal, setProgress, true, 1, 12000, 1500);
+                const relaxedResult = await processWordsToInventory(result.uniqueWords || mergedWords || words, targetLengthTotal, null, setProgress, true, 1, 12000, 1500);
                 const tripleHeavyInv = [
                     ...relaxedResult.inventory.filter(i => i.type === 'triple'),
                     ...relaxedResult.inventory
@@ -1733,7 +1748,7 @@ const fetchRandomWords = async () => {
           setTimeout(async () => {
               let words = inputText.split(/[\s,\n]+/).filter(w => w.length > 1);
               words = applyExclusions(words);
-          const result = await processWordsToInventory(words, targetLength, setProgress, true, 2, 25000, 2000);
+          const result = await processWordsToInventory(words, targetLength, null, setProgress, true, 2, 25000, 2000);
           setInventory(result.inventory);
           
           setProgress(70);
