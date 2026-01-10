@@ -1746,7 +1746,7 @@ Archive
     padding-bottom: var(--spacing-x8);
     border-bottom: 1px solid var(--border-subtle);
     color: var(--foreground-subtle);
-    margin-bottom: var(--spacing-x32);
+    margin-bottom: var(--spacing-x8);
 }
 
 .archive__grid {
