@@ -797,6 +797,7 @@ const els = {
   toastSuccess: $("#toastSuccess"),
   toastWarning: $("#toastWarning"),
   toastError: $("#toastError"),
+  toastErrorPuzzle: $("#toastError-puzzle"),
   toastWordSolved: $("#toastWordSolved"),
   toastHint: $("#toastHint"),
   hintPenalty: $("#hintPenalty"),
@@ -5320,6 +5321,7 @@ function loadPuzzle(i) {
   const p = puzzles[pIdx];
   applyPaletteToDom(p.palette);
   const m = computed(p);
+  setStatus(m);
 
   play.mode = isChainPuzzle(p) ? MODE.CHAIN : MODE.PUZZLE;
   play.entries = m.entries;
@@ -5742,6 +5744,7 @@ function syncBuilder() {
 
 function setStatus(m) {
   const gaps = m.gaps || [];
+  const hasError = !m.ok || gaps.length;
   if (!m.ok) {
     els.status.className = "status bad";
     els.status.textContent = `Conflict at column ${m.conf.idx + 1}: “${m.conf.a}” vs “${m.conf.b}”.`;
@@ -5751,6 +5754,9 @@ function setStatus(m) {
   } else {
     els.status.className = "status";
     els.status.innerHTML = `Total columns: <strong>${m.total}</strong> • Words: <strong>${m.entries.length}</strong> • ${dirty ? "Unsaved changes" : "Saved"}`;
+  }
+  if (els.toastErrorPuzzle) {
+    els.toastErrorPuzzle.classList.toggle("is-showing", hasError);
   }
 }
 

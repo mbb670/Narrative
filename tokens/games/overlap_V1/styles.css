@@ -26,13 +26,8 @@
     --slider-solved: var(--background-medium);
     --slider-color-mix-base: var(--background-default);
     --slider-color-mix-amount: 50;
-    /* 0-100 (%) */
 
-    --toast-success-duration: 2600ms;
-    --toast-warning-duration: 2600ms;
-    --toast-error-duration: 2200ms;
 }
-
 @media (max-width:640px) {
     :root {
         --border-w: 1px;
@@ -682,14 +677,17 @@ body[data-chain-state="done"] .rangeClue-content {
     border-color: var(--system-warning-default);
     color: var(--system-warning-strong);
     background: var(--system-warning-subtle);
-}
+} */
 
 .toast-error {
     border-color: var(--system-critical-default);
     color: var(--system-critical-strong);
     background: var(--system-critical-subtle);
-} */
+}
 
+.bad {
+    opacity: 0.6;
+}
 
 .grid {
     display: grid;
@@ -1121,8 +1119,11 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
     }
 }
 
-.grid.showNums .num {
+/* .grid.showNums .num {
     display: block
+} */
+.is-dev .cell .num{
+    display: block;
 }
 
 /* .cell.is-active {
@@ -1702,10 +1703,6 @@ FTUE
 Archive
 ----------------------------- */
 
-#splashArchiveBtn{
-    pointer-events: all;
-}
-
 .archive__dialog {
     display: flex;
     flex-direction: column;
@@ -1891,6 +1888,7 @@ Archive
     color: var(--foreground-muted);
     margin-top: var(--spacing-x8);
     text-align: center;
+    height: 0;
 }
 
 
@@ -2260,15 +2258,9 @@ Results
     color: var(--foreground-default)
 }
 
-.status {
-    margin-top: 8px;
-    color: var(--foreground-muted);
-    font: 600 12px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial
-}
 
-.bad {
-    color: #8b1d1d
-}
+
+
 
 .io {
     margin-top: 12px

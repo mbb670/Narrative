@@ -77,10 +77,10 @@
             the puzzle!</div>
           <div class="toast toast-warning elevation-fixed-top" id="toastWarning" role="status">Not quite! Some or all
             words are incorrect</div>
-          <div class="toast toast-error elevation-fixed-top" id="toastError" role="status">Puzzle not complete!</div>
+          <div class="toast toast-danger elevation-fixed-top" id="toastError" role="status">Puzzle not complete!</div>
           <div class="toast toast-hint elevation-fixed-top" id="toastHint" role="status">+<span
               id="hintPenalty">00</span> seconds</div>
-
+              <div class="toast toast-error elevation-fixed-top" id="toastError-puzzle" role="status"><span>Puzzle broken - Contact Matt & let him know!</span><span class="text-system-regular-xs" id="status"></span></div>
         </div>
       </div>
       <div class="puzzle-nav" aria-label="Navigation">
@@ -133,7 +133,7 @@
         <div style="height:10px"></div>
         <button class="pill" id="wAdd" type="button">Add word</button>
 
-        <div class="status" id="status"></div>
+        <!-- <div class="status" id="status"></div> -->
         <div class="note">
           Start is <strong>column</strong> (1-based).
         </div>
@@ -346,7 +346,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.951</span>
+            id="splashVersion">V3.952</span>
         </p>
       </footer>
     </div>
