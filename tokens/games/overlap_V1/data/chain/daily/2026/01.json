@@ -1939,5 +1939,920 @@
                 "start": 66
             }
         ]
+    },
+    {
+        "id": "2026-01-22",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Red-breasted bird",
+                "answer": "ROBIN",
+                "start": 1
+            },
+            {
+                "clue": "Tie up",
+                "answer": "BIND",
+                "start": 3
+            },
+            {
+                "clue": "Index plurals",
+                "answer": "INDICES",
+                "start": 4
+            },
+            {
+                "clue": "Neck wrap",
+                "answer": "SCARF",
+                "start": 10
+            },
+            {
+                "clue": "Mold or mushroom",
+                "answer": "FUNGUS",
+                "start": 14
+            },
+            {
+                "clue": "Operator",
+                "answer": "USER",
+                "start": 18
+            },
+            {
+                "clue": "Help desk, say",
+                "answer": "SERVICE",
+                "start": 19
+            },
+            {
+                "clue": "Of the heavens",
+                "answer": "CELESTIAL",
+                "start": 24
+            },
+            {
+                "clue": "Supply-chain, as adj",
+                "answer": "LOGISTIC",
+                "start": 32
+            },
+            {
+                "clue": "Traveling convoy",
+                "answer": "CARAVAN",
+                "start": 39
+            },
+            {
+                "clue": "Without a name",
+                "answer": "ANONYMOUS",
+                "start": 44
+            },
+            {
+                "clue": "Computer pointer",
+                "answer": "MOUSE",
+                "start": 49
+            },
+            {
+                "clue": "Chosen",
+                "answer": "SELECTED",
+                "start": 52
+            },
+            {
+                "clue": "Teacher",
+                "answer": "EDUCATOR",
+                "start": 58
+            },
+            {
+                "clue": "Starting point",
+                "answer": "ORIGIN",
+                "start": 64
+            },
+            {
+                "clue": "Hoosier State",
+                "answer": "INDIANA",
+                "start": 68
+            },
+            {
+                "clue": "Close examination",
+                "answer": "ANALYSIS",
+                "start": 72
+            }
+        ]
+    },
+    {
+        "id": "2026-01-23",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Matter at hand",
+                "answer": "ISSUE",
+                "start": 1
+            },
+            {
+                "clue": "Make clear",
+                "answer": "EXPLAIN",
+                "start": 5
+            },
+            {
+                "clue": "Flatlands",
+                "answer": "PLAINS",
+                "start": 7
+            },
+            {
+                "clue": "Motivated",
+                "answer": "INSPIRED",
+                "start": 10
+            },
+            {
+                "clue": "Easily broken",
+                "answer": "DELICATE",
+                "start": 17
+            },
+            {
+                "clue": "Class",
+                "answer": "CATEGORY",
+                "start": 21
+            },
+            {
+                "clue": "Belonging to you",
+                "answer": "YOURS",
+                "start": 28
+            },
+            {
+                "clue": "Long tale",
+                "answer": "SAGA",
+                "start": 32
+            },
+            {
+                "clue": "Car shelter",
+                "answer": "GARAGE",
+                "start": 34
+            },
+            {
+                "clue": "Of lines and angles",
+                "answer": "GEOMETRICAL",
+                "start": 38
+            },
+            {
+                "clue": "Young cow",
+                "answer": "CALF",
+                "start": 46
+            },
+            {
+                "clue": "Liberty",
+                "answer": "FREEDOM",
+                "start": 49
+            },
+            {
+                "clue": "Rounded roof",
+                "answer": "DOME",
+                "start": 53
+            },
+            {
+                "clue": "Last Greek letter",
+                "answer": "OMEGA",
+                "start": 54
+            },
+            {
+                "clue": "Achieve",
+                "answer": "ATTAIN",
+                "start": 58
+            },
+            {
+                "clue": "Not physical",
+                "answer": "INTANGIBLE",
+                "start": 62
+            },
+            {
+                "clue": "Mix",
+                "answer": "BLEND",
+                "start": 69
+            }
+        ]
+    },
+    {
+        "id": "2026-01-24",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Ireland's capital",
+                "answer": "DUBLIN",
+                "start": 1
+            },
+            {
+                "clue": "Unable to see",
+                "answer": "BLIND",
+                "start": 3
+            },
+            {
+                "clue": "Pretty, in Spanish",
+                "answer": "LINDA",
+                "start": 4
+            },
+            {
+                "clue": "Car, for short",
+                "answer": "AUTO",
+                "start": 8
+            },
+            {
+                "clue": "Sightseer",
+                "answer": "TOURIST",
+                "start": 10
+            },
+            {
+                "clue": "German city",
+                "answer": "STUTTGART",
+                "start": 15
+            },
+            {
+                "clue": "Theater, say",
+                "answer": "ARTS",
+                "start": 21
+            },
+            {
+                "clue": "Biting wit",
+                "answer": "SARCASM",
+                "start": 24
+            },
+            {
+                "clue": "Less important",
+                "answer": "MINOR",
+                "start": 30
+            },
+            {
+                "clue": "Typical",
+                "answer": "NORMAL",
+                "start": 32
+            },
+            {
+                "clue": "Shopping hub",
+                "answer": "MALL",
+                "start": 35
+            },
+            {
+                "clue": "Slip up",
+                "answer": "LAPSE",
+                "start": 38
+            },
+            {
+                "clue": "Symbol",
+                "answer": "EMBLEM",
+                "start": 42
+            },
+            {
+                "clue": "Sour citrus",
+                "answer": "LEMON",
+                "start": 45
+            },
+            {
+                "clue": "Scary creatures",
+                "answer": "MONSTERS",
+                "start": 47
+            },
+            {
+                "clue": "Plaster finish",
+                "answer": "STUCCO",
+                "start": 54
+            },
+            {
+                "clue": "Train a team",
+                "answer": "COACH",
+                "start": 58
+            }
+        ]
+    },
+    {
+        "id": "2026-01-25",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Legislative house",
+                "answer": "CHAMBER",
+                "start": 1
+            },
+            {
+                "clue": "UC city on the Bay",
+                "answer": "BERKELEY",
+                "start": 5
+            },
+            {
+                "clue": "Look at, informally",
+                "answer": "EYEBALL",
+                "start": 11
+            },
+            {
+                "clue": "Misplaced",
+                "answer": "LOST",
+                "start": 17
+            },
+            {
+                "clue": "Office fastener",
+                "answer": "STAPLE",
+                "start": 19
+            },
+            {
+                "clue": "Nerve network",
+                "answer": "PLEXUS",
+                "start": 22
+            },
+            {
+                "clue": "Mocking, with irony",
+                "answer": "SARCASTIC",
+                "start": 27
+            },
+            {
+                "clue": "State in two parts",
+                "answer": "CAROLINA",
+                "start": 35
+            },
+            {
+                "clue": "Defense bloc",
+                "answer": "NATO",
+                "start": 41
+            },
+            {
+                "clue": "Matter unit",
+                "answer": "ATOM",
+                "start": 42
+            },
+            {
+                "clue": "Largest city in Minnesota",
+                "answer": "MINNEAPOLIS",
+                "start": 45
+            },
+            {
+                "clue": "Mona _",
+                "answer": "LISA",
+                "start": 53
+            },
+            {
+                "clue": "Biblical patriarch",
+                "answer": "ISAAC",
+                "start": 54
+            },
+            {
+                "clue": "Freight",
+                "answer": "CARGO",
+                "start": 58
+            },
+            {
+                "clue": "Honk maker",
+                "answer": "GOOSE",
+                "start": 61
+            },
+            {
+                "clue": "Portion",
+                "answer": "SERVING",
+                "start": 64
+            },
+            {
+                "clue": "Space-related",
+                "answer": "GALACTIC",
+                "start": 70
+            }
+        ]
+    },
+    {
+        "id": "2026-01-26",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Arrive",
+                "answer": "COME",
+                "start": 1
+            },
+            {
+                "clue": "Auto fixer",
+                "answer": "MECHANIC",
+                "start": 3
+            },
+            {
+                "clue": "Five-cent coin",
+                "answer": "NICKEL",
+                "start": 8
+            },
+            {
+                "clue": "Chemical unit",
+                "answer": "ELEMENT",
+                "start": 12
+            },
+            {
+                "clue": "Two person bicycle",
+                "answer": "TANDEM",
+                "start": 18
+            },
+            {
+                "clue": "Ukriane neighbor",
+                "answer": "MOLDOVA",
+                "start": 23
+            },
+            {
+                "clue": "Egg shape",
+                "answer": "OVAL",
+                "start": 27
+            },
+            {
+                "clue": "Feb. 14",
+                "answer": "VALENTINE",
+                "start": 28
+            },
+            {
+                "clue": "Furnish",
+                "answer": "EQUIP",
+                "start": 36
+            },
+            {
+                "clue": "Grand, say",
+                "answer": "PIANO",
+                "start": 40
+            },
+            {
+                "clue": "Fiction book",
+                "answer": "NOVEL",
+                "start": 43
+            },
+            {
+                "clue": "Intro-level",
+                "answer": "ELEMENTARY",
+                "start": 46
+            },
+            {
+                "clue": "Stretch class",
+                "answer": "YOGA",
+                "start": 55
+            },
+            {
+                "clue": "Bank record",
+                "answer": "ACCOUNT",
+                "start": 58
+            },
+            {
+                "clue": "Nation",
+                "answer": "COUNTRY",
+                "start": 60
+            },
+            {
+                "clue": "Difficult",
+                "answer": "TRYING",
+                "start": 64
+            }
+        ]
+    },
+    {
+        "id": "2026-01-27",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Female horse",
+                "answer": "MARE",
+                "start": 1
+            },
+            {
+                "clue": "Region",
+                "answer": "AREA",
+                "start": 2
+            },
+            {
+                "clue": "Not hard",
+                "answer": "EASY",
+                "start": 4
+            },
+            {
+                "clue": "Combining into one",
+                "answer": "SYNTHESIS",
+                "start": 6
+            },
+            {
+                "clue": "Land in the sea",
+                "answer": "ISLAND",
+                "start": 13
+            },
+            {
+                "clue": "Dull-colored",
+                "answer": "DRAB",
+                "start": 18
+            },
+            {
+                "clue": "Morning meal",
+                "answer": "BREAKFAST",
+                "start": 21
+            },
+            {
+                "clue": "Halt",
+                "answer": "STOP",
+                "start": 28
+            },
+            {
+                "clue": "Subject",
+                "answer": "TOPIC",
+                "start": 29
+            },
+            {
+                "clue": "Photographs",
+                "answer": "PICTURES",
+                "start": 31
+            },
+            {
+                "clue": "Range",
+                "answer": "SCOPE",
+                "start": 38
+            },
+            {
+                "clue": "Not closed",
+                "answer": "OPEN",
+                "start": 40
+            },
+            {
+                "clue": "Fouls, say",
+                "answer": "PENALTIES",
+                "start": 41
+            },
+            {
+                "clue": "Rough calculation",
+                "answer": "ESTIMATE",
+                "start": 48
+            },
+            {
+                "clue": "Wearisome",
+                "answer": "TEDIOUS",
+                "start": 54
+            },
+            {
+                "clue": "Wash vigorously",
+                "answer": "SCRUB",
+                "start": 60
+            },
+            {
+                "clue": "Spanish city on the Med",
+                "answer": "BARCELONA",
+                "start": 64
+            }
+        ]
+    },
+    {
+        "id": "2026-01-28",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "In a natural way",
+                "answer": "NATURALLY",
+                "start": 1
+            },
+            {
+                "clue": "Song line",
+                "answer": "LYRIC",
+                "start": 8
+            },
+            {
+                "clue": "Wealthy",
+                "answer": "RICH",
+                "start": 10
+            },
+            {
+                "clue": "Safe refuge",
+                "answer": "HAVEN",
+                "start": 13
+            },
+            {
+                "clue": "Biological catalysts",
+                "answer": "ENZYMES",
+                "start": 16
+            },
+            {
+                "clue": "Netting",
+                "answer": "MESH",
+                "start": 20
+            },
+            {
+                "clue": "Keen-edged",
+                "answer": "SHARP",
+                "start": 22
+            },
+            {
+                "clue": "Verse",
+                "answer": "POEM",
+                "start": 26
+            },
+            {
+                "clue": "In early development",
+                "answer": "EMBRYONIC",
+                "start": 28
+            },
+            {
+                "clue": "In a pleasant way",
+                "answer": "NICELY",
+                "start": 34
+            },
+            {
+                "clue": "Poetic",
+                "answer": "LYRICAL",
+                "start": 38
+            },
+            {
+                "clue": "Work",
+                "answer": "LABOR",
+                "start": 44
+            },
+            {
+                "clue": "Circle around",
+                "answer": "ORBIT",
+                "start": 47
+            },
+            {
+                "clue": "Nip",
+                "answer": "BITE",
+                "start": 49
+            },
+            {
+                "clue": "Court statement",
+                "answer": "TESTIMONY",
+                "start": 51
+            },
+            {
+                "clue": "West African people",
+                "answer": "YORUBA",
+                "start": 59
+            },
+            {
+                "clue": "Not a pro",
+                "answer": "AMATEUR",
+                "start": 64
+            }
+        ]
+    },
+    {
+        "id": "2026-01-29",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "EU money",
+                "answer": "EURO",
+                "start": 1
+            },
+            {
+                "clue": "Stones",
+                "answer": "ROCKS",
+                "start": 3
+            },
+            {
+                "clue": "One's being",
+                "answer": "SELF",
+                "start": 7
+            },
+            {
+                "clue": "Level",
+                "answer": "FLAT",
+                "start": 10
+            },
+            {
+                "clue": "House's top room",
+                "answer": "ATTIC",
+                "start": 12
+            },
+            {
+                "clue": "Stored away",
+                "answer": "CACHED",
+                "start": 16
+            },
+            {
+                "clue": "Paradise",
+                "answer": "EDEN",
+                "start": 20
+            },
+            {
+                "clue": "Refusal to admit",
+                "answer": "DENIAL",
+                "start": 21
+            },
+            {
+                "clue": "Young sheep",
+                "answer": "LAMB",
+                "start": 26
+            },
+            {
+                "clue": "Thinker's organ",
+                "answer": "BRAIN",
+                "start": 29
+            },
+            {
+                "clue": "Call upon",
+                "answer": "INVOKE",
+                "start": 32
+            },
+            {
+                "clue": "Hold onto",
+                "answer": "KEEP",
+                "start": 36
+            },
+            {
+                "clue": "Dishware",
+                "answer": "PLATES",
+                "start": 39
+            },
+            {
+                "clue": "Most recent",
+                "answer": "LATEST",
+                "start": 40
+            },
+            {
+                "clue": "Put through trials",
+                "answer": "TESTED",
+                "start": 42
+            },
+            {
+                "clue": "Days of the month",
+                "answer": "DATES",
+                "start": 47
+            },
+            {
+                "clue": "Exam",
+                "answer": "TEST",
+                "start": 49
+            }
+        ]
+    },
+    {
+        "id": "2026-01-30",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Typical level",
+                "answer": "STANDARD",
+                "start": 1
+            },
+            {
+                "clue": "Extreme",
+                "answer": "DRASTIC",
+                "start": 8
+            },
+            {
+                "clue": "Common Spanish name",
+                "answer": "CARLOS",
+                "start": 14
+            },
+            {
+                "clue": "Not win",
+                "answer": "LOSE",
+                "start": 17
+            },
+            {
+                "clue": "Blood component",
+                "answer": "SERUM",
+                "start": 19
+            },
+            {
+                "clue": "Health-related",
+                "answer": "MEDICAL",
+                "start": 23
+            },
+            {
+                "clue": "Lower legs",
+                "answer": "CALVES",
+                "start": 27
+            },
+            {
+                "clue": "Top of the head",
+                "answer": "SCALP",
+                "start": 32
+            },
+            {
+                "clue": "Publish",
+                "answer": "PRINT",
+                "start": 36
+            },
+            {
+                "clue": "Inherent",
+                "answer": "INTRINSIC",
+                "start": 38
+            },
+            {
+                "clue": "Photo device",
+                "answer": "CAMERA",
+                "start": 46
+            },
+            {
+                "clue": "Instead",
+                "answer": "RATHER",
+                "start": 50
+            },
+            {
+                "clue": "Groups of cattle",
+                "answer": "HERDS",
+                "start": 53
+            },
+            {
+                "clue": "Stain",
+                "answer": "SPOT",
+                "start": 57
+            },
+            {
+                "clue": "Clay maker",
+                "answer": "POTTER",
+                "start": 58
+            },
+            {
+                "clue": "Detection tech",
+                "answer": "RADAR",
+                "start": 63
+            },
+            {
+                "clue": "Not light",
+                "answer": "DARK",
+                "start": 65
+            }
+        ]
+    },
+    {
+        "id": "2026-01-31",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Art-show spaces",
+                "answer": "GALLERIES",
+                "start": 1
+            },
+            {
+                "clue": "Set up officially",
+                "answer": "ESTABLISH",
+                "start": 8
+            },
+            {
+                "clue": "Edge of the sea",
+                "answer": "SHORE",
+                "start": 15
+            },
+            {
+                "clue": "Extend an arm",
+                "answer": "REACH",
+                "start": 18
+            },
+            {
+                "clue": "Burn slightly",
+                "answer": "CHAR",
+                "start": 21
+            },
+            {
+                "clue": "Pleasant agreement",
+                "answer": "HARMONY",
+                "start": 22
+            },
+            {
+                "clue": "Not yet mature",
+                "answer": "YOUTHFUL",
+                "start": 28
+            },
+            {
+                "clue": "Light purple",
+                "answer": "LILAC",
+                "start": 35
+            },
+            {
+                "clue": "Unintentional",
+                "answer": "ACCIDENTAL",
+                "start": 38
+            },
+            {
+                "clue": "Short story",
+                "answer": "TALE",
+                "start": 45
+            },
+            {
+                "clue": "Gaining knowledge",
+                "answer": "LEARNING",
+                "start": 47
+            },
+            {
+                "clue": "Food, slangily",
+                "answer": "GRUB",
+                "start": 54
+            },
+            {
+                "clue": "Woman to be wed",
+                "answer": "BRIDE",
+                "start": 57
+            },
+            {
+                "clue": "Perfect in theory",
+                "answer": "IDEAL",
+                "start": 59
+            },
+            {
+                "clue": "Car salesperson",
+                "answer": "DEALER",
+                "start": 60
+            },
+            {
+                "clue": "Very fast",
+                "answer": "RAPID",
+                "start": 65
+            },
+            {
+                "clue": "Notion",
+                "answer": "IDEA",
+                "start": 68
+            },
+            {
+                "clue": "Bargain",
+                "answer": "DEAL",
+                "start": 69
+            },
+            {
+                "clue": "Symbolic story",
+                "answer": "ALLEGORY",
+                "start": 71
+            }
+        ]
     }
 ]

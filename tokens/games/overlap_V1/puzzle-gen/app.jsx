@@ -719,7 +719,8 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
       return path.reduce((acc, item) => {
           const penalty = item.words.some(w => devalueWords.has(cleanWord(w))) ? 10 : 0;
           const tripleBonus = item.type === 'triple' ? 200 : 0;
-          return acc + tripleBonus + item.totalOverlap - penalty;
+          const seedBonus = item.seeded ? 120 : 0;
+          return acc + tripleBonus + seedBonus + item.totalOverlap - penalty;
       }, 0);
   };
 
@@ -738,6 +739,9 @@ const findLongestChainInInventory = (items, usedWordsGlobal = new Set(), devalue
       
       let candidates = adj[nextStart] || [];
       candidates.sort((a, b) => {
+          const seedA = a.seeded ? 1 : 0;
+          const seedB = b.seeded ? 1 : 0;
+          if (seedA !== seedB) return seedB - seedA;
           if (a.type !== b.type) return a.type === 'triple' ? -1 : 1;
           return b.totalOverlap - a.totalOverlap;
       });
@@ -908,6 +912,7 @@ export default function App() {
   const [excludedWords, setExcludedWords] = useState(new Set());
   const [recentExcludedAnswers, setRecentExcludedAnswers] = useState(new Set());
   const [devalueWords, setDevalueWords] = useState(new Set());
+  const [tripleSeedPool, setTripleSeedPool] = useState([]);
   const [manualBridgeInput, setManualBridgeInput] = useState("");
   const [showCluePrepModal, setShowCluePrepModal] = useState(false);
   const [prepUseAI, setPrepUseAI] = useState(false);
@@ -1160,6 +1165,22 @@ export default function App() {
       return () => { cancelled = true; };
   }, [chainDate]);
 
+  useEffect(() => {
+      let cancelled = false;
+      const loadTripleSeeds = async () => {
+          try {
+              const res = await fetch("../data/chain/other/util/triples.json");
+              if (!res.ok) return;
+              const data = await res.json();
+              if (!cancelled && Array.isArray(data)) {
+                  setTripleSeedPool(data);
+              }
+          } catch {}
+      };
+      loadTripleSeeds();
+      return () => { cancelled = true; };
+  }, []);
+
   const persistApiConfig = (next, remember = rememberApiConfig, nextUseAI = useAI) => {
       setApiConfig(next);
       setUseAI(nextUseAI);
@@ -1257,6 +1278,113 @@ export default function App() {
 
       return { nodes, triples };
   }, [chain]);
+
+  const usedWordsSet = useMemo(() => {
+      return new Set(flattenChain.map(w => cleanWord(w)).filter(Boolean));
+  }, [flattenChain]);
+
+  const seededTripleKeys = useMemo(() => {
+      const keys = new Set();
+      chain.forEach(item => {
+          if (item.type !== 'triple' || !item.seeded || !Array.isArray(item.words) || item.words.length !== 3) return;
+          const key = item.words.map(w => cleanWord(w)).join('|');
+          if (key) keys.add(key);
+      });
+      return keys;
+  }, [chain]);
+
+  const tripleSeedIndex = useMemo(() => {
+      const index = new Map();
+      if (!Array.isArray(tripleSeedPool) || tripleSeedPool.length === 0) return index;
+      tripleSeedPool.forEach(entry => {
+          if (!entry || !Array.isArray(entry.words) || entry.words.length !== 3) return;
+          const words = entry.words.map(w => (typeof w === 'string' ? w.trim() : "")).filter(Boolean);
+          if (words.length !== 3) return;
+          const cleaned = words.map(cleanWord);
+          if (cleaned.some(w => !w)) return;
+          const firstChar = cleaned[0][0];
+          const lastChar = cleaned[2][cleaned[2].length - 1];
+          if (!firstChar || !lastChar) return;
+          const overlapRaw = Number(entry.overlap);
+          const overlapWeight = Number.isFinite(overlapRaw) && overlapRaw > 0 ? Math.floor(overlapRaw) : 1;
+          const key = `${firstChar}|${lastChar}`;
+          if (!index.has(key)) index.set(key, []);
+          index.get(key).push({ words, cleaned, overlapWeight });
+      });
+      return index;
+  }, [tripleSeedPool]);
+
+  const tripleBridgeSuggestions = useMemo(() => {
+      if (!showBridgeModal || !showBridgeModal.startWord || !showBridgeModal.endWord) return [];
+      if (!Array.isArray(tripleSeedPool) || tripleSeedPool.length === 0) return [];
+      const startWord = showBridgeModal.startWord;
+      const endWord = showBridgeModal.endWord;
+      const startClean = cleanWord(startWord);
+      const endClean = cleanWord(endWord);
+      if (!startClean || !endClean) return [];
+
+      const key = `${startClean.slice(-1)}|${endClean[0]}`;
+      const pool = tripleSeedIndex.get(key) || [];
+      const candidates = [];
+      const seen = new Set();
+
+      const isAllowedWord = (word) => {
+          const cw = cleanWord(word);
+          if (!cw) return false;
+          if (devalueWords.has(cw)) return false;
+          if (isWordExcluded(word)) return false;
+          if (filterBadWords([word]).length === 0) return false;
+          return true;
+      };
+
+      for (const entry of pool) {
+          const words = entry.words;
+          const cleaned = entry.cleaned;
+          if (new Set(cleaned).size !== 3) continue;
+          if (cleaned.includes(startClean) || cleaned.includes(endClean)) continue;
+          if (cleaned.some(w => usedWordsSet.has(w))) continue;
+          if (words.some(w => !isAllowedWord(w))) continue;
+
+          let derivativeConflict = false;
+          for (let a = 0; a < words.length; a++) {
+              for (let b = a + 1; b < words.length; b++) {
+                  if (isDerivative(words[a], words[b])) {
+                      derivativeConflict = true;
+                      break;
+                  }
+              }
+              if (derivativeConflict) break;
+          }
+          if (derivativeConflict) continue;
+
+          const ovLeft = getOverlap(startWord, words[0], 1);
+          const ovRight = getOverlap(words[2], endWord, 1);
+          if (!ovLeft || !ovRight) continue;
+
+          const key = cleaned.join('|');
+          if (seen.has(key)) continue;
+          seen.add(key);
+
+          const overlapWeight = Math.max(1, entry.overlapWeight || 1);
+          const totalOverlap = ovLeft.count + ovRight.count + overlapWeight;
+          candidates.push({
+              id: `seed-bridge-${key}`,
+              words,
+              length: 3,
+              type: 'triple',
+              totalOverlap,
+              overlapLeft: ovLeft.count,
+              overlapRight: ovRight.count,
+              overlapInner: overlapWeight,
+              score: overlapWeight * 2 + totalOverlap
+          });
+
+          if (candidates.length >= 20) break;
+      }
+
+      candidates.sort((a, b) => b.score - a.score);
+      return candidates.slice(0, 6);
+  }, [showBridgeModal, tripleSeedPool, tripleSeedIndex, usedWordsSet, devalueWords, isWordExcluded]);
 
   // Segments based on target length and triple presence
   const segments = useMemo(() => {
@@ -1571,8 +1699,154 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
       if (!words || words.length === 0) return [];
       return words.filter(w => !isWordExcluded(w));
   };
+
+  const mergeUniqueWords = (words) => {
+      const seen = new Set();
+      const merged = [];
+      words.forEach(w => {
+          const cw = cleanWord(w);
+          if (!cw || seen.has(cw)) return;
+          seen.add(cw);
+          merged.push(w);
+      });
+      return merged;
+  };
+
+  const mergeInventoryItems = (items) => {
+      const map = new Map();
+      items.forEach(item => {
+          if (!item || !Array.isArray(item.words)) return;
+          const key = `${item.type}|${item.words.map(w => cleanWord(w)).join('|')}`;
+          const existing = map.get(key);
+          if (!existing || (item.totalOverlap || 0) > (existing.totalOverlap || 0) || item.seeded) {
+              map.set(key, item);
+          }
+      });
+      return Array.from(map.values());
+  };
+
+  const getSegmentTripleCounts = (chainItems, segmentLength) => {
+      if (!Array.isArray(chainItems) || chainItems.length === 0 || !segmentLength) {
+          return { counts: [], totalWords: 0 };
+      }
+
+      const words = [];
+      chainItems.forEach(item => {
+          item.words.forEach(w => {
+              if (words.length > 0 && cleanWord(words[words.length - 1]) === cleanWord(w)) return;
+              words.push(w);
+          });
+      });
+      if (words.length === 0) return { counts: [], totalWords: 0 };
+
+      const triples = [];
+      for (let i = 0; i < words.length - 2; i++) {
+          const details = getTripleDetails(words[i], words[i + 1], words[i + 2]);
+          if (details) triples.push({ start: i, end: i + 2 });
+      }
+
+      const counts = [];
+      for (let start = 0; start < words.length; start += segmentLength) {
+          const end = Math.min(words.length - 1, start + segmentLength - 1);
+          let count = 0;
+          for (const t of triples) {
+              if (t.start >= start && t.end <= end) count++;
+          }
+          counts.push(count);
+      }
+
+      return { counts, totalWords: words.length };
+  };
+
+  const normalizeSeedEntry = (entry) => {
+      if (!entry || !Array.isArray(entry.words) || entry.words.length !== 3) return null;
+      const words = entry.words.map(w => (typeof w === 'string' ? w.trim() : "")).filter(Boolean);
+      if (words.length !== 3) return null;
+      const details = getTripleDetails(words[0], words[1], words[2]);
+      if (!details) return null;
+      const overlapRaw = Number(entry.overlap);
+      const overlap = Number.isFinite(overlapRaw) && overlapRaw > 0 ? Math.floor(overlapRaw) : (details.sharedCount || 1);
+      const weight = Math.max(1, Math.min(6, overlap));
+      return { words, overlap, weight, details };
+  };
+
+  const isSeedWordAllowed = (word) => {
+      const cw = cleanWord(word);
+      if (!cw) return false;
+      if (devalueWords.has(cw)) return false;
+      if (isWordExcluded(word)) return false;
+      if (filterBadWords([word]).length === 0) return false;
+      return true;
+  };
+
+  const isSeedTripleAllowed = (words) => {
+      const cleaned = words.map(w => cleanWord(w));
+      if (cleaned.some(w => !w)) return false;
+      if (new Set(cleaned).size !== 3) return false;
+      if (words.some(w => !isSeedWordAllowed(w))) return false;
+      for (let i = 0; i < words.length; i++) {
+          for (let j = i + 1; j < words.length; j++) {
+              if (isDerivative(words[i], words[j])) return false;
+          }
+      }
+      return true;
+  };
+
+  const pickWeightedIndex = (list) => {
+      const total = list.reduce((sum, item) => sum + (item.weight || 1), 0);
+      let r = Math.random() * total;
+      for (let i = 0; i < list.length; i++) {
+          r -= (list[i].weight || 1);
+          if (r <= 0) return i;
+      }
+      return list.length - 1;
+  };
+
+  const selectSeedTriples = (needed) => {
+      if (!Array.isArray(tripleSeedPool) || tripleSeedPool.length === 0 || needed <= 0) return [];
+      const candidates = [];
+      tripleSeedPool.forEach(entry => {
+          const normalized = normalizeSeedEntry(entry);
+          if (!normalized) return;
+          if (!isSeedTripleAllowed(normalized.words)) return;
+          candidates.push(normalized);
+      });
+
+      const selected = [];
+      const usedWords = new Set();
+      const pool = [...candidates];
+      while (selected.length < needed && pool.length > 0) {
+          const idx = pickWeightedIndex(pool);
+          const next = pool.splice(idx, 1)[0];
+          const cleaned = next.words.map(w => cleanWord(w));
+          if (cleaned.some(w => usedWords.has(w))) continue;
+          cleaned.forEach(w => usedWords.add(w));
+          selected.push(next);
+      }
+      return selected;
+  };
+
+  const buildSeedTripleItem = (seed) => {
+      if (!seed || !Array.isArray(seed.words) || seed.words.length !== 3) return null;
+      const overlaps = [
+          getOverlap(seed.words[0], seed.words[1], 1) || { overlapStr: '', count: 0 },
+          getOverlap(seed.words[1], seed.words[2], 1) || { overlapStr: '', count: 0 }
+      ];
+      const overlapCount = Math.max(1, seed.overlap || seed.details?.sharedCount || 1);
+      return {
+          id: `seed-triple-${cleanWord(seed.words[0])}-${cleanWord(seed.words[1])}-${cleanWord(seed.words[2])}`,
+          words: seed.words,
+          overlaps,
+          totalOverlap: overlapCount,
+          sharedOverlap: overlapCount,
+          startWord: seed.words[0],
+          endWord: seed.words[2],
+          type: 'triple',
+          seeded: true
+      };
+  };
   
-const fetchRandomWords = async () => {
+  const fetchRandomWords = async () => {
     const TOPICS = ["nature", "city", "technology", "food", "travel", "music", "science", "abstract", "history", "art", "ocean", "space", "sports", "animals", "objects", "literature", "geography", "crafts", "games"];
     const TARGET_UNIQUE = 2500;
     const BATCH_TOPICS = 6;
@@ -1652,7 +1926,10 @@ const fetchRandomWords = async () => {
     
     try {
         const MIN_TRIPLES = 2;
+        const MIN_TRIPLES_PER_SEGMENT = 2;
         const MAX_DURATION_MS = 4_000;
+        const segmentCountTarget = Math.max(1, Math.ceil(targetLengthTotal / targetLength));
+        const requiredTriplesTarget = Math.max(MIN_TRIPLES, segmentCountTarget * MIN_TRIPLES_PER_SEGMENT);
         const startTime = Date.now();
         let best = null;
         let attempt = 0;
@@ -1674,6 +1951,13 @@ const fetchRandomWords = async () => {
 
             let organizedChain = processInventoryToMultiChain(result.inventory, targetLengthTotal, devalueWords, targetLength);
             let tripleCount = countTriples(organizedChain);
+            let wordsForBest = words;
+            let inventoryForBest = result.inventory;
+            let segmentCheck = getSegmentTripleCounts(organizedChain, targetLength);
+            let segmentCounts = segmentCheck.counts;
+            let segmentDeficit = segmentCounts.reduce((acc, c) => acc + Math.max(0, MIN_TRIPLES_PER_SEGMENT - c), 0);
+            let meetsSegmentTriples = segmentCounts.length === 0 || segmentCounts.every(c => c >= MIN_TRIPLES_PER_SEGMENT);
+            let requiredTriples = Math.max(MIN_TRIPLES, (segmentCounts.length || segmentCountTarget) * MIN_TRIPLES_PER_SEGMENT);
 
             // If we still have fewer than MIN_TRIPLES, try enriching with another batch and re-evaluate
             if (tripleCount < MIN_TRIPLES && (Date.now() - startTime) < MAX_DURATION_MS) {
@@ -1684,20 +1968,62 @@ const fetchRandomWords = async () => {
                 setInventory(mergedResult.inventory);
                 organizedChain = processInventoryToMultiChain(mergedResult.inventory, targetLengthTotal, devalueWords, targetLength);
                 tripleCount = countTriples(organizedChain);
+                wordsForBest = mergedWords;
+                inventoryForBest = mergedResult.inventory;
+                segmentCheck = getSegmentTripleCounts(organizedChain, targetLength);
+                segmentCounts = segmentCheck.counts;
+                segmentDeficit = segmentCounts.reduce((acc, c) => acc + Math.max(0, MIN_TRIPLES_PER_SEGMENT - c), 0);
+                meetsSegmentTriples = segmentCounts.length === 0 || segmentCounts.every(c => c >= MIN_TRIPLES_PER_SEGMENT);
+                requiredTriples = Math.max(MIN_TRIPLES, (segmentCounts.length || segmentCountTarget) * MIN_TRIPLES_PER_SEGMENT);
             }
 
             // If still low triples, force a triple-priority build pass
             if (tripleCount < MIN_TRIPLES) {
                 const relaxedResult = await processWordsToInventory(result.uniqueWords || mergedWords || words, targetLengthTotal, null, setProgress, true, 1, 12000, 1500);
-                const tripleHeavyInv = [
-                    ...relaxedResult.inventory.filter(i => i.type === 'triple'),
-                    ...relaxedResult.inventory
-                ];
+                const relaxedTriples = relaxedResult.inventory.filter(i => i.type === 'triple');
+                const baseInventory = result.inventory.filter(i => i.type === 'triple' || i.totalOverlap >= 2);
+                const tripleHeavyInv = Array.from(
+                    new Map([...relaxedTriples, ...baseInventory].map(item => [item.id, item])).values()
+                );
                 const altChain = processInventoryToMultiChain(tripleHeavyInv, targetLengthTotal, devalueWords, targetLength);
                 const altTripleCount = countTriples(altChain);
                 if (altTripleCount > tripleCount) {
                     organizedChain = altChain;
                     tripleCount = altTripleCount;
+                    segmentCheck = getSegmentTripleCounts(organizedChain, targetLength);
+                    segmentCounts = segmentCheck.counts;
+                    segmentDeficit = segmentCounts.reduce((acc, c) => acc + Math.max(0, MIN_TRIPLES_PER_SEGMENT - c), 0);
+                    meetsSegmentTriples = segmentCounts.length === 0 || segmentCounts.every(c => c >= MIN_TRIPLES_PER_SEGMENT);
+                    requiredTriples = Math.max(MIN_TRIPLES, (segmentCounts.length || segmentCountTarget) * MIN_TRIPLES_PER_SEGMENT);
+                }
+            }
+
+            // If we still need more triples per segment, inject vetted triple seeds.
+            if (segmentDeficit > 0 && tripleSeedPool.length > 0) {
+                const needed = Math.max(0, segmentDeficit);
+                const seedTriples = selectSeedTriples(needed);
+                if (seedTriples.length > 0) {
+                    const seedWords = seedTriples.flatMap(t => t.words);
+                    const mergedWordPool = mergeUniqueWords([...(result.uniqueWords || wordsForBest), ...seedWords]);
+                    const seedResult = await processWordsToInventory(mergedWordPool, targetLengthTotal, null, setProgress, true, 2, 25000, 1500);
+                    const seedItems = seedTriples.map(buildSeedTripleItem).filter(Boolean);
+                    const seededInventory = mergeInventoryItems([...seedItems, ...seedResult.inventory]);
+                    const seededChain = processInventoryToMultiChain(seededInventory, targetLengthTotal, devalueWords, targetLength);
+                    const seededTripleCount = countTriples(seededChain);
+                    const seededSegmentCheck = getSegmentTripleCounts(seededChain, targetLength);
+                    const seededCounts = seededSegmentCheck.counts;
+                    const seededMeets = seededCounts.length === 0 || seededCounts.every(c => c >= MIN_TRIPLES_PER_SEGMENT);
+                    if (seededMeets || seededTripleCount > tripleCount) {
+                        organizedChain = seededChain;
+                        tripleCount = seededTripleCount;
+                        wordsForBest = mergedWordPool;
+                        inventoryForBest = seededInventory;
+                        segmentCheck = seededSegmentCheck;
+                        segmentCounts = seededCounts;
+                        segmentDeficit = seededCounts.reduce((acc, c) => acc + Math.max(0, MIN_TRIPLES_PER_SEGMENT - c), 0);
+                        meetsSegmentTriples = seededMeets;
+                        requiredTriples = Math.max(MIN_TRIPLES, (seededCounts.length || segmentCountTarget) * MIN_TRIPLES_PER_SEGMENT);
+                    }
                 }
             }
 
@@ -1705,11 +2031,14 @@ const fetchRandomWords = async () => {
             const bestLenDiff = best ? Math.abs((best.chain?.length || 0) - targetLengthTotal) : Infinity;
             const isBetter =
                 !best ||
-                tripleCount > best.tripleCount ||
-                (tripleCount === best.tripleCount && lenDiff < bestLenDiff) ||
-                (tripleCount === best.tripleCount && lenDiff === bestLenDiff && organizedChain.length > best.chain.length);
+                (meetsSegmentTriples && !best.meetsSegmentTriples) ||
+                (meetsSegmentTriples === best.meetsSegmentTriples && (
+                    tripleCount > best.tripleCount ||
+                    (tripleCount === best.tripleCount && lenDiff < bestLenDiff) ||
+                    (tripleCount === best.tripleCount && lenDiff === bestLenDiff && organizedChain.length > best.chain.length)
+                ));
             if (isBetter) {
-                best = { words, inventory: result.inventory, chain: organizedChain, tripleCount };
+                best = { words: wordsForBest, inventory: inventoryForBest, chain: organizedChain, tripleCount, meetsSegmentTriples, requiredTriples };
             }
 
             const elapsed = Date.now() - startTime;
@@ -1721,8 +2050,8 @@ const fetchRandomWords = async () => {
             setInputText(best.words.join(" "));
             setInventory(best.inventory);
             setChain(best.chain);
-            if (best.tripleCount < MIN_TRIPLES) {
-                showToast("Could not guarantee 2 triples within ~5s; showing best found.", "warning");
+            if (!best.meetsSegmentTriples || best.tripleCount < (best.requiredTriples || requiredTriplesTarget)) {
+                showToast("Could not guarantee 2 triples per segment within ~5s; showing best found.", "warning");
             }
         } else {
             showToast("Failed to generate chain.", "warning");
@@ -2652,6 +2981,53 @@ const fetchRandomWords = async () => {
                             </div>
                         )}
 
+                        {showBridgeModal && (
+                            <div className="pt-4 border-t border-slate-100">
+                                <h4 className="text-xs font-bold text-sky-600 uppercase tracking-wide mb-3 text-center flex items-center justify-center gap-2">
+                                    <Book size={12} className="text-amber-600" />
+                                    Triple Suggestions
+                                </h4>
+                                {tripleSeedPool.length === 0 ? (
+                                    <div className="text-center text-xs text-slate-400 italic p-2">
+                                        Triple database not loaded.
+                                    </div>
+                                ) : tripleBridgeSuggestions.length === 0 ? (
+                                    <div className="text-center text-xs text-slate-400 italic p-2">
+                                        No triple matches found for this gap.
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {tripleBridgeSuggestions.map(sol => (
+                                            <button
+                                                key={sol.id}
+                                                onClick={() => insertBridge(sol)}
+                                                className="w-full text-left px-4 py-3 border rounded-lg text-sm font-medium transition-colors flex items-center justify-between bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    {sol.words.map((w, i) => (
+                                                        <React.Fragment key={i}>
+                                                            {i > 0 && <ArrowRight size={12} className="text-slate-400" />}
+                                                            <span>{w}</span>
+                                                        </React.Fragment>
+                                                    ))}
+                                                </div>
+                                                <div className="text-xs opacity-70 font-normal flex items-center gap-2">
+                                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
+                                                        <span className="text-slate-500">len</span>
+                                                        <span className="font-semibold text-indigo-600">3</span>
+                                                    </span>
+                                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
+                                                        <span className="text-slate-500">overlap</span>
+                                                        <span className="font-semibold text-emerald-600">{sol.totalOverlap}</span>
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Manual Fallbacks */}
                         {(showBridgeModal.forward?.length > 0 || showBridgeModal.backward?.length > 0) && (
                             <div className="pt-4 border-t border-slate-100">
@@ -3261,6 +3637,8 @@ const fetchRandomWords = async () => {
                             const groupNodes = nodes.slice(group.startIndex, group.endIndex + 1);
                             if (groupNodes.length < 3) return null;
                             const hasExcluded = groupNodes.some(n => isWordExcluded(n.word));
+                            const tripleKey = groupNodes.map(n => cleanWord(n.word)).join('|');
+                            const isSeeded = seededTripleKeys.has(tripleKey);
 
                             return (
                                 <div 
@@ -3269,10 +3647,11 @@ const fetchRandomWords = async () => {
                                         hasExcluded ? 'border-rose-300/90 bg-rose-50/50' : 'border-sky-300/80 bg-sky-50/40'
                                     }`}
                                 >
-                                    <div className={`absolute -top-3 left-2 bg-white border rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm ${
+                                    <div className={`absolute -top-3 left-2 bg-white border rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm flex items-center gap-1 ${
                                         hasExcluded ? 'text-rose-700 border-rose-200' : 'text-sky-700 border-sky-200'
                                     }`}>
                                         Overlap {group.displayCount}
+                                        {isSeeded && <Book size={10} className="text-amber-600" />}
                                     </div>
                                     {hasExcluded && (
                                         <div className="absolute -top-3 right-2 bg-white text-rose-700 border border-rose-200 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm">

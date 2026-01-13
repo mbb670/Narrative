@@ -1,0 +1,456 @@
+[{
+        "id": "2026-02-01",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Cereal seed",
+                "answer": "GRAIN",
+                "start": 1
+            },
+            {
+                "clue": "Away from the coast",
+                "answer": "INLAND",
+                "start": 4
+            },
+            {
+                "clue": "Scenery",
+                "answer": "LANDSCAPE",
+                "start": 6
+            },
+            {
+                "clue": "Magazine, say",
+                "answer": "PERIODICAL",
+                "start": 13
+            },
+            {
+                "clue": "Date keeper",
+                "answer": "CALENDAR",
+                "start": 20
+            },
+            {
+                "clue": "Sports venue",
+                "answer": "ARENA",
+                "start": 26
+            },
+            {
+                "clue": "Giving a title",
+                "answer": "NAMING",
+                "start": 29
+            },
+            {
+                "clue": "Resourceful cleverness",
+                "answer": "INGENUITY",
+                "start": 32
+            },
+            {
+                "clue": "Kind",
+                "answer": "TYPE",
+                "start": 39
+            },
+            {
+                "clue": "Outer edge",
+                "answer": "PERIPHERY",
+                "start": 41
+            },
+            {
+                "clue": "___ Reynolds",
+                "answer": "RYAN",
+                "start": 48
+            },
+            {
+                "clue": "Yin's partner",
+                "answer": "YANG",
+                "start": 49
+            },
+            {
+                "clue": "Stared",
+                "answer": "GAZED",
+                "start": 52
+            },
+            {
+                "clue": "Tie game",
+                "answer": "DRAW",
+                "start": 56
+            },
+            {
+                "clue": "In the know",
+                "answer": "AWARE",
+                "start": 58
+            },
+            {
+                "clue": "Lease payment",
+                "answer": "RENT",
+                "start": 61
+            },
+            {
+                "clue": "Contest submissions",
+                "answer": "ENTRIES",
+                "start": 62
+            }
+        ]
+    },
+    {
+        "id": "2026-02-02",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Pleasant smell",
+                "answer": "SCENT",
+                "start": 1
+            },
+            {
+                "clue": "Sense of feel",
+                "answer": "TOUCH",
+                "start": 5
+            },
+            {
+                "clue": "Select",
+                "answer": "CHOOSE",
+                "start": 8
+            },
+            {
+                "clue": "Oceans",
+                "answer": "SEAS",
+                "start": 12
+            },
+            {
+                "clue": "Toward sunrise",
+                "answer": "EASTWARD",
+                "start": 13
+            },
+            {
+                "clue": "Devilish",
+                "answer": "DEMONIC",
+                "start": 20
+            },
+            {
+                "clue": "Pincher",
+                "answer": "CRAB",
+                "start": 26
+            },
+            {
+                "clue": "Overseas",
+                "answer": "ABROAD",
+                "start": 28
+            },
+            {
+                "clue": "Eden figure",
+                "answer": "ADAM",
+                "start": 32
+            },
+            {
+                "clue": "Dutch capital",
+                "answer": "AMSTERDAM",
+                "start": 34
+            },
+            {
+                "clue": "Female knight",
+                "answer": "DAME",
+                "start": 40
+            },
+            {
+                "clue": "Significant",
+                "answer": "MEANINGFUL",
+                "start": 42
+            },
+            {
+                "clue": "Deranged",
+                "answer": "LUNATIC",
+                "start": 51
+            },
+            {
+                "clue": "Shoreline",
+                "answer": "COAST",
+                "start": 57
+            },
+            {
+                "clue": "Celebrity",
+                "answer": "STAR",
+                "start": 60
+            },
+            {
+                "clue": "Aims",
+                "answer": "TARGETS",
+                "start": 61
+            },
+            {
+                "clue": "Radio hiss",
+                "answer": "STATIC",
+                "start": 67
+            }
+        ]
+    },
+    {
+        "id": "2026-02-03",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Steep rock face",
+                "answer": "CLIFF",
+                "start": 1
+            },
+            {
+                "clue": "Plant life",
+                "answer": "FLORA",
+                "start": 5
+            },
+            {
+                "clue": "Spoken",
+                "answer": "ORAL",
+                "start": 7
+            },
+            {
+                "clue": "Stipends",
+                "answer": "ALLOWANCES",
+                "start": 9
+            },
+            {
+                "clue": "Picturesque",
+                "answer": "SCENIC",
+                "start": 18
+            },
+            {
+                "clue": "Medical stupor",
+                "answer": "COMA",
+                "start": 23
+            },
+            {
+                "clue": "Not an island",
+                "answer": "MAINLAND",
+                "start": 25
+            },
+            {
+                "clue": "Famous site",
+                "answer": "LANDMARK",
+                "start": 29
+            },
+            {
+                "clue": "Bazaar",
+                "answer": "MARKET",
+                "start": 33
+            },
+            {
+                "clue": "Guiding beliefs",
+                "answer": "ETHOS",
+                "start": 37
+            },
+            {
+                "clue": "Welcoming treatment",
+                "answer": "HOSPITALITY",
+                "start": 39
+            },
+            {
+                "clue": "Varieties",
+                "answer": "TYPES",
+                "start": 48
+            },
+            {
+                "clue": "Artistic style",
+                "answer": "ESTHETIC",
+                "start": 51
+            },
+            {
+                "clue": "Container",
+                "answer": "CASE",
+                "start": 58
+            },
+            {
+                "clue": "Chair",
+                "answer": "SEAT",
+                "start": 60
+            },
+            {
+                "clue": "Dines",
+                "answer": "EATS",
+                "start": 61
+            },
+            {
+                "clue": "Sand component",
+                "answer": "SILICA",
+                "start": 64
+            }
+        ]
+    },
+    {
+        "id": "2026-02-04",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Reaction starter",
+                "answer": "CATALYST",
+                "start": 1
+            },
+            {
+                "clue": "Postage item",
+                "answer": "STAMP",
+                "start": 7
+            },
+            {
+                "clue": "Plentiful",
+                "answer": "AMPLE",
+                "start": 9
+            },
+            {
+                "clue": "Class topic",
+                "answer": "LESSON",
+                "start": 12
+            },
+            {
+                "clue": "Tune",
+                "answer": "SONG",
+                "start": 15
+            },
+            {
+                "clue": "Jeweler",
+                "answer": "GOLDSMITH",
+                "start": 18
+            },
+            {
+                "clue": "Natural home",
+                "answer": "HABITAT",
+                "start": 26
+            },
+            {
+                "clue": "Characteristic",
+                "answer": "ATTRIBUTE",
+                "start": 31
+            },
+            {
+                "clue": "Male voice type",
+                "answer": "TENOR",
+                "start": 38
+            },
+            {
+                "clue": "Compass point",
+                "answer": "NORTH",
+                "start": 40
+            },
+            {
+                "clue": "Residence",
+                "answer": "HOME",
+                "start": 44
+            },
+            {
+                "clue": "Steak, e.g.",
+                "answer": "MEAT",
+                "start": 46
+            },
+            {
+                "clue": "Having a meal",
+                "answer": "EATING",
+                "start": 47
+            },
+            {
+                "clue": "Mikhail of USSR",
+                "answer": "GORBACHEV",
+                "start": 52
+            },
+            {
+                "clue": "Long journey",
+                "answer": "VOYAGE",
+                "start": 60
+            },
+            {
+                "clue": "Study of Earth",
+                "answer": "GEOGRAPHY",
+                "start": 64
+            },
+            {
+                "clue": "Not mental",
+                "answer": "PHYSICAL",
+                "start": 70
+            }
+        ]
+    },
+    {
+        "id": "2026-02-05",
+        "type": "chain",
+        "palette": "greens",
+        "words": [{
+                "clue": "Phone",
+                "answer": "CALL",
+                "start": 1
+            },
+            {
+                "clue": "Arm or leg",
+                "answer": "LIMB",
+                "start": 4
+            },
+            {
+                "clue": "Transmit",
+                "answer": "BROADCAST",
+                "start": 7
+            },
+            {
+                "clue": "Vapor",
+                "answer": "STEAM",
+                "start": 14
+            },
+            {
+                "clue": "Surrounding",
+                "answer": "AMBIENT",
+                "start": 17
+            },
+            {
+                "clue": "Snare",
+                "answer": "TRAP",
+                "start": 23
+            },
+            {
+                "clue": "Documents",
+                "answer": "PAPERS",
+                "start": 26
+            },
+            {
+                "clue": "Individual",
+                "answer": "PERSON",
+                "start": 28
+            },
+            {
+                "clue": "Tunes",
+                "answer": "SONGS",
+                "start": 31
+            },
+            {
+                "clue": "Holy",
+                "answer": "SACRED",
+                "start": 35
+            },
+            {
+                "clue": "City center",
+                "answer": "DOWNTOWN",
+                "start": 40
+            },
+            {
+                "clue": "Small district",
+                "answer": "TOWNSHIP",
+                "start": 44
+            },
+            {
+                "clue": "Delivering goods",
+                "answer": "SHIPPING",
+                "start": 48
+            },
+            {
+                "clue": "Haggard",
+                "answer": "GAUNT",
+                "start": 55
+            },
+            {
+                "clue": "Raise a glass",
+                "answer": "TOAST",
+                "start": 59
+            },
+            {
+                "clue": "Numerical fact",
+                "answer": "STATISTIC",
+                "start": 62
+            },
+            {
+                "clue": "Admission pass",
+                "answer": "TICKET",
+                "start": 68
+            }
+        ]
+    }
+]
