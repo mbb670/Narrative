@@ -4013,7 +4013,7 @@ function openGiveUpModal() {
 
   if (els.giveUpWordsCount) els.giveUpWordsCount.textContent = String(unsolvedWords).padStart(2, "0");
   if (els.giveUpWordLabel) els.giveUpWordLabel.textContent = unsolvedWords === 1 ? "word" : "words";
-  if (els.giveUpSeconds) els.giveUpSeconds.textContent = String(penaltySec).padStart(2, "0");
+  if (els.giveUpSeconds) els.giveUpSeconds.textContent = fmtTime(penaltySec);
 
   els.giveUpModal.hidden = false;
   els.giveUpModal.classList.add("is-open");
