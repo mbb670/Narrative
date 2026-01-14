@@ -249,7 +249,7 @@ Interactive elements
     justify-content: center;
     gap: var(--spacing-x2);
     background-color: var(--background-muted);
-    border-radius: var(--radius-default);
+    border-radius: var(--radius-soft);
     height: max-content;
     width: 100%;
     width: max-content;
@@ -291,7 +291,7 @@ Interactive elements
     padding-inline: var(--spacing-x8);
     padding-block: 0;
     border-radius: var(--radius-default);
-    color: var(--foreground-disabled);
+    color: var(--foreground-subtle);
 
     &.is-active {
         --background-color: unset;
@@ -318,6 +318,14 @@ Interactive elements
         --background-color: var(--background-strong);
         color: var(--foreground-alt);
     }
+}
+
+.tab{
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
 }
 
 
@@ -1395,7 +1403,7 @@ body[data-view="play"] {
 
 
 /* -----------------------------
-Splash
+Splash settings
 ----------------------------- */
 
 .splash {
@@ -1439,8 +1447,8 @@ Splash
 
         .settings-panel {
             position: absolute;
-            top: calc(100% + var(--spacing-x8));
-            right: 0;
+            /* top: calc(100% + var(--spacing-x8)); */
+            /* right: 0; */
             width: min(320px, 90vw);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-soft);
@@ -1457,11 +1465,23 @@ Splash
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--spacing-x24);
+            padding: var(--spacing-x12) var(--spacing-x24);
         }
 
         .settings-panel__close {
             border: unset;
+            aspect-ratio: 1;
+            &::after {
+                content: '';
+                display: block;
+                width: var(--spacing-x12);
+                aspect-ratio: 1;
+                background-color: var(--foreground-muted);
+                -webkit-mask: url("images/close.svg") center / contain no-repeat;
+                mask: url("images/close.svg") center / contain no-repeat;
+                margin-right: unset;
+            }
+
         }
 
         .settings-panel__section {
@@ -1472,8 +1492,9 @@ Splash
             border-top: 1px solid var(--border-subtle);
         }
 
-        .settings-panel__title {
-            margin-block: var(--spacing-x4);
+        .coming-soon{
+            color: var(--foreground-disabled);
+            margin-top: var(--spacing-x20);
         }
 
         .settings-color-mode {
@@ -1492,7 +1513,14 @@ Splash
 
         .settings-panel__desc {
             color: var(--foreground-muted);
+            margin-top: var(--spacing-x4);
         }
+
+
+
+/* -----------------------------
+Splash main
+----------------------------- */
 
         .splash__main{
             flex: 1;
