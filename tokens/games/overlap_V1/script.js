@@ -916,7 +916,7 @@ function addTimePenalty(seconds, type = "") {
   }
 
   if (type === "hint" && els.toastHint) {
-    const txt = String(sec).padStart(2, "0");
+    const txt = String(sec);
     showToast("hint", txt);
   }
 }
@@ -3858,13 +3858,15 @@ function applyHintForEntry(eIdx) {
   if (idx == null) return;
 
   const expected = play.exp[idx] || "";
+  const hadCorrectLetter = (play.usr[idx] || "") === expected;
   play.usr[idx] = expected;
 
   if (play.mode === MODE.CHAIN) {
     if (!chain.started && !play.done) chainStartNow();
     chain.hintsUsed += 1;
     play.lockedCells[idx] = true;
-    addTimePenalty(HINT_PENALTY_SEC, "hint");
+    const hintPenaltySec = hadCorrectLetter ? HINT_PENALTY_SEC / 2 : HINT_PENALTY_SEC;
+    addTimePenalty(hintPenaltySec, "hint");
 
     let lockedByHint = false;
     if (isWordCorrect(entry)) {
@@ -4448,11 +4450,11 @@ function openChainResults(stats, reason) {
   const hintPenalty = Math.max(0, chain.hintPenaltySecTotal || 0);
   const wordPenalty = Math.max(0, chain.wordPenaltySecTotal || 0);
   if (els.totalHintPenalty) {
-    els.totalHintPenalty.textContent = String(hintPenalty).padStart(2, "0");
+    els.totalHintPenalty.textContent = fmtTime(hintPenalty);
     els.totalHintPenalty.parentElement.style.display = hintPenalty > 0 ? "" : "none";
   }
   if (els.totalWordPenalty) {
-    els.totalWordPenalty.textContent = String(wordPenalty).padStart(2, "0");
+    els.totalWordPenalty.textContent = fmtTime(wordPenalty);
     els.totalWordPenalty.parentElement.style.display = wordPenalty > 0 ? "" : "none";
   }
 

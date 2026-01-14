@@ -1921,6 +1921,10 @@ Results
     text-align: center;
 }
 
+.resultsTitle{
+    margin-bottom: var(--spacing-x4);
+}
+
 .stat-label,
 .resultsSubtitle,
 .stat-penalty {
