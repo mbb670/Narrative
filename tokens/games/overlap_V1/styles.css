@@ -320,7 +320,7 @@ Interactive elements
     }
 }
 
-.tab{
+.tab {
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
@@ -1434,7 +1434,7 @@ Splash settings
             /* border: 1px solid black; */
             aspect-ratio: 1;
 
-               &::after {
+            &::after {
                 content: '';
                 display: block;
                 aspect-ratio: 1;
@@ -1471,6 +1471,7 @@ Splash settings
         .settings-panel__close {
             border: unset;
             aspect-ratio: 1;
+
             &::after {
                 content: '';
                 display: block;
@@ -1492,7 +1493,7 @@ Splash settings
             border-top: 1px solid var(--border-subtle);
         }
 
-        .coming-soon{
+        .coming-soon {
             color: var(--foreground-disabled);
             margin-top: var(--spacing-x20);
         }
@@ -1518,11 +1519,11 @@ Splash settings
 
 
 
-/* -----------------------------
+        /* -----------------------------
 Splash main
 ----------------------------- */
 
-        .splash__main{
+        .splash__main {
             flex: 1;
             align-content: center;
         }
@@ -1686,10 +1687,13 @@ FTUE
 
     .ftue-modal__body {
         flex: 1;
+        align-content: center;
     }
 
     .ftue-text {
         padding-inline: 2%;
+        margin-top: calc(-1 * var(--spacing-x16));
+        z-index: 1;
     }
 
     .ftue-title,
@@ -1735,8 +1739,8 @@ FTUE
                 display: block !important;
             }
 
-            .letter{
-               color: var(--foreground-default)!important;
+            .letter {
+                color: var(--foreground-default) !important;
 
             }
 
@@ -1986,6 +1990,32 @@ Archive
     }
 }
 
+[data-mode="dark"] {
+    .archive-day {
+        &.is-selected {
+            &::after {
+                background-color: var(--opacity-lighten-subtle);
+                outline: 1px solid var(--opacity-lighten-muted);
+            }
+
+        }
+
+    }
+
+    [data-state="complete"] {
+        .archive-day-meta {
+            outline-color: var(--system-positive-default);
+
+            &::before {
+                background-color: var(--system-positive-default);
+            }
+
+        }
+
+    }
+
+}
+
 
 [data-state="not-started"],
 [data-state="progress"] {
@@ -2067,8 +2097,9 @@ Archive
 #archiveDate {
     color: var(--foreground-muted);
     margin-top: var(--spacing-x8);
-    text-align: center;
-    height: 0;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
 }
 
 

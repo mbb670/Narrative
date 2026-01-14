@@ -5118,27 +5118,29 @@ function closeSuccess() {
   els.resultsModal?.classList.remove("is-open");
 }
 
+const resultsInertBlock = (e) => {
+  if (!document.body?.hasAttribute("data-results-open")) return;
+  if (e.target && e.target.closest && e.target.closest("#results")) return;
+  e.stopPropagation();
+  e.preventDefault();
+};
+let resultsInertActive = false;
 function setResultsInert(isOpen) {
   const body = document.body;
   const root = document.documentElement;
   if (!body) return;
-  const inertValue = isOpen ? "true" : null;
   body.toggleAttribute("data-results-open", isOpen);
-  const block = (e) => {
-    if (!isOpen) return;
-    if (e.target && e.target.closest && e.target.closest("#results")) return;
-    e.stopPropagation();
-    e.preventDefault();
-  };
-  if (isOpen) {
-    window.addEventListener("focus", block, true);
-    window.addEventListener("pointerdown", block, true);
-    window.addEventListener("keydown", block, true);
+  if (isOpen && !resultsInertActive) {
+    window.addEventListener("focus", resultsInertBlock, true);
+    window.addEventListener("pointerdown", resultsInertBlock, true);
+    window.addEventListener("keydown", resultsInertBlock, true);
+    resultsInertActive = true;
     body.style.overflow = "hidden";
-  } else {
-    window.removeEventListener("focus", block, true);
-    window.removeEventListener("pointerdown", block, true);
-    window.removeEventListener("keydown", block, true);
+  } else if (!isOpen && resultsInertActive) {
+    window.removeEventListener("focus", resultsInertBlock, true);
+    window.removeEventListener("pointerdown", resultsInertBlock, true);
+    window.removeEventListener("keydown", resultsInertBlock, true);
+    resultsInertActive = false;
     body.style.overflow = "";
   }
   root?.classList.toggle("results-open", isOpen);
