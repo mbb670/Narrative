@@ -13,23 +13,23 @@
 </head>
 
 <body class="wrap">
-<script>
-  (function () {
-    const url = new URL(location.href);
-    if (url.searchParams.has("dev") || url.searchParams.has("devmode")) {
-      document.documentElement.classList.add("is-dev");
-    }
-  })();
-</script>
+  <script>
+    (function () {
+      const url = new URL(location.href);
+      if (url.searchParams.has("dev") || url.searchParams.has("devmode")) {
+        document.documentElement.classList.add("is-dev");
+      }
+    })();
+  </script>
 
 
   <header>
     <section class="header-content">
-    <div class="logo logo-hover" id="logo">
-    <div class="logo-icon">
-    </div>
-    <h1 class="text-subheadline-semibold-lg">Overlap</h1>
-    </div>
+      <div class="logo logo-hover" id="logo">
+        <div class="logo-icon">
+        </div>
+        <h1 class="text-subheadline-semibold-lg">Overlap</h1>
+      </div>
 
       <div class="helper">
 
@@ -41,7 +41,7 @@
           <button class="btn primary text-system-semibold-sm" id="nextPuzzleBtn" type="button" style="display:none">Next
             puzzle</button>
         </div>
-                <div class="chainHud" hidden>
+        <div class="chainHud" hidden>
           <button class="btn text-system-semibold-sm" id="chainStartBtn" type="button">
             <span class="chainTimerLabel" aria-hidden="true">00:00</span>
             <span class="chainStartLabel">Start</span>
@@ -50,10 +50,10 @@
       </div>
       <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
 
-    <div class="builder-toggle" aria-label="Builder toggle">
-      <button class="btn" id="builderOpen" type="button"></button>
-      <button class="btn" id="builderClose" type="button" hidden></button>
-    </div>
+      <div class="builder-toggle" aria-label="Builder toggle">
+        <button class="btn" id="builderOpen" type="button"></button>
+        <button class="btn" id="builderClose" type="button" hidden></button>
+      </div>
     </section>
   </header>
 
@@ -80,7 +80,8 @@
           <div class="toast toast-danger elevation-fixed-top" id="toastError" role="status">Puzzle not complete!</div>
           <div class="toast toast-hint elevation-fixed-top" id="toastHint" role="status">+<span
               id="hintPenalty">00</span> seconds</div>
-              <div class="toast toast-error elevation-fixed-top" id="toastError-puzzle" role="status"><span>Puzzle broken - Contact Matt & let him know!</span><span class="text-system-regular-xs" id="status"></span></div>
+          <div class="toast toast-error elevation-fixed-top" id="toastError-puzzle" role="status"><span>Puzzle broken -
+              Contact Matt & let him know!</span><span class="text-system-regular-xs" id="status"></span></div>
         </div>
       </div>
       <div class="puzzle-nav" aria-label="Navigation">
@@ -111,9 +112,12 @@
   <section class="panel" id="panelBuild" role="tabpanel" aria-labelledby="tabBuild">
     <div class="bTop">
       <div class="builder-mode-tabs tabs" role="tablist" aria-label="Builder puzzle type">
-        <button class="tab text-system-semibold-sm is-active" id="builderTabChain" type="button" role="tab" aria-selected="true">Word Chain</button>
-        <button class="tab text-system-semibold-sm" id="builderTabPuzzle" type="button" role="tab" aria-selected="false">Puzzle</button>
-        <button class="tab text-system-semibold-sm" id="builderTabOther" type="button" role="tab" aria-selected="false">Other</button>
+        <button class="tab text-system-semibold-sm is-active" id="builderTabChain" type="button" role="tab"
+          aria-selected="true">Word Chain</button>
+        <button class="tab text-system-semibold-sm" id="builderTabPuzzle" type="button" role="tab"
+          aria-selected="false">Puzzle</button>
+        <button class="tab text-system-semibold-sm" id="builderTabOther" type="button" role="tab"
+          aria-selected="false">Other</button>
       </div>
       <select class="sel" id="pSel" aria-label="Choose puzzle"></select>
       <button class="pill text-uppercase-semibold-md" id="pNew" type="button">New</button>
@@ -122,8 +126,8 @@
     </div>
 
     <div class="bBody">
-        <div class="box puzzle_inputs">
-          <h3 class="text-uppercase-semibold-lg">Puzzle</h3>
+      <div class="box puzzle_inputs">
+        <h3 class="text-uppercase-semibold-lg">Puzzle</h3>
         <label class="lab" for="pTitle">Puzzle ID</label>
         <input class="ti" id="pTitle" type="text" placeholder="e.g. 2025-01-01 or custom-slug" />
 
@@ -176,22 +180,22 @@
           <div class="stat-label"> Total Time</div>
         </div>
         <div class="stat-extras">
-        <div class="stat-container">
-        <div class="stat resultsStatSolved">
-          <div class="stat-value resultsStatSolvedVal text-subheadline-semibold-md">0/0</div>
-          <div class="stat-label">Solved</div>
-        </div>
-                  <div class="stat-penalty">+<span id="totalWordPenalty">00</span></div>
+          <div class="stat-container">
+            <div class="stat resultsStatSolved">
+              <div class="stat-value resultsStatSolvedVal text-subheadline-semibold-md">0/0</div>
+              <div class="stat-label">Solved</div>
+            </div>
+            <div class="stat-penalty">+<span id="totalWordPenalty">00</span></div>
 
-        </div>
-        <div class="stat-container">
-        <div class="stat resultsStatHints">
-          <div class="stat-value resultsStatHintsVal text-subheadline-semibold-md">0</div>
-          <div class="stat-label">Hints</div>
-        </div>
-                  <div class="stat-penalty">+<span id="totalHintPenalty">00</span></div>
+          </div>
+          <div class="stat-container">
+            <div class="stat resultsStatHints">
+              <div class="stat-value resultsStatHintsVal text-subheadline-semibold-md">0</div>
+              <div class="stat-label">Hints</div>
+            </div>
+            <div class="stat-penalty">+<span id="totalHintPenalty">00</span></div>
 
-        </div>
+          </div>
         </div>
       </div>
       <div class="actions">
@@ -202,7 +206,8 @@
   </div>
 
   <!-- Give Up confirm -->
-  <div class="give-up results text-system-regular-md" id="giveUpModal" role="dialog" aria-modal="true" aria-label="Confirm give up" hidden>
+  <div class="give-up results text-system-regular-md" id="giveUpModal" role="dialog" aria-modal="true"
+    aria-label="Confirm give up" hidden>
     <div class="card results__dialog">
       <div class="result-heading">
         <h2 class="text-headline-semibold-lg">Give up?</h2>
@@ -229,7 +234,8 @@
 
       <div class="ftue-modal__header">
         <button type="button" class="ftue-prev btn text-system-semibold-xs" aria-label="Previous step">Back</button>
-        <button type="button" class="ftue-skip btn text-system-semibold-xs" aria-label="Skip to game">Skip to game</button>
+        <button type="button" class="ftue-skip btn text-system-semibold-xs" aria-label="Skip to game">Skip to
+          game</button>
       </div>
 
       <section class="ftue-modal__body">
@@ -279,26 +285,26 @@
         <button class="btn text-system-semibold-xs" id="archiveTodayBtn" type="button">Today</button>
       </div>
       <div class="archive__main">
-      <div class="archive__controls">
-        <button class="btn icon" id="archivePrevMonth" type="button" aria-label="Previous month">‹</button>
-        <div class="archive__calendar-select">
-        <select class="dropdown text-system-regular-sm" id="archiveMonthSelect" aria-label="Month"></select>
-        <select class="dropdown text-system-regular-sm" id="archiveYearSelect" aria-label="Year"></select>
+        <div class="archive__controls">
+          <button class="btn icon" id="archivePrevMonth" type="button" aria-label="Previous month">‹</button>
+          <div class="archive__calendar-select">
+            <select class="dropdown text-system-regular-sm" id="archiveMonthSelect" aria-label="Month"></select>
+            <select class="dropdown text-system-regular-sm" id="archiveYearSelect" aria-label="Year"></select>
+          </div>
+          <button class="btn icon" id="archiveNextMonth" type="button" aria-label="Next month">›</button>
         </div>
-        <button class="btn icon" id="archiveNextMonth" type="button" aria-label="Next month">›</button>
-      </div>
-      <div class="archive__calendar">
-        <div class="archive__weekdays text-system-regular-sm">
-          <span>S</span>
-          <span>M</span>
-          <span>T</span>
-          <span>W</span>
-          <span>T</span>
-          <span>F</span>
-          <span>S</span>
+        <div class="archive__calendar">
+          <div class="archive__weekdays text-system-regular-sm">
+            <span>S</span>
+            <span>M</span>
+            <span>T</span>
+            <span>W</span>
+            <span>T</span>
+            <span>F</span>
+            <span>S</span>
+          </div>
+          <div class="archive__grid text-system-regular-sm" id="archiveCalendar"></div>
         </div>
-        <div class="archive__grid text-system-regular-sm" id="archiveCalendar"></div>
-      </div>
       </div>
       <div class="archive__footer">
         <button class="btn primary text-system-semibold-md" id="archiveActionBtn" type="button">
@@ -309,28 +315,69 @@
     </div>
   </div>
 
-
- <!-- Splash -->
+  <!-- Splash -->
   <div class="splash" id="splashModal" aria-hidden="true" role="dialog" aria-modal="true" hidden>
     <div class="splash__dialog card elevation-overlay">
       <div class="splash__top">
-        <div class="splash__brand">
-          <div class="logo-icon logo-icon-animation"></div>
-          <div class="splash__text">
-            <h1 class="splash__title text-display-semibold-lg" id="splashTitle">Overlap</h1>
-            <p class="splash__subtitle text-system-regular-md" id="splashSubtitle">Horizontal Crossword Puzzle</p>
-            <p class="splash__date text-system-regular-md" id="splashDate"></p>
+        <div class="splash__settings">
+          <button class="btn settings-btn text-system-semibold-sm" id="settingsBtn" type="button" aria-haspopup="dialog"
+            aria-expanded="false" aria-controls="settingsPanel"></button>
+          <div class="settings-panel card elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
+            aria-modal="false" aria-hidden="true" hidden>
+            <div class="settings-panel__header">
+              <h2 class="text-subheadline-semibold-sm">Settings</h2>
+              <button class="btn settings-panel__close" id="settingsCloseBtn" type="button"
+                aria-label="Close settings">×</button>
+            </div>
+            <div class="settings-panel__section settings-color-mode">
+              <div class="settings-panel__title">Mode</div>
+              <div class="tabs" role="tablist" aria-label="Color mode">
+                <button class="tab is-active text-system-semibold-sm" type="button" data-mode="auto">Auto</button>
+                <button class="tab text-system-semibold-sm" type="button" data-mode="light">Light</button>
+                <button class="tab text-system-semibold-sm" type="button" data-mode="dark">Dark</button>
+              </div>
+            </div>
+            <div class="settings-panel__section">
+              <div class="settings-panel__text">
+                <div class="text-system-regular-xs">Coming Soon!</div>
+                <div class="settings-panel__title">Hard Mode</div>
+                <div class="settings-panel__desc text-system-regular-sm">Correct answers aren't confirmed as you type
+                </div>
+              </div>
+              <div class="toggle" aria-hidden="true">
+              </div>
+            </div>
+            <div class="settings-panel__section">
+              <div class="settings-panel__text">
+                <div class="text-system-regular-xs">Coming Soon!</div>
+                <div class="settings-panel__title">Onscreen Keyboard</div>
+                <div class="settings-panel__desc text-system-regular-sm">Always show the onscreen keyboard</div>
+              </div>
+              <div class="toggle" aria-hidden="true">
+                <!-- <div class="toggle is-on" aria-hidden="true"> -->
 
+              </div>
+            </div>
           </div>
         </div>
-        <div class="splash__actions">
-          <button class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
-          <div class="splash__row">
-            <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button">Archive</button>
-            <button class="btn text-system-semibold-md" id="splashPuzzleBtn" type="button">Puzzles</button>
+        <div class="splash__main">
+          <div class="splash__brand">
+            <div class="logo-icon logo-icon-animation"></div>
+            <div class="splash__text">
+              <h1 class="splash__title text-display-semibold-lg" id="splashTitle">Overlap</h1>
+              <p class="splash__subtitle text-system-regular-md" id="splashSubtitle">Horizontal Crossword Puzzle</p>
+              <p class="splash__date text-system-regular-md" id="splashDate"></p>
+
+            </div>
+          </div>
+          <div class="splash__actions">
+            <button class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
+            <div class="splash__row">
+              <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button">Archive</button>
+              <button class="btn text-system-semibold-md" id="splashPuzzleBtn" type="button">Puzzles</button>
+            </div>
           </div>
         </div>
-
       </div>
       <footer class="splash__footer">
         <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">How to play</button>
@@ -346,7 +393,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.952</span>
+            id="splashVersion">V3.954</span>
         </p>
       </footer>
     </div>

@@ -1,5 +1,9 @@
 import "../../docs/token_switcher/switcher.js";
 
+// window.tokenSwapDefaults = {
+//   mode: "dark"
+// };
+
 const KEY = "overlap_puzzles_v1";
 const SHARE_URL_OVERRIDE = ""; // leave blank to use current page URL; update if you want a fixed share link
 
@@ -739,6 +743,9 @@ const els = {
   splashAvgTime: $("#splashAvgTime"),
   splashGamesPlayed: $("#splashGamesPlayed"),
   splashVersion: $("#splashVersion"),
+  settingsBtn: $("#settingsBtn"),
+  settingsPanel: $("#settingsPanel"),
+  settingsCloseBtn: $("#settingsCloseBtn"),
   archiveModal: $("#archiveModal"),
   archiveDialog: document.querySelector(".archive__dialog"),
   archiveBackBtn: $("#archiveBackBtn"),
@@ -2381,6 +2388,75 @@ function closeArchiveModal() {
   document.body.style.touchAction = "";
 }
 
+const isSettingsPanelOpen = () => !!els.settingsPanel && !els.settingsPanel.hidden;
+function openSettingsPanel() {
+  if (!els.settingsPanel) return;
+  els.settingsPanel.hidden = false;
+  els.settingsPanel.setAttribute("aria-hidden", "false");
+  els.settingsPanel.classList.add("is-open");
+  els.settingsBtn?.setAttribute("aria-expanded", "true");
+}
+
+function closeSettingsPanel() {
+  if (!els.settingsPanel) return;
+  els.settingsPanel.classList.remove("is-open");
+  els.settingsPanel.setAttribute("aria-hidden", "true");
+  els.settingsPanel.hidden = true;
+  els.settingsBtn?.setAttribute("aria-expanded", "false");
+}
+
+function toggleSettingsPanel() {
+  if (isSettingsPanelOpen()) closeSettingsPanel();
+  else openSettingsPanel();
+}
+
+const COLOR_MODE_KEY = `${KEY}__color_mode`;
+const COLOR_MODE_AUTO = "auto";
+const COLOR_MODE_LIGHT = "light";
+const COLOR_MODE_DARK = "dark";
+const COLOR_MODE_VALUES = new Set([COLOR_MODE_AUTO, COLOR_MODE_LIGHT, COLOR_MODE_DARK]);
+const colorModeTabs = Array.from(document.querySelectorAll(".settings-color-mode .tab[data-mode]"));
+const prefersColorQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+let currentColorMode = COLOR_MODE_AUTO;
+
+function resolveAutoColorMode() {
+  return prefersColorQuery && prefersColorQuery.matches ? COLOR_MODE_DARK : COLOR_MODE_LIGHT;
+}
+
+function applyColorMode(mode) {
+  const resolved = mode === COLOR_MODE_AUTO ? resolveAutoColorMode() : mode;
+  if (!resolved) return;
+  document.documentElement.setAttribute("data-mode", resolved);
+}
+
+function updateColorModeUI(mode) {
+  colorModeTabs.forEach((btn) => {
+    const active = btn.dataset.mode === mode;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+}
+
+function setColorMode(mode, { persist = true } = {}) {
+  const next = COLOR_MODE_VALUES.has(mode) ? mode : COLOR_MODE_AUTO;
+  currentColorMode = next;
+  updateColorModeUI(next);
+  applyColorMode(next);
+  if (persist) {
+    try {
+      localStorage.setItem(COLOR_MODE_KEY, next);
+    } catch {}
+  }
+}
+
+function loadColorMode() {
+  let saved = null;
+  try {
+    saved = localStorage.getItem(COLOR_MODE_KEY);
+  } catch {}
+  setColorMode(saved || COLOR_MODE_AUTO, { persist: false });
+}
+
 function openSplash(forceState) {
   if (!els.splash) return;
   updateSplashContent(forceState);
@@ -2397,6 +2473,7 @@ function closeSplash() {
   els.splash.classList.remove("is-open");
   els.splash.setAttribute("aria-hidden", "true");
   els.splash.hidden = true;
+  closeSettingsPanel();
   document.documentElement.classList.remove("is-modal-open");
   document.body.style.overflow = "";
   document.body.style.touchAction = "";
@@ -6031,6 +6108,39 @@ els.reveal.addEventListener("click", () => {
   revealPlay();
   focusForTyping();
 });
+els.settingsBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  toggleSettingsPanel();
+});
+els.settingsCloseBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  closeSettingsPanel();
+});
+document.addEventListener("pointerdown", (e) => {
+  if (!isSettingsPanelOpen()) return;
+  const target = e.target;
+  if (els.settingsPanel?.contains(target)) return;
+  if (els.settingsBtn?.contains(target)) return;
+  closeSettingsPanel();
+});
+colorModeTabs.forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const mode = btn.dataset.mode;
+    setColorMode(mode);
+  });
+});
+loadColorMode();
+if (prefersColorQuery) {
+  const handleSystemChange = () => {
+    if (currentColorMode === COLOR_MODE_AUTO) applyColorMode(COLOR_MODE_AUTO);
+  };
+  if (typeof prefersColorQuery.addEventListener === "function") {
+    prefersColorQuery.addEventListener("change", handleSystemChange);
+  } else if (typeof prefersColorQuery.addListener === "function") {
+    prefersColorQuery.addListener(handleSystemChange);
+  }
+}
 els.splashPrimary?.addEventListener("click", (e) => {
   e.preventDefault();
   handleSplashPrimary();

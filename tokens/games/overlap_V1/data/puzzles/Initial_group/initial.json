@@ -179,36 +179,6 @@
     ]
   },
   {
-    "id": "Edges and Origins",
-    "type": "puzzle",
-    "palette": "classic",
-    "words": [{
-        "clue": "Safe port",
-        "answer": "HARBOR",
-        "start": 1,
-        "height": "full"
-      },
-      {
-        "clue": "Edge or boundary",
-        "answer": "BORDER",
-        "start": 4,
-        "height": "mid"
-      },
-      {
-        "clue": "Draw from",
-        "answer": "DERIVE",
-        "start": 7,
-        "height": "inner"
-      },
-      {
-        "clue": "Climbing plants (plural)",
-        "answer": "IVIES",
-        "start": 10,
-        "height": "full"
-      }
-    ]
-  },
-  {
     "id": "Mixed Signals",
     "type": "puzzle",
     "palette": "greens",
@@ -294,36 +264,6 @@
         "clue": "Rebound",
         "answer": "RICOCHET",
         "start": 9,
-        "height": "full"
-      }
-    ]
-  },
-  {
-    "id": "A Place for Everything",
-    "type": "puzzle",
-    "palette": "classic",
-    "words": [{
-        "clue": "Gallery building",
-        "answer": "MUSEUM",
-        "start": 1,
-        "height": "full"
-      },
-      {
-        "clue": "Short recap",
-        "answer": "SUMMARY",
-        "start": 4,
-        "height": "mid"
-      },
-      {
-        "clue": "U.S. state",
-        "answer": "MARYLAND",
-        "start": 7,
-        "height": "inner"
-      },
-      {
-        "clue": "Scenery",
-        "answer": "LANDSCAPE",
-        "start": 11,
         "height": "full"
       }
     ]

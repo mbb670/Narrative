@@ -2,6 +2,10 @@
 /* body[data-view="chain"]  */
 /* body[data-view="build"] */
 
+.token-swap {
+    display: none;
+}
+
 
 
 :root {
@@ -28,6 +32,7 @@
     --slider-color-mix-amount: 50;
 
 }
+
 @media (max-width:640px) {
     :root {
         --border-w: 1px;
@@ -312,6 +317,42 @@ Interactive elements
         border-color: var(--border-strong);
         --background-color: var(--background-strong);
         color: var(--foreground-alt);
+    }
+}
+
+
+.toggle {
+    width: var(--unit-48);
+    height: var(--unit-24);
+    border-radius: var(--radius-full);
+    background: var(--background-subtle);
+    border: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    padding: var(--unit-2);
+    display: flex;
+
+    &::before {
+        content: '';
+        height: 100%;
+        aspect-ratio: 1;
+        background-color: var(--foreground-disabled);
+        display: block;
+        border-radius: var(--radius-full);
+        box-shadow: 0 var(--unit-2) var(--unit-4) var(--color-alpha-black-A100);
+
+    }
+}
+
+.toggle.is-on {
+    background: var(--foreground-default);
+    border-color: var(--foreground-default);
+}
+
+.toggle.is-on {
+    justify-content: flex-end;
+
+    &::before {
+        background-color: var(--foreground-alt);
     }
 }
 
@@ -965,19 +1006,16 @@ body[data-chain-state="done"] .rangeClue-content {
     color: var(--foreground-default);
     user-select: none;
     touch-action: pan-x;
+    mix-blend-mode: multiply;
+
 
     z-index: 10;
-    mix-blend-mode: multiply;
 
     grid-row: 1/-1;
     container-type: size;
 
     font-weight: var(--system-strong);
     font-family: var(--system-fontfamily);
-
-    /* &:last-of-type {
-box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(--border-w) * 0.5) 0px 0px 0px var(--grid-line)!important;
-} */
 
 
     .letter {
@@ -988,6 +1026,7 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
         display: grid;
         place-items: center;
         transform-origin: center;
+
     }
 
     .num {
@@ -1122,8 +1161,21 @@ box-shadow: calc(var(--border-w) * -0.5) 0px 0px 0px var(--grid-line), calc(var(
 /* .grid.showNums .num {
     display: block
 } */
-.is-dev .cell .num{
+.is-dev .cell .num {
     display: block;
+}
+
+[data-mode="dark"] {
+    .cell {
+        mix-blend-mode: screen !important;
+    }
+
+    .cell.is-active,
+    .cell.is-select-all {
+        &::before {
+            background-color: var(--opacity-lighten-subtle) !important;
+        }
+    }
 }
 
 /* .cell.is-active {
@@ -1348,8 +1400,104 @@ Splash
 
 .splash {
     .splash__top {
+        /* position: relative; */
         flex: 1;
-        align-content: center;
+
+        /* align-content: center; */
+        /* align-content: space-around; */
+        /* border: 1px solid; */
+        display: flex;
+        flex-direction: column;
+
+        .splash__settings {
+            position: relative;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: var(--spacing-x16);
+            z-index: 2;
+        }
+
+        .settings-btn {
+            padding: var(--spacing-x6) var(--spacing-x10);
+            border-radius: var(--radius-default);
+            background-color: var(--background-default);
+            border: unset;
+            padding: var(--spacing-x8);
+            /* border: 1px solid black; */
+            aspect-ratio: 1;
+
+               &::after {
+                content: '';
+                display: block;
+                aspect-ratio: 1;
+                width: var(--spacing-x16);
+                background-color: var(--foreground-muted);
+                -webkit-mask: url("images/settings.svg") center / contain no-repeat;
+                mask: url("images/settings.svg") center / contain no-repeat;
+            }
+        }
+
+        .settings-panel {
+            position: absolute;
+            top: calc(100% + var(--spacing-x8));
+            right: 0;
+            width: min(320px, 90vw);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-soft);
+            padding: unset;
+            gap: unset;
+            background-color: var(--background-muted);
+        }
+
+        .settings-panel[hidden] {
+            display: none !important;
+        }
+
+        .settings-panel__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-x24);
+        }
+
+        .settings-panel__close {
+            border: unset;
+        }
+
+        .settings-panel__section {
+            padding: var(--spacing-x24);
+            display: flex;
+            justify-content: space-between;
+            gap: var(--spacing-x24);
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .settings-panel__title {
+            margin-block: var(--spacing-x4);
+        }
+
+        .settings-color-mode {
+            flex-direction: column;
+            gap: var(--spacing-x8);
+
+            .tabs {
+                width: 100%;
+                background-color: var(--background-subtle);
+
+                .tab {
+                    flex: 1;
+                }
+            }
+        }
+
+        .settings-panel__desc {
+            color: var(--foreground-muted);
+        }
+
+        .splash__main{
+            flex: 1;
+            align-content: center;
+        }
 
         .splash__brand {
             .logo-icon {
@@ -1666,6 +1814,20 @@ FTUE
 }
 
 
+[data-mode="dark"] {
+    .cell {
+        mix-blend-mode: screen !important;
+    }
+
+    .cell.is-active,
+    .cell.is-select-all {
+        &::before {
+            background-color: var(--opacity-lighten-subtle) !important;
+        }
+    }
+}
+
+
 /* the extended dot width breaks the transitions on safari */
 @supports (font: -apple-system-body) {
     .ftue-dot.is-active {
@@ -1921,7 +2083,7 @@ Results
     text-align: center;
 }
 
-.resultsTitle{
+.resultsTitle {
     margin-bottom: var(--spacing-x4);
 }
 
@@ -1987,6 +2149,13 @@ Results
     display: flex;
     flex-direction: column;
     gap: var(--spacing-x24);
+}
+
+[data-mode="dark"] {
+    .card {
+        background-color: color-mix(in srgb, var(--background-default), var(--foreground-default) 5%);
+
+    }
 }
 
 .resultsClose {
@@ -2296,10 +2465,6 @@ Results
     gap: 10px;
     flex-wrap: wrap;
     justify-content: flex-end
-}
-
-.token-swap {
-    display: none;
 }
 
 /* -----------------------------
