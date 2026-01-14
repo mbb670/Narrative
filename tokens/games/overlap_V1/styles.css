@@ -1735,6 +1735,11 @@ FTUE
                 display: block !important;
             }
 
+            .letter{
+               color: var(--foreground-default)!important;
+
+            }
+
             [data-i="5"],
             [data-i="6"] {
                 &::before {
@@ -1840,21 +1845,6 @@ FTUE
         }
     }
 }
-
-
-[data-mode="dark"] {
-    .cell {
-        mix-blend-mode: screen !important;
-    }
-
-    .cell.is-active,
-    .cell.is-select-all {
-        &::before {
-            background-color: var(--opacity-lighten-subtle) !important;
-        }
-    }
-}
-
 
 /* the extended dot width breaks the transitions on safari */
 @supports (font: -apple-system-body) {
