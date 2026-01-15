@@ -712,7 +712,8 @@ body[data-chain-state="done"] .rangeClue-content {
 }
 
 .toast-word-solved,
-.resultsShareToast {
+.resultsShareToast,
+.splashShareToast {
     background: var(--background-default);
     color: var(--foreground-muted);
     border-color: var(--border-subtle);
@@ -1417,7 +1418,7 @@ Splash settings
         display: flex;
         flex-direction: column;
 
-        .splash__settings {
+        .splash__utilities {
             position: relative;
             display: flex;
             justify-content: flex-end;
@@ -1425,23 +1426,33 @@ Splash settings
             z-index: 2;
         }
 
-        .settings-btn {
-            padding: var(--spacing-x6) var(--spacing-x10);
-            border-radius: var(--radius-default);
-            background-color: var(--background-default);
+        .splash__share {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .settings-btn, .share-btn {
             border: unset;
-            padding: var(--spacing-x8);
-            /* border: 1px solid black; */
             aspect-ratio: 1;
+            margin: calc(-1 * var(--spacing-x8)) calc(-1 * var(--spacing-x8)) 0 0;
 
             &::after {
                 content: '';
                 display: block;
                 aspect-ratio: 1;
-                width: var(--spacing-x16);
+                width: var(--unit-18);
                 background-color: var(--foreground-subtle);
                 -webkit-mask: url("images/settings.svg") center / contain no-repeat;
                 mask: url("images/settings.svg") center / contain no-repeat;
+            }
+        }
+
+        .share-btn{
+            margin-right: calc(-1 * var(--spacing-x4));
+            &::after {
+                -webkit-mask: url("images/share.svg") center / contain no-repeat;
+                mask: url("images/share.svg") center / contain no-repeat;
             }
         }
 
@@ -2169,11 +2180,17 @@ Results
     align-content: center;
 }
 
-.resultsShareToast {
+.resultsShareToast,
+.splashShareToast {
     top: calc(100% + var(--spacing-x8));
     left: 50%;
-    transform: translate(-50%) !important;
+    transform: translate(-50%, -8px);
     width: max-content;
+}
+
+.resultsShareToast.is-showing,
+.splashShareToast.is-showing {
+    transform: translate(-50%, 0);
 }
 
 

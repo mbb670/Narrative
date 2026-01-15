@@ -813,6 +813,8 @@ const els = {
   toastHint: $("#toastHint"),
   hintPenalty: $("#hintPenalty"),
   shareInline: $("#shareInline"),
+  splashShareToast: $("#splashShareToast"),
+  shareBtn: $("#shareBtn"),
   totalHintPenalty: $("#totalHintPenalty"),
   totalWordPenalty: $("#totalWordPenalty"),
 
@@ -825,6 +827,7 @@ const logNav = () => {};
 // ---- Toasts ----
 const toastTimers = { success: 0, warning: 0, error: 0, hint: 0 };
 let resultsToastTimer = 0;
+const inlineToastTimers = new WeakMap();
 let lastPlayWarningKey = "";
 let lastChainWarningKey = "";
 const HINT_PENALTY_SEC = 10;
@@ -870,7 +873,23 @@ function showToast(type, message, duration) {
   toastTimers[type] = setTimeout(() => el.classList.remove("is-showing"), dur);
 }
 
-function showShareToast(message) {
+function showInlineToast(el, message) {
+  if (!el) return;
+  el.textContent = message || "";
+  const dur = toastDuration("success");
+  const prev = inlineToastTimers.get(el);
+  if (prev) clearTimeout(prev);
+  el.classList.remove("is-showing");
+  void el.offsetWidth;
+  el.classList.add("is-showing");
+  inlineToastTimers.set(el, setTimeout(() => el.classList.remove("is-showing"), dur));
+}
+
+function showShareToast(message, targetEl) {
+  if (targetEl) {
+    showInlineToast(targetEl, message);
+    return;
+  }
   const t = els.resultsModal?.querySelector(".resultsShareToast");
   const resultsOpen = t && els.resultsModal?.classList.contains("is-open");
   if (resultsOpen && t) {
@@ -5165,7 +5184,7 @@ function setResultsInert(isOpen) {
   root?.classList.toggle("results-open", isOpen);
 }
 
-function shareResult({ mode }) {
+function shareResult({ mode, linkOnly = false, toastEl = null }) {
   const puzzle = puzzles[pIdx];
   const formatShareDate = (dt) =>
     dt.toLocaleDateString(undefined, {
@@ -5175,14 +5194,16 @@ function shareResult({ mode }) {
       day: "numeric",
       timeZone: "UTC",
     });
-  const shareDateLabel = (() => {
-    const id = typeof puzzle === "string" ? puzzle : puzzle?.id;
-    const dt = dateFromKey(id);
-    if (dt && !Number.isNaN(+dt)) return formatShareDate(dt);
-    const lbl = puzzleLabel(puzzle);
-    if (lbl) return lbl;
-    return formatShareDate(new Date());
-  })();
+  const shareDateLabel = linkOnly
+    ? ""
+    : (() => {
+        const id = typeof puzzle === "string" ? puzzle : puzzle?.id;
+        const dt = dateFromKey(id);
+        if (dt && !Number.isNaN(+dt)) return formatShareDate(dt);
+        const lbl = puzzleLabel(puzzle);
+        if (lbl) return lbl;
+        return formatShareDate(new Date());
+      })();
   const baseUrl =
     SHARE_URL_OVERRIDE && SHARE_URL_OVERRIDE.trim()
       ? SHARE_URL_OVERRIDE.trim()
@@ -5194,9 +5215,9 @@ function shareResult({ mode }) {
           }
         })();
 
-  let msg = `Overlap | ${shareDateLabel}`;
+  let msg = linkOnly ? "" : `Overlap | ${shareDateLabel}`;
 
-  if (mode === MODE.CHAIN) {
+  if (!linkOnly && mode === MODE.CHAIN) {
     const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
     const timeText = fmtTime(elapsed);
     if (timeText) msg += `\nI solved the puzzle in ${timeText}`;
@@ -5210,16 +5231,16 @@ function shareResult({ mode }) {
     }
   }
 
-  const payload = { title: "Overlap", text: msg, url: baseUrl };
+  const payload = linkOnly ? { url: baseUrl } : { title: "Overlap", text: msg, url: baseUrl };
 
-  const full = `${msg}\n${baseUrl}`;
+  const full = linkOnly ? baseUrl : `${msg}\n${baseUrl}`;
 
   const isTouch = IS_TOUCH || navigator.maxTouchPoints > 0 || navigator.userAgentData?.mobile === true;
 
   const tryClipboard = async (message) => {
     try {
       await navigator.clipboard?.writeText(full);
-      if (message) showShareToast(message);
+      if (message) showShareToast(message, toastEl);
       return true;
     } catch {
       return false;
@@ -5237,7 +5258,7 @@ function shareResult({ mode }) {
       }
     }
 
-    const copied = await tryClipboard(isTouch ? null : "Results copied to clipboard");
+    const copied = await tryClipboard(isTouch ? null : (linkOnly ? "Copied to clipboard" : "Results copied to clipboard"));
     if (!copied) {
       alert(full);
     }
@@ -6281,6 +6302,10 @@ els.nextPuzzleBtn?.addEventListener("click", () => {
 els.shareInline?.addEventListener("click", () => {
   markInteracted();
   shareResult({ mode: play.mode });
+});
+els.shareBtn?.addEventListener("click", () => {
+  markInteracted();
+  shareResult({ mode: play.mode, linkOnly: true, toastEl: els.splashShareToast });
 });
 const navActions = {
   cellPrev: () => {

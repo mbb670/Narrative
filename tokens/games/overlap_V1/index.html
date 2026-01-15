@@ -319,7 +319,12 @@
   <div class="splash" id="splashModal" aria-hidden="true" role="dialog" aria-modal="true" hidden>
     <div class="splash__dialog card elevation-overlay">
       <div class="splash__top">
-        <div class="splash__settings">
+        <div class="splash__utilities">
+          <div class="splash__share">
+            <button class="btn share-btn text-system-semibold-sm" id="shareBtn" type="button"></button>
+            <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
+              aria-live="polite" aria-atomic="true">Copied to clipboard</div>
+          </div>
           <button class="btn settings-btn text-system-semibold-sm" id="settingsBtn" type="button" aria-haspopup="dialog"
             aria-expanded="false" aria-controls="settingsPanel"></button>
           <div class="settings-panel card elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
@@ -393,7 +398,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.959</span>
+            id="splashVersion">V3.96</span>
         </p>
       </footer>
     </div>
