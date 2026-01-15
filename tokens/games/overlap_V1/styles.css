@@ -329,52 +329,52 @@ Interactive elements
 }
 
 .toggle {
-  width: var(--unit-48);
-  height: var(--unit-24);
-  border-radius: var(--radius-full);
-  background: var(--background-subtle);
-  border: 1px solid var(--border-subtle);
-  flex-shrink: 0;
-  padding: var(--unit-2);
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-
-  transition: background-color 160ms ease, border-color 160ms ease;
-
-  &::before {
-    content: '';
-    height: 100%;
-    aspect-ratio: 1;
-    background-color: var(--foreground-disabled);
-    display: block;
+    width: var(--unit-48);
+    height: var(--unit-24);
     border-radius: var(--radius-full);
-    box-shadow: 0 var(--unit-2) var(--unit-4) var(--color-alpha-black-A100);
+    background: var(--background-subtle);
+    border: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    padding: var(--unit-2);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
 
-    /* slide animation */
-    transform: translateX(0);
-    transition: transform 160ms ease, background-color 160ms ease;
-  }
+    transition: background-color 160ms ease, border-color 160ms ease;
+
+    &::before {
+        content: '';
+        height: 100%;
+        aspect-ratio: 1;
+        background-color: var(--foreground-disabled);
+        display: block;
+        border-radius: var(--radius-full);
+        box-shadow: 0 var(--unit-2) var(--unit-4) var(--color-alpha-black-A100);
+
+        /* slide animation */
+        transform: translateX(0);
+        transition: transform 160ms ease, background-color 160ms ease;
+    }
 }
 
 .switch__input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
 }
 
-.switch__input:checked + .toggle {
-  background: var(--foreground-default);
-  border-color: var(--foreground-default);
+.switch__input:checked+.toggle {
+    background: var(--foreground-default);
+    border-color: var(--foreground-default);
 
-  &::before {
-    background-color: var(--foreground-alt);
+    &::before {
+        background-color: var(--foreground-alt);
 
-    /* travel distance = width - height */
-    transform: translateX(calc(var(--unit-48) - var(--unit-24)));
-  }
+        /* travel distance = width - height */
+        transform: translateX(calc(var(--unit-48) - var(--unit-24)));
+    }
 }
 
 /* -----------------------------
@@ -2305,31 +2305,10 @@ Results
 
 /* Fix for shadow cutoff - but need to have a display: none; on the first thing to prevent the rest of the page from having a y scroll */
 
-/* .ftue-modal,
-.splash {
-    position: absolute;
-    height: 100vh!important;
-    display: none;
-    
-}
-
-
-.ftue-modal__dialog,
-.splash__dialog {
-    height: calc(100svh - (2 * var(--layout-grid-margin)));
-    overflow-y: scroll;
-}
-
-@supports (-webkit-touch-callout: none) {
+/* @supports (-webkit-touch-callout: none) {
     @media (hover: none) and (pointer: coarse) {
-        .ftue-modal,
-.splash {
-    place-content: start;
-}
-        .ftue-modal__dialog,
-        .splash__dialog {
-            height: calc(100svh - var(--layout-grid-margin)) !important;
-        }
+
+
     }
 } */
 
@@ -2583,8 +2562,9 @@ On-screen keyboard (touch)
 
 }
 
-.keyboard.is-visible, body:has(#showOnscreenKeyboard:checked) .keyboard {
-    display: flex!important;
+.keyboard.is-visible,
+body:has(#showOnscreenKeyboard:checked) .keyboard {
+    display: flex !important;
 }
 
 .keyboard-row {
