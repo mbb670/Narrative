@@ -2185,6 +2185,14 @@ Results
     pointer-events: none;
 }
 
+
+/* prevent background behind modals from being interactive*/
+.is-modal-open .wrap,
+.results-open .wrap {
+    position: fixed;
+    inset: 0;
+}
+
 .results-open .results {
     pointer-events: auto;
 }

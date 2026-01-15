@@ -51,6 +51,9 @@ const FORCE_FTUE = (() => {
     return false;
   }
 })();
+const IS_IOS =
+  /iPad|iPhone|iPod/.test(navigator.userAgent || "") ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const FTUE_SEEN_KEY = `${KEY}__ftue_seen`;
 const LAST_PLAYED_CHAIN_KEY = `${KEY}__last_chain_played`;
 
@@ -977,7 +980,7 @@ const ftueIsOpen = () => !!els.ftueModal?.classList.contains("is-open");
 let _ftuePrevOverflow = "";
 function ftueDisableInteractions() {
   _ftuePrevOverflow = document.body.style.overflow;
-  document.body.style.overflow = "hidden";
+  if (!IS_IOS) document.body.style.overflow = "hidden";
   if (els.stage) els.stage.style.pointerEvents = "none";
   if (els.gridScroll) els.gridScroll.style.pointerEvents = "none";
   if (els.keyboard) els.keyboard.style.pointerEvents = "none";
@@ -2369,8 +2372,10 @@ async function openArchiveModal(opts = {}) {
   els.archiveModal.hidden = false;
   els.archiveModal.setAttribute("aria-hidden", "false");
   document.documentElement.classList.add("is-modal-open");
-  document.body.style.overflow = "hidden";
-  document.body.style.touchAction = "none";
+  if (!IS_IOS) {
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+  }
   requestAnimationFrame(() => els.archiveModal?.classList.add("is-open"));
   const dateKey = typeof opts.dateKey === "string" ? opts.dateKey : toDateKey(now);
   const parts = dateKey ? datePartsFromKey(dateKey) : null;
@@ -2385,8 +2390,10 @@ function closeArchiveModal() {
   els.archiveModal.setAttribute("aria-hidden", "true");
   els.archiveModal.hidden = true;
   document.documentElement.classList.remove("is-modal-open");
-  document.body.style.overflow = "";
-  document.body.style.touchAction = "";
+  if (!IS_IOS) {
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+  }
 }
 
 const isSettingsPanelOpen = () => !!els.settingsPanel && !els.settingsPanel.hidden;
@@ -2464,8 +2471,10 @@ function openSplash(forceState) {
   els.splash.hidden = false;
   els.splash.setAttribute("aria-hidden", "false");
   document.documentElement.classList.add("is-modal-open");
-  document.body.style.overflow = "hidden";
-  document.body.style.touchAction = "none";
+  if (!IS_IOS) {
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+  }
   requestAnimationFrame(() => els.splash?.classList.add("is-open"));
 }
 
@@ -2476,8 +2485,10 @@ function closeSplash() {
   els.splash.hidden = true;
   closeSettingsPanel();
   document.documentElement.classList.remove("is-modal-open");
-  document.body.style.overflow = "";
-  document.body.style.touchAction = "";
+  if (!IS_IOS) {
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+  }
 }
 
 function handleSplashPrimary() {
@@ -5140,13 +5151,13 @@ function setResultsInert(isOpen) {
     window.addEventListener("pointerdown", resultsInertBlock, true);
     window.addEventListener("keydown", resultsInertBlock, true);
     resultsInertActive = true;
-    body.style.overflow = "hidden";
+    if (!IS_IOS) body.style.overflow = "hidden";
   } else if (!isOpen && resultsInertActive) {
     window.removeEventListener("focus", resultsInertBlock, true);
     window.removeEventListener("pointerdown", resultsInertBlock, true);
     window.removeEventListener("keydown", resultsInertBlock, true);
     resultsInertActive = false;
-    body.style.overflow = "";
+    if (!IS_IOS) body.style.overflow = "";
   }
   root?.classList.toggle("results-open", isOpen);
 }
