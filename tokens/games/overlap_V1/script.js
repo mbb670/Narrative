@@ -22,6 +22,7 @@ const VIEW = { PLAY: "play", CHAIN: "chain", BUILD: "build" };
 
 // ---- Remember last tab/view ----
 const LAST_VIEW_KEY = `${KEY}__last_view`;
+const ARCHIVE_RETURN_TIMEOUT_MS = 45 * 60 * 1000;
 
 const VALID_VIEWS = new Set(Object.values(VIEW));
 
@@ -2516,7 +2517,10 @@ function maybeShowSplashOnLoad() {
   _splashShown = true;
   const last = getLastPlayedChain();
   const today = todayKey();
-  if (last?.isDate && last.id && today && last.id !== today) {
+  const lastAt = Number.isFinite(last?.at) ? last.at : null;
+  const withinArchiveWindow =
+    lastAt == null ? true : Date.now() - lastAt <= ARCHIVE_RETURN_TIMEOUT_MS;
+  if (last?.isDate && last.id && today && last.id !== today && withinArchiveWindow) {
     openArchiveModal({ dateKey: last.id });
     return;
   }
@@ -2754,7 +2758,8 @@ const getLastPlayedChain = () => {
     if (!data || typeof data !== "object") return null;
     const id = String(data.id || "").trim();
     if (!id) return null;
-    return { id, isDate: !!data.isDate };
+    const at = Number.isFinite(+data.at) ? +data.at : null;
+    return { id, isDate: !!data.isDate, at };
   } catch {
     return null;
   }
