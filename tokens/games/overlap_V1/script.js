@@ -815,6 +815,7 @@ const els = {
   shareInline: $("#shareInline"),
   splashShareToast: $("#splashShareToast"),
   shareBtn: $("#shareBtn"),
+  showOnscreenKeyboard: $("#showOnscreenKeyboard"),
   totalHintPenalty: $("#totalHintPenalty"),
   totalWordPenalty: $("#totalWordPenalty"),
 
@@ -2438,6 +2439,7 @@ function toggleSettingsPanel() {
 }
 
 const COLOR_MODE_KEY = `${KEY}__color_mode`;
+const ONSCREEN_KB_KEY = `${KEY}__show_onscreen_keyboard`;
 const COLOR_MODE_AUTO = "auto";
 const COLOR_MODE_LIGHT = "light";
 const COLOR_MODE_DARK = "dark";
@@ -2482,6 +2484,16 @@ function loadColorMode() {
     saved = localStorage.getItem(COLOR_MODE_KEY);
   } catch {}
   setColorMode(saved || COLOR_MODE_AUTO, { persist: false });
+}
+
+function loadOnscreenKeyboardPref() {
+  if (!els.showOnscreenKeyboard) return;
+  let enabled = false;
+  try {
+    enabled = localStorage.getItem(ONSCREEN_KB_KEY) === "1";
+  } catch {}
+  els.showOnscreenKeyboard.checked = enabled;
+  els.showOnscreenKeyboard.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 function openSplash(forceState) {
@@ -6163,6 +6175,13 @@ els.settingsCloseBtn?.addEventListener("click", (e) => {
   e.preventDefault();
   closeSettingsPanel();
 });
+els.showOnscreenKeyboard?.addEventListener("change", (e) => {
+  const enabled = !!e.target.checked;
+  try {
+    if (enabled) localStorage.setItem(ONSCREEN_KB_KEY, "1");
+    else localStorage.removeItem(ONSCREEN_KB_KEY);
+  } catch {}
+});
 document.addEventListener("pointerdown", (e) => {
   if (!isSettingsPanelOpen()) return;
   const target = e.target;
@@ -6178,6 +6197,7 @@ colorModeTabs.forEach((btn) => {
   });
 });
 loadColorMode();
+loadOnscreenKeyboardPref();
 if (prefersColorQuery) {
   const handleSystemChange = () => {
     if (currentColorMode === COLOR_MODE_AUTO) applyColorMode(COLOR_MODE_AUTO);

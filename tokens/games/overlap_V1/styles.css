@@ -328,40 +328,53 @@ Interactive elements
     letter-spacing: inherit;
 }
 
-
 .toggle {
-    width: var(--unit-48);
-    height: var(--unit-24);
+  width: var(--unit-48);
+  height: var(--unit-24);
+  border-radius: var(--radius-full);
+  background: var(--background-subtle);
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  padding: var(--unit-2);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  transition: background-color 160ms ease, border-color 160ms ease;
+
+  &::before {
+    content: '';
+    height: 100%;
+    aspect-ratio: 1;
+    background-color: var(--foreground-disabled);
+    display: block;
     border-radius: var(--radius-full);
-    background: var(--background-subtle);
-    border: 1px solid var(--border-subtle);
-    flex-shrink: 0;
-    padding: var(--unit-2);
-    display: flex;
+    box-shadow: 0 var(--unit-2) var(--unit-4) var(--color-alpha-black-A100);
 
-    &::before {
-        content: '';
-        height: 100%;
-        aspect-ratio: 1;
-        background-color: var(--foreground-disabled);
-        display: block;
-        border-radius: var(--radius-full);
-        box-shadow: 0 var(--unit-2) var(--unit-4) var(--color-alpha-black-A100);
-
-    }
+    /* slide animation */
+    transform: translateX(0);
+    transition: transform 160ms ease, background-color 160ms ease;
+  }
 }
 
-.toggle.is-on {
-    background: var(--foreground-default);
-    border-color: var(--foreground-default);
+.switch__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.toggle.is-on {
-    justify-content: flex-end;
+.switch__input:checked + .toggle {
+  background: var(--foreground-default);
+  border-color: var(--foreground-default);
 
-    &::before {
-        background-color: var(--foreground-alt);
-    }
+  &::before {
+    background-color: var(--foreground-alt);
+
+    /* travel distance = width - height */
+    transform: translateX(calc(var(--unit-48) - var(--unit-24)));
+  }
 }
 
 /* -----------------------------
@@ -1432,7 +1445,8 @@ Splash settings
             align-items: center;
         }
 
-        .settings-btn, .share-btn {
+        .settings-btn,
+        .share-btn {
             border: unset;
             aspect-ratio: 1;
             margin: calc(-1 * var(--spacing-x8)) calc(-1 * var(--spacing-x8)) 0 0;
@@ -1448,8 +1462,9 @@ Splash settings
             }
         }
 
-        .share-btn{
+        .share-btn {
             margin-right: calc(-1 * var(--spacing-x4));
+
             &::after {
                 -webkit-mask: url("images/share.svg") center / contain no-repeat;
                 mask: url("images/share.svg") center / contain no-repeat;
@@ -2568,8 +2583,8 @@ On-screen keyboard (touch)
 
 }
 
-.keyboard.is-visible {
-    display: flex;
+.keyboard.is-visible, body:has(#showOnscreenKeyboard:checked) .keyboard {
+    display: flex!important;
 }
 
 .keyboard-row {
