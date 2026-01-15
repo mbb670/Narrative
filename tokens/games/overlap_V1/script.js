@@ -4366,6 +4366,7 @@ function ensureChainResults() {
     statTime: wrap.querySelector(".resultsStatTimeVal"),
     statSolved: wrap.querySelector(".resultsStatSolvedVal"),
     statHints: wrap.querySelector(".resultsStatHintsVal"),
+    pluralHints: wrap.querySelector("#pluralHints"),
     cClose,
     cShare,
   };
@@ -4539,7 +4540,9 @@ function openChainResults(stats, reason) {
 
   r.statTime.textContent = fmtTime(tSec);
   r.statSolved.textContent = `${solved}/${total}`;
-  r.statHints.textContent = String(Math.max(0, chain.hintsUsed || 0));
+  const hintCount = Math.max(0, chain.hintsUsed || 0);
+  r.statHints.textContent = String(hintCount);
+  if (r.pluralHints) r.pluralHints.style.display = hintCount === 1 ? "none" : "";
   const hintPenalty = Math.max(0, chain.hintPenaltySecTotal || 0);
   const wordPenalty = Math.max(0, chain.wordPenaltySecTotal || 0);
   if (els.totalHintPenalty) {
@@ -5164,17 +5167,21 @@ function setResultsInert(isOpen) {
 
 function shareResult({ mode }) {
   const puzzle = puzzles[pIdx];
-  const shareDateLabel = (() => {
-    const dateLabel = puzzleDateLabel(puzzle);
-    if (dateLabel) return dateLabel;
-    const lbl = puzzleLabel(puzzle);
-    if (lbl) return lbl;
-    return new Date().toLocaleDateString(undefined, {
+  const formatShareDate = (dt) =>
+    dt.toLocaleDateString(undefined, {
       weekday: "long",
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
+      timeZone: "UTC",
     });
+  const shareDateLabel = (() => {
+    const id = typeof puzzle === "string" ? puzzle : puzzle?.id;
+    const dt = dateFromKey(id);
+    if (dt && !Number.isNaN(+dt)) return formatShareDate(dt);
+    const lbl = puzzleLabel(puzzle);
+    if (lbl) return lbl;
+    return formatShareDate(new Date());
   })();
   const baseUrl =
     SHARE_URL_OVERRIDE && SHARE_URL_OVERRIDE.trim()
@@ -5194,11 +5201,12 @@ function shareResult({ mode }) {
     const timeText = fmtTime(elapsed);
     if (timeText) msg += `\nI solved the puzzle in ${timeText}`;
     const hints = Math.max(0, chain.hintsUsed || 0);
+    const hintLabel = hints === 1 ? "hint" : "hints";
     if (chain.unsolvedCount > 0 && chain.lastFinishReason !== "solved") {
       msg += ` with ${chain.unsolvedCount} unsolved words`;
-      if (hints > 0) msg += ` and ${hints} hints.`;
+      if (hints > 0) msg += ` and ${hints} ${hintLabel}.`;
     } else if (hints > 0) {
-      msg += ` with ${hints} hints.`;
+      msg += ` with ${hints} ${hintLabel}.`;
     }
   }
 
