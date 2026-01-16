@@ -1345,13 +1345,12 @@ body[data-view="play"] {
 .game-slider {
     position: relative;
     width: min(1080px, 100%);
-    /* height: var(--unit-48); */
     margin: var(--spacing-x24) auto;
+    margin-bottom: var(--spacing-x80);
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
-    /* border: 1px solid red; */
     width: calc(100% - (var(--layout-grid-margin) * 2));
     max-width: var(--layout-content-md-max);
 
@@ -1361,6 +1360,14 @@ body[data-view="play"] {
         -webkit-tap-highlight-color: transparent;
     }
 
+}
+
+body:has(.keyboard.is-visible),
+body:has(#showOnscreenKeyboard:checked) {
+
+    .game-slider {
+        margin-bottom: var(--spacing-x24);
+    }
 }
 
 .slider-track {
