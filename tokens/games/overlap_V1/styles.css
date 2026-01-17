@@ -2478,41 +2478,6 @@ Results
 }
 
 
-
-
-
-.io {
-    margin-top: 12px
-}
-
-.io>summary {
-    cursor: pointer;
-    color: var(--foreground-muted);
-    font: 800 12px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    letter-spacing: .10em;
-    text-transform: uppercase
-}
-
-.ioTa {
-    width: 100%;
-    min-height: 160px;
-    resize: vertical;
-    margin-top: 10px;
-    font: 600 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    color: var(--foreground-default);
-    background: rgba(255, 255, 255, .20);
-    border: 1px solid rgba(0, 0, 0, .14);
-    padding: 10px
-}
-
-.ioBtns {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: flex-end
-}
-
 /* -----------------------------
 On-screen keyboard (touch)
 ----------------------------- */

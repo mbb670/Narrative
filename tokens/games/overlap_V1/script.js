@@ -796,9 +796,6 @@ const els = {
   pTitle: $("#pTitle"),
   rows: $("#rows"),
   wAdd: $("#wAdd"),
-  ioTxt: $("#ioTxt"),
-  ioExp: $("#ioExp"),
-  ioImp: $("#ioImp"),
   status: $("#status"),
   helper: $(".helper"),
   keyboard: $(".keyboard"),
@@ -5980,30 +5977,6 @@ els.pSave.addEventListener("click", () => {
   store.save();
   setDirty(false);
   loadPuzzle(pIdx);
-});
-
-// Export
-els.ioExp.addEventListener("click", async () => {
-  const t = JSON.stringify(stripHeightsFromPuzzles(puzzles), null, 2);
-  els.ioTxt.value = t;
-  try {
-    await navigator.clipboard.writeText(t);
-  } catch {}
-});
-
-// Import
-els.ioImp.addEventListener("click", () => {
-  try {
-    const arr = JSON.parse(els.ioTxt.value || "");
-    if (!Array.isArray(arr)) throw 0;
-    puzzles = arr.map((p) => normPuzzle(p));
-    store.save();
-    els.ioTxt.value = "";
-    loadPuzzle(0);
-    setTab(VIEW.BUILD);
-  } catch {
-    alert("Invalid JSON. Paste the exported puzzles JSON and try again.");
-  }
 });
 
 // Tabs
