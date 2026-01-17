@@ -799,9 +799,7 @@ const els = {
   ioTxt: $("#ioTxt"),
   ioExp: $("#ioExp"),
   ioImp: $("#ioImp"),
-  bGrid: $("#bGrid"),
   status: $("#status"),
-  solution: $("#solution"),
   helper: $(".helper"),
   keyboard: $(".keyboard"),
   archiveDate: $("#archiveDate"),
@@ -5964,21 +5962,6 @@ function renderRows() {
 
 function renderPreview() {
   const m = computed(puzzles[pIdx]);
-  setCols(m.total);
-  renderGrid(els.bGrid, m, false, puzzles[pIdx]);
-  els.bGrid.classList.add("showNums");
-
-  const bad = m.ok ? null : m.conf?.idx;
-
-  els.bGrid.querySelectorAll(".cell").forEach((c) => {
-    const i = +c.dataset.i;
-    c.querySelector(".num").textContent = i + 1;
-    c.querySelector(".letter").textContent = m.exp[i] || "";
-    c.classList.toggle("is-bad", bad === i);
-  });
-
-  els.solution.textContent = `Solution row: ${m.exp.map((c) => c || "·").join("")}`;
-
   setStatus(m);
 }
 
@@ -6372,7 +6355,7 @@ function attachHoldRepeat(btn, fn) {
   if (!btn || typeof fn !== "function") return;
   let repeatT = null;
   let repeatI = null;
-  let lastPointerTs = 0;
+  let ignoreClick = false;
 
   const stop = () => {
     if (repeatT) clearTimeout(repeatT);
@@ -6383,7 +6366,7 @@ function attachHoldRepeat(btn, fn) {
 
   btn.addEventListener("pointerdown", (e) => {
     e.preventDefault();
-    lastPointerTs = performance.now();
+    ignoreClick = true;
     stop();
     fn();
     repeatT = setTimeout(() => {
@@ -6391,12 +6374,22 @@ function attachHoldRepeat(btn, fn) {
     }, 350);
   });
 
-  ["pointerup", "pointercancel", "pointerleave", "blur"].forEach((ev) => {
+  ["pointerup", "blur"].forEach((ev) => {
     btn.addEventListener(ev, () => stop());
   });
 
+  ["pointercancel", "pointerleave"].forEach((ev) => {
+    btn.addEventListener(ev, () => {
+      ignoreClick = false;
+      stop();
+    });
+  });
+
   btn.addEventListener("click", (e) => {
-    if (performance.now() - lastPointerTs < 150) return;
+    if (ignoreClick) {
+      ignoreClick = false;
+      return;
+    }
     fn();
   });
 }

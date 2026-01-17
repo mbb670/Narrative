@@ -654,7 +654,7 @@ body[data-chain-state="done"] .rangeClue-content {
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
 
-    #navCellPrev, #navCellNext{
+    #navWordPrev, #navWordNext{
     --icon: url("images/double-right-arrow.svg");
     }
 
@@ -2367,46 +2367,13 @@ Results
     margin: 0 auto;
 }
 
-.previewBox,
+
 .box {
     border: 1px solid var(--border-subtle);
 }
 
 .box {
     padding: var(--spacing-x16);
-}
-
-.previewBox {
-    position: sticky;
-    top: 18px;
-    align-self: flex-start;
-    width: 100%;
-    overflow: hidden;
-
-    .gridScroll {
-        padding-inline: var(--spacing-x16);
-
-        .rangeClue {
-            display: block !important;
-        }
-    }
-
-    h3,
-    .note {
-        padding: var(--spacing-x16);
-        margin: unset;
-        margin-top: var(--spacing-x12);
-    }
-
-    h3 {
-        color: var(--foreground-default);
-
-    }
-
-    .note {
-        color: var(--foreground-muted);
-        padding-top: unset;
-    }
 }
 
 .puzzle_inputs {
