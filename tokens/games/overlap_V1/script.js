@@ -858,8 +858,7 @@ function showToast(type, message, duration) {
   const el = map[type];
   if (!el) return;
   if (type === "wordSolved") {
-    const countSpan = el.querySelector(".toast-word-solved-count");
-    if (countSpan) countSpan.textContent = message || "";
+    updateWordSolvedCount(message);
   } else if (type === "hint") {
     const penaltyEl = el.querySelector("#hintPenalty");
     if (penaltyEl && message != null) penaltyEl.textContent = message;
@@ -872,6 +871,24 @@ function showToast(type, message, duration) {
   void el.offsetWidth; // restart transition
   el.classList.add("is-showing");
   toastTimers[type] = setTimeout(() => el.classList.remove("is-showing"), dur);
+}
+
+function updateWordSolvedCount(message) {
+  const targets = document.querySelectorAll(".word-solved-count");
+  if (!targets.length) return;
+  let text = message;
+  if (!text) {
+    if (play.mode === MODE.CHAIN && Array.isArray(play.entries) && play.entries.length) {
+      const total = play.entries.length;
+      const solved = play.lockedEntries ? play.lockedEntries.size : play.entries.filter(isWordCorrect).length;
+      text = `${solved} of ${total}`;
+    } else {
+      text = "";
+    }
+  }
+  targets.forEach((el) => {
+    el.textContent = text;
+  });
 }
 
 function showInlineToast(el, message) {
@@ -4760,7 +4777,7 @@ function chainApplyLocksIfEnabled() {
           triggerSolveAnimation(e);
           const solved = play.lockedEntries.size;
           const total = play.entries.length;
-          showToast("wordSolved", `${solved}/${total}`);
+          showToast("wordSolved", `${solved} of ${total}`);
         }))
       );
     }
@@ -4980,6 +4997,7 @@ function updatePlayUI() {
   updateSliderUI();
   updatePlayControlsVisibility();
   updateSelectAllUI();
+  updateWordSolvedCount();
 }
 
 function setAt(i, { behavior, noScroll } = {}) {

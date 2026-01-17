@@ -86,21 +86,23 @@
       </div>
       <div class="puzzle-nav" aria-label="Navigation">
         <div class="puzzle-nav-prev">
-          <button class="btn icon" id="navWordPrev" type="button" aria-label="Previous unresolved word"
-            title="Previous word">«</button>
-          <button class="btn icon" id="navCellPrev" type="button" aria-label="Previous unresolved cell"
-            title="Previous letter">‹</button>
+          <button class="btn btn-icon" id="navWordPrev" type="button" aria-label="Previous unresolved word"
+            title="Previous word"></button>
+          <button class="btn btn-icon" id="navCellPrev" type="button" aria-label="Previous unresolved cell"
+            title="Previous letter"></button>
         </div>
         <div class="toast-stack toast-stack-working text-system-semibold-sm" aria-live="polite" aria-atomic="true">
           <div class="toast toast-word-solved elevation-fixed-top" id="toastWordSolved" role="status">
-            Word Solved! <span class="toast-word-solved-count"></span>
+            Word Solved!
           </div>
+         <div class="word-solved-count text-system-regular-md"></div>
         </div>
+         
         <div class="puzzle-nav-next">
-          <button class="btn icon" id="navCellNext" type="button" aria-label="Next unresolved cell"
-            title="Next letter">›</button>
-          <button class="btn icon" id="navWordNext" type="button" aria-label="Next unresolved word"
-            title="Next word">»</button>
+          <button class="btn btn-icon" id="navCellNext" type="button" aria-label="Next unresolved cell"
+            title="Next letter"></button>
+          <button class="btn btn-icon" id="navWordNext" type="button" aria-label="Next unresolved word"
+            title="Next word"></button>
         </div>
       </div>
       <div class="legend" id="legend" aria-label="Clues"></div>
@@ -398,7 +400,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.962</span>
+            id="splashVersion">V3.963</span>
         </p>
       </footer>
     </div>
