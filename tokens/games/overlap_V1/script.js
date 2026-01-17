@@ -2096,7 +2096,7 @@ async function loadArchiveIndex() {
     }
 
     years = Array.from(new Set(years))
-      .filter((y) => y <= currentYear)
+      .filter((y) => DEV_MODE || y <= currentYear)
       .sort((a, b) => a - b);
 
     const monthsByYear = new Map();
@@ -2125,7 +2125,7 @@ async function loadArchiveIndex() {
       }
 
       months = Array.from(new Set(months))
-        .filter((m) => year < currentYear || (year === currentYear && m <= currentMonth))
+        .filter((m) => DEV_MODE || year < currentYear || (year === currentYear && m <= currentMonth))
         .sort((a, b) => a - b);
 
       if (months.length) monthsByYear.set(year, months);
