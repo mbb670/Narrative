@@ -424,26 +424,17 @@ header {
     align-items: center;
     justify-content: center;
     gap: var(--spacing-x2);
-
-    button {
-        aspect-ratio: 1;
-
-        &::after {
-            content: "";
-            width: var(--spacing-x16);
-            display: block;
-            aspect-ratio: 1;
-            background-color: var(--foreground-disabled);
-            -webkit-mask: url("images/builder-icon.svg") center / contain no-repeat;
-            mask: url("images/builder-icon.svg") center / contain no-repeat;
-        }
+    button{
+        padding: var(--unit-10);
+    }
+    #builderOpen{
+        --icon: url("images/builder-icon.svg");
+        --icon-color:var(--foreground-disabled);
     }
 
     #builderClose {
-        &::after {
-            -webkit-mask: url("images/close.svg") center / contain no-repeat;
-            mask: url("images/close.svg") center / contain no-repeat;
-        }
+        --icon: url("images/close.svg");
+        --icon-color:var(--foreground-disabled);
     }
 }
 
@@ -737,14 +728,12 @@ body[data-chain-state="done"] .rangeClue-content {
     border-color: transparent;
     color: var(--foreground-alt);
     background: var(--background-strong);
+    pointer-events: none;
 
     &.is-showing {
         opacity: 1;
         transform: translateY(0);
     }
-
-
-
 }
 
 .toast-success {
@@ -1476,41 +1465,25 @@ Splash settings
             position: relative;
             display: flex;
             justify-content: flex-end;
-            margin-bottom: var(--spacing-x16);
             z-index: 2;
+            --icon-color: var(--foreground-subtle);
+
         }
 
-        .splash__share {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
 
         .settings-btn,
         .share-btn {
             border: unset;
-            aspect-ratio: 1;
-            margin: calc(-1 * var(--spacing-x8)) calc(-1 * var(--spacing-x8)) 0 0;
-
-            &::after {
-                content: '';
-                display: block;
-                aspect-ratio: 1;
-                width: var(--unit-18);
-                background-color: var(--foreground-subtle);
-                -webkit-mask: url("images/settings.svg") center / contain no-repeat;
-                mask: url("images/settings.svg") center / contain no-repeat;
-            }
+            padding: var(--unit-10);
+            margin: calc(-1 * var(--spacing-x4)) calc(-1 * var(--spacing-x4)) 0 0;
         }
-
-        .share-btn {
-            margin-right: calc(-1 * var(--spacing-x4));
-
-            &::after {
-                -webkit-mask: url("images/share.svg") center / contain no-repeat;
-                mask: url("images/share.svg") center / contain no-repeat;
+        .share-btn{
+                --icon: url("images/share.svg");
+                 position: relative;
             }
-        }
+        .settings-btn{
+                --icon: url("images/settings.svg");
+            }
 
         .settings-panel {
             position: absolute;
@@ -1537,19 +1510,8 @@ Splash settings
 
         .settings-panel__close {
             border: unset;
-            aspect-ratio: 1;
-
-            &::after {
-                content: '';
-                display: block;
-                width: var(--spacing-x12);
-                aspect-ratio: 1;
-                background-color: var(--foreground-muted);
-                -webkit-mask: url("images/close.svg") center / contain no-repeat;
-                mask: url("images/close.svg") center / contain no-repeat;
-                margin-right: unset;
-            }
-
+            --icon: url("images/close.svg");
+            --icon-color: var(--foreground-muted);
         }
 
         .settings-panel__section {
@@ -1765,6 +1727,7 @@ FTUE
 
     .ftue-title,
     .ftue-desc {
+         max-width: 400px;
         text-wrap: balance;
         text-align: center;
     }
@@ -1965,6 +1928,7 @@ Archive
     justify-content: space-between;
     gap: var(--spacing-x8);
     margin-bottom: var(--spacing-x32);
+   
 
     .archive__calendar-select {
         display: inherit;
@@ -1980,8 +1944,13 @@ Archive
         }
     }
 
-    .icon {
-        aspect-ratio: 1;
+    #archiveNextMonth, #archivePrevMonth{
+--icon-color: var(--foreground-subtle);
+    }
+
+    #archivePrevMonth{
+        --icon-rotation:180deg;
+         
     }
 }
 
@@ -2293,6 +2262,7 @@ Results
     top: var(--spacing-x8);
     right: var(--spacing-x8);
     border: unset;
+    --icon: url("images/close.svg");
 }
 
 .giveUpSubtitle {

@@ -51,8 +51,8 @@
       <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
 
       <div class="builder-toggle" aria-label="Builder toggle">
-        <button class="btn" id="builderOpen" type="button"></button>
-        <button class="btn" id="builderClose" type="button" hidden></button>
+        <button class="btn btn-icon" id="builderOpen" type="button"></button>
+        <button class="btn btn-icon" id="builderClose" type="button" hidden></button>
       </div>
     </section>
   </header>
@@ -171,7 +171,7 @@
   <!-- Results -->
   <div class="results text-system-regular-md" id="results" role="dialog" aria-modal="true" aria-label="Results">
     <div class="card results__dialog">
-      <button class="btn resultsClose text-system-regular-lg" type="button" aria-label="Close results">×</button>
+      <button class="btn btn-icon resultsClose text-system-regular-lg" type="button" aria-label="Close results"></button>
       <div class="result-heading">
         <h2 class="text-headline-semibold-lg resultsTitle">Solved!</h2>
         <p class="resultsSubtitle"></p>
@@ -288,12 +288,12 @@
       </div>
       <div class="archive__main">
         <div class="archive__controls">
-          <button class="btn icon" id="archivePrevMonth" type="button" aria-label="Previous month">‹</button>
+          <button class="btn btn-icon" id="archivePrevMonth" type="button" aria-label="Previous month"></button>
           <div class="archive__calendar-select">
             <select class="dropdown text-system-regular-sm" id="archiveMonthSelect" aria-label="Month"></select>
             <select class="dropdown text-system-regular-sm" id="archiveYearSelect" aria-label="Year"></select>
           </div>
-          <button class="btn icon" id="archiveNextMonth" type="button" aria-label="Next month">›</button>
+          <button class="btn btn-icon" id="archiveNextMonth" type="button" aria-label="Next month"></button>
         </div>
         <div class="archive__calendar">
           <div class="archive__weekdays text-system-regular-sm">
@@ -322,18 +322,17 @@
     <div class="splash__dialog card elevation-overlay">
       <div class="splash__top">
         <div class="splash__utilities">
-          <div class="splash__share">
-            <button class="btn share-btn text-system-semibold-sm" id="shareBtn" type="button"></button>
-            <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
+            <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
+              <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
               aria-live="polite" aria-atomic="true">Copied to clipboard</div>
-          </div>
-          <button class="btn settings-btn text-system-semibold-sm" id="settingsBtn" type="button" aria-haspopup="dialog"
+            </button>
+          <button class="btn btn-icon settings-btn text-system-semibold-sm" id="settingsBtn" type="button" aria-haspopup="dialog"
             aria-expanded="false" aria-controls="settingsPanel"></button>
           <div class="settings-panel card elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
             aria-modal="false" aria-hidden="true" hidden>
             <div class="settings-panel__header">
               <h2 class="text-subheadline-semibold-xs">Settings</h2>
-              <button class="btn settings-panel__close" id="settingsCloseBtn" type="button"
+              <button class="btn btn-icon settings-panel__close" id="settingsCloseBtn" type="button"
                 aria-label="Close settings"></button>
             </div>
             <div class="settings-panel__section settings-color-mode">
