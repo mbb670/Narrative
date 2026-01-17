@@ -47,12 +47,7 @@
             <span class="chainStartLabel">Start</span>
           </button>
         </div>
-      </div>
-      <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
-
-      <div class="builder-toggle" aria-label="Builder toggle">
-        <button class="btn btn-icon" id="builderOpen" type="button"></button>
-        <button class="btn btn-icon" id="builderClose" type="button" hidden></button>
+        <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
       </div>
     </section>
   </header>
@@ -95,9 +90,9 @@
           <div class="toast toast-word-solved elevation-fixed-top" id="toastWordSolved" role="status">
             Word Solved!
           </div>
-         <div class="word-solved-count text-system-regular-md"></div>
+          <div class="word-solved-count text-system-regular-md"></div>
         </div>
-         
+
         <div class="puzzle-nav-next">
           <button class="btn btn-icon" id="navCellNext" type="button" aria-label="Next unresolved cell"
             title="Next letter"></button>
@@ -105,32 +100,13 @@
             title="Next word"></button>
         </div>
       </div>
-      <div class="legend" id="legend" aria-label="Clues"></div>
       <div class="game-slider"></div>
     </div>
   </section>
 
   <!-- BUILDER -->
   <section class="panel" id="panelBuild" role="tabpanel" aria-labelledby="tabBuild">
-    <div class="bTop">
-      <select class="sel" id="pSel" aria-label="Choose puzzle"></select>
-      <button class="pill text-uppercase-semibold-md" id="pSave" type="button">Save</button>
-    </div>
 
-    <div class="bBody">
-      <div class="box puzzle_inputs">
-        <h3 class="text-uppercase-semibold-lg">Puzzle</h3>
-        <label class="lab" for="pTitle">Puzzle ID</label>
-        <input class="ti" id="pTitle" type="text" placeholder="e.g. 2025-01-01 or custom-slug" />
-
-        <div style="height:12px"></div>
-        <div class="rows" id="rows"></div>
-
-        <div style="height:10px"></div>
-        <button class="pill" id="wAdd" type="button">Add word</button>
-
-      </div>
-    </div>
   </section>
 
   <div class="keyboard"></div>
@@ -139,7 +115,8 @@
   <!-- Results -->
   <div class="results text-system-regular-md" id="results" role="dialog" aria-modal="true" aria-label="Results">
     <div class="card results__dialog">
-      <button class="btn btn-icon resultsClose text-system-regular-lg" type="button" aria-label="Close results"></button>
+      <button class="btn btn-icon resultsClose text-system-regular-lg" type="button"
+        aria-label="Close results"></button>
       <div class="result-heading">
         <h2 class="text-headline-semibold-lg resultsTitle">Solved!</h2>
         <p class="resultsSubtitle"></p>
@@ -290,12 +267,12 @@
     <div class="splash__dialog card elevation-overlay">
       <div class="splash__top">
         <div class="splash__utilities">
-            <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
-              <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
+          <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
+            <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
               aria-live="polite" aria-atomic="true">Copied to clipboard</div>
-            </button>
-          <button class="btn btn-icon settings-btn text-system-semibold-sm" id="settingsBtn" type="button" aria-haspopup="dialog"
-            aria-expanded="false" aria-controls="settingsPanel"></button>
+          </button>
+          <button class="btn btn-icon settings-btn text-system-semibold-sm" id="settingsBtn" type="button"
+            aria-haspopup="dialog" aria-expanded="false" aria-controls="settingsPanel"></button>
           <div class="settings-panel card elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
             aria-modal="false" aria-hidden="true" hidden>
             <div class="settings-panel__header">
@@ -326,10 +303,10 @@
                 <div>On-screen Keyboard</div>
                 <div class="settings-panel__desc text-system-regular-sm">Always show the on-screen keyboard</div>
               </div>
-               <div class="switch">
-                  <input class="switch__input" type="checkbox" id="showOnscreenKeyboard" role="switch" />
-                  <label class="toggle" for="showOnscreenKeyboard"></label>
-               </div>
+              <div class="switch">
+                <input class="switch__input" type="checkbox" id="showOnscreenKeyboard" role="switch" />
+                <label class="toggle" for="showOnscreenKeyboard"></label>
+              </div>
             </div>
           </div>
         </div>
@@ -347,8 +324,8 @@
             <button class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
             <div class="splash__row">
               <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button">Archive</button>
+              <!-- <button class="btn text-system-semibold-md" id="splashPuzzleBtns" type="button">Puzzles</button> -->
               <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">How to play</button>
-              <!-- <button class="btn text-system-semibold-md" id="splashPuzzleBtn" type="button">Puzzles</button> -->
             </div>
           </div>
         </div>
@@ -367,7 +344,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V3.968</span>
+            id="splashVersion">V3.969</span>
         </p>
       </footer>
     </div>

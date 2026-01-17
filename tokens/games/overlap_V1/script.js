@@ -18,13 +18,11 @@ const COLORS = [
 const HEIGHT_CYCLE = ["full", "mid", "inner"];
 
 const MODE = { PUZZLE: "puzzle", CHAIN: "chain" };
-const VIEW = { PLAY: "play", CHAIN: "chain", BUILD: "build" };
+const VIEW = { PLAY: "play", CHAIN: "chain" };
 
 // ---- Remember last tab/view ----
 const LAST_VIEW_KEY = `${KEY}__last_view`;
 const ARCHIVE_RETURN_TIMEOUT_MS = 45 * 60 * 1000;
-
-const VALID_VIEWS = new Set(Object.values(VIEW));
 
 const DEV_MODE = (() => {
   try {
@@ -60,8 +58,7 @@ const LAST_PLAYED_CHAIN_KEY = `${KEY}__last_chain_played`;
 function loadLastView() {
   try {
     const v = localStorage.getItem(LAST_VIEW_KEY);
-    if (!DEV_MODE && v === VIEW.BUILD) return VIEW.CHAIN;
-    return (DEV_MODE ? VALID_VIEWS.has(v) : v === VIEW.PLAY || v === VIEW.CHAIN) ? v : VIEW.CHAIN;
+    return v === VIEW.PLAY || v === VIEW.CHAIN ? v : VIEW.CHAIN;
   } catch {
     return VIEW.CHAIN;
   }
@@ -710,18 +707,11 @@ const DEF = await loadDefaultPuzzles();
 // ---- DOM ----
 const $ = (s) => document.querySelector(s);
 const els = {
-  tabPlay: $("#tabPlay"),
-  tabChain: $("#tabChain"),
-  tabBuild: $("#tabBuild"),
-  builderOpen: document.getElementById("builderOpen"),
-  builderClose: document.getElementById("builderClose"),
   logo: $("#logo"),
   panelPlay: $("#panelPlay"),
-  panelBuild: $("#panelBuild"),
   stage: $("#stage"),
   gridScroll: $("#gridScroll"),
   grid: $("#grid"),
-  legend: $("#legend"),
   meta: $("#meta"),
   prev: $("#prev"),
   next: $("#next"),
@@ -735,7 +725,7 @@ const els = {
   puzzleActions: document.querySelector(".puzzle-actions"),
   splash: $("#splashModal"),
   splashPrimary: $("#splashPrimary"),
-  splashPuzzleBtn: $("#splashPuzzleBtn"),
+  splashPuzzleBtn: document.querySelector("#splashPuzzleBtns, #splashPuzzleBtn"),
   splashArchiveBtn: $("#splashArchiveBtn"),
   splashTutorialBtn: $("#splashTutorialBtn"),
   splashDate: $("#splashDate"),
@@ -785,12 +775,7 @@ const els = {
   ftueDialog: document.querySelector(".ftue-modal__dialog"),
   ftuePlayPause: document.querySelector(".ftue-playpause"),
   ftuePlayPauseIcon: document.querySelector(".ftue-playpause-icon"),
-  pSel: $("#pSel"),
-  pSave: $("#pSave"),
   pClear: $("#pClear"),
-  pTitle: $("#pTitle"),
-  rows: $("#rows"),
-  wAdd: $("#wAdd"),
   status: $("#status"),
   helper: $(".helper"),
   keyboard: $(".keyboard"),
@@ -2707,12 +2692,6 @@ const insets = (h) => (h === "mid" ? [12.5, 12.5] : h === "inner" ? [25, 25] : [
 const isEditable = (el) =>
   !!(el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable));
 
-let dirty = false;
-const setDirty = (v = true) => {
-  dirty = !!v;
-  els.pSave && els.pSave.classList.toggle("is-hot", dirty);
-};
-
 const tieR = new WeakMap();
 const tr = (w) => {
   let v = tieR.get(w);
@@ -2901,9 +2880,7 @@ const normPuzzle = (p) => {
 let puzzles = store.load().map(normPuzzle);
 let pIdx = 0;
 
-let currentView = loadLastView(); // play | chain | build
-let lastNonBuildView = currentView === VIEW.BUILD ? VIEW.PLAY : currentView;
-let pausedForBuilder = false;
+let currentView = loadLastView(); // play | chain
 
 const play = {
   mode: MODE.PUZZLE,
@@ -4859,7 +4836,7 @@ function chainInputAllowed() {
   return chain.started;
 }
 function setInlineCluesHiddenUntilChainStart() {
-  const preStart = play.mode === MODE.CHAIN && !chain.started && currentView !== VIEW.BUILD;
+  const preStart = play.mode === MODE.CHAIN && !chain.started;
 
   // toggle a class so you can also handle with CSS if you want
   document.documentElement.classList.toggle("chain-prestart", preStart);
@@ -4918,11 +4895,6 @@ function nearestUnsolvedEntryToCursor() {
 }
 
 function updateChainClues() {
-  // Legend clues removed; rely on inline range clues only.
-  if (els.legend) {
-    els.legend.hidden = true;
-    els.legend.innerHTML = "";
-  }
 }
 
 function updateArchiveDateBanner(p = puzzles[pIdx]) {
@@ -5310,8 +5282,6 @@ function resetPlay(opts = {}) {
     if (clearPersist) clearChainProgressForPuzzle(puzzles[pIdx]);
     const ui = ensureChainUI();
     ui.startBtn.style.display = "";
-    els.legend.hidden = true;
-    els.legend.innerHTML = "";
     chainResetTimer();
     setInlineCluesHiddenUntilChainStart();
   } else {
@@ -5492,17 +5462,10 @@ function loadPuzzle(i) {
   updateSliderUI();
 
 
-  // Legend mode
   if (play.mode === MODE.CHAIN) {
     const ui = ensureChainUI();
     ui.hud.hidden = false;
     ui.startBtn.style.display = ""; // show Start
-
-    if (els.legend) {
-      els.legend.classList.add("chainLegend");
-      els.legend.hidden = true; // hide unused legend
-      els.legend.innerHTML = "";
-    }
 
     chainResetTimer();
     setInlineCluesHiddenUntilChainStart();
@@ -5511,19 +5474,13 @@ function loadPuzzle(i) {
     if (chainUI) chainUI.hud.hidden = true;
     if (els.reveal) els.reveal.style.display = "";
 
-    if (els.legend) {
-      els.legend.hidden = true;
-      els.legend.classList.remove("chainLegend");
-      els.legend.innerHTML = "";
-    }
     setInlineCluesHiddenUntilChainStart(); // clears chain-prestart class when not in chain mode
     pulseRangeHintIntro();
   }
   updateResetRevealVisibility();
 
   // meta count should reflect current view list
-  const viewForMeta = currentView === VIEW.BUILD ? (isChainPuzzle(p) ? VIEW.CHAIN : VIEW.PLAY) : currentView;
-  const list = indicesForView(viewForMeta);
+  const list = indicesForView(currentView);
   const pos = list.indexOf(pIdx);
   const posText = list.length ? `${(pos >= 0 ? pos : 0) + 1} / ${list.length}` : `1 / ${puzzles.length}`;
 
@@ -5540,8 +5497,6 @@ function loadPuzzle(i) {
 
   if (els.gridScroll) els.gridScroll.scrollLeft = 0;
 
-  syncBuilder();
-  setDirty(false);
   const restored = play.mode === MODE.CHAIN ? restoreChainProgressForCurrentPuzzle() : false;
   if (!restored) {
     _restoredFromStorage = false;
@@ -5552,58 +5507,20 @@ function loadPuzzle(i) {
 
 // ---- Tabs ----
 function setTab(which) {
-  if (!DEV_MODE && which === VIEW.BUILD) which = VIEW.CHAIN;
-  const enteringBuild = which === VIEW.BUILD && currentView !== VIEW.BUILD;
-  const exitingBuild = which !== VIEW.BUILD && currentView === VIEW.BUILD;
-  if (enteringBuild) {
-    pausedForBuilder = false;
-    if (play.mode === MODE.CHAIN && chain.started && chain.running && !play.done) {
-      pausedForBuilder = true;
-      chainPauseWithOpts({ showSplash: false });
-    }
-  }
-  if (exitingBuild && pausedForBuilder) {
-    if (play.mode === MODE.CHAIN && chain.started && !chain.running && !play.done) {
-      chainResume();
-    }
-    pausedForBuilder = false;
-  }
-  if (which !== VIEW.BUILD) {
-    lastNonBuildView = which;
-  }
+  if (which !== VIEW.PLAY && which !== VIEW.CHAIN) which = VIEW.CHAIN;
   currentView = which;
   try { localStorage.setItem(LAST_VIEW_KEY, currentView); } catch {}
 
   // Global hook for CSS
-  document.body.dataset.view = which; // "play" | "chain" | "build"
+  document.body.dataset.view = which; // "play" | "chain"
 
-  const isBuild = which === VIEW.BUILD;
-  const isChain = which === VIEW.CHAIN;
-  const isPlay  = which === VIEW.PLAY;
-
-  els.tabPlay?.classList.toggle("is-active", isPlay);
-  els.tabChain?.classList.toggle("is-active", isChain);
-  els.tabBuild?.classList.toggle("is-active", DEV_MODE && isBuild);
-  if (els.builderOpen) els.builderOpen.hidden = !(DEV_MODE && !isBuild);
-  if (els.builderClose) els.builderClose.hidden = !(DEV_MODE && isBuild);
-
-  els.tabPlay?.setAttribute("aria-selected", isPlay ? "true" : "false");
-  els.tabChain?.setAttribute("aria-selected", isChain ? "true" : "false");
-  els.tabBuild?.setAttribute("aria-selected", isBuild && DEV_MODE ? "true" : "false");
-
-  els.panelPlay?.classList.toggle("is-active", !isBuild);
-  els.panelBuild?.classList.toggle("is-active", DEV_MODE && isBuild);
-  if (isBuild) {
-    syncBuilder();
-  }
+  els.panelPlay?.classList.toggle("is-active", true);
 
   updateKeyboardVisibility();
 
-  if (!isBuild) {
-    ensureCurrentPuzzleMatchesView();
-    updateSliderUI();
-    focusForTyping();
-  }
+  ensureCurrentPuzzleMatchesView();
+  updateSliderUI();
+  focusForTyping();
 
   updateResetRevealVisibility();
   updatePlayControlsVisibility();
@@ -5752,199 +5669,27 @@ function onKey(e) {
   }
 }
 
-// ---- Builder UI injection (mode + chain fields) ----
-let bModeWrap = null;
-let bModeSel = null;
-let bPaletteSel = null;
-
-function ensureBuilderModeUI() {
-  if (bModeWrap) return;
-
-  const box = document.querySelector(".puzzle_inputs");
-  if (!box) return;
-
-  const wrap = document.createElement("div");
-  wrap.style.marginTop = "12px";
-  wrap.innerHTML = `
-    <label class="lab" for="pMode">Mode</label>
-    <select class="sel" id="pMode">
-      <option value="${MODE.PUZZLE}">Puzzle</option>
-      <option value="${MODE.CHAIN}">Word Chain</option>
-    </select>
-
-    <div style="margin-top:10px">
-      <label class="lab" for="pPalette">Palette</label>
-      <select class="sel" id="pPalette"></select>
-    </div>
-  `;
-
-  els.pTitle.insertAdjacentElement("afterend", wrap);
-
-  bModeWrap = wrap;
-  bModeSel = wrap.querySelector("#pMode");
-  bPaletteSel = wrap.querySelector("#pPalette");
-
-  bModeSel.addEventListener("change", () => {
-    puzzles[pIdx].type = bModeSel.value;
-
-    if (puzzles[pIdx].type === MODE.CHAIN) {
-      puzzles[pIdx].words = (puzzles[pIdx].words || []).map((w) => normWord(w, MODE.CHAIN));
-    }
-
-    setDirty(true);
-    syncBuilder();
-  });
-
-  bPaletteSel.addEventListener("change", () => {
-    puzzles[pIdx].palette = normalizePaletteId(bPaletteSel.value);
-    setDirty(true);
-    applyPaletteToDom(puzzles[pIdx].palette);
-    renderPreview();
-    renderRows();
-  });
-
-}
-
-// ---- Builder render ----
-function syncBuilder() {
-  ensureBuilderModeUI();
-
-  const indices = puzzles.map((_, idx) => idx);
-
-  els.pSel.innerHTML = indices
-    .map((i) => {
-      const p = puzzles[i];
-      return `<option value="${i}" ${i === pIdx ? "selected" : ""}>${escapeHtml(puzzleLabel(p))}</option>`;
-    })
-    .join("");
-
-  els.pTitle.value = puzzles[pIdx]?.id || "";
-
-  const p = puzzles[pIdx];
-  const chainMode = isChainPuzzle(p);
-
-  if (bModeSel) bModeSel.value = isChainPuzzle(p) ? MODE.CHAIN : MODE.PUZZLE;
-  if (bPaletteSel) {
-    const opts = PALETTES.map(
-      (pal) => `<option value="${pal.id}" ${pal.id === p.palette ? "selected" : ""}>${escapeHtml(pal.label)}</option>`
-    ).join("");
-    bPaletteSel.innerHTML = opts;
-    bPaletteSel.value = p.palette;
-  }
-
-  renderRows();
-  renderPreview();
-}
-
 function setStatus(m) {
   const gaps = m.gaps || [];
   const hasError = !m.ok || gaps.length;
-  if (!m.ok) {
-    els.status.className = "status bad";
-    els.status.textContent = `Conflict at column ${m.conf.idx + 1}: “${m.conf.a}” vs “${m.conf.b}”.`;
-  } else if (gaps.length) {
-    els.status.className = "status bad";
-    els.status.textContent = `Uncovered columns: ${gaps.slice(0, 18).map((x) => x + 1).join(", ")}${gaps.length > 18 ? "…" : ""}`;
-  } else {
-    els.status.className = "status";
-    els.status.innerHTML = `Total columns: <strong>${m.total}</strong> • Words: <strong>${m.entries.length}</strong> • ${dirty ? "Unsaved changes" : "Saved"}`;
+  if (els.status) {
+    if (!m.ok) {
+      els.status.className = "status bad";
+      els.status.textContent = `Conflict at column ${m.conf.idx + 1}: “${m.conf.a}” vs “${m.conf.b}”.`;
+    } else if (gaps.length) {
+      els.status.className = "status bad";
+      els.status.textContent = `Uncovered columns: ${gaps.slice(0, 18).map((x) => x + 1).join(", ")}${gaps.length > 18 ? "…" : ""}`;
+    } else {
+      els.status.className = "status";
+      els.status.innerHTML = `Total columns: <strong>${m.total}</strong> • Words: <strong>${m.entries.length}</strong>`;
+    }
   }
   if (els.toastErrorPuzzle) {
     els.toastErrorPuzzle.classList.toggle("is-showing", hasError);
   }
 }
 
-function renderRows() {
-  const p = puzzles[pIdx];
-  const chainMode = isChainPuzzle(p);
-
-
-  const ws = p.words || [];
-  const order = ws.map((w, i) => ({ i, s: +w.start || 1, r: tr(w) })).sort((a, b) => a.s - b.s || a.r - b.r);
-
-  els.rows.innerHTML = order
-    .map((o, pos) => {
-      const i = o.i;
-      const w = ws[i];
-
-      const swColor = paletteColorForWord(p, i);
-
-      return `
-        <div class="row" data-i="${i}">
-          <div class="rowTop">
-            <div class="left">
-              <span class="range-swatch" style="--color:${swColor}"></span>
-              <span>Word ${pos + 1}</span>
-            </div>
-            <div class="right"><button class="pill" type="button" data-act="rm">Remove</button></div>
-          </div>
-            <div class="grid5">
-              <div class="full">
-                <label class="lab">Clue</label>
-                <input class="mi" data-f="clue" value="${escapeAttr(w.clue || "")}" />
-              </div>
-              <div class="full">
-              <label class="lab">Answer</label>
-              <input class="mi" data-f="answer" value="${escapeAttr(w.answer || "")}" />
-            </div>
-            <div>
-              <label class="lab">Start</label>
-              <input class="mi" data-f="start" inputmode="numeric" value="${escapeAttr(String(w.start ?? 1))}" />
-            </div>
-          </div>
-        </div>`;
-    })
-    .join("");
-
-  const m = computed(puzzles[pIdx]);
-  setStatus(m);
-}
-
-function renderPreview() {
-  const m = computed(puzzles[pIdx]);
-  setStatus(m);
-}
-
-function saveAndReRender() {
-  setDirty(true);
-  renderRows();
-  renderPreview();
-}
-
 // ---- Events ----
-// Save
-els.pSave.addEventListener("click", () => {
-  const m = computed(puzzles[pIdx]);
-  if (!m.ok) return alert("Fix conflicts before saving.");
-  if (m.gaps?.length) return alert("Cover every column (no gaps) before saving.");
-  store.save();
-  setDirty(false);
-  loadPuzzle(pIdx);
-});
-
-// Tabs
-els.tabPlay?.addEventListener("click", () => setTab(VIEW.PLAY));
-els.tabChain?.addEventListener("click", () => setTab(VIEW.CHAIN));
-if (DEV_MODE) {
-  els.tabBuild?.addEventListener("click", () => setTab(VIEW.BUILD));
-} else if (els.tabBuild) {
-  els.tabBuild.style.display = "none";
-  els.panelBuild && (els.panelBuild.style.display = "none");
-}
-
-if (DEV_MODE) {
-  els.builderOpen?.addEventListener("click", () => {
-    if (currentView !== VIEW.BUILD) lastNonBuildView = currentView;
-    setTab(VIEW.BUILD);
-  });
-  els.builderClose?.addEventListener("click", () => {
-    setTab(lastNonBuildView || VIEW.PLAY);
-  });
-} else {
-  if (els.builderOpen) els.builderOpen.hidden = true;
-  if (els.builderClose) els.builderClose.hidden = true;
-}
-
 // Keyboard (physical detection + input)
 document.addEventListener(
   "keydown",
@@ -6375,100 +6120,12 @@ els.resultsModal?.addEventListener("click", (e) => {
   }
 });
 
-// Builder
-els.pSel.addEventListener("change", () => {
-  pIdx = +els.pSel.value || 0;
-  loadPuzzle(pIdx);
-});
-
-els.pTitle.addEventListener("input", () => {
-  const { id } = normalizePuzzleId({ ...puzzles[pIdx], id: els.pTitle.value });
-  puzzles[pIdx].id = id;
-  const opt = Array.from(els.pSel.options).find((o) => +o.value === pIdx);
-  if (opt) opt.text = puzzleLabel(puzzles[pIdx]);
-  setDirty(true);
-  store.save();
-  setDirty(false);
-  renderPreview();
-});
-
+// Clear stats/progress
 els.pClear?.addEventListener("click", () => {
   clearAllChainProgress();
   clearChainStats();
   resetPlay({ clearPersist: false });
   chainForceIdleZero();
-});
-
-els.wAdd.addEventListener("click", () => {
-  const p = puzzles[pIdx];
-  p.words = p.words || [];
-
-  const maxEnd = p.words.reduce((m, w) => {
-    const s = Math.max(1, Math.floor(+w.start || 1));
-    const len = cleanA(w.answer).length || 4;
-    return Math.max(m, s + len - 1);
-  }, 0);
-
-  const nextStart = Math.max(1, maxEnd + 1);
-  const chainMode = isChainPuzzle(p);
-
-  p.words.push({
-    clue: "Clue",
-    answer: "WORD",
-    start: nextStart,
-    color: "--c-red",
-    ...(chainMode ? { diff: "easy" } : {}),
-  });
-
-  saveAndReRender();
-});
-
-els.rows.addEventListener("click", (e) => {
-  const row = e.target.closest(".row");
-  const act = e.target.closest("[data-act]")?.dataset.act;
-  if (!row || !act) return;
-
-  const i = +row.dataset.i;
-  const ws = puzzles[pIdx].words || [];
-
-  if (act === "rm") {
-    ws.splice(i, 1);
-    saveAndReRender();
-  }
-});
-
-els.rows.addEventListener("input", (e) => {
-  const row = e.target.closest(".row");
-  const f = e.target.dataset.f;
-  if (!row || !f) return;
-
-  const i = +row.dataset.i;
-  const w = (puzzles[pIdx].words || [])[i];
-  if (!w) return;
-
-  if (f === "start") w.start = +e.target.value || 1;
-  else w[f] = e.target.value;
-
-  setDirty(true);
-  renderPreview();
-});
-
-els.rows.addEventListener("change", (e) => {
-  const row = e.target.closest(".row");
-  const f = e.target.dataset.f;
-  if (!row || !f) return;
-
-  const i = +row.dataset.i;
-  const w = (puzzles[pIdx].words || [])[i];
-  if (!w) return;
-
-  w[f] = e.target.value;
-
-  setDirty(true);
-  renderRows();
-  renderPreview();
-   store.save();
-   setDirty(false);
 });
 
 // ---- Start ----

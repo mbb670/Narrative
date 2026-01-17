@@ -419,6 +419,12 @@ header {
     }
 }
 
+.is-dev{
+      #pClear{
+         display: block;
+      }
+}
+
 .builder-toggle {
     display: none;
     align-items: center;
@@ -442,19 +448,8 @@ header {
     display: none;
 }
 
-.is-dev .builder-toggle {
-    display: flex;
-}
-
-
-[data-view="build"] {
-    .helper {
-        display: none;
-    }
-
-    #pClear {
-        display: block;
-    }
+.is-dev #pClear {
+    display: block;
 }
 
 /* Prev / Next arrows */
@@ -862,6 +857,7 @@ body[data-chain-state="done"] .rangeClue-content {
     background: transparent;
     display: none !important;
     pointer-events: none;
+    box-shadow: inset 0 0 var(--spacing-x16) var(--spacing-x16) color-mix(in srgb, var(--color) 16%, transparent);
 }
 
 .range-focus.is-active {
@@ -1248,31 +1244,6 @@ body[data-chain-state="done"] .rangeClue-content {
     background: rgba(255, 43, 29, .09);
     box-shadow: inset 0 0 0 2px rgba(255, 43, 29, .35)
 }
-
-.legend {
-    margin-top: var(--spacing-x24);
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: var(--spacing-x20);
-    padding-inline: var(--layout-grid-margin);
-
-    display: none !important;
-
-    button {
-        max-width: 240px !important;
-    }
-}
-
-@media (max-width:640px) {
-    .legend {
-        flex-direction: column;
-        gap: var(--spacing-x16);
-    }
-}
-
 
 .clue {
     display: inline-flex;
@@ -2308,12 +2279,6 @@ Results
 
 
 
-
-
-
-
-
-
 /* Fix for shadow cutoff - but need to have a display: none; on the first thing to prevent the rest of the page from having a y scroll */
 
 /* @supports (-webkit-touch-callout: none) {
@@ -2323,161 +2288,6 @@ Results
     }
 } */
 
-
-/* Builder (kept intentionally simple + lightweight) */
-.bTop {
-    margin: 22px auto 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    justify-content: center
-}
-
-.sel,
-.ti {
-    appearance: none;
-    border: 1px solid rgba(0, 0, 0, .14);
-    background: rgba(255, 255, 255, .22);
-    padding: 10px 12px;
-    border-radius: 12px;
-    font: 600 13px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    color: var(--foreground-default)
-}
-
-.sel {
-    min-width: 240px;
-    padding-right: 38px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b675f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 14px
-}
-
-.ti {
-    min-width: 260px
-}
-
-.bBody {
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-    justify-content: center;
-    margin-top: 14px;
-    margin: 0 auto;
-}
-
-
-.box {
-    border: 1px solid var(--border-subtle);
-}
-
-.box {
-    padding: var(--spacing-x16);
-}
-
-.puzzle_inputs {
-    max-width: 400px;
-}
-
-@media (max-width:980px) {
-    .bBody {
-        flex-direction: column-reverse
-    }
-
-    .previewBox {
-        position: static;
-        top: auto
-    }
-
-    .sel,
-    .ti {
-        width: 100%;
-        min-width: 0
-    }
-
-}
-
-.boxt {
-    margin: 0 0 10px;
-    color: var(--foreground-muted);
-    font: 800 12px/1.1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    letter-spacing: .10em;
-    text-transform: uppercase
-}
-
-.rows {
-    display: grid;
-    gap: 10px
-}
-
-.row {
-    border: 1px solid rgba(0, 0, 0, .12);
-    background: rgba(255, 255, 255, .14);
-    padding: 10px;
-    display: grid;
-    gap: 10px
-}
-
-.rowTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px
-}
-
-.rowTop .left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font: 800 12px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    letter-spacing: .10em;
-    text-transform: uppercase
-}
-
-.rowTop .right {
-    display: flex;
-    gap: 8px
-}
-
-.grid5 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px
-}
-
-.grid5 .full {
-    grid-column: 1/-1
-}
-
-@media (max-width:980px) {
-    .grid5 {
-        grid-template-columns: 1fr 1fr
-    }
-}
-
-.lab {
-    display: block;
-    margin: 0 0 6px;
-    color: var(--foreground-muted);
-    font: 700 11px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    letter-spacing: .08em;
-    text-transform: uppercase
-}
-
-.mi,
-.ms {
-    width: 100%;
-    appearance: none;
-    border: 1px solid rgba(0, 0, 0, .14);
-    background: rgba(255, 255, 255, .20);
-    padding: 10px;
-    border-radius: 10px;
-    font: 600 13px/1 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    color: var(--foreground-default)
-}
-
-
 /* -----------------------------
 On-screen keyboard (touch)
 ----------------------------- */
@@ -2485,13 +2295,8 @@ On-screen keyboard (touch)
 
 .keyboard {
     display: none;
-    /* width: min(920px, 100%); */
-    /* margin: var(--spacing-x16) auto var(--spacing-x12); */
     padding: var(--spacing-x12);
     gap: var(--unit-4);
-    /* box-sizing: border-box; */
-    /* width: 50%; */
-    /* flex-grow: 1; */
     flex-direction: column;
     justify-content: flex-end;
     max-width: var(--layout-content-md-max);
@@ -2539,19 +2344,14 @@ body:has(#showOnscreenKeyboard:checked) .keyboard {
 
 .keyboard-key {
     appearance: none;
-    /* border: 1px solid var(--border-subtle); */
-    /* --background-color: var(--background-subtle); */
     background: var(--background-subtle) !important;
     color: var(--foreground-default);
     border-radius: var(--radius-slight);
-    /* padding: var(--spacing-x8) var(--spacing-x4); */
     font: inherit;
     text-transform: uppercase;
     cursor: pointer;
-    /* box-shadow: 0 2px 0 var(--border-subtle); */
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    /* transition: filter 10ms ease, color 10ms ease; */
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -2559,21 +2359,6 @@ body:has(#showOnscreenKeyboard:checked) .keyboard {
     min-width: var(--unit-24);
     font-size: 35cqmin;
     position: relative;
-
-    /* &::before{
-                   
-                    width: 140%;
-                    height: var(--spacing-x4);
-                    display: block;
-                    position: absolute;
-                    top:-4px;
-                    left: -20%;
-            aspect-ratio: 1;
-            background-color: var(--background-subtle);
-            -webkit-mask: url("images/keyboard-preview-connect.svg") center / 100% 100% no-repeat;
-            mask: url("images/keyboard-preview-connect.svg") center / 100% 100% no-repeat;
-    } */
-
 }
 
 .keyboard-key:focus-visible {
@@ -2585,11 +2370,6 @@ body:has(#showOnscreenKeyboard:checked) .keyboard {
 .keyboard-key:active {
     filter: brightness(0.9);
     color: transparent;
-
-    /* border-radius: 0 0  var(--radius-slight) var(--radius-slight);
-    &::before{
-         content: '';
-    } */
 }
 
 .keyboard-key--backspace,
@@ -2633,7 +2413,6 @@ body:has(#showOnscreenKeyboard:checked) .keyboard {
     font-size: calc(var(--text-system-semibold-sm, 1rem) * 1.6);
     text-align: center;
     opacity: 0;
-    /* border: 1px solid var(--border-muted); */
     left: -20%;
     width: 140%;
     height: 120%;
