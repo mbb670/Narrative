@@ -715,9 +715,6 @@ const els = {
   tabBuild: $("#tabBuild"),
   builderOpen: document.getElementById("builderOpen"),
   builderClose: document.getElementById("builderClose"),
-  builderTabChain: document.getElementById("builderTabChain"),
-  builderTabPuzzle: document.getElementById("builderTabPuzzle"),
-  builderTabOther: document.getElementById("builderTabOther"),
   logo: $("#logo"),
   panelPlay: $("#panelPlay"),
   panelBuild: $("#panelBuild"),
@@ -789,8 +786,6 @@ const els = {
   ftuePlayPause: document.querySelector(".ftue-playpause"),
   ftuePlayPauseIcon: document.querySelector(".ftue-playpause-icon"),
   pSel: $("#pSel"),
-  pNew: $("#pNew"),
-  pDel: $("#pDel"),
   pSave: $("#pSave"),
   pClear: $("#pClear"),
   pTitle: $("#pTitle"),
@@ -2909,8 +2904,6 @@ let pIdx = 0;
 let currentView = loadLastView(); // play | chain | build
 let lastNonBuildView = currentView === VIEW.BUILD ? VIEW.PLAY : currentView;
 let pausedForBuilder = false;
-const BUILDER_FILTER = { CHAIN: "chain", PUZZLE: "puzzle", OTHER: "other" };
-let builderFilterMode = BUILDER_FILTER.CHAIN;
 
 const play = {
   mode: MODE.PUZZLE,
@@ -5812,61 +5805,11 @@ function ensureBuilderModeUI() {
 
 }
 
-const filteredBuilderIndices = (mode = builderFilterMode) => {
-  return puzzles
-    .map((p, i) => ({ p, i }))
-    .filter(({ p }) => {
-      let type = String(p?.type || MODE.PUZZLE).toLowerCase();
-      if (type === "overlap") type = MODE.PUZZLE;
-      if (mode === BUILDER_FILTER.CHAIN) return type === MODE.CHAIN;
-      if (mode === BUILDER_FILTER.PUZZLE) return type !== MODE.CHAIN && type !== "other";
-      if (mode === BUILDER_FILTER.OTHER) return type === "other";
-      return true;
-    })
-    .map(({ i }) => i);
-};
-
-const updateBuilderTabsUI = () => {
-  const set = (el, active) => {
-    if (!el) return;
-    el.classList.toggle("is-active", active);
-    el.setAttribute("aria-selected", active ? "true" : "false");
-  };
-  set(els.builderTabChain, builderFilterMode === BUILDER_FILTER.CHAIN);
-  set(els.builderTabPuzzle, builderFilterMode === BUILDER_FILTER.PUZZLE);
-  set(els.builderTabOther, builderFilterMode === BUILDER_FILTER.OTHER);
-};
-
-const setBuilderFilter = (mode) => {
-  if (!Object.values(BUILDER_FILTER).includes(mode)) return;
-  builderFilterMode = mode;
-  updateBuilderTabsUI();
-  const filtered = filteredBuilderIndices(mode);
-  if (!filtered.length) {
-    syncBuilder();
-    return;
-  }
-  if (!filtered.includes(pIdx)) {
-    pIdx = filtered[0];
-    loadPuzzle(pIdx);
-  } else {
-    syncBuilder();
-  }
-};
-
 // ---- Builder render ----
 function syncBuilder() {
   ensureBuilderModeUI();
 
-  const applyFilter = currentView === VIEW.BUILD;
-  const filtered = applyFilter ? filteredBuilderIndices() : [];
-  const indices = applyFilter && filtered.length ? filtered : puzzles.map((_, idx) => idx);
-
-  if (applyFilter && indices.length && !indices.includes(pIdx)) {
-    pIdx = indices[0];
-    loadPuzzle(pIdx);
-    return;
-  }
+  const indices = puzzles.map((_, idx) => idx);
 
   els.pSel.innerHTML = indices
     .map((i) => {
@@ -5997,15 +5940,9 @@ if (DEV_MODE) {
   els.builderClose?.addEventListener("click", () => {
     setTab(lastNonBuildView || VIEW.PLAY);
   });
-  els.builderTabChain?.addEventListener("click", () => setBuilderFilter(BUILDER_FILTER.CHAIN));
-  els.builderTabPuzzle?.addEventListener("click", () => setBuilderFilter(BUILDER_FILTER.PUZZLE));
-  els.builderTabOther?.addEventListener("click", () => setBuilderFilter(BUILDER_FILTER.OTHER));
 } else {
   if (els.builderOpen) els.builderOpen.hidden = true;
   if (els.builderClose) els.builderClose.hidden = true;
-  if (els.builderTabChain) els.builderTabChain.hidden = true;
-  if (els.builderTabPuzzle) els.builderTabPuzzle.hidden = true;
-  if (els.builderTabOther) els.builderTabOther.hidden = true;
 }
 
 // Keyboard (physical detection + input)
@@ -6455,37 +6392,6 @@ els.pTitle.addEventListener("input", () => {
   renderPreview();
 });
 
-els.pNew.addEventListener("click", () => {
-  const newType =
-    builderFilterMode === BUILDER_FILTER.CHAIN
-      ? MODE.CHAIN
-      : builderFilterMode === BUILDER_FILTER.PUZZLE
-      ? MODE.PUZZLE
-      : "other";
-  puzzles.push(
-    normPuzzle({
-      id:
-        newType === MODE.CHAIN
-          ? todayKey() || "chain"
-          : `puzzle-${puzzles.length + 1}`,
-      type: newType,
-      palette: FIRST_PALETTE_ID,
-      words: [{ clue: "Clue", answer: "WORD", start: 1 }],
-    })
-  );
-  store.save();
-  loadPuzzle(puzzles.length - 1);
-  setTab(VIEW.BUILD);
-});
-
-els.pDel.addEventListener("click", () => {
-  if (puzzles.length <= 1) return;
-  if (!confirm("Delete this puzzle?")) return;
-  puzzles.splice(pIdx, 1);
-  store.save();
-  loadPuzzle(Math.max(0, pIdx - 1));
-});
-
 els.pClear?.addEventListener("click", () => {
   clearAllChainProgress();
   clearChainStats();
@@ -6568,7 +6474,6 @@ els.rows.addEventListener("change", (e) => {
 // ---- Start ----
 initOnScreenKeyboard();
 initSlider();
-updateBuilderTabsUI();
 loadPuzzle(0);
 setTab(currentView);
 queueInitialHintIntro();
