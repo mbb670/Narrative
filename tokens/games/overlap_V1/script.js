@@ -380,6 +380,7 @@ function sliderCurveLen(prevLenPx, nextLenPx) {
 function buildSliderGeometry(runs) {
   if (!runs?.length) return { path: "", totalWidth: 100, segments: [], maskStops: [] };
 
+  // Convert cell runs into pixel segments so we can draw a single capsule path.
   const segments = [];
   let x = 0;
 
@@ -397,7 +398,7 @@ function buildSliderGeometry(runs) {
 
   const totalWidth = Math.max(1, x);
 
-  // Build the squished capsule path
+  // Build the squished capsule path (single path used for both base and gradient fill).
   let d = `M ${segments[0].start} ${sliderTopFor(segments[0].type)} `;
 
   for (let i = 0; i < segments.length; i++) {
@@ -440,6 +441,7 @@ function buildSliderGeometry(runs) {
   d += `A ${firstH / 2} ${firstH / 2} 0 0 1 0 ${sliderTopFor(first.type)} Z`;
 
   // Mask stops (opaque where thick, transparent where thin) with feathered transitions
+  // so the gradient fades in/out around solved areas.
   const FEATHER_L = Math.max(1, SLIDER_CFG.unit * 2); // earlier gray on entry
   const FEATHER_R = Math.max(2, SLIDER_CFG.unit * 1); // shorter gray bleed exiting
   const maskStops = [];
@@ -548,6 +550,7 @@ function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride, allowS
     runs.push({ color: c, start, end: i });
   }
 
+  // Build per-run gradient stops with short blends at run boundaries.
   const stops = [];
   const mix = (a, b) => (b ? `color-mix(in srgb, ${a} 45%, ${b} 55%)` : a);
   const totalWidth = geometry.totalWidth;
@@ -604,6 +607,7 @@ function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride, allowS
 function renderSliderSvg() {
   if (!slider.track) return;
 
+  // In chain view, allow solved cells to thin out the slider (visual progress).
   const allowSolved = play.mode === MODE.CHAIN && currentView === VIEW.CHAIN;
   const solvedCells = allowSolved ? computeSolvedCells() : null;
 
@@ -2158,6 +2162,7 @@ async function loadArchiveIndex() {
       .map((y) => Number.parseInt(y, 10))
       .filter((y) => Number.isFinite(y));
 
+    // If index data is missing, derive years from loaded puzzles.
     if (!years.length) {
       const derived = puzzles
         .filter(isDailyChainPuzzle)
@@ -2491,6 +2496,7 @@ async function openArchiveModal(opts = {}) {
   if (els.splash && !els.splash.hidden) closeSplash();
   els.archiveModal.hidden = false;
   els.archiveModal.setAttribute("aria-hidden", "false");
+  // Lock scroll while modal is open.
   document.documentElement.classList.add("is-modal-open");
   if (!IS_IOS) {
     document.body.style.overflow = "hidden";
@@ -2671,6 +2677,7 @@ function maybeShowSplashOnLoad() {
   const lastAt = Number.isFinite(last?.at) ? last.at : null;
   const withinArchiveWindow =
     lastAt == null ? true : Date.now() - lastAt <= ARCHIVE_RETURN_TIMEOUT_MS;
+  // If the user last played a previous daily puzzle recently, jump into the archive.
   if (last?.isDate && last.id && today && last.id !== today && withinArchiveWindow) {
     openArchiveModal({ dateKey: last.id });
     return;
@@ -2688,6 +2695,7 @@ function chainProgressSnapshot(p) {
   const hasInput = Array.isArray(play.usr) && play.usr.some(Boolean);
   const elapsed = chain.running ? (Date.now() - chain.startAt) / 1000 : chain.elapsed || 0;
   const score = scoreChain();
+  // Snapshot includes enough data to restore timing, locks, and hint penalties.
   const snap = {
     puzzleKey: key,
     puzzleId: normalizedId.id || null,
@@ -2699,8 +2707,8 @@ function chainProgressSnapshot(p) {
     started: !!(chain.started || play.done || hasInput),
     done: !!play.done,
     revealed: !!play.revealed,
-    lockedEntries: [...play.lockedEntries],
-    lockedCells: Array.isArray(play.lockedCells) ? play.lockedCells.slice(0, play.n) : [],
+    lockedEntries: [...play.lockedEntries], // word-level locks
+    lockedCells: Array.isArray(play.lockedCells) ? play.lockedCells.slice(0, play.n) : [], // per-cell locks (hints)
     hintsUsed: chain.hintsUsed || 0,
     hintPenaltySecTotal: chain.hintPenaltySecTotal || 0,
     wordPenaltySecTotal: chain.wordPenaltySecTotal || 0,
@@ -2753,6 +2761,7 @@ function restoreChainProgressForCurrentPuzzle() {
   const key = chainPuzzleKey(p);
   if (!key) return false;
 
+  // Remove stale daily data before attempting to restore.
   pruneStaleChainProgress();
   const store = loadChainProgressStore();
   const data = store.puzzles?.[key];
@@ -2771,6 +2780,7 @@ function restoreChainProgressForCurrentPuzzle() {
 
   const ui = ensureChainUI();
 
+  // Restore user input and cursor position.
   play.usr = Array.from({ length: play.n }, (_, i) => data.usr?.[i] || "");
   play.at = clamp(data.at ?? 0, 0, Math.max(0, play.n - 1));
   play.done = !!data.done;
@@ -2787,6 +2797,7 @@ function restoreChainProgressForCurrentPuzzle() {
   chain.hintPenaltySecTotal = Math.max(0, +data.hintPenaltySecTotal || chain.hintsUsed * HINT_PENALTY_SEC || 0);
   chain.wordPenaltySecTotal = Math.max(0, +data.wordPenaltySecTotal || 0);
 
+  // Rebuild locks so hints and solved words preserve non-editable state.
   play.lockedEntries = new Set(Array.isArray(data.lockedEntries) ? data.lockedEntries : []);
   const prevLocked = Array.isArray(data.lockedCells) ? data.lockedCells.slice(0, play.n) : [];
   play.lockedCells = prevLocked.concat(Array.from({ length: Math.max(0, play.n - prevLocked.length) }, () => false));
@@ -3116,6 +3127,7 @@ const focusForTyping = () => {
   const a = document.activeElement;
   if (a && a !== kb && isEditable(a)) return;
 
+  // If using custom keyboard or hardware keyboard, keep focus on the stage for key handling.
   if (shouldUseCustomKeyboard() || hasHardwareKeyboard || !IS_TOUCH) {
     try {
       els.stage.focus({ preventScroll: true });
@@ -3125,6 +3137,7 @@ const focusForTyping = () => {
     return;
   }
 
+  // Otherwise focus the hidden input so mobile keyboards appear.
   try {
     kb.focus({ preventScroll: true });
   } catch {
@@ -3197,6 +3210,7 @@ function initOnScreenKeyboard() {
     repeatInterval = null;
   };
 
+  // Build keys from the layout definition.
   KB_ROWS.forEach((rowKeys) => {
     const row = document.createElement("div");
     row.className = "keyboard-row text-system-semibold-sm";
@@ -3230,6 +3244,7 @@ function initOnScreenKeyboard() {
     root.appendChild(row);
   });
 
+  // Central action dispatch for key presses.
   const triggerAction = (btn) => {
     if (btn.dataset.key) write(btn.dataset.key);
     else if (btn.dataset.action === "backspace") back();
@@ -3253,7 +3268,7 @@ function initOnScreenKeyboard() {
 
     focusForTyping();
 
-    // Start repeat for actions only on initial pointer press
+    // Start repeat for actions only on initial pointer press.
     const allowRepeat = e.type && e.type.startsWith("pointer");
     if (!isRepeat && allowRepeat && btn.dataset.action) {
       stopRepeats();
@@ -3343,6 +3358,7 @@ function maybeDemoteHardwareKeyboard() {
   const stale = !lastHardwareKeyboardTs || Date.now() - lastHardwareKeyboardTs > HARDWARE_STALE_MS;
   if (!stale) return;
 
+  // No recent hardware keys -> allow on-screen keyboard again.
   hasHardwareKeyboard = false;
   updateKeyboardVisibility();
 }
@@ -3392,6 +3408,7 @@ function computed(p) {
 
     })
     .filter((e) => e.len)
+    // Sort by start position, then a stable random tie-breaker to avoid flicker.
     .sort((a, b) => a.start - b.start || a.r - b.r);
 
   entries.forEach((e, i) => (e.eIdx = i));
@@ -3427,10 +3444,10 @@ function renderGrid(target, model, clickable, puzzleForPalette) {
   if (target === els.grid) resetRangeClueHints();
   target.innerHTML = "";
 
-  // Track which entries cover each cell (for ARIA + sizing)
+  // Track which entries cover each cell (for ARIA + sizing).
   const cellWords = Array.from({ length: model.total }, () => []);
 
-  // Ranges (explicit grid placement)
+  // Ranges (explicit grid placement). These paint the colored bands behind cells.
   for (const e of model.entries) {
     const d = document.createElement("div");
 
@@ -3456,7 +3473,7 @@ function renderGrid(target, model, clickable, puzzleForPalette) {
 
     target.appendChild(d);
 
-    // Range clue rendered directly in grid
+    // Range clue rendered directly in grid; includes a hint button.
     const rc = document.createElement("div");
     rc.className = "rangeClue";
     rc.dataset.e = String(e.eIdx);
@@ -3501,10 +3518,11 @@ function renderGrid(target, model, clickable, puzzleForPalette) {
     focus.classList.remove("range-full", "range-mid", "range-inner");
     focus.classList.remove("is-active");
     focus.style.gridRow = "";
+    // Focus overlay sits above ranges and below cells.
     target.appendChild(focus);
   }
 
-  // Cells (MUST explicitly place into columns so they don't get auto-placed after ranges)
+  // Cells (MUST explicitly place into columns so they don't get auto-placed after ranges).
   for (let i = 0; i < model.total; i++) {
     const b = document.createElement("button");
     b.type = "button";
@@ -3581,6 +3599,7 @@ function smoothFollowScrollLeft(sc, target, opts = {}) {
 
   const tick = () => {
     const el = _scrollFollowEl;
+    // Bail out if the user is actively panning; we don't want to fight them.
     if (_isUserPanning) { _scrollFollowRaf = 0; return; }
     if (!el) { _scrollFollowRaf = 0; return; }
 
@@ -3634,7 +3653,7 @@ function keepCellInView(idx, behavior = IS_TOUCH ? "smooth" : "auto") {
   const max = sc.scrollWidth - sc.clientWidth;
   target = Math.max(0, Math.min(target, max));
 
-  // tiny deadzone to prevent micro updates
+  // Tiny deadzone to prevent micro updates from jittering the scroll position.
   if (Math.abs(sc.scrollLeft - target) < 1.5) return;
 
   // Avoid native smooth jitter on rapid calls
@@ -3820,6 +3839,7 @@ function jumpToUnresolvedWord(delta) {
     return;
   }
 
+  // Chain mode: pick the nearest unresolved word and jump to its first unresolved cell.
   const unsolved = unresolvedEntries().sort((a, b) => a.start - b.start);
   if (!unsolved.length) return;
   const idx = play.at;
@@ -4461,6 +4481,7 @@ function chainResume() {
   const ui = ensureChainUI();
 
   const elapsed = Math.max(0, +chain.elapsed || 0);
+  // Resume by setting startAt so elapsed math stays consistent.
   chain.startAt = Date.now() - elapsed * 1000;
 
   chain.running = true;
@@ -4492,6 +4513,7 @@ function ensureChainUI() {
   const hud = document.querySelector(".chainHud");
 
   const host = els.helper || els.meta?.parentElement || document.body;
+  // Ensure the HUD lives near the meta/helper region for consistent layout.
   if (hud && host && hud.parentElement !== host) host.appendChild(hud);
 
   const startBtn = hud.querySelector("#chainStartBtn");
@@ -4601,6 +4623,7 @@ function chainStopTimer() {
 function ensureChainTick() {
   if (chain.tickId) return;
   const ui = ensureChainUI();
+  // Short interval keeps the timer smooth without excessive work.
   chain.tickId = setInterval(() => {
     if (!chain.running) return;
     const elapsed = (Date.now() - chain.startAt) / 1000;
@@ -4758,6 +4781,7 @@ function chainFinish(reason = "time", opts = {}) {
   const unsolved = Math.max(0, opts.unsolved ?? 0);
   chain.lastFinishLeftSec = 0;
 
+  // elapsed already includes any hint/word penalties (startAt is adjusted when penalties are added).
   const elapsed = (() => {
     // If actively running, derive from startAt; otherwise trust accumulated elapsed (penalties included).
     if (chain.running && chain.startAt) return (Date.now() - chain.startAt) / 1000;
@@ -4926,6 +4950,7 @@ function chainApplyLocksIfEnabled() {
     updateLockedWordUI();
     if (selectedEntry != null && play.lockedEntries.has(selectedEntry)) clearSelection();
     if (newlyLocked.length) {
+      // Delay animations so the DOM has updated locked classes.
       requestAnimationFrame(() =>
         requestAnimationFrame(() => newlyLocked.forEach((e) => {
           triggerSolveAnimation(e);
@@ -5091,6 +5116,7 @@ function nearestUnsolvedEntryToCursor() {
 
 // Placeholder for chain-specific clue ordering/visibility logic.
 function updateChainClues() {
+  // TODO: determine which clues to show based on cursor position and unsolved entries.
 }
 
 // Show a banner when viewing an archived daily puzzle.
@@ -5123,11 +5149,14 @@ function updatePlayUI() {
     c.querySelector(".letter").textContent = play.usr[i] || "";
     c.classList.toggle("is-active", i === play.at && !play.done);
     const wordsHere = play.cellWords?.[i] || [];
+    // In chain mode, "solved" cells are those fully covered by correct words; locked cells
+    // are still correct but visually distinct while a word finishes locking in.
     const fullySolved = play.mode === MODE.CHAIN && wordsHere.length > 0 && wordsHere.every((w) => isWordCorrect(w));
     const locked = play.mode === MODE.CHAIN && isCellLocked(i) && !fullySolved;
     c.classList.toggle("cell-solved", fullySolved);
     c.classList.toggle("cell-locked", locked);
     // apply class for largest height covering this cell
+    // Cell height classes are derived from the tallest covering range.
     c.classList.remove("cell-height-full", "cell-height-mid", "cell-height-inner", "cell-range-start", "cell-range-end");
     if (wordsHere.length) {
       const priority = { full: 3, mid: 2, inner: 1 };
@@ -5164,6 +5193,7 @@ function setAt(i, { behavior, noScroll } = {}) {
   const target = clamp(i, 0, play.n - 1);
   if (target !== play.at) clearLockedAutoAdvanceSuppressionIfMoved(target);
   play.at = target;
+  // setAt is the main cursor setter; it also triggers UI refresh and persistence.
   updatePlayUI();
   if (!noScroll) {
     const bh = behavior || (IS_TOUCH ? "smooth" : "auto");
@@ -5215,6 +5245,7 @@ function write(ch) {
   if (!chainInputAllowed()) return; // require Start for word chain
 
   if (play.mode === MODE.CHAIN && isCellLocked(play.at)) {
+    // Skip over locked cells; if we just locked one, suppression may hold position briefly.
     if (consumeLockedAutoAdvanceSuppression(play.at)) return;
     const next = findNextEditable(play.at, +1);
     if (next == null) return;
@@ -5225,13 +5256,14 @@ function write(ch) {
   const wasLocked = isCellLocked(prevAt);
   play.usr[play.at] = ch;
 
-  // auto-advance
+  // Auto-advance differs by mode; chain mode can jump across solved words.
   let nextAt = play.at < play.n - 1 ? play.at + 1 : play.at;
 
   if (play.mode === MODE.CHAIN) {
     chainApplyLocksIfEnabled();
     const lockedNow = isCellLocked(prevAt);
     if (lockedNow && !wasLocked) {
+      // Newly locked word may force a jump to the next unresolved word.
       const decision = chooseAutoAdvanceTarget(prevAt);
       if (decision.suppress) {
         nextAt = prevAt;
@@ -5270,6 +5302,7 @@ function back() {
   if (!chainInputAllowed()) return; // require Start for word chain
 
   if (play.mode === MODE.CHAIN && isCellLocked(play.at)) {
+    // In chain mode, backspace skips locked cells instead of clearing them.
     const prev = findNextEditable(play.at, -1);
     if (prev != null) play.at = prev;
     updatePlayUI();
@@ -5365,6 +5398,7 @@ function setResultsInert(isOpen) {
   if (!body) return;
   body.toggleAttribute("data-results-open", isOpen);
   if (isOpen && !resultsInertActive) {
+    // Capture events to prevent interactions outside the modal.
     window.addEventListener("focus", resultsInertBlock, true);
     window.addEventListener("pointerdown", resultsInertBlock, true);
     window.addEventListener("keydown", resultsInertBlock, true);
@@ -5445,6 +5479,7 @@ function shareResult({ mode, linkOnly = false, toastEl = null }) {
   };
 
   (async () => {
+    // Prefer native share on touch; otherwise fall back to clipboard or alert.
     if (isTouch && navigator.share) {
       try {
         await navigator.share(payload);
@@ -5487,6 +5522,7 @@ function resetPlay(opts = {}) {
   closeChainResults();
 
   if (play.mode === MODE.CHAIN) {
+    // Clearing persistence here prevents immediate restore on the same puzzle.
     if (clearPersist) clearChainProgressForPuzzle(puzzles[pIdx]);
     const ui = ensureChainUI();
     ui.startBtn.style.display = "";
@@ -5523,6 +5559,7 @@ function revealPlay() {
 function onGridCellClick(e) {
   if (IS_TOUCH && performance.now() < _ignoreGridClickUntil) return;
 
+  // Hint and clue buttons take precedence over cell clicks.
   const hintBtn = e.target.closest(".rangeClue-hint");
   if (hintBtn) {
     const eIdx = Number(hintBtn.dataset.e || hintBtn.closest(".rangeClue")?.dataset.e);
@@ -5564,8 +5601,10 @@ function onGridCellClick(e) {
 
   const i = +cell.dataset.i;
   if (play.mode === MODE.CHAIN && !chain.started && !play.done) {
+    // First interaction starts the chain timer.
     chainStartNow();
   } else if (play.mode === MODE.CHAIN && chain.started && !chain.running && !play.done) {
+    // Resume if the chain was paused.
     chainResume();
   }
 
@@ -5576,6 +5615,7 @@ function onGridCellClick(e) {
 
 function onGridPointerUpTouch(e) {
   if (e.pointerType !== "touch") return;
+  // Touch pointerup is used to avoid the delayed click on some mobile browsers.
   const hintBtn = e.target.closest(".rangeClue-hint");
   if (hintBtn) {
     e.preventDefault();
@@ -5619,6 +5659,7 @@ function onGridRangeCluePointerOut(e) {
 }
 
 function onGlobalPointerDownForRangeClues(e) {
+  // Click-away handler to dismiss hint popovers and focus overlays.
   if (e.target.closest(".puzzle-nav")) return;
   if (e.target.closest("#navWordPrev") || e.target.closest("#navWordNext")) return;
   if (e.target.closest(".rangeClue") || e.target.closest(".range-focus")) return;
@@ -5707,6 +5748,7 @@ function loadPuzzle(i) {
 
   if (els.gridScroll) els.gridScroll.scrollLeft = 0;
 
+  // Restore saved chain progress after the DOM is ready.
   const restored = play.mode === MODE.CHAIN ? restoreChainProgressForCurrentPuzzle() : false;
   if (!restored) {
     _restoredFromStorage = false;
@@ -5722,6 +5764,7 @@ function setTab(which) {
   currentView = which;
   try { localStorage.setItem(LAST_VIEW_KEY, currentView); } catch {}
 
+  // "view" controls which puzzle list is active and which UI elements are visible.
   // Global hook for CSS
   document.body.dataset.view = which; // "play" | "chain"
 
@@ -5737,7 +5780,7 @@ function setTab(which) {
   updatePlayControlsVisibility();
   updatePuzzleActionsVisibility();
 
-  // Keep chain HUD in sync without resetting state
+  // Keep chain HUD in sync without resetting state.
   const uiState =
     play.done
       ? CHAIN_UI.DONE
@@ -5801,6 +5844,7 @@ function handleEnterKey() {
 // Central keyboard handler for navigation and typing.
 function onKey(e) {
   if (ftueIsOpen()) {
+    // FTUE captures all keys so the demo isn't interrupted.
     e.preventDefault();
     e.stopImmediatePropagation?.();
     return;
