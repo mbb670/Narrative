@@ -397,6 +397,24 @@ Interactive elements
 }
 
 /* -----------------------------
+Global elements
+----------------------------- */
+
+.inline-notification{
+    background-color: var(--system-informative-subtle);
+    border-left: var(--spacing-x4) solid var(--system-informative-default);
+    padding: var(--spacing-x24);
+    h3{
+        color: var(--system-informative-strong);
+    }
+    p{
+        margin-top: var(--unit-6);
+        color: var(--system-informative-strong);
+        opacity: 0.7;
+    }
+}
+
+/* -----------------------------
 Header
 ----------------------------- */
 
