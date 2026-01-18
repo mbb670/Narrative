@@ -1,12 +1,17 @@
+// Overlap V1 game runtime.
+// Single-file implementation that handles puzzle loading, UI, input, chain timing,
+// persistence, and all modal flows. Comments below are intended to guide future modularization.
 import "../../docs/token_switcher/switcher.js";
 
 // window.tokenSwapDefaults = {
 //   mode: "dark"
 // };
 
+// Storage and sharing keys are centralized so data resets can be managed predictably.
 const KEY = "overlap_puzzles_v1";
 const SHARE_URL_OVERRIDE = ""; // leave blank to use current page URL; update if you want a fixed share link
 
+// Legacy/default color names mapped to CSS variables (palette-driven colors are preferred).
 const COLORS = [
   ["Red", "--c-red"],
   ["Yellow", "--c-yellow"],
@@ -15,8 +20,10 @@ const COLORS = [
   ["Purple", "--c-purple"],
 ];
 
+// Height cycle gives each word a stacking height for the layered "overlap" layout.
 const HEIGHT_CYCLE = ["full", "mid", "inner"];
 
+// Game mode is per puzzle; view is the tab selection.
 const MODE = { PUZZLE: "puzzle", CHAIN: "chain" };
 const VIEW = { PLAY: "play", CHAIN: "chain" };
 
@@ -24,6 +31,7 @@ const VIEW = { PLAY: "play", CHAIN: "chain" };
 const LAST_VIEW_KEY = `${KEY}__last_view`;
 const ARCHIVE_RETURN_TIMEOUT_MS = 45 * 60 * 1000;
 
+// URL flags used for debug, FTUE forcing, and splash suppression.
 const DEV_MODE = (() => {
   try {
     const url = new URL(location.href);
@@ -49,12 +57,14 @@ const FORCE_FTUE = (() => {
     return false;
   }
 })();
+// iOS detection is used to avoid scroll/overflow changes that Safari dislikes.
 const IS_IOS =
   /iPad|iPhone|iPod/.test(navigator.userAgent || "") ||
   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const FTUE_SEEN_KEY = `${KEY}__ftue_seen`;
 const LAST_PLAYED_CHAIN_KEY = `${KEY}__last_chain_played`;
 
+// Reads last open tab from storage with a safe fallback.
 function loadLastView() {
   try {
     const v = localStorage.getItem(LAST_VIEW_KEY);
@@ -66,10 +76,13 @@ function loadLastView() {
 
 
 // ---- Palettes (5 colors, from CSS) ----
+// Palettes are defined in CSS via [data-puzzle-palette="..."] selectors and
+// --puzzle-color-<n> variables. JS discovers palette IDs and reads computed values.
 const PALETTE_SIZE = 5;
 const FALLBACK_PALETTE_ID = "classic";
 const FALLBACK_PALETTE_COLORS = ["var(--c-red)", "var(--c-orange)", "var(--c-yellow)", "var(--c-green)", "var(--c-blue)"];
 
+// Extract palette IDs from stylesheets, then read computed CSS variables with a probe element.
 function readCssPalettes() {
   const css = getComputedStyle(document.documentElement);
 
@@ -134,25 +147,31 @@ function readCssPalettes() {
   return palettes;
 }
 
+// Palette helpers normalize IDs and fetch word colors for rendering and UI accents.
 const PALETTES = readCssPalettes();
 const PALETTE_ID_SET = new Set(PALETTES.map((p) => p.id));
 const FIRST_PALETTE_ID = PALETTES[0]?.id || FALLBACK_PALETTE_ID;
 
+// Ensure palette id is valid, falling back to the first available palette.
 const normalizePaletteId = (id) => {
   const v = String(id || "");
   return PALETTE_ID_SET.has(v) ? v : FIRST_PALETTE_ID;
 };
 const getPaletteById = (id) => PALETTES.find((p) => p.id === id) || PALETTES[0];
+// Pick a palette color based on the word index (wraps if needed).
 const paletteColorForWord = (puzzle, wordIdx) => {
   const pal = getPaletteById(normalizePaletteId(puzzle?.palette));
   const colors = pal?.colors?.length ? pal.colors : FALLBACK_PALETTE_COLORS;
   return colors[wordIdx % colors.length] || FALLBACK_PALETTE_COLORS[0];
 };
+// Apply palette selection to the root element for CSS to consume.
 const applyPaletteToDom = (paletteId) => {
   document.documentElement.setAttribute("data-puzzle-palette", normalizePaletteId(paletteId));
 };
 
 // ---- Slider (scroll surrogate, squish-style) ----
+// The slider mirrors horizontal grid scroll and provides a quick scrub control.
+// It renders an SVG capsule with thick/thin segments (unsolved/solved).
 const SLIDER_CFG = {
   viewH: 100,
   unit: 8, // px per cell in the viewBox space
@@ -161,6 +180,7 @@ const SLIDER_CFG = {
   curve: 14,
 };
 
+// Runtime slider state (DOM refs + interaction state + cached geometry).
 const slider = {
   root: null,
   track: null,
@@ -173,6 +193,7 @@ const slider = {
   cache: null, // { key, stops, segments }
 };
 
+// Read CSS mix settings so the slider gradient can be toned down for legibility.
 function getSliderMixSettings() {
   const css = getComputedStyle(document.documentElement);
   const base = css.getPropertyValue("--slider-color-mix-base").trim() || "var(--background-default)";
@@ -182,6 +203,7 @@ function getSliderMixSettings() {
   return { base, amount };
 }
 
+// Measure effective scroll range (taking padding into account).
 function sliderScrollMetrics() {
   const sc = els.gridScroll;
   if (!sc) return { max: 0, padL: 0, padR: 0, eff: 0 };
@@ -193,6 +215,7 @@ function sliderScrollMetrics() {
   return { max, padL, padR, eff: effWidth };
 }
 
+// Build slider DOM and wire pointer drag/click handling.
 function initSlider() {
   slider.root = els.slider;
   if (!slider.root) return;
@@ -261,6 +284,7 @@ function initSlider() {
   slider.root.addEventListener("pointercancel", endInteraction);
 }
 
+// Map slider percent to scrollLeft with optional smooth follow.
 function setScrollFromSliderPct(pct, { smooth = false } = {}) {
   if (!els.gridScroll) return;
   const sc = els.gridScroll;
@@ -275,6 +299,7 @@ function setScrollFromSliderPct(pct, { smooth = false } = {}) {
   if (slider.thumb) slider.thumb.style.left = `${pct * 100}%`;
 }
 
+// Sync thumb position from the current scroll offset.
 function updateThumbFromScroll(force = false) {
   if (!slider.root || !slider.thumb) return;
   if (slider.grabbing && !force) return;
@@ -285,7 +310,7 @@ function updateThumbFromScroll(force = false) {
   slider.thumb.style.left = `${pct * 100}%`;
 }
 
-// Build thick/thin runs from solved cells (not just locked words)
+// Build thick/thin runs from solved cells (not just locked words).
 function computeSolvedCells() {
   if (play.mode !== MODE.CHAIN || !play.n) return [];
 
@@ -300,7 +325,7 @@ function computeSolvedCells() {
     }
   }
 
-  // Precompute which words are correct
+  // Precompute which words are correct to avoid repeat checks per cell.
   const wordCorrect = new Map();
   for (const e of play.entries || []) {
     wordCorrect.set(e.eIdx, isWordCorrect(e));
@@ -319,6 +344,7 @@ function computeSolvedCells() {
   return solved;
 }
 
+// Convert solved cells into contiguous thick/thin segments.
 function sliderSegments(solvedCellsOverride) {
   const total = play.n || 0;
   if (!total) return [{ start: 0, len: 1, type: "thick" }];
@@ -343,12 +369,14 @@ const sliderHeightFor = (t) => (t === "thin" ? SLIDER_CFG.thinH : SLIDER_CFG.thi
 const sliderTopFor = (t) => (SLIDER_CFG.viewH - sliderHeightFor(t)) / 2;
 const sliderBottomFor = (t) => sliderTopFor(t) + sliderHeightFor(t);
 
+// Curves at segment boundaries are clamped so short segments are not over-curved.
 function sliderCurveLen(prevLenPx, nextLenPx) {
   const base = SLIDER_CFG.curve;
   const lim = Math.min(prevLenPx * 0.5, nextLenPx * 0.5);
   return Math.max(2, Math.min(base, Math.max(0, lim)));
 }
 
+// Create the squished capsule SVG path + mask stops for thick/thin blending.
 function buildSliderGeometry(runs) {
   if (!runs?.length) return { path: "", totalWidth: 100, segments: [], maskStops: [] };
 
@@ -443,6 +471,7 @@ function buildSliderGeometry(runs) {
   return { path: d, totalWidth, segments, maskStops };
 }
 
+// Translate cell index boundaries into SVG x positions.
 function sliderBoundaryX(idx, segments, totalCells) {
   if (idx <= 0) return 0;
   if (idx >= totalCells) return segments.length ? segments[segments.length - 1].end : 0;
@@ -458,6 +487,7 @@ function sliderBoundaryX(idx, segments, totalCells) {
   return (idx / Math.max(1, totalCells)) * (segments[segments.length - 1]?.end || 0);
 }
 
+// Compute gradient stops based on word colors, with optional solved override.
 function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride, allowSolved = false) {
   const total = play.n || 0;
   if (!entries?.length || !total || !geometry?.segments?.length) return [];
@@ -468,6 +498,7 @@ function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride, allowS
     getComputedStyle(document.documentElement).getPropertyValue("--slider-solved").trim() ||
     "rgba(0,0,0,0.35)";
 
+  // Map each cell to the entries that cover it.
   const covers = Array.from({ length: total }, () => []);
   for (const e of entries) {
     for (let i = e.start; i < e.start + e.len && i < total; i++) covers[i].push(e);
@@ -476,6 +507,7 @@ function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride, allowS
   const wordCorrect = new Map();
   for (const e of entries) wordCorrect.set(e.eIdx, isWordCorrect(e));
 
+  // Pick a color for each cell based on the first unsolved word covering it.
   const colors = Array.from({ length: total }, () => null);
   for (let i = 0; i < total; i++) {
     if (useSolved && solvedCells?.[i]) {
@@ -496,6 +528,7 @@ function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride, allowS
     }
   }
 
+  // Ensure all cells have a color (avoid empty gradients).
   const fallbackColor =
     colors.find(Boolean) ||
     paletteColorForWord(puzzle, 0) ||
@@ -505,6 +538,7 @@ function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride, allowS
     if (!colors[i]) colors[i] = fallbackColor;
   }
 
+  // Collapse consecutive cells into color runs so gradients blend smoothly.
   const runs = [];
   let i = 0;
   while (i < total) {
@@ -566,6 +600,7 @@ function sliderColorStops(entries, puzzle, geometry, solvedCellsOverride, allowS
   return stops.map((s) => ({ ...s, color: mixColor(s.color) }));
 }
 
+// Render the slider SVG; cache geometry when possible to avoid recompute.
 function renderSliderSvg() {
   if (!slider.track) return;
 
@@ -626,6 +661,7 @@ function renderSliderSvg() {
   slider.track.innerHTML = svg;
 }
 
+// Show/hide slider based on overflow and repaint its SVG.
 function updateSliderUI() {
   if (!slider.root || !slider.track) return;
   const isPlayableView = currentView === VIEW.CHAIN || currentView === VIEW.PLAY;
@@ -638,11 +674,13 @@ function updateSliderUI() {
 }
 
 // ---- Defaults loading (modular data files) ----
+// Puzzle content lives in JSON bundles; this section fetches and flattens them.
 const DEFAULTS_VERSION = "2026-01-26"; // <-- bump this any time you edit puzzle data layout
 const DEFAULTS_VER_KEY = `${KEY}__defaults_version`;
 
 const JSON_FETCH_OPTS = { cache: "no-store" };
 
+// Fetch JSON with a safe fallback (no caching so daily updates show up immediately).
 async function fetchJson(url, fallback = null) {
   try {
     const res = await fetch(url, JSON_FETCH_OPTS);
@@ -653,6 +691,7 @@ async function fetchJson(url, fallback = null) {
   }
 }
 
+// Given a list of JSON file paths, return a single flattened array.
 async function loadJsonArraysFromList(baseUrl, paths = []) {
   const results = await Promise.all(
     paths.map(async (p) => {
@@ -664,6 +703,7 @@ async function loadJsonArraysFromList(baseUrl, paths = []) {
   return results.flat();
 }
 
+// Non-chain puzzles (overlap mode) are loaded from the puzzles data folder.
 async function loadPuzzleModeDefaults() {
   const base = new URL("./data/puzzles/", import.meta.url);
   const manifest = await fetchJson(new URL("./data/puzzles/index.json", import.meta.url), null);
@@ -674,6 +714,7 @@ async function loadPuzzleModeDefaults() {
   return loadJsonArraysFromList(base, list);
 }
 
+// Non-daily chain content (FTUE, custom packs, etc).
 async function loadChainOtherDefaults() {
   const base = new URL("./data/chain/other/", import.meta.url);
   const manifest = await fetchJson(new URL("./data/chain/other/index.json", import.meta.url), null);
@@ -684,6 +725,7 @@ async function loadChainOtherDefaults() {
   return loadJsonArraysFromList(base, list);
 }
 
+// Daily chain puzzles are grouped by month for smaller fetches.
 async function loadDailyChainDefaults(date = new Date()) {
   const base = new URL("./data/chain/daily/", import.meta.url);
   const y = date.getFullYear();
@@ -692,6 +734,7 @@ async function loadDailyChainDefaults(date = new Date()) {
   return loadJsonArraysFromList(base, [monthPath]);
 }
 
+// Load all default puzzle sources in parallel.
 async function loadDefaultPuzzles() {
   const [daily, chainOther, puzzleModes] = await Promise.all([
     loadDailyChainDefaults(),
@@ -705,6 +748,7 @@ const DEF = await loadDefaultPuzzles();
 
 
 // ---- DOM ----
+// Cache frequently used nodes so logic and rendering are decoupled from selectors.
 const $ = (s) => document.querySelector(s);
 const els = {
   logo: $("#logo"),
@@ -801,6 +845,7 @@ const NAV_DEBUG = false;
 const logNav = () => {};
 
 // ---- Toasts ----
+// Toasts are timed UI messages; we track timers per type to avoid overlap flicker.
 const toastTimers = { success: 0, warning: 0, error: 0, hint: 0 };
 let resultsToastTimer = 0;
 const inlineToastTimers = new WeakMap();
@@ -808,12 +853,14 @@ let lastPlayWarningKey = "";
 let lastChainWarningKey = "";
 const HINT_PENALTY_SEC = 10;
 
+// Parse CSS custom properties that store durations (ms).
 function parseMsVar(val, fallback) {
   if (!val) return fallback;
   const n = parseInt(String(val).trim(), 10);
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
+// Duration per toast type; driven by CSS variables with sensible defaults.
 function toastDuration(type) {
   const css = getComputedStyle(document.documentElement);
   const raw =
@@ -822,6 +869,7 @@ function toastDuration(type) {
   return parseMsVar(raw, type === "error" ? 2200 : 2600);
 }
 
+// Show a toast and reset its animation by toggling the class.
 function showToast(type, message, duration) {
   const map = {
     success: els.toastSuccess,
@@ -848,6 +896,7 @@ function showToast(type, message, duration) {
   toastTimers[type] = setTimeout(() => el.classList.remove("is-showing"), dur);
 }
 
+// Update inline counters for solved words; called by toasts and UI refreshes.
 function updateWordSolvedCount(message) {
   const targets = document.querySelectorAll(".word-solved-count");
   if (!targets.length) return;
@@ -866,6 +915,7 @@ function updateWordSolvedCount(message) {
   });
 }
 
+// Inline toast is used in small UI areas (share, results, etc).
 function showInlineToast(el, message) {
   if (!el) return;
   el.textContent = message || "";
@@ -878,6 +928,7 @@ function showInlineToast(el, message) {
   inlineToastTimers.set(el, setTimeout(() => el.classList.remove("is-showing"), dur));
 }
 
+// Share feedback prefers inline toasts if a target is provided or results modal is open.
 function showShareToast(message, targetEl) {
   if (targetEl) {
     showInlineToast(targetEl, message);
@@ -898,6 +949,7 @@ function showShareToast(message, targetEl) {
   showToast("success", message);
 }
 
+// Clear all current toasts and timers (useful on reset).
 function clearToasts() {
   ["success", "warning", "error", "wordSolved", "hint"].forEach((type) => {
     if (toastTimers[type]) {
@@ -918,6 +970,7 @@ function resetToastGuards() {
 }
 
 // ---- Time penalties ----
+// Chain mode uses time penalties for hints and "give up" reveals.
 function addTimePenalty(seconds, type = "") {
   if (play.mode !== MODE.CHAIN) return;
   const sec = Math.max(0, Math.round(seconds || 0));
@@ -945,6 +998,7 @@ function addTimePenalty(seconds, type = "") {
 }
 
 // ---- FTUE ----
+// First-time user experience is a scripted demo board with timed typing animations.
 const FTUE_STEPS = [
   {
     title: "Solve each clue to fill a block",
@@ -968,6 +1022,7 @@ let ftueDialogTimer = null;
 let ftueShowTimer = null;
 let ftueNavBlockedUntil = 0;
 let ftueTouchStart = null;
+// FTUE demo state is independent from the real play state.
 const ftueDemo = {
   puzzle: null,
   model: null,
@@ -988,8 +1043,10 @@ const FTUE_TIMING = {
   step3MidPause: 2000,
 };
 
+// Modal state helpers for FTUE.
 const ftueIsOpen = () => !!els.ftueModal?.classList.contains("is-open");
 let _ftuePrevOverflow = "";
+// Prevent interaction with the live board while FTUE is open.
 function ftueDisableInteractions() {
   _ftuePrevOverflow = document.body.style.overflow;
   if (!IS_IOS) document.body.style.overflow = "hidden";
@@ -1004,6 +1061,7 @@ function ftueEnableInteractions() {
   if (els.keyboard) els.keyboard.style.pointerEvents = "";
 }
 
+// FTUE persistence flags (localStorage).
 const hasSeenFtue = () => {
   try {
     return localStorage.getItem(FTUE_SEEN_KEY) === "1";
@@ -1017,6 +1075,7 @@ const markFtueSeen = () => {
   } catch {}
 };
 
+// Render labels and kick off the step animation.
 function renderFtueStep() {
   const step = Math.max(0, Math.min(FTUE_STEPS.length - 1, ftueStep));
   const data = FTUE_STEPS[step] || FTUE_STEPS[0];
@@ -1054,6 +1113,7 @@ function renderFtueStep() {
   requestAnimationFrame(() => runFtueAnimation(step));
 }
 
+// Open the FTUE modal and pause any live chain progress underneath.
 function openFtue(startStep = 0, opts = {}) {
   if (!els.ftueModal) return;
   clearTimeout(ftueDialogTimer);
@@ -1139,6 +1199,7 @@ function openFtue(startStep = 0, opts = {}) {
   }
 }
 
+// Close FTUE, restore body state, and mark as seen.
 function closeFtue() {
   if (!els.ftueModal) return;
   clearFtueTimers();
@@ -1181,6 +1242,7 @@ const prevFtue = () => {
   renderFtueStep();
 };
 
+// Show FTUE automatically if not seen or forced.
 function maybeShowFtue() {
   if (!els.ftueModal) return;
   clearTimeout(ftueShowTimer);
@@ -1189,11 +1251,13 @@ function maybeShowFtue() {
   }
 }
 
+// All FTUE animations are timer-driven; reset between steps.
 function clearFtueTimers() {
   ftueDemo.timers.forEach((t) => clearTimeout(t));
   ftueDemo.timers = [];
 }
 
+// Swipe navigation between FTUE steps (touch only).
 function onFtueTouchStart(e) {
   if (!ftueIsOpen()) return;
   const t = e.touches && e.touches[0];
@@ -1219,6 +1283,7 @@ function onFtueTouchEnd(e) {
   else prevFtue();
 }
 
+// FTUE animation can be paused; update the toggle UI.
 function ftueUpdatePlayPauseUI() {
   if (!els.ftuePlayPause) return;
   const isPaused = !!ftueDemo.paused;
@@ -1242,6 +1307,7 @@ function ftuePlay() {
   runFtueAnimation(ftueStep);
 }
 
+// Build a synthetic board for the FTUE demo puzzle.
 function ensureFtueBoard() {
   if (!els.ftueGrid) return null;
   const ftuePuzzle = puzzles.find(
@@ -1259,6 +1325,7 @@ function ensureFtueBoard() {
   return ftueDemo;
 }
 
+// Render FTUE board state (letters, active cell, solved/locked styling).
 function ftueRenderState() {
   if (!ftueDemo.model || !els.ftueGrid) return;
   const cells = els.ftueGrid.querySelectorAll(".cell");
@@ -1280,6 +1347,7 @@ function ftueRenderState() {
   ftueKeepActiveInView(ftueDemo.lastScrollBehavior || "smooth");
 }
 
+// Move the demo cursor and keep it in view.
 function ftueSetAt(idx, opts = {}) {
   if (!ftueDemo.model) return;
   ftueDemo.at = clamp(idx, 0, ftueDemo.model.total - 1);
@@ -1294,6 +1362,7 @@ function ftueSetLetter(idx, ch) {
   ftueRenderState();
 }
 
+// FTUE uses its own "solved" check separate from live play.
 function ftueIsEntrySolved(entry) {
   if (!entry) return false;
   for (let i = 0; i < entry.len; i++) {
@@ -1309,6 +1378,7 @@ function ftueIsEntrySolved(entry) {
 //   return covering.every((e) => ftueDemo.lockedEntries.has(e.eIdx) && ftueIsEntrySolved(e));
 // }
 
+// Add cells to the "solved" styling set (used in demo visuals).
 function ftueAddSolvedCells(entry, count = null) {
   if (!entry || !ftueDemo.solvedCells) return;
   const n = count == null ? entry.len : Math.min(count, entry.len);
@@ -1317,6 +1387,7 @@ function ftueAddSolvedCells(entry, count = null) {
   }
 }
 
+// Maintain FTUE cursor in view; can freeze during animations.
 function ftueKeepActiveInView(behavior = "smooth") {
   if (ftueDemo.freezeScroll) return;
   if (ftueStep === 0) {
@@ -1339,6 +1410,7 @@ function ftueKeepActiveInView(behavior = "smooth") {
   }
 }
 
+// Lock a demo entry and play its solve animation.
 function ftueLockEntry(entry) {
   if (!entry) return;
   if (!ftueDemo.lockedEntries) ftueDemo.lockedEntries = new Set();
@@ -1368,6 +1440,7 @@ function ftueFillEntryInstant(entry) {
   });
 }
 
+// Stepwise typing animation for the FTUE demo.
 function ftueTypeLetters(startIdx, letters, opts = {}) {
   let delay = opts.delayBefore ?? 0;
   const step = opts.step ?? 180;
@@ -1398,6 +1471,7 @@ function ftueTypeLetters(startIdx, letters, opts = {}) {
   }
 }
 
+// Trigger the same solve animations used in the live board.
 function ftueTriggerSolveAnimation(entry) {
   if (!entry || !els.ftueGrid) return;
   const letters = [];
@@ -1434,6 +1508,7 @@ function ftueTriggerSolveAnimation(entry) {
   }
 }
 
+// Reset FTUE board to a blank state between loops.
 function ftueResetBoard() {
   if (!ftueDemo.model) return;
   if (els.ftueGrid) {
@@ -1453,6 +1528,7 @@ function ftueResetBoard() {
   ftueRenderState();
 }
 
+// Orchestrate the scripted typing demo per FTUE step.
 function runFtueAnimation(step) {
   if (!ensureFtueBoard()) return;
   clearFtueTimers();
@@ -1630,6 +1706,7 @@ function runFtueAnimation(step) {
   }
 }
 
+// Clear all editable cells (used for select-all delete and reset behaviors).
 function clearAllUnlockedCells() {
   if (play.done) return;
   if (play.mode === MODE.CHAIN && !chainInputAllowed()) return;
@@ -1665,6 +1742,7 @@ function clearAllUnlockedCells() {
   }
 }
 
+// Warnings shown when the board is fully filled but incorrect.
 function maybeToastPlayFilledWrong() {
   if (play.mode !== MODE.PUZZLE || play.done) return;
   const filled = play.usr.every(Boolean);
@@ -1697,6 +1775,7 @@ function maybeToastChainFilledWrong() {
   }
 }
 
+// Grid scroll should cancel smooth-follow so dragging feels direct.
 function bindGridScrollCancels() {
   if (_gridScrollBound || !els.gridScroll) return;
   _gridScrollBound = true;
@@ -1707,6 +1786,7 @@ function bindGridScrollCancels() {
   });
 }
 
+// Remove derived height fields before persisting puzzles (keeps storage stable across layouts).
 const stripHeightsFromPuzzles = (arr = []) =>
   arr.map((p) => {
     const { words = [], height, h, dateKey, title, ...restPuzzle } = p || {};
@@ -1720,7 +1800,9 @@ const stripHeightsFromPuzzles = (arr = []) =>
   });
 
 // ---- Storage ----
+// Puzzles are stored in localStorage; defaults are merged so shipped updates appear.
 const store = {
+  // Merge saved puzzles with shipped defaults; defaults fill any missing items.
   load() {
     const defaults = structuredClone(DEF);
     try {
@@ -1756,6 +1838,7 @@ const store = {
       return defaults;
     }
   },
+  // Persist puzzles (without layout-only data) and the defaults version.
   save() {
     localStorage.setItem(DEFAULTS_VER_KEY, DEFAULTS_VERSION);
     localStorage.setItem(KEY, JSON.stringify(stripHeightsFromPuzzles(puzzles)));
@@ -1763,6 +1846,7 @@ const store = {
 };
 
 // ---- Per-puzzle chain progress persistence ----
+// Stores partial progress for chain puzzles (including daily puzzles).
 const CHAIN_PROGRESS_KEY = `${KEY}__chain_progress_v2`;
 const CHAIN_STATS_KEY = `${KEY}__chain_stats_v2`;
 const clearLegacyChainStorage = () => {
@@ -1774,6 +1858,7 @@ const clearLegacyChainStorage = () => {
 
 const todayKey = () => toDateKey(new Date());
 
+// Use puzzle ID + word signature to create a stable key even if ordering changes.
 function chainPuzzleKey(p) {
   if (!p || !isChainPuzzle(p)) return null;
   const wordSig = puzzleWordSignature(p);
@@ -1781,6 +1866,7 @@ function chainPuzzleKey(p) {
   return `${MODE.CHAIN}||${id}||${wordSig || "words"}`;
 }
 
+// Load progress store and normalize its shape.
 function loadChainProgressStore() {
   clearLegacyChainStorage();
   try {
@@ -1799,6 +1885,7 @@ function saveChainProgressStore(store) {
   } catch {}
 }
 
+// Daily puzzles expire when a new day starts; remove stale entries.
 function pruneStaleChainProgress() {
   const store = loadChainProgressStore();
   const t = todayKey();
@@ -1820,6 +1907,7 @@ function pruneStaleChainProgress() {
   if (changed) saveChainProgressStore(store);
 }
 
+// Remove progress for a single puzzle.
 function clearChainProgressForPuzzle(p) {
   const key = chainPuzzleKey(p);
   if (!key) return;
@@ -1830,6 +1918,7 @@ function clearChainProgressForPuzzle(p) {
   }
 }
 
+// Remove all chain progress (used by the clear stats action).
 function clearAllChainProgress() {
   try {
     localStorage.removeItem(CHAIN_PROGRESS_KEY);
@@ -1844,6 +1933,7 @@ let _splashShown = false;
 let _ftueNoAnimRestore = null;
 
 // ---- Chain stats (completed games only) ----
+// Aggregates completed chain games for the splash screen summary.
 function loadChainStatsStore() {
   clearLegacyChainStorage();
   try {
@@ -1870,6 +1960,7 @@ function clearChainStats() {
   } catch {}
 }
 
+// Record completion once per puzzle key (prevents double counting).
 function recordChainCompletionIfNeeded(elapsedSec) {
   const key = chainPuzzleKey(puzzles[pIdx]);
   if (!key || play.mode !== MODE.CHAIN) return;
@@ -1882,6 +1973,7 @@ function recordChainCompletionIfNeeded(elapsedSec) {
   saveChainStatsStore(store);
 }
 
+// Summary used on splash: total games and average time.
 function chainStatsSummary() {
   const store = loadChainStatsStore();
   const games = Math.max(0, store.games || 0);
@@ -1891,6 +1983,7 @@ function chainStatsSummary() {
 }
 
 // ---- Splash modal ----
+// Splash summarizes chain progress and exposes quick actions (play/continue/admire).
 function chainSummaryFromLive() {
   if (play.mode !== MODE.CHAIN) return null;
   const total = play.entries?.length || 0;
@@ -1899,6 +1992,7 @@ function chainSummaryFromLive() {
   return { state, solved, total };
 }
 
+// When not on chain view, infer summary from stored progress.
 function chainSummaryFromStore() {
   // Use today's chain puzzle (if available) to infer state when not in chain view
   const idx = findTodayChainIndex();
@@ -1951,6 +2045,7 @@ function splashSolvedText() {
   return { solved, total };
 }
 
+// Populate splash labels and stats based on current progress.
 function updateSplashContent(forceState) {
   if (!els.splash) return;
   const summary = chainProgressSummary();
@@ -2005,6 +2100,7 @@ function updateSplashContent(forceState) {
 }
 
 // ---- Archive modal ----
+// Daily puzzle archive with month navigation and resume/admire actions.
 const ARCHIVE_MONTH_LABELS = [
   "January",
   "February",
@@ -2020,6 +2116,7 @@ const ARCHIVE_MONTH_LABELS = [
   "December",
 ];
 
+// Archive state keeps cached months and the current selection.
 const archiveState = {
   ready: false,
   loadingPromise: null,
@@ -2040,6 +2137,7 @@ const pad2 = (n) => String(n).padStart(2, "0");
 const archiveMonthKey = (year, month) => `${year}-${pad2(month)}`;
 const archiveDateKey = (year, month, day) => `${year}-${pad2(month)}-${pad2(day)}`;
 
+// Load the available years/months for daily puzzles (from JSON index files).
 async function loadArchiveIndex() {
   if (archiveState.ready) return;
   if (archiveState.loadingPromise) return archiveState.loadingPromise;
@@ -2122,6 +2220,7 @@ async function loadArchiveIndex() {
   return archiveState.loadingPromise;
 }
 
+// Load a single month's daily puzzles and map them by date ID.
 async function loadArchiveMonth(year, month) {
   const key = archiveMonthKey(year, month);
   if (archiveState.monthCache.has(key)) return archiveState.monthCache.get(key);
@@ -2141,6 +2240,7 @@ async function loadArchiveMonth(year, month) {
   return monthData;
 }
 
+// Choose a default date for a month (today if available, otherwise first day).
 function archiveDefaultSelection(year, month, monthData) {
   const today = toDateKey(new Date());
   const monthPrefix = `${year}-${pad2(month)}-`;
@@ -2150,6 +2250,7 @@ function archiveDefaultSelection(year, month, monthData) {
   return archiveDateKey(year, month, 1);
 }
 
+// Populate year/month selectors and enable prev/next navigation.
 function renderArchiveControls() {
   const yearSel = els.archiveYearSelect;
   const monthSel = els.archiveMonthSelect;
@@ -2190,6 +2291,7 @@ function renderArchiveControls() {
   nextBtn.disabled = idx < 0 || idx >= archiveState.availableMonths.length - 1;
 }
 
+// Render the calendar grid with per-day progress states.
 function renderArchiveCalendar() {
   const grid = els.archiveCalendar;
   if (!grid) return;
@@ -2226,6 +2328,7 @@ function renderArchiveCalendar() {
     const hasPuzzle = !!puzzle;
     const isFuture = !!(todayKey && dateKey > todayKey);
 
+    // state drives calendar visuals: hidden, complete, progress, or not-started.
     let state = "hidden";
     if (hasPuzzle && !isFuture) {
       const key = chainPuzzleKey(puzzle);
@@ -2258,6 +2361,7 @@ function renderArchiveCalendar() {
   grid.appendChild(frag);
 }
 
+// Update the CTA label based on progress (play/continue/admire).
 function updateArchiveAction() {
   const btn = els.archiveActionBtn;
   if (!btn) return;
@@ -2317,6 +2421,7 @@ function updateArchiveAction() {
   btn.disabled = !playable;
 }
 
+// Set month/year selection and render calendar.
 async function setArchiveMonth(year, month, opts = {}) {
   const token = ++archiveState.renderToken;
   await loadArchiveIndex();
@@ -2352,6 +2457,7 @@ async function setArchiveMonth(year, month, opts = {}) {
   updateArchiveAction();
 }
 
+// Select a day in the archive calendar.
 function selectArchiveDate(dateKey) {
   if (!dateKey) return;
   archiveState.selectedDateKey = dateKey;
@@ -2362,6 +2468,7 @@ function selectArchiveDate(dateKey) {
   updateArchiveAction();
 }
 
+// Ensure an archive puzzle exists in the main puzzles list; return its index.
 function ensurePuzzleInList(puzzle) {
   const id = normalizePuzzleId(puzzle).id;
   const idx = puzzles.findIndex((p) => isChainPuzzle(p) && normalizePuzzleId(p).id === id);
@@ -2376,6 +2483,7 @@ const isArchiveDailyPuzzle = (p) => {
   return isDailyChainPuzzle(p) && id && today && id !== today;
 };
 
+// Open the archive modal and load the requested date/month.
 async function openArchiveModal(opts = {}) {
   if (!els.archiveModal) return;
   const now = new Date();
@@ -2408,6 +2516,7 @@ function closeArchiveModal() {
   }
 }
 
+// Settings panel is a simple show/hide container.
 const isSettingsPanelOpen = () => !!els.settingsPanel && !els.settingsPanel.hidden;
 function openSettingsPanel() {
   if (!els.settingsPanel) return;
@@ -2430,6 +2539,7 @@ function toggleSettingsPanel() {
   else openSettingsPanel();
 }
 
+// Color mode persists per user and respects system preference for auto.
 const COLOR_MODE_KEY = `${KEY}__color_mode`;
 const ONSCREEN_KB_KEY = `${KEY}__show_onscreen_keyboard`;
 const COLOR_MODE_AUTO = "auto";
@@ -2440,16 +2550,19 @@ const colorModeTabs = Array.from(document.querySelectorAll(".settings-color-mode
 const prefersColorQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 let currentColorMode = COLOR_MODE_AUTO;
 
+// Resolve "auto" to the current system preference.
 function resolveAutoColorMode() {
   return prefersColorQuery && prefersColorQuery.matches ? COLOR_MODE_DARK : COLOR_MODE_LIGHT;
 }
 
+// Apply resolved mode to the root for CSS theming.
 function applyColorMode(mode) {
   const resolved = mode === COLOR_MODE_AUTO ? resolveAutoColorMode() : mode;
   if (!resolved) return;
   document.documentElement.setAttribute("data-mode", resolved);
 }
 
+// Update tab UI to reflect the current selection.
 function updateColorModeUI(mode) {
   colorModeTabs.forEach((btn) => {
     const active = btn.dataset.mode === mode;
@@ -2458,6 +2571,7 @@ function updateColorModeUI(mode) {
   });
 }
 
+// Set and optionally persist a color mode.
 function setColorMode(mode, { persist = true } = {}) {
   const next = COLOR_MODE_VALUES.has(mode) ? mode : COLOR_MODE_AUTO;
   currentColorMode = next;
@@ -2478,6 +2592,7 @@ function loadColorMode() {
   setColorMode(saved || COLOR_MODE_AUTO, { persist: false });
 }
 
+// Restore user preference for the on-screen keyboard.
 function loadOnscreenKeyboardPref() {
   if (!els.showOnscreenKeyboard) return;
   let enabled = false;
@@ -2514,6 +2629,7 @@ function closeSplash() {
   }
 }
 
+// Primary CTA handles FTUE gating and resumes/starts the chain.
 function handleSplashPrimary() {
   if (!hasSeenFtue()) {
     // First-time: move to chain view in an idle state, then show FTUE (chain must not start yet)
@@ -2546,6 +2662,7 @@ function handleSplashPrimary() {
   else if (!chain.running) chainResume();
 }
 
+// Decide whether to show splash or jump to the archive after a recent return.
 function maybeShowSplashOnLoad() {
   if (_splashShown || SUPPRESS_SPLASH) return;
   _splashShown = true;
@@ -2561,6 +2678,7 @@ function maybeShowSplashOnLoad() {
   openSplash();
 }
 
+// Serialize the current chain state for persistence (including penalties + locks).
 function chainProgressSnapshot(p) {
   if (play.mode !== MODE.CHAIN) return null;
   const key = chainPuzzleKey(p);
@@ -2575,7 +2693,7 @@ function chainProgressSnapshot(p) {
     puzzleId: normalizedId.id || null,
     puzzleType,
     puzzleIdIsDate: !!normalizedId.isDate,
-    savedDayKey: todayKey(),
+    savedDayKey: todayKey(), // used to invalidate daily puzzles on date change
     usr: (play.usr || []).slice(0, play.n),
     at: clamp(play.at ?? 0, 0, Math.max(0, play.n - 1)),
     started: !!(chain.started || play.done || hasInput),
@@ -2603,6 +2721,7 @@ function chainProgressSnapshot(p) {
   return snap;
 }
 
+// Save chain progress now (used after major events).
 function persistChainProgressImmediate() {
   if (play.mode !== MODE.CHAIN) return;
   const p = puzzles[pIdx];
@@ -2616,6 +2735,7 @@ function persistChainProgressImmediate() {
   _persistTickLastTs = performance.now ? performance.now() : Date.now();
 }
 
+// Throttle persistence to animation frame to avoid excessive writes.
 function requestPersistChainProgress() {
   if (play.mode !== MODE.CHAIN) return;
   if (_persistChainRaf) return;
@@ -2625,6 +2745,7 @@ function requestPersistChainProgress() {
   });
 }
 
+// Restore persisted progress for the current chain puzzle (if it matches).
 function restoreChainProgressForCurrentPuzzle() {
   if (play.mode !== MODE.CHAIN) return false;
   _restoredFromStorage = false;
@@ -2639,6 +2760,7 @@ function restoreChainProgressForCurrentPuzzle() {
   const isDaily = isDailyChainPuzzle(p);
   const puzzleId = normalizePuzzleId(p).id;
   const isCurrentDaily = isDaily && today && puzzleId === today;
+  // Daily puzzles should not carry progress across days.
   const stale = data && isCurrentDaily && data.savedDayKey && data.savedDayKey !== today;
 
   if (stale) {
@@ -2686,12 +2808,14 @@ function restoreChainProgressForCurrentPuzzle() {
 
 
 // ---- Utils ----
+// Shared helpers for string normalization, bounds, IDs, and date parsing.
 const cleanA = (s) => (s || "").toUpperCase().replace(/[^A-Z]/g, "");
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 const insets = (h) => (h === "mid" ? [12.5, 12.5] : h === "inner" ? [25, 25] : [0, 0]);
 const isEditable = (el) =>
   !!(el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable));
 
+// Stable random tie-breaker for entries with the same start position.
 const tieR = new WeakMap();
 const tr = (w) => {
   let v = tieR.get(w);
@@ -2704,10 +2828,12 @@ const tr = (w) => {
 
 const isChainPuzzle = (p) => String(p?.type || MODE.PUZZLE) === MODE.CHAIN;
 
+// Placeholder difficulty inference (currently unused).
 const inferDiffFromColor = () => "easy";
 
 const DATE_ID_RE = /^\d{4}-\d{2}-\d{2}$/;
 
+// Convert Date to YYYY-MM-DD (UTC-insensitive for labels).
 const toDateKey = (d) => {
   if (!(d instanceof Date) || Number.isNaN(+d)) return null;
   const y = d.getFullYear();
@@ -2770,6 +2896,7 @@ const datePartsFromKey = (key) => {
   return { year: y, month: mo, day: d };
 };
 
+// Normalize any ID candidate to either a date or a stable string key.
 const normalizeIdCandidate = (val) => {
   const raw = String(val ?? "").trim();
   if (!raw) return { id: null, isDate: false };
@@ -2804,11 +2931,13 @@ const setLastPlayedChain = (puzzle) => {
   } catch {}
 };
 
+// Signature used to disambiguate puzzles without explicit IDs.
 const puzzleWordSignature = (p) =>
   (p?.words || [])
     .map((w) => `${cleanA(w.answer)}@${Math.max(1, Math.floor(+w.start || 1))}`)
     .join(";");
 
+// Pick a stable puzzle identifier (prefers explicit ID/date/title).
 const normalizePuzzleId = (p) => {
   const candidates = [p?.id, p?.dateKey, p?.date, p?.title];
   for (const cand of candidates) {
@@ -2822,6 +2951,7 @@ const normalizePuzzleId = (p) => {
 
 const isDateId = (id) => DATE_ID_RE.test(String(id || "").trim());
 
+// Format a date-based puzzle ID for display.
 const puzzleDateLabel = (p) => {
   const raw = typeof p === "string" ? p : p?.id;
   const id = String(raw || "").trim();
@@ -2845,6 +2975,7 @@ const puzzleLabel = (p) => {
 const isDailyChainPuzzle = (p) => isChainPuzzle(p) && isDateId(p?.id);
 const isCustomChainPuzzle = (p) => isChainPuzzle(p) && !isDateId(p?.id);
 
+// Normalize word objects from data files.
 const normWord = (w, pType, opts = {}) => {
   const out = {
     clue: String(w?.clue || ""),
@@ -2856,6 +2987,7 @@ const normWord = (w, pType, opts = {}) => {
 };
 
 
+// Normalize puzzle records (type, palette, and word list).
 const normPuzzle = (p) => {
   let type = String(p?.type || MODE.PUZZLE).toLowerCase();
   if (type === "overlap") type = MODE.PUZZLE;
@@ -2877,11 +3009,13 @@ const normPuzzle = (p) => {
 };
 
 // ---- State ----
+// Shared runtime state for the current puzzle and UI.
 let puzzles = store.load().map(normPuzzle);
 let pIdx = 0;
 
 let currentView = loadLastView(); // play | chain
 
+// Current puzzle state for the active board.
 const play = {
   mode: MODE.PUZZLE,
   entries: [],
@@ -2897,6 +3031,7 @@ const play = {
   lockedEntries: new Set(), // eIdx
 };
 
+// Selection state for range highlighting and select-all delete.
 let selectedEntry = null;
 let selectAllUnlocked = false;
 
@@ -2928,6 +3063,7 @@ function clearLockedAutoAdvanceSuppressionIfMoved(newIdx) {
 }
 
 // ---- Touch + on-screen keyboard ----
+// Handles hidden input for mobile typing and a custom on-screen keyboard on touch.
 let hasInteracted = true;
 const markInteracted = () => {
   hasInteracted = true;
@@ -2939,14 +3075,15 @@ const UA_DESKTOP_HINT =
   /(Windows NT|Macintosh|CrOS|Linux|X11)/i.test(UA) && !/(Mobile|Tablet|iPad|iPhone|Android)/i.test(UA);
 const UA_DATA_DESKTOP = navigator.userAgentData ? navigator.userAgentData.mobile === false : false;
 
+// On touch devices default to virtual keyboard; on desktop honor detection.
 const DEFAULTS_TO_HARDWARE = UA_DESKTOP_HINT || UA_DATA_DESKTOP;
-// On touch devices default to virtual keyboard; on desktop honor detection
 let hasHardwareKeyboard = IS_TOUCH ? false : DEFAULTS_TO_HARDWARE;
 let hardwareKeyboardLocked = false; // set true when we detect hardware during this session
 let lastHardwareKeyboardTs = 0;
 const HARDWARE_STALE_MS = 120000; // demote hardware flag after ~2 minutes of no keys
 const shouldUseCustomKeyboard = () => IS_TOUCH && !hasHardwareKeyboard;
 
+// Hidden input used to receive native keyboard input on mobile.
 const kb = document.createElement("input");
 kb.type = "text";
 kb.setAttribute("autocomplete", "off");
@@ -2960,6 +3097,7 @@ kb.style.cssText =
   "position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;font-size:16px;";
 (document.body || document.documentElement).appendChild(kb);
 
+// Sentinel keeps selection range consistent for mobile IME input.
 const KB_SENTINEL = "\u200B";
 const kbReset = () => {
   kb.value = KB_SENTINEL;
@@ -2969,6 +3107,7 @@ const kbReset = () => {
 };
 kbReset();
 
+// Focus the appropriate input target (stage or hidden input).
 const focusForTyping = () => {
   if (!hasInteracted) return;
   if (!els.panelPlay || !els.panelPlay.classList.contains("is-active")) return;
@@ -3035,6 +3174,7 @@ const KB_ROWS = [
   ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACKSPACE"],
 ];
 
+// Build the custom on-screen keyboard and wire interactions (tap/hold repeat).
 function initOnScreenKeyboard() {
   const root = els.keyboard;
   if (!root) return;
@@ -3182,6 +3322,7 @@ function initOnScreenKeyboard() {
   root.addEventListener("focusout", () => clearPressed());
 }
 
+// Toggle custom keyboard based on device and view.
 function updateKeyboardVisibility() {
   const root = els.keyboard;
   if (!root) return;
@@ -3195,6 +3336,7 @@ function updateKeyboardVisibility() {
   if (show) kb.blur();
 }
 
+// If no hardware key use is detected for a while, revert to touch keyboard.
 function maybeDemoteHardwareKeyboard() {
   if (hardwareKeyboardLocked) return;
   if (!hasHardwareKeyboard) return;
@@ -3205,6 +3347,7 @@ function maybeDemoteHardwareKeyboard() {
   updateKeyboardVisibility();
 }
 
+// Once hardware keyboard is detected on touch, lock it in for the session.
 function noteHardwareKeyboard() {
   if (!IS_TOUCH) return;
   if (hasHardwareKeyboard) return;
@@ -3216,10 +3359,12 @@ function noteHardwareKeyboard() {
 }
 
 // ---- Model ----
+// Build a normalized, sortable view of words and the expected letter array.
 function computed(p) {
   let type = String(p?.type || MODE.PUZZLE).toLowerCase();
   if (type === "overlap") type = MODE.PUZZLE;
 
+  // Normalize words into entries with calculated layout + color metadata.
   const entries = (p.words || [])
     .map((w, rawIdx) => {
       const ans = cleanA(w.answer);
@@ -3252,12 +3397,14 @@ function computed(p) {
   entries.forEach((e, i) => (e.eIdx = i));
 
   const total = Math.max(1, ...entries.map((e) => e.start + e.len));
+  // exp holds the expected letter per cell (null until covered by a word).
   const exp = Array.from({ length: total }, () => null);
 
   for (const e of entries) {
     for (let i = 0; i < e.len; i++) {
       const idx = e.start + i;
       const ch = e.ans[i];
+      // If two words conflict on a letter, mark the puzzle invalid.
       if (exp[idx] && exp[idx] !== ch) {
         return { ok: false, total, exp, entries, conf: { idx, a: exp[idx], b: ch } };
       }
@@ -3265,14 +3412,17 @@ function computed(p) {
     }
   }
 
+  // Any null positions are gaps (no word covers that column).
   const gaps = exp.map((c, i) => (c ? null : i)).filter((v) => v !== null);
   return { ok: true, total, exp, entries, gaps };
 }
 
+// Update CSS grid column count to match puzzle width.
 function setCols(n) {
   document.documentElement.style.setProperty("--cols", String(n));
 }
 
+// Render the range overlays, clues, and per-cell buttons.
 function renderGrid(target, model, clickable, puzzleForPalette) {
   if (target === els.grid) resetRangeClueHints();
   target.innerHTML = "";
@@ -3390,6 +3540,7 @@ function renderGrid(target, model, clickable, puzzleForPalette) {
 
 
 // ---- Horizontal keep-in-view ----
+// Keeps the active cell centered without fighting user panning.
 let _keepInViewRaf = 0;
 // ---- Touch pan protection (iOS horizontal scroll) ----
 let _isUserPanning = false;
@@ -3419,6 +3570,7 @@ let _scrollFollowK = SCROLL_FOLLOW_K;
 let _scrollFollowEps = SCROLL_FOLLOW_EPS;
 
 
+// Simple spring-like follow for scrollLeft updates.
 function smoothFollowScrollLeft(sc, target, opts = {}) {
   _scrollFollowEl = sc;
   _scrollFollowTarget = target;
@@ -3459,6 +3611,7 @@ function cancelSmoothFollow() {
 }
 
 
+// Center a specific cell in the scroll view.
 function keepCellInView(idx, behavior = IS_TOUCH ? "smooth" : "auto") {
   const sc = els.gridScroll;
   if (!sc || sc.scrollWidth <= sc.clientWidth) return;
@@ -3508,6 +3661,7 @@ function requestKeepActiveCellInView(behavior) {
   });
 }
 
+// After restore, keep retrying until layout is ready.
 function scrollActiveCellAfterRestore(idx = play.at) {
   let attempts = 0;
   const MAX_ATTEMPTS = 14;
@@ -3553,6 +3707,7 @@ function scrollToWordStart(e, behavior = IS_TOUCH ? "smooth" : "auto") {
 
 
 // ---- Selection highlight ----
+// Navigation helpers for unresolved cells and word-based jumps.
 function entryContainsIndex(e, i) {
   return i >= e.start && i < e.start + e.len;
 }
@@ -3567,6 +3722,7 @@ function isCellUnresolved(i) {
   return exp !== usr;
 }
 
+// Walk in a direction to find the next editable/incorrect cell.
 function findUnresolvedCell(from, dir) {
   if (!play.exp?.length) return null;
   let i = clamp(from + dir, 0, play.n - 1);
@@ -3594,6 +3750,7 @@ function firstUnresolvedCellInEntry(e) {
   return e.start; // fallback
 }
 
+// Word-level navigation; logic differs between overlap vs chain mode.
 function jumpToUnresolvedWord(delta) {
   logNav("jumpToUnresolvedWord start", {
     delta,
@@ -3741,6 +3898,7 @@ function cellAriaLabel(idx, words = []) {
 }
 
 // ---- Hints ----
+// Range clue tooltips and hint application (fills one correct letter).
 let _rangeHintOpen = null;
 let _rangeHintHideTimer = 0;
 let _rangeHintIntroTimer = 0;
@@ -3819,6 +3977,7 @@ function hideAllRangeClueHints() {
   });
 }
 
+// Show the hint button for a specific range clue.
 function showRangeClueHint(eIdx) {
   const rc = rangeClueEl(eIdx);
   if (!rc || rc.classList.contains("is-hidden")) return;
@@ -3858,6 +4017,7 @@ function hideRangeFocus() {
   rangeFocusEl.classList.remove("is-active");
 }
 
+// Highlight the selected word range with a focus overlay.
 function showRangeFocusForEntry(entry) {
   if (!entry) return;
   const el = ensureRangeFocusEl();
@@ -3910,6 +4070,7 @@ function resetRangeClueHints() {
   hideRangeFocus();
 }
 
+// Intro animation that briefly reveals hint buttons.
 function pulseRangeHintIntro({ delay = 300, duration = 1400 } = {}) {
   if (play.mode === MODE.CHAIN && !chain.started) return;
   const clues = els.grid?.querySelectorAll(".rangeClue:not(.is-hidden)") || [];
@@ -3956,6 +4117,7 @@ function firstHintIndex(entry) {
   return null;
 }
 
+// Fill one correct cell in a word and apply penalties in chain mode.
 function applyHintForEntry(eIdx) {
   clearSelectAll();
   const entry = play.entries.find((x) => x.eIdx === eIdx);
@@ -3997,12 +4159,14 @@ function applyHintForEntry(eIdx) {
   updatePuzzleActionsVisibility();
 }
 
+// Toggle selected range highlight.
 function updateSelectedWordUI() {
   els.grid.querySelectorAll(".range").forEach((r) => {
     r.classList.toggle("is-selected", selectedEntry != null && r.dataset.e === String(selectedEntry));
   });
 }
 
+// Select-all is a visual state; it does not lock cells.
 function updateSelectAllUI() {
   if (!els.grid) return;
   els.grid.querySelectorAll(".cell").forEach((c) => {
@@ -4034,6 +4198,7 @@ function selectAllUnlockedCells() {
 }
 
 // ---- Give up confirm modal ----
+// Shows penalty summary before revealing chain answers.
 function openGiveUpModal() {
   if (!els.giveUpModal) return;
   const unsolvedWords = countUnsolvedWords();
@@ -4061,6 +4226,7 @@ function closeGiveUpModal() {
 }
 
 // ---- UI visibility helpers ----
+// Centralize visibility toggles for play/chain controls.
 function updatePlayControlsVisibility() {
   if (!els.reset || !els.reveal) return;
   // Only gate in play/overlap mode; otherwise leave visible.
@@ -4105,6 +4271,7 @@ function entryAtIndex(i) {
 }
 
 // ---- View filtering ----
+// "Play" shows overlap puzzles; "Chain" shows chain puzzles (daily and custom).
 function indicesForView(v = currentView) {
   const wantChain = v === VIEW.CHAIN;
   const out = [];
@@ -4116,6 +4283,7 @@ function indicesForView(v = currentView) {
   return out;
 }
 
+// Locate today's daily chain puzzle if present.
 function findTodayChainIndex() {
   const todayKey = toDateKey(new Date());
   if (!todayKey) return null;
@@ -4136,6 +4304,7 @@ function loadByViewOffset(delta) {
   loadPuzzle(list[nextPos]);
 }
 
+// Ensure the currently loaded puzzle aligns with the selected tab.
 function ensureCurrentPuzzleMatchesView() {
   const list = indicesForView(currentView);
   if (!list.length) return false;
@@ -4162,6 +4331,7 @@ function ensureCurrentPuzzleMatchesView() {
 }
 
 // ---- Word Chain HUD & results ----
+// Chain mode is an untimed "speed" run with pause/resume and results modal.
 const chain = {
   running: false,
   started: false,
@@ -4180,6 +4350,7 @@ const chain = {
 };
 
 
+// Lazily created UI references for the chain HUD and results modal.
 let chainUI = null;
 let chainResults = null;
 
@@ -4214,6 +4385,7 @@ function updatePuzzleActionsVisibility(stateOverride) {
 }
 
 
+// Update global chain state and HUD labels/timer visibility.
 function chainSetUIState(state, ui = ensureChainUI()) {
   // global hook for CSS
   document.body.dataset.chainState = state;
@@ -4250,6 +4422,7 @@ function chainPause() {
   return chainPauseWithOpts({});
 }
 
+// Pause and optionally show the splash/archive.
 function chainPauseWithOpts(opts = {}) {
   if (!chain.started || !chain.running) return;
 
@@ -4281,6 +4454,7 @@ function chainPauseIfBackgrounded() {
   chainPauseWithOpts({ showSplash: true });
 }
 
+// Resume from a paused chain; preserves elapsed time.
 function chainResume() {
   if (!chain.started || chain.running) return;
 
@@ -4295,6 +4469,7 @@ function chainResume() {
   focusForTyping();
 }
 
+// Reset handler triggered from the HUD reset action.
 function chainResetFromHud() {
   // optional: stop the tick if it's still running
   if (chain.tickId) {
@@ -4310,6 +4485,7 @@ function chainResetFromHud() {
 
 
 
+// Ensure chain HUD exists in the DOM and wire its click handler.
 function ensureChainUI() {
   if (chainUI) return chainUI;
 
@@ -4355,6 +4531,7 @@ chainSetUIState(
   return chainUI;
 }
 
+// Ensure results modal references and wire share/close events.
 function ensureChainResults() {
   if (chainResults) return chainResults;
 
@@ -4399,6 +4576,7 @@ function fmtTime(sec) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+// Fully reset chain timer state (used on load/reset).
 function chainStopTimer() {
   chain.running = false;
   chain.started = false;
@@ -4419,6 +4597,7 @@ function chainStopTimer() {
   _persistTickLastTs = 0;
 }
 
+// Start the interval that drives the timer display and persistence throttle.
 function ensureChainTick() {
   if (chain.tickId) return;
   const ui = ensureChainUI();
@@ -4478,6 +4657,7 @@ function chainShowResetWithClues() {
 }
 
 
+// Start chain mode (first editable cell, timer, and clue visibility).
 function chainStartNow() {
   if (play.mode !== MODE.CHAIN) return;
   if (play.done) return;
@@ -4519,6 +4699,7 @@ function isWordCorrect(e) {
   return true;
 }
 
+// Compute solved/attempted counts for results.
 function scoreChain() {
   const entries = play.entries || [];
   const correct = entries.filter(isWordCorrect).length;
@@ -4526,6 +4707,7 @@ function scoreChain() {
   return { correct, attempted };
 }
 
+// Populate and display the results modal.
 function openChainResults(stats, reason) {
   const r = ensureChainResults();
   if (!r) return;
@@ -4569,6 +4751,7 @@ function openChainResults(stats, reason) {
 
 }
 
+// Finalize a chain run and persist completion stats.
 function chainFinish(reason = "time", opts = {}) {
   if (play.mode !== MODE.CHAIN) return;
   if (play.done) return;
@@ -4606,6 +4789,7 @@ function chainFinish(reason = "time", opts = {}) {
   persistChainProgressImmediate();
 }
 
+// Check for full solve and trigger chainFinish.
 function chainMaybeFinishIfSolved() {
   if (play.mode !== MODE.CHAIN || play.done) return;
   if (!chain.started) return;
@@ -4618,10 +4802,12 @@ function chainMaybeFinishIfSolved() {
 }
 
 // ---- Word Chain locking behavior ----
+// In chain mode, correct words lock and become non-editable.
 function isCellLocked(i) {
   return !!play.lockedCells[i];
 }
 
+// Rebuild lockedCells array from lockedEntries (plus any hint-locked cells).
 function rebuildLockedCells() {
   const prev = Array.isArray(play.lockedCells) ? play.lockedCells.slice() : [];
   play.lockedCells = Array.from({ length: play.n }, () => false);
@@ -4642,6 +4828,7 @@ function rebuildLockedCells() {
   }
 }
 
+// Animate a word's letters and range when it becomes locked.
 function triggerSolveAnimation(entry) {
   if (!entry || play.mode !== MODE.CHAIN || !els.grid) return;
   const letters = [];
@@ -4707,6 +4894,7 @@ function triggerFullSolveAnimation() {
   play.fullSolveAnimated = true;
 }
 
+// Toggle locked styling for ranges and refresh slider segments.
 function updateLockedWordUI() {
   els.grid.querySelectorAll(".range").forEach((r) => {
     const eIdx = +r.dataset.e;
@@ -4716,6 +4904,7 @@ function updateLockedWordUI() {
   updateSliderUI();
 }
 
+// Lock any newly correct words and trigger solve animations.
 function chainApplyLocksIfEnabled() {
   const p = puzzles[pIdx];
   if (play.mode !== MODE.CHAIN) return;
@@ -4750,6 +4939,7 @@ function chainApplyLocksIfEnabled() {
   }
 }
 
+// Find the next editable cell in a given direction.
 function findNextEditable(from, dir) {
   let i = from;
   while (i >= 0 && i < play.n) {
@@ -4759,7 +4949,9 @@ function findNextEditable(from, dir) {
   return null;
 }
 
+// Decide where to move after a cell becomes locked (chain mode).
 function chooseAutoAdvanceTarget(prevIdx) {
+  // Strategy: prefer forward progress, but avoid jumping into locked/solved words.
   const currentEntry = entryAtIndex(prevIdx);
   const ordered = (play.entries || []).slice().sort((a, b) => a.start - b.start);
   const curPos = currentEntry ? ordered.findIndex((e) => e.eIdx === currentEntry.eIdx) : -1;
@@ -4829,12 +5021,14 @@ function chooseAutoAdvanceTarget(prevIdx) {
   return { target: fallback != null ? fallback : prevIdx, suppress: false };
 }
 
+// Chain input is gated behind start/resume.
 function chainInputAllowed() {
   if (play.mode !== MODE.CHAIN) return true;
   if (!chain.started && !play.done) chainStartNow();
   else if (chain.started && !chain.running && !play.done) chainResume();
   return chain.started;
 }
+// Hide range clues until chain is started (prevents early peeking).
 function setInlineCluesHiddenUntilChainStart() {
   const preStart = play.mode === MODE.CHAIN && !chain.started;
 
@@ -4851,6 +5045,7 @@ function setInlineCluesHiddenUntilChainStart() {
 
 
 // ---- Word Chain clues (current word first + adjacent unsolved) ----
+// This block is intended to manage a dynamic clue list; updateChainClues is a stub for now.
 let _cluesRaf = 0;
 
 function requestChainClues() {
@@ -4894,9 +5089,11 @@ function nearestUnsolvedEntryToCursor() {
   return unsolved[0];
 }
 
+// Placeholder for chain-specific clue ordering/visibility logic.
 function updateChainClues() {
 }
 
+// Show a banner when viewing an archived daily puzzle.
 function updateArchiveDateBanner(p = puzzles[pIdx]) {
   if (!els.archiveDate) return;
   const show = isArchiveDailyPuzzle(p);
@@ -4917,6 +5114,7 @@ function updateArchiveDateBanner(p = puzzles[pIdx]) {
 
 
 // ---- Play UI ----
+// Render letters, active state, and cell classes based on current play state.
 function updatePlayUI() {
   const cells = els.grid.querySelectorAll(".cell");
   cells.forEach((c) => {
@@ -4960,6 +5158,7 @@ function updatePlayUI() {
   updateWordSolvedCount();
 }
 
+// Update cursor position and keep it visible.
 function setAt(i, { behavior, noScroll } = {}) {
   clearSelectAll();
   const target = clamp(i, 0, play.n - 1);
@@ -4979,6 +5178,7 @@ function setAt(i, { behavior, noScroll } = {}) {
   if (play.mode === MODE.CHAIN) requestPersistChainProgress();
 }
 
+// Jump to the first empty cell in a word and select it.
 function jumpToEntry(eIdx) {
   const e = play.entries.find((x) => x.eIdx === eIdx);
   if (!e) return;
@@ -4996,6 +5196,7 @@ function jumpToEntry(eIdx) {
   scrollToWordStart(e, "smooth");
 }
 
+// Only overlap (non-chain) puzzles use full-board correctness checks.
 function checkSolvedOverlapOnly() {
   if (play.mode === MODE.CHAIN) return;
   if (!play.usr.every(Boolean)) return;
@@ -5008,6 +5209,7 @@ function checkSolvedOverlapOnly() {
   }
 }
 
+// Write a letter into the active cell and advance according to mode rules.
 function write(ch) {
   if (play.done) return;
   if (!chainInputAllowed()) return; // require Start for word chain
@@ -5062,6 +5264,7 @@ function write(ch) {
   checkSolvedOverlapOnly();
 }
 
+// Backspace behavior supports chain locks and select-all delete.
 function back() {
   if (play.done) return;
   if (!chainInputAllowed()) return; // require Start for word chain
@@ -5121,6 +5324,7 @@ function countUnsolvedLetters() {
   return c;
 }
 
+// Cursor navigation with chain-mode lock skipping.
 function move(d, opts = {}) {
   if (!chainInputAllowed()) return;
 
@@ -5138,6 +5342,7 @@ function move(d, opts = {}) {
 }
 
 // ---- Modals (Overlap) ----
+// The success overlay is legacy; chain mode uses results modal instead.
 function openSuccess() {
   // Success overlay disabled for play mode; toast handles feedback.
 }
@@ -5153,6 +5358,7 @@ const resultsInertBlock = (e) => {
   e.preventDefault();
 };
 let resultsInertActive = false;
+// Trap focus/interaction when results modal is open.
 function setResultsInert(isOpen) {
   const body = document.body;
   const root = document.documentElement;
@@ -5174,6 +5380,7 @@ function setResultsInert(isOpen) {
   root?.classList.toggle("results-open", isOpen);
 }
 
+// Share text and link for either puzzle or chain mode.
 function shareResult({ mode, linkOnly = false, toastEl = null }) {
   const puzzle = puzzles[pIdx];
   const formatShareDate = (dt) =>
@@ -5256,6 +5463,7 @@ function shareResult({ mode, linkOnly = false, toastEl = null }) {
 }
 
 // ---- Reset / reveal ----
+// Reset clears board and state; reveal fills expected answers (with penalties in chain).
 function resetPlay(opts = {}) {
   const { clearPersist = true } = opts;
   play.usr = Array.from({ length: play.n }, () => "");
@@ -5311,6 +5519,7 @@ function revealPlay() {
   updatePlayControlsVisibility();
 }
 
+// Main grid interaction handler (clue buttons + cell selection).
 function onGridCellClick(e) {
   if (IS_TOUCH && performance.now() < _ignoreGridClickUntil) return;
 
@@ -5420,6 +5629,7 @@ function onGlobalPointerDownForRangeClues(e) {
 }
 
 // ---- Load puzzle ----
+// Reset state, build model/grid, and restore progress if available.
 function loadPuzzle(i) {
   closeSuccess();
   closeChainResults();
@@ -5506,6 +5716,7 @@ function loadPuzzle(i) {
 }
 
 // ---- Tabs ----
+// Switch between play and chain views (affects puzzle list and UI).
 function setTab(which) {
   if (which !== VIEW.PLAY && which !== VIEW.CHAIN) which = VIEW.CHAIN;
   currentView = which;
@@ -5541,6 +5752,7 @@ function setTab(which) {
 
 
 // ---- Escaping ----
+// Safe text/attribute helpers for any HTML injection.
 function escapeHtml(s) {
   return String(s).replace(/[&<>]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[m]));
 }
@@ -5552,6 +5764,7 @@ function escapeAttr(s) {
   );
 }
 
+// Enter key triggers solve checks or chain completion warnings.
 function handleEnterKey() {
   if (play.mode === MODE.PUZZLE) {
     if (play.done) return;
@@ -5585,6 +5798,7 @@ function handleEnterKey() {
 }
 
 // ---- Global key handler (desktop) ----
+// Central keyboard handler for navigation and typing.
 function onKey(e) {
   if (ftueIsOpen()) {
     e.preventDefault();
@@ -5669,6 +5883,7 @@ function onKey(e) {
   }
 }
 
+// Update status bar for conflicts/gaps when a puzzle is invalid.
 function setStatus(m) {
   const gaps = m.gaps || [];
   const hasError = !m.ok || gaps.length;
@@ -5690,6 +5905,7 @@ function setStatus(m) {
 }
 
 // ---- Events ----
+// Central event wiring for keyboard, touch, modals, and controls.
 // Keyboard (physical detection + input)
 document.addEventListener(
   "keydown",
@@ -6006,6 +6222,7 @@ const navActions = {
   wordNext: () => jumpToUnresolvedWord(1),
 };
 
+// Allow nav buttons to repeat when held (pointerdown + interval).
 function attachHoldRepeat(btn, fn) {
   if (!btn || typeof fn !== "function") return;
   let repeatT = null;
@@ -6129,6 +6346,7 @@ els.pClear?.addEventListener("click", () => {
 });
 
 // ---- Start ----
+// Initialize UI and load the initial puzzle/view.
 initOnScreenKeyboard();
 initSlider();
 loadPuzzle(0);
