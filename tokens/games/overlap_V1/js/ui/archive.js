@@ -4,12 +4,11 @@ import {
   toDateKey,
   datePartsFromKey,
   normalizePuzzleId,
-  isDateId,
   isDailyChainPuzzle,
   isChainPuzzle,
 } from "../utils.js";
-import { computed, normPuzzle } from "../model.js";
-import { fetchJson } from "../data/defaults.js";
+import { computed } from "../model.js";
+import { createArchiveData } from "../data/archive-data.js";
 import { chainPuzzleKey, loadChainProgressStore, todayKey } from "../data/chain-progress.js";
 
 export function createArchiveUI({
@@ -52,14 +51,8 @@ export function createArchiveUI({
     "December",
   ];
 
-  // Archive state keeps cached months and the current selection.
+  // Archive state tracks the current selection and UI state.
   const archiveState = {
-    ready: false,
-    loadingPromise: null,
-    years: [],
-    monthsByYear: new Map(),
-    availableMonths: [],
-    monthCache: new Map(),
     current: { year: null, month: null },
     monthData: null,
     selectedDateKey: null,
@@ -69,115 +62,10 @@ export function createArchiveUI({
     renderToken: 0,
   };
 
-  const pad2 = (n) => String(n).padStart(2, "0");
-  const archiveMonthKey = (year, month) => `${year}-${pad2(month)}`;
-  const archiveDateKey = (year, month, day) => `${year}-${pad2(month)}-${pad2(day)}`;
-
   const getPuzzleList = () => (typeof getPuzzles === "function" ? (getPuzzles() || []) : []);
-
-  // Load the available years/months for daily puzzles (from JSON index files).
-  async function loadArchiveIndex() {
-    if (archiveState.ready) return;
-    if (archiveState.loadingPromise) return archiveState.loadingPromise;
-
-    archiveState.loadingPromise = (async () => {
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth() + 1;
-
-      const idxUrl = new URL("../../data/chain/daily/index.json", import.meta.url);
-      const idx = await fetchJson(idxUrl, null);
-      let years = [];
-      if (Array.isArray(idx?.years)) years = idx.years;
-      else if (Array.isArray(idx?.files)) years = idx.files;
-
-      years = years
-        .map((y) => String(y).split("/")[0])
-        .map((y) => Number.parseInt(y, 10))
-        .filter((y) => Number.isFinite(y));
-
-      // If index data is missing, derive years from loaded puzzles.
-      if (!years.length) {
-        const derived = getPuzzleList()
-          .filter(isDailyChainPuzzle)
-          .map((p) => normalizePuzzleId(p).id)
-          .filter(isDateId);
-        years = derived
-          .map((id) => Number.parseInt(String(id).slice(0, 4), 10))
-          .filter((y) => Number.isFinite(y));
-      }
-
-      years = Array.from(new Set(years))
-        .filter((y) => DEV_MODE || y <= currentYear)
-        .sort((a, b) => a - b);
-
-      const monthsByYear = new Map();
-      for (const year of years) {
-        const yearIdxUrl = new URL(`../../data/chain/daily/${year}/index.json`, import.meta.url);
-        const yearIdx = await fetchJson(yearIdxUrl, null);
-        let months = [];
-        if (Array.isArray(yearIdx?.months)) months = yearIdx.months;
-        else if (Array.isArray(yearIdx?.files)) months = yearIdx.files;
-
-        months = months
-          .map((m) => {
-            const raw = String(m);
-            const match = raw.match(/(\d{2})(?:\.json)?$/);
-            return match ? Number.parseInt(match[1], 10) : Number.parseInt(raw, 10);
-          })
-          .filter((m) => Number.isFinite(m) && m >= 1 && m <= 12);
-
-        if (!months.length) {
-          months = getPuzzleList()
-            .filter(isDailyChainPuzzle)
-            .map((p) => normalizePuzzleId(p).id)
-            .filter((id) => String(id).startsWith(`${year}-`))
-            .map((id) => Number.parseInt(String(id).slice(5, 7), 10))
-            .filter((m) => Number.isFinite(m) && m >= 1 && m <= 12);
-        }
-
-        months = Array.from(new Set(months))
-          .filter((m) => DEV_MODE || year < currentYear || (year === currentYear && m <= currentMonth))
-          .sort((a, b) => a - b);
-
-        if (months.length) monthsByYear.set(year, months);
-      }
-
-      const availableMonths = [];
-      monthsByYear.forEach((months, year) => {
-        months.forEach((month) => availableMonths.push({ year, month }));
-      });
-      availableMonths.sort((a, b) => (a.year - b.year) || (a.month - b.month));
-
-      archiveState.years = Array.from(monthsByYear.keys()).sort((a, b) => a - b);
-      archiveState.monthsByYear = monthsByYear;
-      archiveState.availableMonths = availableMonths;
-      archiveState.ready = true;
-      archiveState.loadingPromise = null;
-    })();
-
-    return archiveState.loadingPromise;
-  }
-
-  // Load a single month's daily puzzles and map them by date ID.
-  async function loadArchiveMonth(year, month) {
-    const key = archiveMonthKey(year, month);
-    if (archiveState.monthCache.has(key)) return archiveState.monthCache.get(key);
-
-    const url = new URL(`../../data/chain/daily/${year}/${pad2(month)}.json`, import.meta.url);
-    const data = await fetchJson(url, []);
-    const list = Array.isArray(data) ? data : [];
-    const byDate = new Map();
-    list.forEach((raw) => {
-      const p = normPuzzle(raw);
-      const id = normalizePuzzleId(p).id;
-      if (isDateId(id)) byDate.set(id, p);
-    });
-
-    const monthData = { year, month, puzzles: list, byDate };
-    archiveState.monthCache.set(key, monthData);
-    return monthData;
-  }
+  const archiveData = createArchiveData({ getPuzzles: getPuzzleList });
+  const archiveDataState = archiveData.state;
+  const { pad2, archiveDateKey, loadArchiveIndex, loadArchiveMonth } = archiveData;
 
   // Choose a default date for a month (today if available, otherwise first day).
   function archiveDefaultSelection(year, month, monthData) {
@@ -197,7 +85,7 @@ export function createArchiveUI({
     const nextBtn = els?.archiveNextMonth;
     if (!yearSel || !monthSel || !prevBtn || !nextBtn) return;
 
-    const years = [...archiveState.years].sort((a, b) => b - a);
+    const years = [...archiveDataState.years].sort((a, b) => b - a);
     yearSel.innerHTML = "";
     years.forEach((y) => {
       const opt = document.createElement("option");
@@ -207,7 +95,7 @@ export function createArchiveUI({
     });
 
     const curYear = archiveState.current.year ?? years[0];
-    const yearMonths = archiveState.monthsByYear.get(curYear) || [];
+    const yearMonths = archiveDataState.monthsByYear.get(curYear) || [];
     const curMonth = archiveState.current.month ?? yearMonths[0];
 
     yearSel.value = curYear != null ? String(curYear) : "";
@@ -223,11 +111,11 @@ export function createArchiveUI({
     yearSel.disabled = !years.length;
     monthSel.disabled = !yearMonths.length;
 
-    const idx = archiveState.availableMonths.findIndex(
+    const idx = archiveDataState.availableMonths.findIndex(
       (m) => m.year === curYear && m.month === curMonth
     );
     prevBtn.disabled = idx <= 0;
-    nextBtn.disabled = idx < 0 || idx >= archiveState.availableMonths.length - 1;
+    nextBtn.disabled = idx < 0 || idx >= archiveDataState.availableMonths.length - 1;
   }
 
   // Render the calendar grid with per-day progress states.
@@ -366,7 +254,7 @@ export function createArchiveUI({
     await loadArchiveIndex();
     if (token !== archiveState.renderToken) return;
 
-    if (!archiveState.availableMonths.length) {
+    if (!archiveDataState.availableMonths.length) {
       archiveState.current = { year: null, month: null };
       archiveState.monthData = null;
       archiveState.selectedDateKey = null;
@@ -379,8 +267,8 @@ export function createArchiveUI({
     const requestedParts = opts.selectDateKey ? datePartsFromKey(opts.selectDateKey) : null;
     const targetYear = requestedParts?.year ?? year;
     const targetMonth = requestedParts?.month ?? month;
-    const exact = archiveState.availableMonths.find((m) => m.year === targetYear && m.month === targetMonth);
-    const fallback = exact || archiveState.availableMonths[archiveState.availableMonths.length - 1];
+    const exact = archiveDataState.availableMonths.find((m) => m.year === targetYear && m.month === targetMonth);
+    const fallback = exact || archiveDataState.availableMonths[archiveDataState.availableMonths.length - 1];
 
     archiveState.current = { year: fallback.year, month: fallback.month };
     renderArchiveControls();
@@ -468,7 +356,7 @@ export function createArchiveUI({
     });
     els?.archivePrevMonth?.addEventListener("click", (e) => {
       e.preventDefault();
-      const list = archiveState.availableMonths;
+      const list = archiveDataState.availableMonths;
       const cur = archiveState.current;
       const idx = list.findIndex((m) => m.year === cur.year && m.month === cur.month);
       if (idx <= 0) return;
@@ -477,7 +365,7 @@ export function createArchiveUI({
     });
     els?.archiveNextMonth?.addEventListener("click", (e) => {
       e.preventDefault();
-      const list = archiveState.availableMonths;
+      const list = archiveDataState.availableMonths;
       const cur = archiveState.current;
       const idx = list.findIndex((m) => m.year === cur.year && m.month === cur.month);
       if (idx < 0 || idx >= list.length - 1) return;
@@ -487,7 +375,7 @@ export function createArchiveUI({
     els?.archiveYearSelect?.addEventListener("change", (e) => {
       const year = Number.parseInt(e.target.value, 10);
       if (Number.isNaN(year)) return;
-      const months = archiveState.monthsByYear.get(year) || [];
+      const months = archiveDataState.monthsByYear.get(year) || [];
       const currentMonth = archiveState.current.month;
       const nextMonth = months.includes(currentMonth) ? currentMonth : months[months.length - 1];
       setArchiveMonth(year, nextMonth);
