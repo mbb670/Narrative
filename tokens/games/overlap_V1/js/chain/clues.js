@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Chain clue visibility and updates.
+ * Controls: Clue text and clue UI state for chain mode.
+ * How: Updates DOM content based on chain state and selection.
+ * Key interactions: Used by chain HUD and app wiring.
+ */
 // Chain clue helpers (pre-start hiding + cursor-based clue ordering).
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createChainClues({
   els,

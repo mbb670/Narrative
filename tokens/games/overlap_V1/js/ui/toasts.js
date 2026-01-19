@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Toast notification system.
+ * Controls: Toast container, timing, and dismissal.
+ * How: Creates DOM nodes and manages hide and show timers.
+ * Key interactions: Used by share, warnings, results, and settings.
+ */
 // Toast helpers for game feedback.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createToasts({ els, getPlay, isWordCorrect }) {
   // Toasts are timed UI messages; we track timers per type to avoid overlap flicker.

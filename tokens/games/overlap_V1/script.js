@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: Legacy monolithic game runtime kept as a fallback reference.
+ * Controls: All game state, UI, data, and interactions in a single file.
+ * How: Defines globals and handlers directly against the DOM and storage APIs.
+ * Key interactions: Standalone and not used by app.js unless manually swapped.
+ */
 // Overlap V1 game runtime.
 // Single-file implementation that handles puzzle loading, UI, input, chain timing,
 // persistence, and all modal flows. Comments below are intended to guide future modularization.

@@ -1,6 +1,13 @@
+/*
+ * File Overview
+ * Purpose: Chain results modal.
+ * Controls: End-of-chain summary, share actions, and close flow.
+ * How: Builds summary data and binds modal events.
+ * Key interactions: Uses chain-progress, share, toasts, and app callbacks.
+ */
 // Chain results modal helpers.
-import { MODE } from "../config.js";
-import { puzzleDateLabel, puzzleLabel } from "../utils.js";
+import { MODE } from "../core/config.js";
+import { puzzleDateLabel, puzzleLabel } from "../utils/index.js";
 
 export function createChainResults({
   els,

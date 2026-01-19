@@ -1,12 +1,19 @@
+/*
+ * File Overview
+ * Purpose: Chain progress and stats persistence.
+ * Controls: Daily chain completions, streaks, and summary stats.
+ * How: Stores and updates records in localStorage with date keys.
+ * Key interactions: Used by chain core, chain results, and app.js.
+ */
 // Chain progress + stats persistence for per-puzzle storage.
-import { KEY, MODE } from "../config.js";
+import { KEY, MODE } from "../core/config.js";
 import {
   isChainPuzzle,
   isDateId,
   normalizePuzzleId,
   puzzleWordSignature,
   toDateKey,
-} from "../utils.js";
+} from "../utils/index.js";
 
 const CHAIN_PROGRESS_KEY = `${KEY}__chain_progress_v2`;
 const CHAIN_STATS_KEY = `${KEY}__chain_stats_v2`;

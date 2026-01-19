@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Tab switching controller.
+ * Controls: Active tab state and panel visibility.
+ * How: Binds tab buttons and persists state via view-state.
+ * Key interactions: Uses view-state and dom cache.
+ */
 // Tab switching helpers for play/chain views.
-import { VIEW } from "../config.js";
+import { VIEW } from "../core/config.js";
 
 export function createTabs({
   els,

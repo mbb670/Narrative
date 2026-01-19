@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Grid renderer and DOM builder.
+ * Controls: Creates grid structure and attaches cell references.
+ * How: Builds HTML from model and computed data and caches cells.
+ * Key interactions: Uses core/model, core/dom, and cell-ui.
+ */
 // Grid rendering helpers for puzzles and FTUE boards.
-import { paletteColorForWord } from "../palette.js";
+import { paletteColorForWord } from "../core/palette.js";
 
 export function createGridRenderer({
   els,

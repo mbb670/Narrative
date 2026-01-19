@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: Auto-advance behavior for chain input.
+ * Controls: Moves active cell or word after input and respects locks.
+ * How: Computes next positions and suppresses advances when needed.
+ * Key interactions: Used by play/actions and selection or navigation.
+ */
 // Chain auto-advance helpers (lock suppression + target selection).
 
 export function createChainAutoAdvance({

@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Default puzzle data loader.
+ * Controls: Provides the built-in puzzle list when no store data exists.
+ * How: Imports bundled defaults and returns normalized puzzle data.
+ * Key interactions: Used by app.js and the data store layer.
+ */
 // Default puzzle loading + JSON fetch helper.
-import { KEY } from "../config.js";
+import { KEY } from "../core/config.js";
 
 export const DEFAULTS_VERSION = "2026-01-26"; // <-- bump this any time you edit puzzle data layout
 export const DEFAULTS_VER_KEY = `${KEY}__defaults_version`;

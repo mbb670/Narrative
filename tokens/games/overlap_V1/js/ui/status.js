@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: Status bar content updates.
+ * Controls: Puzzle title, date, and metadata labels.
+ * How: Updates DOM text from model and utils.
+ * Key interactions: Uses model, utils, and dom cache.
+ */
 // Status bar helpers for invalid puzzles.
 import { escapeHtml } from "../utils/escape.js";
 

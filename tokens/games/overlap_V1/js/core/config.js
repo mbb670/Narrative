@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: Central configuration and constants for the game.
+ * Controls: Modes, thresholds, sizes, timing values, and feature flags.
+ * How: Exports constant values referenced across core, chain, play, and UI modules.
+ * Key interactions: Imported by app.js and most core and UI modules.
+ */
 // Shared configuration and environment flags for Overlap V1.
 // Keep this file DOM-safe; only simple reads from location/navigator.
 

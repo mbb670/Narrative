@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: DOM cache and selectors for key UI elements.
+ * Controls: References to grid, modals, buttons, HUD, and other UI nodes.
+ * How: Queries the document once and exports a stable els map for reuse.
+ * Key interactions: Used by UI modules to avoid repeated DOM queries.
+ */
 // DOM cache for frequently used nodes.
 const $ = (s) => document.querySelector(s);
 

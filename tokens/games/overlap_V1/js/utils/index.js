@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Shared utility helpers used throughout the app.
+ * Controls: Date formatting, labels, clamps, ids, and type checks.
+ * How: Exports small pure functions reused across core, data, and UI modules.
+ * Key interactions: Imported across most modules and app.js.
+ */
 // Shared helpers for string normalization, bounds, IDs, and date parsing.
-import { MODE, LAST_PLAYED_CHAIN_KEY } from "./config.js";
+import { MODE, LAST_PLAYED_CHAIN_KEY } from "../core/config.js";
 
 export const cleanA = (s) => (s || "").toUpperCase().replace(/[^A-Z]/g, "");
 export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));

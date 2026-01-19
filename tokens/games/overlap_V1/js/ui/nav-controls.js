@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Navigation button bindings.
+ * Controls: Prev and next word or cell buttons.
+ * How: Binds DOM buttons to navigation helpers.
+ * Key interactions: Uses navigation and selection.
+ */
 // Navigation button helpers for cell/word movement.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createNavControls({
   els,

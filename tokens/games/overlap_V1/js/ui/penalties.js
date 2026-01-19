@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Chain penalty UI updates.
+ * Controls: Penalty count and display.
+ * How: Applies penalty increments and updates HUD text.
+ * Key interactions: Uses chain timing or core and dom cache.
+ */
 // Time penalty helpers for chain mode.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createPenaltyManager({
   els,

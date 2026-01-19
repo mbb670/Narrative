@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: Scroll helpers for keeping the active cell in view.
+ * Controls: Scroll position adjustments for the grid container.
+ * How: Measures bounding boxes and scrolls to keep selection visible.
+ * Key interactions: Used by selection and grid interactions.
+ */
 // Grid scroll helpers for keeping the active cell in view.
 export function createScrollHelpers({
   els,

@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Play control visibility and state.
+ * Controls: Shows or hides reset and reveal controls based on game state.
+ * How: Toggles DOM classes and disabled states.
+ * Key interactions: Used by app.js and controls module.
+ */
 // Play/chain control visibility helpers.
-import { MODE, VIEW } from "../config.js";
+import { MODE, VIEW } from "../core/config.js";
 
 export function createPlayControls({ els, getPlay, getCurrentView, chainUiStates } = {}) {
   const getPlaySafe = typeof getPlay === "function" ? getPlay : () => null;

@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: Palette lookup and CSS variable application.
+ * Controls: Theme colors applied to the document.
+ * How: Selects palette values and sets CSS variables on root elements.
+ * Key interactions: Used by app.js and settings or theme controls.
+ */
 // Palette discovery and helpers for puzzle rendering.
 
 // Palettes are defined in CSS via [data-puzzle-palette="..."] selectors and

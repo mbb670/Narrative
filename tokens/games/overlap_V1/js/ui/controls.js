@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Main control buttons binding.
+ * Controls: Reset, reveal, give up, and other top-level controls.
+ * How: Binds DOM events to play actions and modal toggles.
+ * Key interactions: Uses play/actions, give-up, and penalties modules.
+ */
 // UI control bindings (buttons, modals, FTUE).
-import { MODE, VIEW } from "../config.js";
+import { MODE, VIEW } from "../core/config.js";
 
 export function bindControlEvents({
   els,

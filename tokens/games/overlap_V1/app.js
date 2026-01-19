@@ -1,12 +1,17 @@
-// Overlap V1 game runtime.
-// Single-file implementation that handles puzzle loading, UI, input, chain timing,
-// persistence, and all modal flows. Comments below are intended to guide future modularization.
+/*
+ * File Overview
+ * Purpose: Application bootstrap for Overlap V1 and the composition root for the modular build.
+ * Controls: Initializes shared state, wires module factories, and triggers the initial render.
+ * How: Imports config, utils, model/data helpers, and UI factories, then binds events and kicks off startup flows.
+ * Key interactions: Touches most modules and is the entry point referenced by index.html.
+ */
+// Overlap V1 app bootstrap.
+// Wires modules, shared state, and global event bindings.
 import "../../docs/token_switcher/switcher.js";
 import {
   MODE,
-  VIEW,
   LAST_VIEW_KEY,
-} from "./js/config.js";
+} from "./js/core/config.js";
 import {
   clamp,
   isEditable,
@@ -16,8 +21,8 @@ import {
   puzzleDateLabel,
   puzzleLabel,
   isDailyChainPuzzle,
-} from "./js/utils.js";
-import { applyPaletteToDom } from "./js/palette.js";
+} from "./js/utils/index.js";
+import { applyPaletteToDom } from "./js/core/palette.js";
 import { loadDefaultPuzzles } from "./js/data/defaults.js";
 import { createStore } from "./js/data/store.js";
 import {
@@ -27,8 +32,8 @@ import {
   chainStatsSummary,
   recordChainCompletionIfNeeded,
 } from "./js/data/chain-progress.js";
-import { els } from "./js/dom.js";
-import { computed, normPuzzle, setCols } from "./js/model.js";
+import { els } from "./js/core/dom.js";
+import { computed, normPuzzle, setCols } from "./js/core/model.js";
 import { createSlider } from "./js/ui/slider.js";
 import { createSettingsUI } from "./js/ui/settings.js";
 import { createArchiveUI } from "./js/ui/archive.js";
@@ -64,25 +69,22 @@ import { createWarningToasts } from "./js/ui/warnings.js";
 import { createTabs } from "./js/ui/tabs.js";
 import { createFtue } from "./js/ui/ftue.js";
 import { createChainPersistence } from "./js/data/chain-persistence.js";
-import { createTabState, loadLastView } from "./js/view-state.js";
+import { createTabState, loadLastView } from "./js/core/view-state.js";
 
-// ---- Palettes ----
-// (moved to ./js/palette.js)
+// ---- Palettes ---- (js/core/palette.js)
 
-// ---- Slider (scroll surrogate, squish-style) ----
-// (moved to ./js/ui/slider.js)
+// ---- Slider (scroll surrogate, squish-style) ---- (js/ui/slider.js)
 
-// ---- Defaults loading ----
-// (moved to ./js/data/defaults.js)
+// ---- Defaults loading ---- (js/data/defaults.js)
 const DEF = await loadDefaultPuzzles();
 
 
-// ---- DOM ----
-// (moved to ./js/dom.js)
+// ---- DOM ---- (js/core/dom.js)
 
 const NAV_DEBUG = false;
 const logNav = () => {};
 
+// ---- Cross-module refs ----
 const { setTab, setTabManager } = createTabState();
 
 const chainCoreRef = {
@@ -145,8 +147,7 @@ const resetPlay = (...args) => playActionsRef.resetPlay(...args);
 const revealPlay = (...args) => playActionsRef.revealPlay(...args);
 const loadPuzzle = (...args) => playActionsRef.loadPuzzle(...args);
 
-// ---- Toasts ----
-// (moved to ./js/ui/toasts.js)
+// ---- Toasts ---- (js/ui/toasts.js)
 const toasts = createToasts({
   els,
   getPlay: () => play,
@@ -200,7 +201,7 @@ const chainResetTimer = (...args) => chainHudRef.chainResetTimer(...args);
 const chainForceIdleZero = (...args) => chainHudRef.chainForceIdleZero(...args);
 const chainShowResetWithClues = (...args) => chainHudRef.chainShowResetWithClues(...args);
 
-// ---- Chain timing/penalties ----
+// ---- Chain timing/penalties ---- (js/chain/timing.js)
 const { addTimePenalty, fmtTime, hintPenaltySec: HINT_PENALTY_SEC } = createChainTiming({
   els,
   getPlay: () => play,
@@ -223,8 +224,7 @@ const getLastChainWarningKey = () => lastChainWarningKey;
 
 const settingsUI = createSettingsUI({ els });
 
-// ---- Splash ----
-// (moved to ./js/ui/splash.js)
+// ---- Splash ---- (js/ui/splash.js)
 let splashUI = null;
 const chainProgressSummary = () =>
   splashUI?.chainProgressSummary?.() ?? { state: "default", solved: 0, total: 0 };
@@ -294,15 +294,14 @@ const warningToasts = createWarningToasts({
 
 const { maybeToastPlayFilledWrong, maybeToastChainFilledWrong, resetToastGuards } = warningToasts;
 
-// ---- Chain clues ----
+// ---- Chain clues ---- (js/chain/clues.js)
 const { setInlineCluesHiddenUntilChainStart, requestChainClues } = createChainClues({
   els,
   getPlay: () => play,
   getChain: () => chain,
 });
 
-// ---- FTUE ----
-// (moved to ./js/ui/ftue.js)
+// ---- FTUE ---- (js/ui/ftue.js)
 let ftueUI = null;
 const ftueIsOpen = () => ftueUI?.ftueIsOpen?.() ?? false;
 const openFtue = (startStep = 0, opts = {}) => ftueUI?.openFtue?.(startStep, opts);
@@ -321,10 +320,9 @@ const ftuePlay = () => ftueUI?.ftuePlay?.();
 const ftuePause = () => ftueUI?.ftuePause?.();
 const ftueIsPaused = () => ftueUI?.isPaused?.() ?? false;
 
-// Clear-all moved to ./js/play/actions.js.
+// ---- Clear-all ---- (js/play/actions.js)
 
-// Grid scroll should cancel smooth-follow so dragging feels direct.
-// (moved to slider module)
+// ---- Scroll behavior ---- (js/ui/slider.js)
 
 // ---- Storage ----
 // Puzzles are stored in localStorage; defaults are merged so shipped updates appear.
@@ -333,19 +331,13 @@ const store = createStore({
   getPuzzles: () => puzzles,
 });
 
-// ---- Per-puzzle chain progress persistence ----
-// (moved to ./js/data/chain-persistence.js)
+// ---- Chain progress persistence ---- (js/data/chain-persistence.js)
 
-// ---- Archive modal ----
-// (moved to ./js/ui/archive.js)
+// ---- Archive modal ---- (js/ui/archive.js)
 
-// ---- Settings ----
-// (moved to ./js/ui/settings.js)
+// ---- Settings ---- (js/ui/settings.js)
 
-// ---- Utils ----
-// (moved to ./js/utils.js)
-
-// (normPuzzle moved to ./js/model.js)
+// ---- Utils ---- (js/utils/index.js)
 
 // ---- State ----
 // Shared runtime state for the current puzzle and UI.
@@ -390,8 +382,6 @@ const sliderUI = createSlider({
   isUserPanning: () => panState.isUserPanning,
 });
 
-// Chain auto-advance moved to ./js/chain/auto-advance.js.
-
 // ---- Touch + on-screen keyboard ----
 // Handles hidden input for mobile typing and a custom on-screen keyboard on touch.
 const IS_TOUCH = "ontouchstart" in window || navigator.maxTouchPoints > 0;
@@ -416,12 +406,10 @@ const {
   blurKeyboardInput,
 } = keyboardUI;
 
-// ---- Model ----
-// (moved to ./js/model.js)
+// ---- Model ---- (js/core/model.js)
 
-// ---- Horizontal keep-in-view ----
+// ---- Horizontal keep-in-view ---- (js/ui/scroll.js)
 // Keeps the active cell centered without fighting user panning.
-// Smooth scroll-follow moved to ./js/ui/slider.js
 const {
   keepCellInView,
   keepActiveCellInView,
@@ -509,8 +497,7 @@ const {
   updatePuzzleActionsVisibility,
 } = playControls;
 
-// ---- Hints ----
-// (moved to ./js/ui/hints.js)
+// ---- Hints ---- (js/ui/hints.js)
 const {
   ensureRangeFocusEl,
   resetRangeClueHints,
@@ -667,8 +654,7 @@ const giveUpUI = createGiveUpModal({
 
 const { openGiveUpModal, closeGiveUpModal } = giveUpUI;
 
-// ---- View filtering ----
-// (moved to ./js/ui/view.js)
+// ---- View filtering ---- (js/ui/view.js)
 const {
   indicesForView,
   findTodayChainIndex,
@@ -869,18 +855,9 @@ const chainCore = createChainCore({
 });
 Object.assign(chainCoreRef, chainCore);
 
-// Chain core logic moved to ./js/chain/core.js.
-
-// ---- Word Chain locking behavior ----
-// (moved to ./js/chain/locks.js)
-
-// Chain input gating moved to ./js/chain/core.js.
-// Chain clues moved to ./js/chain/clues.js.
-// Play actions moved to ./js/play/actions.js.
-// Chain auto-advance moved to ./js/chain/auto-advance.js.
-
-// ---- Escaping ----
-// (moved to ./js/utils/escape.js)
+// ---- Chain helpers ---- (js/chain/core.js, js/chain/locks.js, js/chain/clues.js, js/chain/auto-advance.js)
+// ---- Play actions ---- (js/play/actions.js)
+// ---- Escaping ---- (js/utils/escape.js)
 
 const { handleEnterKey } = createEnterKeyHandler({
   getPlay: () => play,

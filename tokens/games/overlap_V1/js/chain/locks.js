@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Chain word locking rules.
+ * Controls: Lock state for words and cells and their UI classes.
+ * How: Tracks locked positions and updates grid and selection visuals.
+ * Key interactions: Used by chain core, grid UI, and selection.
+ */
 // Chain locking + solve animation helpers.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createChainLocks({
   els,

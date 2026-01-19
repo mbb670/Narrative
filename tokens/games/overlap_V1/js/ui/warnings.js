@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: User warnings and guardrails.
+ * Controls: Single-shot warning messages for invalid actions.
+ * How: Uses toasts to display warnings and rate-limits repeats.
+ * Key interactions: Used by keyboard, play/actions, and controls.
+ */
 // Warning toasts for fully filled but incorrect boards.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createWarningToasts({
   getPlay,

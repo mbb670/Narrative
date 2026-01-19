@@ -1,7 +1,14 @@
+/*
+ * File Overview
+ * Purpose: Slider UI for navigating puzzles or progress.
+ * Controls: Slider input, value display, and scroll sync.
+ * How: Binds input events and updates view state or scroll.
+ * Key interactions: Uses view-state, archive, and dom cache.
+ */
 // Slider UI + smooth scroll-follow (shared by grid and slider scrubbing).
-import { MODE, VIEW } from "../config.js";
-import { clamp } from "../utils.js";
-import { paletteColorForWord } from "../palette.js";
+import { MODE, VIEW } from "../core/config.js";
+import { clamp } from "../utils/index.js";
+import { paletteColorForWord } from "../core/palette.js";
 
 export function createSlider({
   els,

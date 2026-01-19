@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Navigation logic for moving through the grid.
+ * Controls: Computes next or prev positions for word or cell.
+ * How: Uses model and computed data to select valid targets.
+ * Key interactions: Used by nav-controls, keyboard, and grid interactions.
+ */
 // Cursor/word navigation helpers.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createNavigation({
   getPlay,

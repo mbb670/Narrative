@@ -1,6 +1,13 @@
+/*
+ * File Overview
+ * Purpose: Puzzle model normalization and computed helpers.
+ * Controls: Grid dimensions, word and cell lookup, and derived puzzle data.
+ * How: Normalizes puzzle input and exposes computed utilities and setters.
+ * Key interactions: Used by renderers, play actions, navigation, and chain logic.
+ */
 // Model + normalization helpers for puzzles and grid layout.
 import { HEIGHT_CYCLE, MODE } from "./config.js";
-import { cleanA, insets, tr, normalizePuzzleId } from "./utils.js";
+import { cleanA, insets, tr, normalizePuzzleId } from "../utils/index.js";
 import { normalizePaletteId, paletteColorForWord } from "./palette.js";
 
 // Normalize word objects from data files.

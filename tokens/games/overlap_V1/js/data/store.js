@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Puzzle persistence layer.
+ * Controls: Saving and loading puzzles, progress, and metadata in localStorage.
+ * How: Wraps storage reads and writes and merges defaults with saved data.
+ * Key interactions: Used by app.js, archive UI, and results.
+ */
 // Puzzle storage helpers (defaults + localStorage merge).
-import { KEY } from "../config.js";
+import { KEY } from "../core/config.js";
 import { DEFAULTS_VERSION, DEFAULTS_VER_KEY } from "./defaults.js";
 
 // Remove derived height fields before persisting puzzles (keeps storage stable across layouts).

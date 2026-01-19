@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: Give-up confirmation modal.
+ * Controls: Open/close modal and confirm action.
+ * How: Binds modal buttons to reset or cancel flows.
+ * Key interactions: Uses play/actions and dom cache.
+ */
 // Give-up confirm modal helpers.
 
 export function createGiveUpModal({

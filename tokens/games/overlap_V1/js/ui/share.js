@@ -1,6 +1,13 @@
+/*
+ * File Overview
+ * Purpose: Share payload builder and share triggers.
+ * Controls: Builds share text and invokes clipboard or Web Share.
+ * How: Formats results into text and handles share UI actions.
+ * Key interactions: Used by results and chain-results; uses utils/escape and toasts.
+ */
 // Share helpers for puzzle/chain results.
-import { MODE, SHARE_URL_OVERRIDE } from "../config.js";
-import { dateFromKey, puzzleLabel } from "../utils.js";
+import { MODE, SHARE_URL_OVERRIDE } from "../core/config.js";
+import { dateFromKey, puzzleLabel } from "../utils/index.js";
 
 export function createShareUI({
   getPuzzles,

@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Enter key handling.
+ * Controls: Submit and advance behavior when enter is pressed.
+ * How: Listens to keyboard or UI enter triggers and calls actions.
+ * Key interactions: Uses play/actions, selection, and navigation or chain logic.
+ */
 // Enter-key behavior for puzzle/chain completion warnings.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createEnterKeyHandler({
   getPlay,

@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: Splash screen modal.
+ * Controls: Intro display and close or start actions.
+ * How: Shows on load and hides based on user action.
+ * Key interactions: Used by app.js and ftue or settings.
+ */
 // Splash modal helpers for chain progress and quick actions.
 import {
   ARCHIVE_RETURN_TIMEOUT_MS,
@@ -5,14 +12,14 @@ import {
   IS_IOS,
   MODE,
   VIEW,
-} from "../config.js";
+} from "../core/config.js";
 import {
   getLastPlayedChain,
   isChainPuzzle,
   normalizePuzzleId,
   isDailyChainPuzzle,
-} from "../utils.js";
-import { computed } from "../model.js";
+} from "../utils/index.js";
+import { computed } from "../core/model.js";
 import {
   chainPuzzleKey,
   loadChainProgressStore,

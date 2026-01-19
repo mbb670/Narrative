@@ -1,6 +1,13 @@
+/*
+ * File Overview
+ * Purpose: Chain HUD status UI.
+ * Controls: Timer, penalty, and chain progress indicators.
+ * How: Updates DOM elements based on chain state and timing.
+ * Key interactions: Uses chain core and timing with the dom cache.
+ */
 // Chain HUD + timer helpers.
-import { DEV_DISABLE_AUTOPAUSE, MODE } from "../config.js";
-import { normalizePuzzleId } from "../utils.js";
+import { DEV_DISABLE_AUTOPAUSE, MODE } from "../core/config.js";
+import { normalizePuzzleId } from "../utils/index.js";
 
 export function createChainHud({
   els,

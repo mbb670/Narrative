@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Global event wiring.
+ * Controls: Window, document, and visibility events.
+ * How: Registers listeners once and forwards to modules as needed.
+ * Key interactions: Uses keyboard, navigation, grid interactions, and view-state.
+ */
 // Global event wiring (keyboard, grid, visibility, touch pan).
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function bindGlobalEvents({
   els,

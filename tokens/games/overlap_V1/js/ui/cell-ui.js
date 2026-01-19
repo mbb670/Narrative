@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Cell-level DOM updates.
+ * Controls: Cell text, classes, correctness, and locked styling.
+ * How: Applies classes and text based on model and computed state.
+ * Key interactions: Used by the grid renderer and play/actions.
+ */
 // Grid cell rendering helpers.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createCellUI({
   els,

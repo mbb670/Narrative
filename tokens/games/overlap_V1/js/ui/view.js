@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: View mode controls.
+ * Controls: Grid view mode toggles and CSS classes.
+ * How: Applies view-state or config-based classes to the DOM.
+ * Key interactions: Uses view-state, dom cache, and selection or hints.
+ */
 // View filtering helpers for play vs chain puzzle lists.
-import { VIEW } from "../config.js";
+import { VIEW } from "../core/config.js";
 
 export function createViewHelpers({
   getPuzzles,

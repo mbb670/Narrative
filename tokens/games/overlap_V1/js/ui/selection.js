@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Selection state and highlighting.
+ * Controls: Active cell or word, selection classes, and focus.
+ * How: Stores selection state and updates DOM classes.
+ * Key interactions: Used by navigation, grid interactions, keyboard, and hints.
+ */
 // Range selection + select-all helpers for the grid.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createSelectionUI({
   els,

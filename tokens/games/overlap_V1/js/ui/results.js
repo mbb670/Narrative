@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Standard results modal for non-chain puzzles.
+ * Controls: Summary display, share button, and close behavior.
+ * How: Builds result text from model and stores and binds events.
+ * Key interactions: Uses share, toasts, data/store, and utils.
+ */
 // Results modal helpers.
-import { IS_IOS } from "../config.js";
+import { IS_IOS } from "../core/config.js";
 
 export function createResultsUI({
   els,

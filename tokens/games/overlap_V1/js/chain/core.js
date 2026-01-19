@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Chain mode orchestration.
+ * Controls: Chain lifecycle, scoring, gating, and completion flow.
+ * How: Coordinates model updates, persistence, HUD updates, and results.
+ * Key interactions: Uses chain-progress, chain-persistence, locks, timing, and UI modules.
+ */
 // Core chain mode helpers (start/finish/scoring/input gating).
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createChainCore({
   getPlay,

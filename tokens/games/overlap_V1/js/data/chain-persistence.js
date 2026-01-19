@@ -1,6 +1,13 @@
+/*
+ * File Overview
+ * Purpose: In-progress chain state persistence.
+ * Controls: Saving and restoring chain grid, timer, and status.
+ * How: Serializes chain state to storage and hydrates it on load.
+ * Key interactions: Used by chain core and play/actions.
+ */
 // Chain progress persistence and restore helpers.
-import { MODE } from "../config.js";
-import { clamp, normalizePuzzleId, isDailyChainPuzzle } from "../utils.js";
+import { MODE } from "../core/config.js";
+import { clamp, normalizePuzzleId, isDailyChainPuzzle } from "../utils/index.js";
 import {
   chainPuzzleKey,
   loadChainProgressStore,

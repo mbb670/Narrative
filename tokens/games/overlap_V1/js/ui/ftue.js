@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: First-time user experience overlay.
+ * Controls: FTUE modal steps and persistence.
+ * How: Shows or hides steps and records completion in storage.
+ * Key interactions: Uses dom cache and settings or controls triggers.
+ */
 // First-time user experience (FTUE) demo and modal flow.
-import { FORCE_FTUE, FTUE_SEEN_KEY, IS_IOS, MODE } from "../config.js";
+import { FORCE_FTUE, FTUE_SEEN_KEY, IS_IOS, MODE } from "../core/config.js";
 
 export function createFtue({
   els,

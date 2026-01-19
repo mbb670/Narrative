@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Settings panel and user preferences.
+ * Controls: User toggles, theme selection, and saved preferences.
+ * How: Binds input controls to storage and updates UI state.
+ * Key interactions: Uses palette, view-state, dom, and app callbacks.
+ */
 // Settings panel + color mode persistence.
-import { KEY } from "../config.js";
+import { KEY } from "../core/config.js";
 
 export function createSettingsUI({ els } = {}) {
   // Settings panel is a simple show/hide container.

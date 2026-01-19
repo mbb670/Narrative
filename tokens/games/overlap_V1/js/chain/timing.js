@@ -1,3 +1,10 @@
+/*
+ * File Overview
+ * Purpose: Chain timing and penalty helpers.
+ * Controls: Time formatting and penalty increments.
+ * How: Converts elapsed time to display strings and applies penalties.
+ * Key interactions: Used by chain core and penalties UI.
+ */
 // Chain timing + penalty helpers.
 import { createPenaltyManager } from "../ui/penalties.js";
 

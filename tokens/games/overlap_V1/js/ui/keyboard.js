@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: On-screen keyboard UI.
+ * Controls: Key layout, key states, and input handling.
+ * How: Binds key buttons to play actions and updates key styling.
+ * Key interactions: Uses play/actions, selection, and warnings.
+ */
 // Touch + on-screen keyboard helpers and hidden input wiring.
-import { VIEW } from "../config.js";
+import { VIEW } from "../core/config.js";
 
 export function createKeyboard({
   els,

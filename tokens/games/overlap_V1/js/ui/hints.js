@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Hints and range clue UI.
+ * Controls: Hint visibility and highlight ranges.
+ * How: Reads model and selection and updates DOM classes and text.
+ * Key interactions: Uses selection, view, and dom cache.
+ */
 // Range clue hints + focus overlay helpers.
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createHints({
   els,

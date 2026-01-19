@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Core gameplay actions and state mutations.
+ * Controls: Typing, cursor movement, reset or reveal, and puzzle load.
+ * How: Mutates model state, triggers UI updates, and persists progress.
+ * Key interactions: Used by keyboard, grid interactions, enter key, and chain core.
+ */
 // Core play actions (cursor movement, typing, reset/load).
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createPlayActions({
   els,

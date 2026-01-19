@@ -1,5 +1,12 @@
+/*
+ * File Overview
+ * Purpose: Grid pointer and touch interactions.
+ * Controls: Cell selection, focus, and tap behavior.
+ * How: Attaches listeners to grid cells and calls selection or actions.
+ * Key interactions: Uses selection, play/actions, and scroll helpers.
+ */
 // Grid interaction handlers (click/touch/hint/clue).
-import { MODE } from "../config.js";
+import { MODE } from "../core/config.js";
 
 export function createGridInteractions({
   els,

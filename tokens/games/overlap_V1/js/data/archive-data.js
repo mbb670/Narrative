@@ -1,8 +1,15 @@
+/*
+ * File Overview
+ * Purpose: Archive view data shaping.
+ * Controls: Calendar groupings, labels, and archive metadata.
+ * How: Transforms puzzle lists into date-based structures for rendering.
+ * Key interactions: Used by ui/archive.js.
+ */
 // Archive data fetch + cache for daily chain puzzles.
-import { DEV_MODE } from "../config.js";
-import { isDailyChainPuzzle, normalizePuzzleId, isDateId } from "../utils.js";
+import { DEV_MODE } from "../core/config.js";
+import { isDailyChainPuzzle, normalizePuzzleId, isDateId } from "../utils/index.js";
 import { fetchJson } from "./defaults.js";
-import { normPuzzle } from "../model.js";
+import { normPuzzle } from "../core/model.js";
 
 export function createArchiveData({ getPuzzles, devMode = DEV_MODE } = {}) {
   const state = {

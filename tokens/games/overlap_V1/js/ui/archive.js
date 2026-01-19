@@ -1,13 +1,20 @@
+/*
+ * File Overview
+ * Purpose: Archive modal and calendar navigation.
+ * Controls: Open/close archive, month/day selection, and puzzle loading.
+ * How: Renders archive data to the DOM and binds UI events.
+ * Key interactions: Uses data/archive-data, data/store, view-state, and app callbacks.
+ */
 // Archive modal for daily chain puzzles.
-import { DEV_MODE, IS_IOS, MODE, VIEW } from "../config.js";
+import { DEV_MODE, IS_IOS, MODE, VIEW } from "../core/config.js";
 import {
   toDateKey,
   datePartsFromKey,
   normalizePuzzleId,
   isDailyChainPuzzle,
   isChainPuzzle,
-} from "../utils.js";
-import { computed } from "../model.js";
+} from "../utils/index.js";
+import { computed } from "../core/model.js";
 import { createArchiveData } from "../data/archive-data.js";
 import { chainPuzzleKey, loadChainProgressStore, todayKey } from "../data/chain-progress.js";
 
