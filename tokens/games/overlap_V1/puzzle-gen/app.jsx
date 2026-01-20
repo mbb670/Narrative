@@ -872,6 +872,10 @@ const InventoryItem = ({ item, onDragStart, isCompact = false }) => {
   );
 };
 
+const DEFAULT_EXCLUSION_DAYS = 180;
+const MIN_EXCLUSION_DAYS = 0;
+const MAX_EXCLUSION_DAYS = 365;
+
 export default function App() {
   const [inputText, setInputText] = useState("solstice iceberg glacier forest steward warden dendrite rite frosty stew");
   const [inventory, setInventory] = useState([]);
@@ -887,6 +891,7 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [targetLength, setTargetLength] = useState(17);
   const [showInput, setShowInput] = useState(false);
+  const [exclusionDays, setExclusionDays] = useState(DEFAULT_EXCLUSION_DAYS);
   
   // Clue State
   const [clues, setClues] = useState({}); 
@@ -1069,12 +1074,12 @@ export default function App() {
       } catch {}
   }, [chain, clues, definitions, stateLoaded]);
 
-  // Load excluded words and recent answers based on the selected chain date (current + previous month for 30-day window)
+  // Load excluded words and recent answers based on the selected chain date and exclusion window.
   useEffect(() => {
       let cancelled = false;
       const loadLists = async () => {
       try {
-          const exclRes = await fetch("../data/chain/other/util/excluded-words.json");
+          const exclRes = await fetch("data/excluded-words.json");
           if (exclRes.ok) {
               const data = await exclRes.json();
               if (!cancelled && Array.isArray(data)) {
@@ -1097,11 +1102,27 @@ export default function App() {
           const prevMonthDate = new Date(Date.UTC(currYear, currMonth - 1, 1));
           const nextMonthDate = new Date(Date.UTC(currYear, currMonth + 1, 1));
 
-          const monthsToLoad = [
-              { year: currYear, month: currMonth },
-              { year: prevMonthDate.getUTCFullYear(), month: prevMonthDate.getUTCMonth() },
-              { year: nextMonthDate.getUTCFullYear(), month: nextMonthDate.getUTCMonth() }
-          ];
+          const monthsToLoad = [];
+          const monthKeys = new Set();
+          const addMonth = (year, month) => {
+              const key = `${year}-${month}`;
+              if (monthKeys.has(key)) return;
+              monthKeys.add(key);
+              monthsToLoad.push({ year, month });
+          };
+
+          addMonth(currYear, currMonth);
+          addMonth(prevMonthDate.getUTCFullYear(), prevMonthDate.getUTCMonth());
+          addMonth(nextMonthDate.getUTCFullYear(), nextMonthDate.getUTCMonth());
+
+          const exclusionMs = Math.max(0, exclusionDays) * 24 * 60 * 60 * 1000;
+          const lookbackDate = new Date(refDate.getTime() - exclusionMs);
+          let monthCursor = new Date(Date.UTC(lookbackDate.getUTCFullYear(), lookbackDate.getUTCMonth(), 1));
+          const endCursor = new Date(Date.UTC(currYear, currMonth, 1));
+          while (monthCursor <= endCursor) {
+              addMonth(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth());
+              monthCursor.setUTCMonth(monthCursor.getUTCMonth() + 1);
+          }
 
           const monthData = [];
           for (const m of monthsToLoad) {
@@ -1113,7 +1134,6 @@ export default function App() {
           const recent = [];
           const dateKeys = [];
           const refMs = refDate.getTime();
-          const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
           monthData.forEach(p => {
               const dateIso = typeof p.id === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.id) ? p.id : null;
@@ -1123,7 +1143,7 @@ export default function App() {
               let isRecent = false;
               if (dateIso) {
                   const t = Date.parse(dateIso);
-                  if (!Number.isNaN(t) && t <= refMs && (refMs - t) <= THIRTY_DAYS) {
+                  if (exclusionMs > 0 && !Number.isNaN(t) && t <= refMs && (refMs - t) <= exclusionMs) {
                       isRecent = true;
                   }
               }
@@ -1163,13 +1183,13 @@ export default function App() {
       };
       loadLists();
       return () => { cancelled = true; };
-  }, [chainDate]);
+  }, [chainDate, exclusionDays]);
 
   useEffect(() => {
       let cancelled = false;
       const loadTripleSeeds = async () => {
           try {
-              const res = await fetch("../data/chain/other/util/triples.json");
+              const res = await fetch("data/triples.json");
               if (!res.ok) return;
               const data = await res.json();
               if (!cancelled && Array.isArray(data)) {
@@ -3423,6 +3443,28 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
                             {isProcessing ? <RefreshCw className="animate-spin" size={18} /> : <Wand2 size={18} />}
                             Generate Random
                             </Button>
+                            <div className="flex flex-col items-start gap-1">
+                                <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Exclude Days</label>
+                                <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-200">
+                                    <input
+                                        type="number"
+                                        min={MIN_EXCLUSION_DAYS}
+                                        max={MAX_EXCLUSION_DAYS}
+                                        value={exclusionDays}
+                                        onChange={(e) => {
+                                            const parsed = Number.parseInt(e.target.value, 10);
+                                            if (Number.isNaN(parsed)) {
+                                                setExclusionDays(MIN_EXCLUSION_DAYS);
+                                                return;
+                                            }
+                                            const next = Math.min(MAX_EXCLUSION_DAYS, Math.max(MIN_EXCLUSION_DAYS, parsed));
+                                            setExclusionDays(next);
+                                        }}
+                                        className="w-16 text-sm font-semibold text-slate-700 bg-transparent outline-none"
+                                    />
+                                    <span className="text-[10px] text-slate-400 uppercase tracking-wide">days</span>
+                                </div>
+                            </div>
                             <Button
                                 variant="secondary"
                                 className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"

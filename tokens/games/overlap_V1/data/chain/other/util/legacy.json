@@ -1,7 +1,6 @@
  [ {
     "id": "First Chain",
     "type": "chain",
-    "palette": "classic",
     "words": [{
         "clue": "Chain of sea islands",
         "answer": "ARCHIPELAGO",
@@ -43,7 +42,6 @@
   {
     "id": "super long",
     "type": "chain",
-    "palette": "classic",
     "words": [{
         "clue": "Middle Eastern ruler",
         "answer": "SULTAN",

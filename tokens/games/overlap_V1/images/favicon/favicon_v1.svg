@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    :root{
+      --a-fill:#B2E59E; --a-stroke:#3BA01C;
+      --b-fill:#91E1E5; --b-stroke:#19B9C1;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --a-fill:#084025; --a-stroke:#3BA01C;
+        --b-fill:#0A676D; --b-stroke:#19B9C1;
+<!-- same for now -->
+      --a-fill:#B2E59E; --a-stroke:#3BA01C;
+      --b-fill:#91E1E5; --b-stroke:#19B9C1;
+      }
+    }
+  </style>
+
+  <rect x="0.5" y="0.5" width="23" height="23" rx="5.5" fill="var(--a-fill)" stroke="var(--a-stroke)" stroke-width="2"/>
+  <rect x="8.5" y="8.5" width="23" height="23" rx="5.5" fill="var(--b-fill)" stroke="var(--b-stroke)" stroke-width="2"/>
+</svg>

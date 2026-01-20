@@ -46,30 +46,6 @@ Puzzle Colors
 ----------------------------- */
 
 :root {
-    --puzzle-color-1: #ff2b1d;
-    --puzzle-color-2: #ff7a1a;
-    --puzzle-color-3: #f5b800;
-    --puzzle-color-4: #2f8f1d;
-    --puzzle-color-5: #2b74ff;
-}
-
-[data-puzzle-palette="classic"] {
-    --puzzle-color-1: #ff2b1d;
-    --puzzle-color-2: #ff7a1a;
-    --puzzle-color-3: #f5b800;
-    --puzzle-color-4: #2f8f1d;
-    --puzzle-color-5: #2b74ff;
-}
-
-[data-puzzle-palette="sunrise"] {
-    --puzzle-color-1: #ff5f6d;
-    --puzzle-color-2: #ffc371;
-    --puzzle-color-3: #ffe29f;
-    --puzzle-color-4: #c4f1be;
-    --puzzle-color-5: #7aa2ff;
-}
-
-[data-puzzle-palette="greens"] {
     --puzzle-color-1: #59D3FF;
     --puzzle-color-2: #313A73;
     --puzzle-color-3: #61A87D;
@@ -77,7 +53,40 @@ Puzzle Colors
     --puzzle-color-5: #d1f3d0;
 }
 
-[data-puzzle-palette="test"] {
+/* [data-puzzle-palette="MON"] {
+    --puzzle-color-1: #ff2b1d;
+    --puzzle-color-2: #ff7a1a;
+    --puzzle-color-3: #f5b800;
+    --puzzle-color-4: #2f8f1d;
+    --puzzle-color-5: #2b74ff;
+}
+
+[data-puzzle-palette="TUE"] {
+    --puzzle-color-1: #ff5f6d;
+    --puzzle-color-2: #ffc371;
+    --puzzle-color-3: #ffe29f;
+    --puzzle-color-4: #c4f1be;
+    --puzzle-color-5: #7aa2ff;
+}
+
+[data-mode="dark"] [data-puzzle-palette="TUE"] {
+    --puzzle-color-1: red;
+    --puzzle-color-2: orange;
+    --puzzle-color-3: yellow;
+    --puzzle-color-4: green;
+    --puzzle-color-5: blue;
+}
+
+
+[data-puzzle-palette="WED"] {
+    --puzzle-color-1: #59D3FF;
+    --puzzle-color-2: #313A73;
+    --puzzle-color-3: #61A87D;
+    --puzzle-color-4: #7EE081;
+    --puzzle-color-5: #d1f3d0;
+}
+
+[data-puzzle-palette="THU"] {
     --puzzle-color-1: #FF8360;
     --puzzle-color-2: #E8E288;
     --puzzle-color-3: #7DCE82;
@@ -85,7 +94,7 @@ Puzzle Colors
     --puzzle-color-5: #00FFF5;
 }
 
-[data-puzzle-palette="test"] {
+[data-puzzle-palette="FRI"] {
     --puzzle-color-1: #034732;
     --puzzle-color-2: #008148;
     --puzzle-color-3: #C6C013;
@@ -94,13 +103,13 @@ Puzzle Colors
 }
 
 
-[data-puzzle-palette="test"] {
+[data-puzzle-palette="SAT"] {
     --puzzle-color-1: #173f5f;
     --puzzle-color-2: #20639b;
     --puzzle-color-3: #3caea3;
     --puzzle-color-4: #f6d55c;
     --puzzle-color-5: #ed553b;
-}
+} */
 
 
 /* -----------------------------
@@ -284,14 +293,15 @@ Interactive elements
 }
 
 /* Icon Button */
-.btn-icon{
+.btn-icon {
     aspect-ratio: 1;
     width: var(--unit-36);
     padding: var(--spacing-x12);
     --icon: url("images/arrow.svg");
     --icon-color: var(--foreground-subtle);
-    --icon-rotation:0;
-    &::before{
+    --icon-rotation: 0;
+
+    &::before {
         content: '';
         display: block;
         aspect-ratio: 1;
@@ -400,14 +410,16 @@ Interactive elements
 Global elements
 ----------------------------- */
 
-.inline-notification{
+.inline-notification {
     background-color: var(--system-informative-subtle);
     border-left: var(--spacing-x4) solid var(--system-informative-default);
     padding: var(--spacing-x24);
-    h3{
+
+    h3 {
         color: var(--system-informative-strong);
     }
-    p{
+
+    p {
         margin-top: var(--unit-6);
         color: var(--system-informative-strong);
         opacity: 0.7;
@@ -437,10 +449,10 @@ header {
     }
 }
 
-.is-dev{
-      #pClear{
-         display: block;
-      }
+.is-dev {
+    #pClear {
+        display: block;
+    }
 }
 
 .builder-toggle {
@@ -448,17 +460,19 @@ header {
     align-items: center;
     justify-content: center;
     gap: var(--spacing-x2);
-    button{
+
+    button {
         padding: var(--unit-10);
     }
-    #builderOpen{
+
+    #builderOpen {
         --icon: url("images/builder-icon.svg");
-        --icon-color:var(--foreground-disabled);
+        --icon-color: var(--foreground-disabled);
     }
 
     #builderClose {
         --icon: url("images/close.svg");
-        --icon-color:var(--foreground-disabled);
+        --icon-color: var(--foreground-disabled);
     }
 }
 
@@ -667,13 +681,14 @@ body[data-chain-state="done"] .rangeClue-content {
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
 
-    #navWordPrev, #navWordNext{
-    --icon: url("images/double-right-arrow.svg");
+    #navWordPrev,
+    #navWordNext {
+        --icon: url("images/double-right-arrow.svg");
     }
 
-    .puzzle-nav-prev{
-        button{
---icon-rotation: 180deg;
+    .puzzle-nav-prev {
+        button {
+            --icon-rotation: 180deg;
         }
     }
 }
@@ -724,7 +739,7 @@ body[data-chain-state="done"] .rangeClue-content {
     .toast {
         transform: translateY(8px);
         place-content: center;
-        bottom:100%;
+        bottom: 100%;
     }
 }
 
@@ -1388,10 +1403,11 @@ body:has(#showOnscreenKeyboard:checked) {
     cursor: pointer;
     mask-repeat: no-repeat;
     -webkit-mask-repeat: no-repeat;
-    svg{
+
+    svg {
         transform: scaleY(1.3);
     }
- 
+
 }
 
 .slider-track .slider-svg {
@@ -1466,13 +1482,15 @@ Splash settings
             padding: var(--unit-10);
             margin: calc(-1 * var(--spacing-x4)) calc(-1 * var(--spacing-x4)) 0 0;
         }
-        .share-btn{
-                --icon: url("images/share.svg");
-                 position: relative;
-            }
-        .settings-btn{
-                --icon: url("images/settings.svg");
-            }
+
+        .share-btn {
+            --icon: url("images/share.svg");
+            position: relative;
+        }
+
+        .settings-btn {
+            --icon: url("images/settings.svg");
+        }
 
         .settings-panel {
             position: absolute;
@@ -1716,7 +1734,7 @@ FTUE
 
     .ftue-title,
     .ftue-desc {
-         max-width: 400px;
+        max-width: 400px;
         text-wrap: balance;
         text-align: center;
     }
@@ -1917,7 +1935,7 @@ Archive
     justify-content: space-between;
     gap: var(--spacing-x8);
     margin-bottom: var(--spacing-x32);
-   
+
 
     .archive__calendar-select {
         display: inherit;
@@ -1933,13 +1951,14 @@ Archive
         }
     }
 
-    #archiveNextMonth, #archivePrevMonth{
---icon-color: var(--foreground-subtle);
+    #archiveNextMonth,
+    #archivePrevMonth {
+        --icon-color: var(--foreground-subtle);
     }
 
-    #archivePrevMonth{
-        --icon-rotation:180deg;
-         
+    #archivePrevMonth {
+        --icon-rotation: 180deg;
+
     }
 }
 

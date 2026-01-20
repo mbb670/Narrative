@@ -27,9 +27,6 @@ export const tr = (w) => {
 
 export const isChainPuzzle = (p) => String(p?.type || MODE.PUZZLE) === MODE.CHAIN;
 
-// Placeholder difficulty inference (currently unused).
-export const inferDiffFromColor = () => "easy";
-
 const DATE_ID_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Convert Date to YYYY-MM-DD (UTC-insensitive for labels).

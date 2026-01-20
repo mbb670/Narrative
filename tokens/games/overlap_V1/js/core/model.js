@@ -8,7 +8,7 @@
 // Model + normalization helpers for puzzles and grid layout.
 import { HEIGHT_CYCLE, MODE } from "./config.js";
 import { cleanA, insets, tr, normalizePuzzleId } from "../utils/index.js";
-import { normalizePaletteId, paletteColorForWord } from "./palette.js";
+import { paletteIdForPuzzle, paletteColorForWord } from "./palette.js";
 
 // Normalize word objects from data files.
 export const normWord = (w, pType, opts = {}) => {
@@ -36,7 +36,7 @@ export const normPuzzle = (p) => {
     // legacy title retained in memory only; UI uses id instead
     title: String(p?.title || ""),
     type,
-    palette: normalizePaletteId(p?.palette),
+    palette: paletteIdForPuzzle(id),
     words,
   };
   return out;
@@ -55,7 +55,6 @@ export function computed(p) {
       const h = HEIGHT_CYCLE[rawIdx % HEIGHT_CYCLE.length] || "full";
       const [t, b] = insets(h);
 
-      let diff = null;
       const color = paletteColorForWord(p, rawIdx);
 
       return {
@@ -69,7 +68,6 @@ export function computed(p) {
         h,
         r: tr(w),
         rawIdx,
-        diff,
       };
     })
     .filter((e) => e.len)
@@ -101,5 +99,6 @@ export function computed(p) {
 
 // Update CSS grid column count to match puzzle width.
 export function setCols(n) {
-  document.documentElement.style.setProperty("--cols", String(n));
+  const target = document.body || document.documentElement;
+  target.style.setProperty("--cols", String(n));
 }

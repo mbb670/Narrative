@@ -1,7 +1,6 @@
 [{
         "id": "2026-02-01",
         "type": "chain",
-        "palette": "greens",
         "words": [{
                 "clue": "Cereal seed",
                 "answer": "GRAIN",
@@ -92,7 +91,6 @@
     {
         "id": "2026-02-02",
         "type": "chain",
-        "palette": "greens",
         "words": [{
                 "clue": "Pleasant smell",
                 "answer": "SCENT",
@@ -183,7 +181,6 @@
     {
         "id": "2026-02-03",
         "type": "chain",
-        "palette": "greens",
         "words": [{
                 "clue": "Steep rock face",
                 "answer": "CLIFF",
@@ -274,7 +271,6 @@
     {
         "id": "2026-02-04",
         "type": "chain",
-        "palette": "greens",
         "words": [{
                 "clue": "Reaction starter",
                 "answer": "CATALYST",
@@ -365,7 +361,6 @@
     {
         "id": "2026-02-05",
         "type": "chain",
-        "palette": "greens",
         "words": [{
                 "clue": "Phone",
                 "answer": "CALL",
@@ -450,6 +445,791 @@
                 "clue": "Admission pass",
                 "answer": "TICKET",
                 "start": 68
+            }
+        ]
+    },
+    {
+        "id": "2026-02-06",
+        "type": "chain",
+        "words": [{
+                "clue": "School level",
+                "answer": "GRADE",
+                "start": 1
+            },
+            {
+                "clue": "Small part",
+                "answer": "DETAIL",
+                "start": 4
+            },
+            {
+                "clue": "Serving as an example",
+                "answer": "ILLUSTRATIVE",
+                "start": 8
+            },
+            {
+                "clue": "Everyday speech",
+                "answer": "VERNACULAR",
+                "start": 18
+            },
+            {
+                "clue": "Piece in a magazine",
+                "answer": "ARTICLE",
+                "start": 26
+            },
+            {
+                "clue": "Transparent",
+                "answer": "CLEAR",
+                "start": 30
+            },
+            {
+                "clue": "Our planet",
+                "answer": "EARTH",
+                "start": 32
+            },
+            {
+                "clue": "Central idea",
+                "answer": "THEME",
+                "start": 35
+            },
+            {
+                "clue": "Poetic rhythm unit",
+                "answer": "METER",
+                "start": 38
+            },
+            {
+                "clue": "Everlasting",
+                "answer": "ETERNAL",
+                "start": 39
+            },
+            {
+                "clue": "Church table",
+                "answer": "ALTAR",
+                "start": 44
+            },
+            {
+                "clue": "Ancient object",
+                "answer": "ARTIFACT",
+                "start": 47
+            },
+            {
+                "clue": "Contributing cause",
+                "answer": "FACTOR",
+                "start": 51
+            },
+            {
+                "clue": "Symphony ensemble",
+                "answer": "ORCHESTRA",
+                "start": 55
+            },
+            {
+                "clue": "Hopping pet",
+                "answer": "RABBIT",
+                "start": 62
+            },
+            {
+                "clue": "One thing",
+                "answer": "ITEM",
+                "start": 66
+            }
+        ]
+    },
+    {
+        "id": "2026-02-07",
+        "type": "chain",
+        "words": [{
+                "clue": "Pre-made layout",
+                "answer": "TEMPLATE",
+                "start": 1
+            },
+            {
+                "clue": "Course manual",
+                "answer": "TEXTBOOK",
+                "start": 7
+            },
+            {
+                "clue": "Small pamphlet",
+                "answer": "BOOKLET",
+                "start": 11
+            },
+            {
+                "clue": "Import tax",
+                "answer": "TARIFF",
+                "start": 17
+            },
+            {
+                "clue": "Number one",
+                "answer": "FIRST",
+                "start": 22
+            },
+            {
+                "clue": "Plant stalk",
+                "answer": "STEM",
+                "start": 25
+            },
+            {
+                "clue": "Moderate",
+                "answer": "TEMPER",
+                "start": 26
+            },
+            {
+                "clue": "Noticing",
+                "answer": "PERCEIVING",
+                "start": 29
+            },
+            {
+                "clue": "Polite fellow",
+                "answer": "GENTLEMAN",
+                "start": 38
+            },
+            {
+                "clue": "Handle skillfully",
+                "answer": "MANIPULATE",
+                "start": 44
+            },
+            {
+                "clue": "Written note",
+                "answer": "TEXT",
+                "start": 52
+            },
+            {
+                "clue": "Taken out",
+                "answer": "EXTRACTED",
+                "start": 53
+            },
+            {
+                "clue": "Cultivate",
+                "answer": "DEVELOP",
+                "start": 61
+            },
+            {
+                "clue": "Religious traveler",
+                "answer": "PILGRIM",
+                "start": 67
+            },
+            {
+                "clue": "Unstated but understood",
+                "answer": "IMPLICIT",
+                "start": 72
+            },
+            {
+                "clue": "Quote as proof",
+                "answer": "CITE",
+                "start": 77
+            }
+        ]
+    },
+    {
+        "id": "2026-02-08",
+        "type": "chain",
+        "words": [{
+                "clue": "Musical speed",
+                "answer": "TEMPO",
+                "start": 1
+            },
+            {
+                "clue": "Self-important",
+                "answer": "POMPOUS",
+                "start": 4
+            },
+            {
+                "clue": "Not in danger",
+                "answer": "SAFE",
+                "start": 10
+            },
+            {
+                "clue": "Notable traits",
+                "answer": "FEATURES",
+                "start": 12
+            },
+            {
+                "clue": "Take a break",
+                "answer": "REST",
+                "start": 17
+            },
+            {
+                "clue": "Fashion sense",
+                "answer": "STYLE",
+                "start": 19
+            },
+            {
+                "clue": "Big jump",
+                "answer": "LEAP",
+                "start": 22
+            },
+            {
+                "clue": "Wrapped shipment",
+                "answer": "PACKAGE",
+                "start": 25
+            },
+            {
+                "clue": "Representation firm",
+                "answer": "AGENCY",
+                "start": 29
+            },
+            {
+                "clue": "Book of broad knowledge",
+                "answer": "ENCYCLOPEDIA",
+                "start": 31
+            },
+            {
+                "clue": "Above",
+                "answer": "ATOP",
+                "start": 42
+            },
+            {
+                "clue": "Walking way",
+                "answer": "PATH",
+                "start": 45
+            },
+            {
+                "clue": "The one here",
+                "answer": "THIS",
+                "start": 47
+            },
+            {
+                "clue": "Record of the past",
+                "answer": "HISTORY",
+                "start": 48
+            },
+            {
+                "clue": "Bread starter",
+                "answer": "YEAST",
+                "start": 54
+            },
+            {
+                "clue": "Narrow water passage",
+                "answer": "STRAIT",
+                "start": 57
+            }
+        ]
+    },
+    {
+        "id": "2026-02-09",
+        "type": "chain",
+        "words": [{
+                "clue": "Things",
+                "answer": "ITEMS",
+                "start": 1
+            },
+            {
+                "clue": "Wise one",
+                "answer": "SAGE",
+                "start": 5
+            },
+            {
+                "clue": "Not brand-name",
+                "answer": "GENERIC",
+                "start": 7
+            },
+            {
+                "clue": "Stir-fry grain",
+                "answer": "RICE",
+                "start": 11
+            },
+            {
+                "clue": "The King of Rock",
+                "answer": "ELVIS",
+                "start": 14
+            },
+            {
+                "clue": "Scenic view",
+                "answer": "VISTA",
+                "start": 16
+            },
+            {
+                "clue": "Turkey's largest city",
+                "answer": "ISTANBUL",
+                "start": 17
+            },
+            {
+                "clue": "Extravagant",
+                "answer": "LAVISH",
+                "start": 24
+            },
+            {
+                "clue": "Ferry back and forth",
+                "answer": "SHUTTLE",
+                "start": 28
+            },
+            {
+                "clue": "Person in charge",
+                "answer": "LEADER",
+                "start": 33
+            },
+            {
+                "clue": "Wiped out",
+                "answer": "ERASED",
+                "start": 37
+            },
+            {
+                "clue": "Process food",
+                "answer": "DIGEST",
+                "start": 42
+            },
+            {
+                "clue": "Overexert",
+                "answer": "STRAIN",
+                "start": 46
+            },
+            {
+                "clue": "Practice sessions",
+                "answer": "TRAINING",
+                "start": 47
+            },
+            {
+                "clue": "Strong wind",
+                "answer": "GALE",
+                "start": 54
+            },
+            {
+                "clue": "Sports association",
+                "answer": "LEAGUE",
+                "start": 56
+            }
+        ]
+    },
+    {
+        "id": "2026-02-10",
+        "type": "chain",
+        "words": [{
+                "clue": "Estimate",
+                "answer": "GUESS",
+                "start": 1
+            },
+            {
+                "clue": "Near a city, not urban",
+                "answer": "SUBURBAN",
+                "start": 5
+            },
+            {
+                "clue": "State of insolvency",
+                "answer": "BANKRUPTCY",
+                "start": 10
+            },
+            {
+                "clue": "Periodic",
+                "answer": "CYCLICAL",
+                "start": 18
+            },
+            {
+                "clue": "About food energy",
+                "answer": "CALORIC",
+                "start": 23
+            },
+            {
+                "clue": "Spanish house",
+                "answer": "CASA",
+                "start": 29
+            },
+            {
+                "clue": "Seasoning",
+                "answer": "SALT",
+                "start": 31
+            },
+            {
+                "clue": "High voice",
+                "answer": "ALTO",
+                "start": 32
+            },
+            {
+                "clue": "Be against",
+                "answer": "OPPOSE",
+                "start": 35
+            },
+            {
+                "clue": "Collections",
+                "answer": "SETS",
+                "start": 39
+            },
+            {
+                "clue": "Colombian pop star",
+                "answer": "SHAKIRA",
+                "start": 42
+            },
+            {
+                "clue": "Mideast nation",
+                "answer": "IRAN",
+                "start": 46
+            },
+            {
+                "clue": "Ordered list",
+                "answer": "RANKING",
+                "start": 47
+            },
+            {
+                "clue": "Sentence rules",
+                "answer": "GRAMMAR",
+                "start": 53
+            },
+            {
+                "clue": "Boat harbor",
+                "answer": "MARINA",
+                "start": 57
+            },
+            {
+                "clue": "Not awake",
+                "answer": "ASLEEP",
+                "start": 62
+            }
+        ]
+    },
+    {
+        "id": "2026-02-11",
+        "type": "chain",
+        "words": [{
+                "clue": "Brag",
+                "answer": "BOAST",
+                "start": 1
+            },
+            {
+                "clue": "Remain",
+                "answer": "STAY",
+                "start": 4
+            },
+            {
+                "clue": "Swift's surname",
+                "answer": "TAYLOR",
+                "start": 5
+            },
+            {
+                "clue": "Noble title",
+                "answer": "LORD",
+                "start": 8
+            },
+            {
+                "clue": "Not smart",
+                "answer": "DUMB",
+                "start": 11
+            },
+            {
+                "clue": "Destined",
+                "answer": "BOUND",
+                "start": 14
+            },
+            {
+                "clue": "Take back",
+                "answer": "UNDO",
+                "start": 16
+            },
+            {
+                "clue": "___ fir",
+                "answer": "DOUGLAS",
+                "start": 18
+            },
+            {
+                "clue": "Facets",
+                "answer": "ASPECTS",
+                "start": 23
+            },
+            {
+                "clue": "Bag",
+                "answer": "SACK",
+                "start": 29
+            },
+            {
+                "clue": "Balkan nation",
+                "answer": "KOSOVO",
+                "start": 32
+            },
+            {
+                "clue": "Loudness level",
+                "answer": "VOLUME",
+                "start": 36
+            },
+            {
+                "clue": "Honor award",
+                "answer": "MEDAL",
+                "start": 40
+            },
+            {
+                "clue": "Similar",
+                "answer": "ALIKE",
+                "start": 43
+            },
+            {
+                "clue": "Enjoyed",
+                "answer": "LIKED",
+                "start": 44
+            },
+            {
+                "clue": "Put down",
+                "answer": "DISS",
+                "start": 48
+            },
+            {
+                "clue": "Distribute widely",
+                "answer": "SPREAD",
+                "start": 51
+            }
+        ]
+    },
+    {
+        "id": "2026-02-12",
+        "type": "chain",
+        "words": [{
+                "clue": "Site mgr, briefly",
+                "answer": "ADMIN",
+                "start": 1
+            },
+            {
+                "clue": "Physical harms",
+                "answer": "INJURIES",
+                "start": 4
+            },
+            {
+                "clue": "Talent spotter",
+                "answer": "SCOUT",
+                "start": 11
+            },
+            {
+                "clue": "Bathroom fixture",
+                "answer": "TOILET",
+                "start": 15
+            },
+            {
+                "clue": "Permits",
+                "answer": "LETS",
+                "start": 18
+            },
+            {
+                "clue": "Data blueprint",
+                "answer": "SCHEMA",
+                "start": 21
+            },
+            {
+                "clue": "Digital message",
+                "answer": "EMAIL",
+                "start": 24
+            },
+            {
+                "clue": "Sending by post",
+                "answer": "MAILING",
+                "start": 25
+            },
+            {
+                "clue": "Relating to stomach",
+                "answer": "GASTRIC",
+                "start": 31
+            },
+            {
+                "clue": "Chemical element C",
+                "answer": "CARBON",
+                "start": 37
+            },
+            {
+                "clue": "Skeletal part",
+                "answer": "BONE",
+                "start": 40
+            },
+            {
+                "clue": "Required",
+                "answer": "NECESSARY",
+                "start": 42
+            },
+            {
+                "clue": "Ox harness",
+                "answer": "YOKE",
+                "start": 50
+            },
+            {
+                "clue": "Involve",
+                "answer": "ENGAGE",
+                "start": 53
+            },
+            {
+                "clue": "Earth-related",
+                "answer": "GEOLOGIC",
+                "start": 57
+            },
+            {
+                "clue": "Seat",
+                "answer": "CHAIR",
+                "start": 64
+            },
+            {
+                "clue": "Top of a house",
+                "answer": "ROOF",
+                "start": 68
+            }
+        ]
+    },
+    {
+        "id": "2026-02-13",
+        "type": "chain",
+        "words": [{
+                "clue": "Counterbalance",
+                "answer": "OFFSET",
+                "start": 1
+            },
+            {
+                "clue": "Surrounding conditions",
+                "answer": "SETTING",
+                "start": 4
+            },
+            {
+                "clue": "Twins zodiac sign",
+                "answer": "GEMINI",
+                "start": 10
+            },
+            {
+                "clue": "Collision",
+                "answer": "IMPACT",
+                "start": 15
+            },
+            {
+                "clue": "Real",
+                "answer": "ACTUAL",
+                "start": 18
+            },
+            {
+                "clue": "From nearby",
+                "answer": "LOCAL",
+                "start": 23
+            },
+            {
+                "clue": "Serene",
+                "answer": "CALM",
+                "start": 25
+            },
+            {
+                "clue": "Just short of",
+                "answer": "ALMOST",
+                "start": 26
+            },
+            {
+                "clue": "Barters",
+                "answer": "TRADES",
+                "start": 31
+            },
+            {
+                "clue": "Wipe out",
+                "answer": "DESTROY",
+                "start": 34
+            },
+            {
+                "clue": "Bivalves with pearls",
+                "answer": "OYSTERS",
+                "start": 39
+            },
+            {
+                "clue": "Chinese port city",
+                "answer": "SHANGHAI",
+                "start": 45
+            },
+            {
+                "clue": "Locks",
+                "answer": "HAIR",
+                "start": 50
+            },
+            {
+                "clue": "Planes, collectively",
+                "answer": "AIRCRAFT",
+                "start": 51
+            },
+            {
+                "clue": "Crying drops",
+                "answer": "TEARS",
+                "start": 58
+            },
+            {
+                "clue": "Located",
+                "answer": "SITUATED",
+                "start": 62
+            },
+            {
+                "clue": "Major mishap",
+                "answer": "DISASTER",
+                "start": 69
+            }
+        ]
+    },
+    {
+        "id": "2026-02-14",
+        "type": "chain",
+        "words": [{
+                "clue": "Unpredictable",
+                "answer": "ERRATIC",
+                "start": 1
+            },
+            {
+                "clue": "City-related",
+                "answer": "CIVIC",
+                "start": 7
+            },
+            {
+                "clue": "Those harmed",
+                "answer": "VICTIMS",
+                "start": 9
+            },
+            {
+                "clue": "Quick look",
+                "answer": "SCAN",
+                "start": 15
+            },
+            {
+                "clue": "Tilt",
+                "answer": "CANT",
+                "start": 16
+            },
+            {
+                "clue": "San ___",
+                "answer": "ANTONIO",
+                "start": 17
+            },
+            {
+                "clue": "Clothing set",
+                "answer": "OUTFIT",
+                "start": 23
+            },
+            {
+                "clue": "Appropriate",
+                "answer": "FITTING",
+                "start": 26
+            },
+            {
+                "clue": "Small wooded area",
+                "answer": "GROVE",
+                "start": 32
+            },
+            {
+                "clue": "Baking unit",
+                "answer": "OVEN",
+                "start": 34
+            },
+            {
+                "clue": "South American nation",
+                "answer": "VENEZUELA",
+                "start": 35
+            },
+            {
+                "clue": "Not concrete",
+                "answer": "ABSTRACT",
+                "start": 43
+            },
+            {
+                "clue": "Real-life state",
+                "answer": "ACTUALITY",
+                "start": 48
+            },
+            {
+                "clue": "Knotting",
+                "answer": "TYING",
+                "start": 55
+            },
+            {
+                "clue": "Deep sorrow",
+                "answer": "GRIEF",
+                "start": 59
+            },
+            {
+                "clue": "Banner",
+                "answer": "FLAG",
+                "start": 63
+            },
+            {
+                "clue": "Shallow coastal inlet",
+                "answer": "LAGOON",
+                "start": 64
             }
         ]
     }

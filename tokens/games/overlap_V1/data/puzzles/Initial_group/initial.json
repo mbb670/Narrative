@@ -1,7 +1,6 @@
 [{
     "id": "Under the Surface",
     "type": "puzzle",
-    "palette": "greens",
     "words": [{
         "clue": "Fury",
         "answer": "ANGER",
@@ -31,7 +30,6 @@
   {
     "id": "Moving Parts",
     "type": "puzzle",
-    "palette": "greens",
     "words": [{
         "clue": "Representation",
         "answer": "MODEL",
@@ -61,7 +59,6 @@
   {
     "id": "Just Right",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Path around a planet",
         "answer": "ORBIT",
@@ -91,7 +88,6 @@
   {
     "id": "Quiet Company",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Backyard plot",
         "answer": "GARDEN",
@@ -121,7 +117,6 @@
   {
     "id": "Local Detail",
     "type": "puzzle",
-    "palette": "greens",
     "words": [{
         "clue": "Tiny screen dot",
         "answer": "PIXEL",
@@ -151,7 +146,6 @@
   {
     "id": "Hosted",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Milk container",
         "answer": "CARTON",
@@ -181,7 +175,6 @@
   {
     "id": "Mixed Signals",
     "type": "puzzle",
-    "palette": "greens",
     "words": [{
         "clue": "Soft fiber",
         "answer": "COTTON",
@@ -211,7 +204,6 @@
   {
     "id": "Keep It Down",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Ancient imprint",
         "answer": "FOSSIL",
@@ -241,7 +233,6 @@
   {
     "id": "Bounce Back",
     "type": "puzzle",
-    "palette": "sunrise",
     "words": [{
         "clue": "Corkscrew shape",
         "answer": "SPIRAL",
@@ -271,7 +262,6 @@
   {
     "id": "Bad Inbox",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Large body of water",
         "answer": "OCEAN",
@@ -301,7 +291,6 @@
   {
     "id": "Deep Cuts",
     "type": "puzzle",
-    "palette": "greens",
     "words": [{
         "clue": "Underground chamber",
         "answer": "CAVERN",
@@ -331,7 +320,6 @@
   {
     "id": "Points of Interest",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Bed cushion",
         "answer": "PILLOW",
@@ -361,7 +349,6 @@
   {
     "id": "On Target",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Blue-tinted metal",
         "answer": "COBALT",
@@ -391,7 +378,6 @@
   {
     "id": "Night Out",
     "type": "puzzle",
-    "palette": "sunrise",
     "words": [{
         "clue": "Bird of prey",
         "answer": "FALCON",
@@ -421,7 +407,6 @@
   {
     "id": "At the Horizon",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Distant line",
         "answer": "HORIZON",
@@ -451,7 +436,6 @@
   {
     "id": "Morning Routine",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Breakfast staple",
         "answer": "CEREAL",
@@ -481,7 +465,6 @@
   {
     "id": "Guided Tour",
     "type": "puzzle",
-    "palette": "greens",
     "words": [{
         "clue": "Admiration",
         "answer": "RESPECT",
@@ -511,7 +494,6 @@
   {
     "id": "Weatherproof",
     "type": "puzzle",
-    "palette": "classic",
     "words": [{
         "clue": "Wet-weather jacket",
         "answer": "RAINCOAT",

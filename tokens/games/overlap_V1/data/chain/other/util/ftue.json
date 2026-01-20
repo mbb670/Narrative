@@ -1,7 +1,6 @@
 [{
     "id": "FTUE",
     "type": "chain",
-    "palette": "greens",
     "words": [{
             "clue": "common greeting",
             "answer": "HELLO",
