@@ -13,7 +13,7 @@ body {
 }
 
 body {
-  background: var(--background-default);
+  /* background: var(--background-default); */
   color: var(--foreground-default);
   /*   margin: var(--layout-grid-margin); */
 }
