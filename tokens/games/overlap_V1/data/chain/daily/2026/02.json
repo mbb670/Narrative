@@ -1218,5 +1218,267 @@
                 "start": 64
             }
         ]
+    },
+    {
+        "id": "2026-02-15",
+        "words": [{
+                "clue": "Nutrient supplement",
+                "answer": "VITAMIN",
+                "start": 1
+            },
+            {
+                "clue": "Time unit: abbr",
+                "answer": "MINS",
+                "start": 5
+            },
+            {
+                "clue": "Within",
+                "answer": "INSIDE",
+                "start": 6
+            },
+            {
+                "clue": "Guarding against attack",
+                "answer": "DEFENSIVE",
+                "start": 10
+            },
+            {
+                "clue": "Calf meat",
+                "answer": "VEAL",
+                "start": 17
+            },
+            {
+                "clue": "Boston airport",
+                "answer": "LOGAN",
+                "start": 20
+            },
+            {
+                "clue": "Crew",
+                "answer": "GANG",
+                "start": 22
+            },
+            {
+                "clue": "Heavenly beings",
+                "answer": "ANGELS",
+                "start": 23
+            },
+            {
+                "clue": "Pleased",
+                "answer": "SATISFIED",
+                "start": 28
+            },
+            {
+                "clue": "Getting rid of",
+                "answer": "DISPOSAL",
+                "start": 36
+            },
+            {
+                "clue": "Discount event",
+                "answer": "SALE",
+                "start": 41
+            },
+            {
+                "clue": "Egyptian port city",
+                "answer": "ALEXANDRIA",
+                "start": 42
+            },
+            {
+                "clue": "Mideast native",
+                "answer": "ARAB",
+                "start": 51
+            },
+            {
+                "clue": "Plains bison",
+                "answer": "BUFFALO",
+                "start": 54
+            },
+            {
+                "clue": "Relax",
+                "answer": "LOUNGE",
+                "start": 59
+            },
+            {
+                "clue": "Taxonomy rank",
+                "answer": "GENUS",
+                "start": 63
+            },
+            {
+                "clue": "Small battle",
+                "answer": "SKIRMISH",
+                "start": 67
+            }
+        ]
+    },
+    {
+        "id": "2026-02-16",
+        "words": [{
+                "clue": "Day off work",
+                "answer": "HOLIDAY",
+                "start": 1
+            },
+            {
+                "clue": "24-hour spans",
+                "answer": "DAYS",
+                "start": 5
+            },
+            {
+                "clue": "Cruelly enjoying pain",
+                "answer": "SADISTIC",
+                "start": 8
+            },
+            {
+                "clue": "Big-top show",
+                "answer": "CIRCUS",
+                "start": 15
+            },
+            {
+                "clue": "Traditions",
+                "answer": "CUSTOMS",
+                "start": 18
+            },
+            {
+                "clue": "Unexpected obstacle",
+                "answer": "SETBACK",
+                "start": 24
+            },
+            {
+                "clue": "Tangle",
+                "answer": "KNOT",
+                "start": 30
+            },
+            {
+                "clue": "Zero",
+                "answer": "NOTHING",
+                "start": 31
+            },
+            {
+                "clue": "Snatch",
+                "answer": "GRAB",
+                "start": 37
+            },
+            {
+                "clue": "Mistreat",
+                "answer": "ABUSE",
+                "start": 39
+            },
+            {
+                "clue": "Aquatic mammals",
+                "answer": "SEALS",
+                "start": 42
+            },
+            {
+                "clue": "Ticket portion",
+                "answer": "STUB",
+                "start": 46
+            },
+            {
+                "clue": "Male siblings",
+                "answer": "BROS",
+                "start": 49
+            },
+            {
+                "clue": "___ Parks",
+                "answer": "ROSA",
+                "start": 50
+            },
+            {
+                "clue": "Quick raid",
+                "answer": "SALLY",
+                "start": 52
+            },
+            {
+                "clue": "Girl's name",
+                "answer": "LYDIA",
+                "start": 55
+            },
+            {
+                "clue": "Ordered lists",
+                "answer": "ARRAYS",
+                "start": 59
+            }
+        ]
+    },
+    {
+        "id": "2026-02-17",
+        "words": [{
+                "clue": "Changing position",
+                "answer": "SHIFTING",
+                "start": 1
+            },
+            {
+                "clue": "Pretense",
+                "answer": "GUISE",
+                "start": 8
+            },
+            {
+                "clue": "Financial",
+                "answer": "ECONOMIC",
+                "start": 12
+            },
+            {
+                "clue": "Potter's soil",
+                "answer": "CLAY",
+                "start": 19
+            },
+            {
+                "clue": "Stratum",
+                "answer": "LAYER",
+                "start": 20
+            },
+            {
+                "clue": "Make fresh again",
+                "answer": "RENEW",
+                "start": 24
+            },
+            {
+                "clue": "Ocean giant",
+                "answer": "WHALE",
+                "start": 28
+            },
+            {
+                "clue": "Trebek, say",
+                "answer": "ALEX",
+                "start": 30
+            },
+            {
+                "clue": "State clearly",
+                "answer": "EXPRESS",
+                "start": 32
+            },
+            {
+                "clue": "Work period",
+                "answer": "SHIFT",
+                "start": 38
+            },
+            {
+                "clue": "Road congestion",
+                "answer": "TRAFFIC",
+                "start": 42
+            },
+            {
+                "clue": "Made-up stories",
+                "answer": "FICTION",
+                "start": 46
+            },
+            {
+                "clue": "State of bliss",
+                "answer": "NIRVANA",
+                "start": 52
+            },
+            {
+                "clue": "Caucasus nation",
+                "answer": "AZERBAIJAN",
+                "start": 58
+            },
+            {
+                "clue": "Doe",
+                "answer": "JANE",
+                "start": 65
+            },
+            {
+                "clue": "Not one nor the other",
+                "answer": "NEITHER",
+                "start": 67
+            }
+        ]
     }
 ]

@@ -2149,8 +2149,6 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
 
           return {
               id: safeDateKey,
-              type: "chain",
-              palette: "greens",
               words: exportData
           };
       };

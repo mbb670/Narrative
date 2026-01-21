@@ -457,7 +457,8 @@ export function createSlider({
     let baseStops;
     let geometry;
 
-    const cacheKey = currentView === VIEW.PLAY ? `play-${pIdx}-${play.mode}` : null;
+    const cacheKey =
+      !allowSolved && currentView === VIEW.PLAY ? `play-${pIdx}-${play.mode}` : null;
 
     if (cacheKey && slider.cache?.key === cacheKey) {
       ({ runs, baseStops, geometry } = slider.cache);
