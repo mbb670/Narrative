@@ -23,10 +23,13 @@
 .card,
 .expander {
   position: relative;
-  border: 1px solid var(--border-subtle);
+  /* border: 1px solid var(--border-subtle); */
   border-radius: var(--radius-soft);
   overflow: hidden;
   background: var(--background-default);
+  /* background: color-mix(in srgb, var(--background-muted) 100%, var(--background-default)); */
+  border: 0.5px solid color-mix(in srgb, var(--border-subtle) 80%, white);
+
 
   /*   Styles from .text-system-regular-sm */
   font-size: var(--system-fontsize-sm);
