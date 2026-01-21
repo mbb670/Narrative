@@ -23,13 +23,13 @@ export const COLORS = [
 // Height cycle gives each word a stacking height for the layered "overlap" layout.
 export const HEIGHT_CYCLE = ["full", "mid", "inner"];
 
-// Game mode is per puzzle; view is the tab selection.
+// Game mode is per puzzle; view is the single layout selection.
 export const MODE = { PUZZLE: "puzzle", CHAIN: "chain" };
-export const VIEW = { PLAY: "play", CHAIN: "chain" };
+export const VIEW = { PLAY: "play" };
 
-// ---- Remember last tab/view ----
-export const LAST_VIEW_KEY = `${KEY}__last_view`;
+// ---- Archive return window ----
 export const ARCHIVE_RETURN_TIMEOUT_MS = 45 * 60 * 1000;
+export const ARCHIVE_RECENT_PLAY_TIMEOUT_MS = 12 * 60 * 60 * 1000;
 
 // URL flags used for debug, FTUE forcing, and splash suppression.
 export const DEV_MODE = (() => {
@@ -68,3 +68,5 @@ export const IS_IOS =
 
 export const FTUE_SEEN_KEY = `${KEY}__ftue_seen`;
 export const LAST_PLAYED_CHAIN_KEY = `${KEY}__last_chain_played`;
+export const LAST_SCREEN_KEY = `${KEY}__last_screen`;
+export const LAST_ARCHIVE_PLAYED_KEY = `${KEY}__last_archive_played`;

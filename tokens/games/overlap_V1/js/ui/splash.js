@@ -15,7 +15,8 @@ import {
 } from "../core/config.js";
 import {
   getLastPlayedChain,
-  isChainPuzzle,
+  getLastScreen,
+  setLastScreen,
   normalizePuzzleId,
   isDailyChainPuzzle,
 } from "../utils/index.js";
@@ -74,7 +75,7 @@ export function createSplash({
     const idx = typeof findTodayChainIndex === "function" ? findTodayChainIndex() : null;
     const puzzles = getPuzzleList();
     const p = idx != null ? puzzles[idx] : null;
-    if (!p || !isChainPuzzle(p)) return null;
+    if (!p) return null;
     const key = chainPuzzleKey(p);
     if (!key) return null;
     const store = loadChainProgressStore();
@@ -182,6 +183,7 @@ export function createSplash({
 
   function openSplash(forceState) {
     if (!els?.splash) return;
+    setLastScreen("splash");
     updateSplashContent(forceState);
     els.splash.hidden = false;
     els.splash.setAttribute("aria-hidden", "false");
@@ -195,6 +197,7 @@ export function createSplash({
 
   function closeSplash() {
     if (!els?.splash) return;
+    setLastScreen(null);
     els.splash.classList.remove("is-open");
     els.splash.setAttribute("aria-hidden", "true");
     els.splash.hidden = true;
@@ -215,7 +218,7 @@ export function createSplash({
 
     if (!seen) {
       // First-time: move to chain view in an idle state, then show FTUE (chain must not start yet)
-      if (typeof setTab === "function") setTab(VIEW.CHAIN);
+      if (typeof setTab === "function") setTab(VIEW.PLAY);
       if (typeof chainForceIdleZero === "function") chainForceIdleZero();
       chain.started = false;
       chain.running = false;
@@ -229,7 +232,7 @@ export function createSplash({
     }
 
     const state = splashState();
-    if (typeof setTab === "function") setTab(VIEW.CHAIN);
+    if (typeof setTab === "function") setTab(VIEW.PLAY);
     if (state === "complete") {
       closeSplash();
       return;
@@ -250,11 +253,30 @@ export function createSplash({
   function maybeShowSplashOnLoad() {
     if (splashShown || SUPPRESS_SPLASH) return;
     splashShown = true;
+    const now = Date.now();
+    const lastScreen = getLastScreen();
+    if (lastScreen?.screen === "splash") {
+      openSplash();
+      return;
+    }
+    if (lastScreen?.screen === "archive") {
+      const lastAt = Number.isFinite(lastScreen.at) ? lastScreen.at : null;
+      const withinArchiveWindow =
+        lastAt == null ? true : now - lastAt <= ARCHIVE_RETURN_TIMEOUT_MS;
+      if (withinArchiveWindow) {
+        if (typeof openArchiveModal === "function") {
+          openArchiveModal();
+          return;
+        }
+      } else {
+        setLastScreen(null);
+      }
+    }
     const last = getLastPlayedChain();
     const today = todayKey();
     const lastAt = Number.isFinite(last?.at) ? last.at : null;
     const withinArchiveWindow =
-      lastAt == null ? true : Date.now() - lastAt <= ARCHIVE_RETURN_TIMEOUT_MS;
+      lastAt == null ? true : now - lastAt <= ARCHIVE_RETURN_TIMEOUT_MS;
     // If the user last played a previous daily puzzle recently, jump into the archive.
     if (last?.isDate && last.id && today && last.id !== today && withinArchiveWindow) {
       if (typeof openArchiveModal === "function") {

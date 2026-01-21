@@ -6,13 +6,20 @@
  * Key interactions: Uses data/archive-data, data/store, view-state, and app callbacks.
  */
 // Archive modal for daily chain puzzles.
-import { DEV_MODE, IS_IOS, MODE, VIEW } from "../core/config.js";
+import {
+  ARCHIVE_RECENT_PLAY_TIMEOUT_MS,
+  DEV_MODE,
+  IS_IOS,
+  MODE,
+  VIEW,
+} from "../core/config.js";
 import {
   toDateKey,
   datePartsFromKey,
   normalizePuzzleId,
   isDailyChainPuzzle,
-  isChainPuzzle,
+  getLastArchivePlayed,
+  setLastScreen,
 } from "../utils/index.js";
 import { computed } from "../core/model.js";
 import { createArchiveData } from "../data/archive-data.js";
@@ -310,7 +317,7 @@ export function createArchiveUI({
   function ensurePuzzleInList(puzzle) {
     const puzzles = getPuzzleList();
     const id = normalizePuzzleId(puzzle).id;
-    const idx = puzzles.findIndex((p) => isChainPuzzle(p) && normalizePuzzleId(p).id === id);
+    const idx = puzzles.findIndex((p) => normalizePuzzleId(p).id === id);
     if (idx >= 0) return idx;
     if (typeof addPuzzle === "function") return addPuzzle(puzzle);
     puzzles.push(normPuzzle(puzzle));
@@ -329,6 +336,7 @@ export function createArchiveUI({
     const now = new Date();
     if (!els.archiveModal.hidden) return;
     if (els.splash && !els.splash.hidden && typeof closeSplash === "function") closeSplash();
+    setLastScreen("archive");
     els.archiveModal.hidden = false;
     els.archiveModal.setAttribute("aria-hidden", "false");
     // Lock scroll while modal is open.
@@ -338,7 +346,14 @@ export function createArchiveUI({
       document.body.style.touchAction = "none";
     }
     requestAnimationFrame(() => els.archiveModal?.classList.add("is-open"));
-    const dateKey = typeof opts.dateKey === "string" ? opts.dateKey : toDateKey(now);
+    const recentArchive = getLastArchivePlayed();
+    const recentAt = Number.isFinite(recentArchive?.at) ? recentArchive.at : null;
+    const recentDateKey =
+      recentArchive?.id &&
+      (recentAt == null || Date.now() - recentAt <= ARCHIVE_RECENT_PLAY_TIMEOUT_MS)
+        ? recentArchive.id
+        : null;
+    const dateKey = typeof opts.dateKey === "string" ? opts.dateKey : (recentDateKey || toDateKey(now));
     const parts = dateKey ? datePartsFromKey(dateKey) : null;
     const targetYear = parts?.year ?? now.getFullYear();
     const targetMonth = parts?.month ?? (now.getMonth() + 1);
@@ -347,6 +362,7 @@ export function createArchiveUI({
 
   function closeArchiveModal() {
     if (!els?.archiveModal) return;
+    setLastScreen(null);
     els.archiveModal.classList.remove("is-open");
     els.archiveModal.setAttribute("aria-hidden", "true");
     els.archiveModal.hidden = true;
@@ -419,7 +435,7 @@ export function createArchiveUI({
       const action = archiveState.selectedAction;
       const idx = ensurePuzzleInList(archiveState.selectedPuzzle);
       closeArchiveModal();
-      if (typeof setTab === "function") setTab(VIEW.CHAIN);
+      if (typeof setTab === "function") setTab(VIEW.PLAY);
       if (typeof loadPuzzle === "function") loadPuzzle(idx);
 
       const play = typeof getPlay === "function" ? getPlay() : null;

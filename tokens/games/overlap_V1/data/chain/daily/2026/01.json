@@ -1,6 +1,5 @@
 [{
         "id": "2026-01-01",
-        "type": "chain",
         "words": [{
                 "clue": "The universe in totality",
                 "answer": "COSMOS",
@@ -95,7 +94,6 @@
     },
     {
         "id": "2026-01-02",
-        "type": "chain",
         "words": [{
                 "clue": "Way through the woods",
                 "answer": "PATH",
@@ -185,7 +183,6 @@
     },
     {
         "id": "2026-01-03",
-        "type": "chain",
         "words": [{
                 "clue": "Apply color to a surface",
                 "answer": "PAINT",
@@ -280,7 +277,6 @@
     },
     {
         "id": "2026-01-04",
-        "type": "chain",
         "words": [{
                 "clue": "Painter's surface",
                 "answer": "CANVAS",
@@ -370,7 +366,6 @@
     },
     {
         "id": "2026-01-05",
-        "type": "chain",
         "words": [{
                 "clue": "A good rhythm",
                 "answer": "GROOVE",
@@ -460,7 +455,6 @@
     },
     {
         "id": "2026-01-06",
-        "type": "chain",
         "words": [{
                 "clue": "Set of connected parts",
                 "answer": "SYSTEM",
@@ -550,7 +544,6 @@
     },
     {
         "id": "2026-01-07",
-        "type": "chain",
         "words": [{
                 "clue": "Gone by",
                 "answer": "PAST",
@@ -640,7 +633,6 @@
     },
     {
         "id": "2026-01-08",
-        "type": "chain",
         "words": [{
                 "clue": "Washbowl",
                 "answer": "BASIN",
@@ -740,7 +732,6 @@
     },
     {
         "id": "2026-01-09",
-        "type": "chain",
         "words": [{
                 "clue": "Bus-and-train travel",
                 "answer": "TRANSIT",
@@ -830,7 +821,6 @@
     },
     {
         "id": "2026-01-10",
-        "type": "chain",
         "words": [{
                 "clue": "Secret ciphers",
                 "answer": "CODES",
@@ -925,7 +915,6 @@
     },
     {
         "id": "2026-01-11",
-        "type": "chain",
         "words": [{
                 "clue": "Unchanging",
                 "answer": "CONSTANT",
@@ -1020,7 +1009,6 @@
     },
     {
         "id": "2026-01-12",
-        "type": "chain",
         "words": [{
                 "clue": "Display at a museum",
                 "answer": "EXHIBIT",
@@ -1110,7 +1098,6 @@
     },
     {
         "id": "2026-01-13",
-        "type": "chain",
         "words": [{
                 "clue": "TV show",
                 "answer": "PROGRAM",
@@ -1200,7 +1187,6 @@
     },
     {
         "id": "2026-01-14",
-        "type": "chain",
         "words": [{
                 "clue": "Roman ruler",
                 "answer": "EMPEROR",
@@ -1290,7 +1276,6 @@
     },
     {
         "id": "2026-01-15",
-        "type": "chain",
         "words": [{
                 "clue": "Give chow to",
                 "answer": "FEED",
@@ -1381,7 +1366,6 @@
 
     {
         "id": "2026-01-16",
-        "type": "chain",
         "words": [{
                 "clue": "Scholarly book on one topic",
                 "answer": "MONOGRAPH",
@@ -1471,7 +1455,6 @@
     },
     {
         "id": "2026-01-17",
-        "type": "chain",
         "words": [{
                 "clue": "Internal body part",
                 "answer": "ORGAN",
@@ -1561,7 +1544,6 @@
     },
     {
         "id": "2026-01-18",
-        "type": "chain",
         "words": [{
                 "clue": "Notoriously bad",
                 "answer": "INFAMOUS",
@@ -1651,7 +1633,6 @@
     },
     {
         "id": "2026-01-19",
-        "type": "chain",
         "words": [{
                 "clue": "Split in two",
                 "answer": "DIVIDE",
@@ -1741,7 +1722,6 @@
     },
     {
         "id": "2026-01-20",
-        "type": "chain",
         "words": [{
                 "clue": "Grooming tool",
                 "answer": "BRUSH",
@@ -1831,7 +1811,6 @@
     },
     {
         "id": "2026-01-21",
-        "type": "chain",
         "words": [{
                 "clue": "Table supports",
                 "answer": "LEGS",
@@ -1921,7 +1900,6 @@
     },
     {
         "id": "2026-01-22",
-        "type": "chain",
         "words": [{
                 "clue": "Red-breasted bird",
                 "answer": "ROBIN",
@@ -2011,7 +1989,6 @@
     },
     {
         "id": "2026-01-23",
-        "type": "chain",
         "words": [{
                 "clue": "Matter at hand",
                 "answer": "ISSUE",
@@ -2101,7 +2078,6 @@
     },
     {
         "id": "2026-01-24",
-        "type": "chain",
         "words": [{
                 "clue": "Ireland's capital",
                 "answer": "DUBLIN",
@@ -2191,7 +2167,6 @@
     },
     {
         "id": "2026-01-25",
-        "type": "chain",
         "words": [{
                 "clue": "Legislative house",
                 "answer": "CHAMBER",
@@ -2281,7 +2256,6 @@
     },
     {
         "id": "2026-01-26",
-        "type": "chain",
         "words": [{
                 "clue": "Arrive",
                 "answer": "COME",
@@ -2366,7 +2340,6 @@
     },
     {
         "id": "2026-01-27",
-        "type": "chain",
         "words": [{
                 "clue": "Female horse",
                 "answer": "MARE",
@@ -2456,7 +2429,6 @@
     },
     {
         "id": "2026-01-28",
-        "type": "chain",
         "words": [{
                 "clue": "In a natural way",
                 "answer": "NATURALLY",
@@ -2546,7 +2518,6 @@
     },
     {
         "id": "2026-01-29",
-        "type": "chain",
         "words": [{
                 "clue": "EU money",
                 "answer": "EURO",
@@ -2636,7 +2607,6 @@
     },
     {
         "id": "2026-01-30",
-        "type": "chain",
         "words": [{
                 "clue": "Typical level",
                 "answer": "STANDARD",
@@ -2726,7 +2696,6 @@
     },
     {
         "id": "2026-01-31",
-        "type": "chain",
         "words": [{
                 "clue": "Art-show spaces",
                 "answer": "GALLERIES",

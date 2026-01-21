@@ -1,6 +1,5 @@
 [{
         "id": "2026-02-01",
-        "type": "chain",
         "words": [{
                 "clue": "Cereal seed",
                 "answer": "GRAIN",
@@ -90,7 +89,6 @@
     },
     {
         "id": "2026-02-02",
-        "type": "chain",
         "words": [{
                 "clue": "Pleasant smell",
                 "answer": "SCENT",
@@ -180,7 +178,6 @@
     },
     {
         "id": "2026-02-03",
-        "type": "chain",
         "words": [{
                 "clue": "Steep rock face",
                 "answer": "CLIFF",
@@ -270,7 +267,6 @@
     },
     {
         "id": "2026-02-04",
-        "type": "chain",
         "words": [{
                 "clue": "Reaction starter",
                 "answer": "CATALYST",
@@ -360,7 +356,6 @@
     },
     {
         "id": "2026-02-05",
-        "type": "chain",
         "words": [{
                 "clue": "Phone",
                 "answer": "CALL",
@@ -450,7 +445,6 @@
     },
     {
         "id": "2026-02-06",
-        "type": "chain",
         "words": [{
                 "clue": "School level",
                 "answer": "GRADE",
@@ -535,7 +529,6 @@
     },
     {
         "id": "2026-02-07",
-        "type": "chain",
         "words": [{
                 "clue": "Pre-made layout",
                 "answer": "TEMPLATE",
@@ -620,7 +613,6 @@
     },
     {
         "id": "2026-02-08",
-        "type": "chain",
         "words": [{
                 "clue": "Musical speed",
                 "answer": "TEMPO",
@@ -705,7 +697,6 @@
     },
     {
         "id": "2026-02-09",
-        "type": "chain",
         "words": [{
                 "clue": "Things",
                 "answer": "ITEMS",
@@ -790,7 +781,6 @@
     },
     {
         "id": "2026-02-10",
-        "type": "chain",
         "words": [{
                 "clue": "Estimate",
                 "answer": "GUESS",
@@ -875,7 +865,6 @@
     },
     {
         "id": "2026-02-11",
-        "type": "chain",
         "words": [{
                 "clue": "Brag",
                 "answer": "BOAST",
@@ -965,7 +954,6 @@
     },
     {
         "id": "2026-02-12",
-        "type": "chain",
         "words": [{
                 "clue": "Site mgr, briefly",
                 "answer": "ADMIN",
@@ -1055,7 +1043,6 @@
     },
     {
         "id": "2026-02-13",
-        "type": "chain",
         "words": [{
                 "clue": "Counterbalance",
                 "answer": "OFFSET",
@@ -1145,7 +1132,6 @@
     },
     {
         "id": "2026-02-14",
-        "type": "chain",
         "words": [{
                 "clue": "Unpredictable",
                 "answer": "ERRATIC",

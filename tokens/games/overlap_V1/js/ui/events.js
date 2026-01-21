@@ -66,6 +66,8 @@ export function bindGlobalEvents({
     const t = e.target;
     if (!isKeyboardInputTarget(t) && isEditable(t)) return;
 
+    if (typeof markInteracted === "function") markInteracted();
+
     if (isSelectAllUnlocked() && e.key !== "Backspace" && e.key !== "Delete") {
       clearSelectAll();
     }

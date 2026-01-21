@@ -6,7 +6,11 @@
  * Key interactions: Imported across most modules and app.js.
  */
 // Shared helpers for string normalization, bounds, IDs, and date parsing.
-import { MODE, LAST_PLAYED_CHAIN_KEY } from "../core/config.js";
+import {
+  LAST_PLAYED_CHAIN_KEY,
+  LAST_SCREEN_KEY,
+  LAST_ARCHIVE_PLAYED_KEY,
+} from "../core/config.js";
 
 export const cleanA = (s) => (s || "").toUpperCase().replace(/[^A-Z]/g, "");
 export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -25,7 +29,7 @@ export const tr = (w) => {
   return v;
 };
 
-export const isChainPuzzle = (p) => String(p?.type || MODE.PUZZLE) === MODE.CHAIN;
+export const isChainPuzzle = (p) => !!p;
 
 const DATE_ID_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -101,6 +105,32 @@ const normalizeIdCandidate = (val) => {
   return { id: raw, isDate: DATE_ID_RE.test(raw) };
 };
 
+export const getLastScreen = () => {
+  try {
+    const raw = localStorage.getItem(LAST_SCREEN_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== "object") return null;
+    const screen = String(data.screen || "").trim();
+    if (!screen) return null;
+    const at = Number.isFinite(+data.at) ? +data.at : null;
+    return { screen, at };
+  } catch {
+    return null;
+  }
+};
+
+export const setLastScreen = (screen) => {
+  const value = String(screen || "").trim();
+  try {
+    if (!value) {
+      localStorage.removeItem(LAST_SCREEN_KEY);
+      return;
+    }
+    localStorage.setItem(LAST_SCREEN_KEY, JSON.stringify({ screen: value, at: Date.now() }));
+  } catch {}
+};
+
 export const getLastPlayedChain = () => {
   try {
     const raw = localStorage.getItem(LAST_PLAYED_CHAIN_KEY);
@@ -147,6 +177,32 @@ export const normalizePuzzleId = (p) => {
 
 export const isDateId = (id) => DATE_ID_RE.test(String(id || "").trim());
 
+export const getLastArchivePlayed = () => {
+  try {
+    const raw = localStorage.getItem(LAST_ARCHIVE_PLAYED_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== "object") return null;
+    const id = String(data.id || "").trim();
+    if (!id) return null;
+    const at = Number.isFinite(+data.at) ? +data.at : null;
+    return { id, at };
+  } catch {
+    return null;
+  }
+};
+
+export const setLastArchivePlayed = (puzzleOrId) => {
+  const id =
+    typeof puzzleOrId === "string"
+      ? String(puzzleOrId || "").trim()
+      : normalizePuzzleId(puzzleOrId).id;
+  if (!id || !isDateId(id)) return;
+  try {
+    localStorage.setItem(LAST_ARCHIVE_PLAYED_KEY, JSON.stringify({ id, at: Date.now() }));
+  } catch {}
+};
+
 // Format a date-based puzzle ID for display.
 export const puzzleDateLabel = (p) => {
   const raw = typeof p === "string" ? p : p?.id;
@@ -168,5 +224,5 @@ export const puzzleLabel = (p) => {
   return id || "Untitled";
 };
 
-export const isDailyChainPuzzle = (p) => isChainPuzzle(p) && isDateId(p?.id);
-export const isCustomChainPuzzle = (p) => isChainPuzzle(p) && !isDateId(p?.id);
+export const isDailyChainPuzzle = (p) => isDateId(p?.id);
+export const isCustomChainPuzzle = (p) => !isDateId(p?.id);

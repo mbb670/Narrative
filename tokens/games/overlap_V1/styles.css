@@ -595,10 +595,6 @@ body[data-view="play"] {
         /* display: block; */
     }
 
-    .chainHud {
-        display: none;
-    }
-
     .meta {
         text-align: center;
     }
@@ -611,10 +607,6 @@ body[data-view="play"] {
     .puzzle-actions {
         justify-content: center;
     }
-}
-
-body[data-view="chain"] .chainHud {
-    display: flex !important;
 }
 
 /* -----------------------------
@@ -1321,6 +1313,7 @@ body[data-chain-state="done"] .rangeClue-content {
     }
 
     .chainHud {
+        display: flex;
         align-items: center;
         gap: var(--spacing-x8);
         justify-content: space-between;
@@ -1354,10 +1347,6 @@ body[data-chain-state="done"] .rangeClue-content {
 }
 
 body[data-view="play"] {
-    .chainTimerLabel {
-        display: none;
-    }
-
     #next,
     #prev {
         display: block;

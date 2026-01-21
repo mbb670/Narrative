@@ -6,30 +6,29 @@
  * Key interactions: Uses view-state, dom cache, and selection or hints.
  */
 // View filtering helpers for play vs chain puzzle lists.
-import { VIEW } from "../core/config.js";
 
 export function createViewHelpers({
   getPuzzles,
   getPuzzleIndex,
-  getCurrentView,
   loadPuzzle,
-  isChainPuzzle,
   isDailyChainPuzzle,
   toDateKey,
 } = {}) {
   const getList = () => (typeof getPuzzles === "function" ? (getPuzzles() || []) : []);
   const getIdx = () => (typeof getPuzzleIndex === "function" ? getPuzzleIndex() : 0);
-  const getView = () => (typeof getCurrentView === "function" ? getCurrentView() : VIEW.CHAIN);
 
-  // "Play" shows overlap puzzles; "Chain" shows chain puzzles (daily and custom).
-  function indicesForView(v = getView()) {
-    const wantChain = v === VIEW.CHAIN;
-    const out = [];
+  // Single unified view: return all puzzles in order.
+  function indicesForView() {
     const puzzles = getList();
+    const todayKey = toDateKey(new Date());
+    const out = [];
     for (let i = 0; i < puzzles.length; i++) {
       const p = puzzles[i];
-      const isCh = isChainPuzzle(p);
-      if (wantChain ? isCh : !isCh) out.push(i);
+      if (isDailyChainPuzzle(p)) {
+        if (todayKey && p?.id === todayKey) out.push(i);
+      } else {
+        out.push(i);
+      }
     }
     return out;
   }
@@ -47,7 +46,7 @@ export function createViewHelpers({
   }
 
   function loadByViewOffset(delta) {
-    const list = indicesForView(getView());
+    const list = indicesForView();
     if (!list.length) return;
 
     const pos = list.indexOf(getIdx());
@@ -58,26 +57,9 @@ export function createViewHelpers({
 
   // Ensure the currently loaded puzzle aligns with the selected tab.
   function ensureCurrentPuzzleMatchesView() {
-    const list = indicesForView(getView());
+    const list = indicesForView();
     if (!list.length) return false;
-    if (getView() === VIEW.CHAIN) {
-      const todayIdx = findTodayChainIndex();
-      if (todayIdx != null) {
-        if (getIdx() !== todayIdx) {
-          loadPuzzle(todayIdx);
-          return true;
-        }
-        return true;
-      }
-    }
     if (list.includes(getIdx())) return true;
-    if (getView() === VIEW.CHAIN) {
-      const todayIdx = findTodayChainIndex();
-      if (todayIdx != null) {
-        loadPuzzle(todayIdx);
-        return true;
-      }
-    }
     loadPuzzle(list[0]);
     return true;
   }

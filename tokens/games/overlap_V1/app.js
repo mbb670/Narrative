@@ -10,14 +10,13 @@
 import "../../docs/token_switcher/switcher.js";
 import {
   MODE,
-  LAST_VIEW_KEY,
 } from "./js/core/config.js";
 import {
   clamp,
   isEditable,
-  isChainPuzzle,
   toDateKey,
   setLastPlayedChain,
+  setLastArchivePlayed,
   puzzleDateLabel,
   puzzleLabel,
   isDailyChainPuzzle,
@@ -402,6 +401,8 @@ const sliderUI = createSlider({
   isAutoCheckEnabled,
 });
 
+const chainSessionRef = { markSessionActive: () => {} };
+
 // ---- Touch + on-screen keyboard ----
 // Handles hidden input for mobile typing and a custom on-screen keyboard on touch.
 const IS_TOUCH = "ontouchstart" in window || navigator.maxTouchPoints > 0;
@@ -415,7 +416,7 @@ const keyboardUI = createKeyboard({
   isTouch: IS_TOUCH,
 });
 const {
-  markInteracted,
+  markInteracted: markInteractedRaw,
   focusForTyping,
   initOnScreenKeyboard,
   updateKeyboardVisibility,
@@ -425,6 +426,10 @@ const {
   isKeyboardInputTarget,
   blurKeyboardInput,
 } = keyboardUI;
+const markInteracted = (...args) => {
+  markInteractedRaw(...args);
+  chainSessionRef.markSessionActive();
+};
 
 // ---- Model ---- (js/core/model.js)
 
@@ -452,6 +457,7 @@ const {
   maybePersistFromTick,
   clearRestoreState,
   getRestoreState,
+  markSessionActive,
 } = createChainPersistence({
   getPlay: () => play,
   getChain: () => chain,
@@ -472,6 +478,7 @@ const {
   hintPenaltySec: HINT_PENALTY_SEC,
   isAutoCheckEnabled,
 });
+chainSessionRef.markSessionActive = markSessionActive;
 
 
 // ---- Selection highlight ----
@@ -690,9 +697,7 @@ const {
 } = createViewHelpers({
   getPuzzles: () => puzzles,
   getPuzzleIndex: () => pIdx,
-  getCurrentView: () => currentView,
   loadPuzzle,
-  isChainPuzzle,
   isDailyChainPuzzle,
   toDateKey,
 });
@@ -713,7 +718,6 @@ const playActions = createPlayActions({
   normPuzzle,
   setStatus,
   setCols,
-  isChainPuzzle,
   puzzleLabel,
   puzzleDateLabel,
   isArchiveDailyPuzzle,
@@ -795,11 +799,9 @@ const tabManager = createTabs({
   els,
   getPlay: () => play,
   getChain: () => chain,
-  getCurrentView: () => currentView,
   setCurrentView: (view) => {
     currentView = view;
   },
-  lastViewKey: LAST_VIEW_KEY,
   updateKeyboardVisibility,
   ensureCurrentPuzzleMatchesView,
   sliderUI,
@@ -984,11 +986,17 @@ bindControlEvents({
 // Initialize UI and load the initial puzzle/view.
 initOnScreenKeyboard();
 sliderUI.initSlider();
-loadPuzzle(0);
+const todayIdx = findTodayChainIndex();
+loadPuzzle(todayIdx != null ? todayIdx : 0, { skipLastPlayed: true });
 setTab(currentView);
 queueInitialHintIntro();
 maybeShowFtue();
 maybeShowSplashOnLoad();
+const currentPuzzle = puzzles[pIdx];
+setLastPlayedChain(currentPuzzle);
+if (typeof isArchiveDailyPuzzle === "function" && isArchiveDailyPuzzle(currentPuzzle)) {
+  setLastArchivePlayed(currentPuzzle);
+}
 
 requestAnimationFrame(() => {
   const restoreState = getRestoreState();

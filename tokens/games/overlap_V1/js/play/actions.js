@@ -7,6 +7,7 @@
  */
 // Core play actions (cursor movement, typing, reset/load).
 import { MODE } from "../core/config.js";
+import { setLastArchivePlayed, setLastPlayedChain } from "../utils/index.js";
 
 export function createPlayActions({
   els,
@@ -22,7 +23,6 @@ export function createPlayActions({
   normPuzzle,
   setStatus,
   setCols,
-  isChainPuzzle,
   puzzleLabel,
   puzzleDateLabel,
   isArchiveDailyPuzzle,
@@ -377,7 +377,8 @@ export function createPlayActions({
     updatePlayControlsVisibility();
   }
 
-  function loadPuzzle(i) {
+  function loadPuzzle(i, opts = {}) {
+    const { skipLastPlayed = false } = opts;
     const play = getPlay();
     const puzzles = getPuzzles();
     closeSuccess();
@@ -393,6 +394,12 @@ export function createPlayActions({
     puzzles[nextIdx] = normPuzzle(puzzles[nextIdx]);
 
     const p = puzzles[nextIdx];
+    if (!skipLastPlayed) {
+      setLastPlayedChain(p);
+      if (typeof isArchiveDailyPuzzle === "function" && isArchiveDailyPuzzle(p)) {
+        setLastArchivePlayed(p);
+      }
+    }
     applyPaletteToDom(p.palette);
     const m = computed(p);
     setStatus(m);

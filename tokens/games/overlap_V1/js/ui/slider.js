@@ -511,7 +511,7 @@ export function createSlider({
   function updateSliderUI() {
     if (!slider.root || !slider.track) return;
     const currentView = getCurrentView();
-    const isPlayableView = currentView === VIEW.CHAIN || currentView === VIEW.PLAY;
+    const isPlayableView = currentView === VIEW.PLAY;
     const overflow = isPlayableView && els.gridScroll && els.gridScroll.scrollWidth > els.gridScroll.clientWidth + 4;
     slider.root.style.display = overflow ? "" : "none";
     if (!overflow) return;

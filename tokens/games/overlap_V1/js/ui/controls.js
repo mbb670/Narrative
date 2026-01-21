@@ -153,7 +153,7 @@ export function bindControlEvents({
       // Always jump into chain play on final CTA
       const summary = chainProgressSummary();
       closeFtue();
-      setTab(VIEW.CHAIN);
+      setTab(VIEW.PLAY);
       if (summary.state === "complete" || play.done) {
         chain.running = false;
         chain.started = true;
@@ -168,7 +168,7 @@ export function bindControlEvents({
   els.ftueSkip?.addEventListener("click", (e) => {
     e.preventDefault();
     closeFtue();
-    setTab(VIEW.CHAIN);
+    setTab(VIEW.PLAY);
     const summary = chainProgressSummary();
     if (summary.state === "complete" || play.done) {
       chain.running = false;

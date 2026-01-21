@@ -40,6 +40,7 @@ export function createChainPersistence({
   let persistTickLastTs = 0;
   let restoredFromStorage = false;
   let restoredAt = 0;
+  let sessionActive = false;
 
   const formatTime = typeof fmtTime === "function"
     ? fmtTime
@@ -118,7 +119,7 @@ export function createChainPersistence({
     const store = loadChainProgressStore();
     store.puzzles[snap.puzzleKey] = snap;
     saveChainProgressStore(store);
-    if (typeof setLastPlayedChain === "function") setLastPlayedChain(p);
+    if (snap.started && sessionActive && typeof setLastPlayedChain === "function") setLastPlayedChain(p);
     persistTickLastTs = performance.now ? performance.now() : Date.now();
   }
 
@@ -245,5 +246,8 @@ export function createChainPersistence({
     maybePersistFromTick,
     clearRestoreState,
     getRestoreState,
+    markSessionActive: () => {
+      sessionActive = true;
+    },
   };
 }

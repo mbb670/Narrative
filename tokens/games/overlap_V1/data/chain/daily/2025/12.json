@@ -1,7 +1,6 @@
 [
     {
     "id": "2025-12-17",
-    "type": "chain",
     "words": [{
         "clue": "Middle Eastern ruler",
         "answer": "SULTAN",
@@ -90,7 +89,6 @@
   },
   {
     "id": "2025-12-18",
-    "type": "chain",
     "words": [{
         "clue": "Rock",
         "answer": "STONE",
@@ -179,7 +177,6 @@
   },
   {
     "id": "2025-12-19",
-    "type": "chain",
     "words": [{
         "clue": "Low on iron, say",
         "answer": "ANEMIC",
@@ -262,7 +259,6 @@
   },
   {
     "id": "2025-12-20",
-    "type": "chain",
     "words": [{
         "clue": "Permanently frozen ground",
         "answer": "PERMAFROST",
@@ -351,7 +347,6 @@
   },
   {
     "id": "2025-12-21",
-    "type": "chain",
     "words": [{
         "clue": "Season of snow",
         "answer": "WINTER",
@@ -452,7 +447,6 @@
   },
   {
     "id": "2025-12-22",
-    "type": "chain",
     "words": [{
         "clue": "Midday summer snooze",
         "answer": "SIESTA",
@@ -631,7 +625,6 @@
   },
   {
     "id": "2025-12-23",
-    "type": "chain",
     "words": [{
         "clue": "Spy, perhaps",
         "answer": "AGENT",
@@ -756,7 +749,6 @@
   },
   {
     "id": "2025-12-24",
-    "type": "chain",
     "words": [{
         "clue": "Whole bread unit",
         "answer": "LOAF",
@@ -846,7 +838,6 @@
   },
   {
     "id": "2025-12-25",
-    "type": "chain",
     "words": [{
         "clue": "Nature buff",
         "answer": "NATURALIST",
@@ -931,7 +922,6 @@
   },
   {
     "id": "2025-12-26",
-    "type": "chain",
     "words": [{
         "clue": "Spaghetti, for one",
         "answer": "PASTA",
@@ -1050,7 +1040,6 @@
   },
   {
     "id": "2025-12-27",
-    "type": "chain",
     "words": [{
         "clue": "Way to obtain or enter.",
         "answer": "ACCESS",
@@ -1160,7 +1149,6 @@
   },
   {
     "id": "2025-12-28",
-    "type": "chain",
     "words": [{
         "clue": "Baja California's country",
         "answer": "MEXICO",
@@ -1260,7 +1248,6 @@
   },
   {
     "id": "2025-12-29",
-    "type": "chain",
     "words": [{
         "clue": "Capital of India",
         "answer": "DELHI",
@@ -1355,7 +1342,6 @@
   },
   {
     "id": "2025-12-30",
-    "type": "chain",
     "words": [{
         "clue": "A long religious journey",
         "answer": "PILGRIMAGE",
@@ -1460,7 +1446,6 @@
   },
   {
     "id": "2025-12-31",
-    "type": "chain",
     "words": [{
         "clue": "Expel a foreigner",
         "answer": "DEPORT",

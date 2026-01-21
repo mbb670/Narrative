@@ -5,16 +5,14 @@
  * How: Binds tab buttons and persists state via view-state.
  * Key interactions: Uses view-state and dom cache.
  */
-// Tab switching helpers for play/chain views.
+// Tab switching helpers (single unified view).
 import { VIEW } from "../core/config.js";
 
 export function createTabs({
   els,
   getPlay,
   getChain,
-  getCurrentView,
   setCurrentView,
-  lastViewKey,
   updateKeyboardVisibility,
   ensureCurrentPuzzleMatchesView,
   sliderUI,
@@ -28,7 +26,6 @@ export function createTabs({
 } = {}) {
   const getPlaySafe = typeof getPlay === "function" ? getPlay : () => null;
   const getChainSafe = typeof getChain === "function" ? getChain : () => null;
-  const getViewSafe = typeof getCurrentView === "function" ? getCurrentView : () => null;
   const setViewSafe = typeof setCurrentView === "function" ? setCurrentView : () => {};
   const updateKeyboard = typeof updateKeyboardVisibility === "function" ? updateKeyboardVisibility : () => {};
   const ensurePuzzleView =
@@ -43,19 +40,15 @@ export function createTabs({
   const setChainUI = typeof chainSetUIState === "function" ? chainSetUIState : () => {};
   const ensureTick = typeof ensureChainTick === "function" ? ensureChainTick : () => {};
   const chainStates = chainUiStates || { IDLE: "idle", RUNNING: "running", PAUSED: "paused", DONE: "done" };
-  const viewKey = typeof lastViewKey === "string" ? lastViewKey : null;
 
-  // Switch between play and chain views (affects puzzle list and UI).
+  // Single view: always set play view for layout hooks.
   function setTab(which) {
-    if (which !== VIEW.PLAY && which !== VIEW.CHAIN) which = VIEW.CHAIN;
-    setViewSafe(which);
-    try {
-      if (viewKey) localStorage.setItem(viewKey, which);
-    } catch {}
+    const next = VIEW.PLAY;
+    setViewSafe(next);
 
     // "view" controls which puzzle list is active and which UI elements are visible.
     // Global hook for CSS
-    if (document?.body) document.body.dataset.view = which; // "play" | "chain"
+    if (document?.body) document.body.dataset.view = next;
 
     els?.panelPlay?.classList.toggle("is-active", true);
 

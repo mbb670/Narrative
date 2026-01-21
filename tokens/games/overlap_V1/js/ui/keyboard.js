@@ -298,7 +298,7 @@ export function createKeyboard({
     if (!root) return;
 
     const currentView = getView();
-    const show = shouldUseCustomKeyboard() && (currentView === VIEW.PLAY || currentView === VIEW.CHAIN);
+    const show = shouldUseCustomKeyboard() && currentView === VIEW.PLAY;
 
     root.classList.toggle("is-visible", show);
     root.setAttribute("aria-hidden", show ? "false" : "true");
