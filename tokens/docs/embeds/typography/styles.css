@@ -55,8 +55,13 @@
     padding-inline: var(--spacing-x16);
   }
 
-  .grid {
-    margin: var(--spacing-x16);
+  /* .grid { */
+    /* margin: var(--spacing-x16); */
+  /* } */
+
+  h2{
+    border-radius: var(--radius-soft);
+    margin-bottom: var(--spacing-x12);
   }
 
 

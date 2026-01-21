@@ -3,5 +3,7 @@ import "../../swatch_maker/swatch_maker.js";
 import "../../typographic_styles/typography.js";
 
 window.tokenSwapDefaults = {
-  breakpoint: "mobile"
+  breakpoint: "mobile",
+  colorTheme: "slate"
+  // fontTheme: "opinion"
 };

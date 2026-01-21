@@ -1,6 +1,10 @@
 import "../../token_switcher/switcher.js";
 import "../../swatch_maker/swatch_maker.js";
 
+// window.tokenSwapDefaults = {
+//     colorTheme: "slate"
+// };
+
 (() => {
   const ATTR = "data-swap-allow";
   const VALUE = "mode colorTheme";

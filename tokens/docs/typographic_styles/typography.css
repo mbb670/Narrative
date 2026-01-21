@@ -25,12 +25,15 @@
 .text-container {
   border: 1px solid var(--border-subtle);
   overflow: hidden;
-
   border-radius: var(--radius-relaxed);
 
-  .grid {
+  border:unset;
+  border-radius: var(--radius-relaxed) var(--radius-relaxed) 0 0;
+ box-shadow: unset!important;
+
+  /* .grid {
     margin: var(--spacing-x24);
-  }
+  } */
 
   p {
     color: var(--foreground-subtle);
