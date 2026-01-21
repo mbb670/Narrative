@@ -19,6 +19,7 @@ export function createFtue({
   chainSetUIState,
   chainUiStates,
   chainProgressSummary,
+  isAutoCheckEnabled,
 } = {}) {
   const getPuzzlesSafe = typeof getPuzzles === "function" ? getPuzzles : () => [];
   const compute = typeof computed === "function" ? computed : () => null;
@@ -26,6 +27,8 @@ export function createFtue({
   const clampSafe = typeof clamp === "function" ? clamp : (v, min, max) => Math.min(max, Math.max(min, v));
   const getPlaySafe = typeof getPlay === "function" ? getPlay : () => null;
   const getChainSafe = typeof getChain === "function" ? getChain : () => null;
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
   const setChainUI = typeof chainSetUIState === "function" ? chainSetUIState : () => {};
   const chainStates = chainUiStates || { IDLE: "idle", RUNNING: "running", PAUSED: "paused", DONE: "done" };
   const getChainSummary =
@@ -138,7 +141,7 @@ export function createFtue({
           summary.state === "complete"
             ? "Admire puzzle"
             : summary.state === "paused"
-            ? `Continue puzzle (${solved}/${total})`
+            ? (autoCheckEnabled() ? `Continue puzzle (${solved}/${total})` : "Continue puzzle")
             : "Let's Play";
       }
       els.ftueNext.textContent = label;

@@ -34,6 +34,7 @@ export function createChainPersistence({
   setAt,
   scrollActiveCellAfterRestore,
   hintPenaltySec,
+  isAutoCheckEnabled,
 } = {}) {
   let persistChainRaf = 0;
   let persistTickLastTs = 0;
@@ -53,6 +54,8 @@ export function createChainPersistence({
   const getChainState = () => (typeof getChain === "function" ? getChain() : null);
   const getPuzzleList = () => (typeof getPuzzles === "function" ? getPuzzles() : []);
   const getPuzzleIndexSafe = () => (typeof getPuzzleIndex === "function" ? getPuzzleIndex() : 0);
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
   // Serialize the current chain state for persistence (including penalties + locks).
   function chainProgressSnapshot(p) {
@@ -78,6 +81,8 @@ export function createChainPersistence({
       started: !!(chain.started || play.done || hasInput),
       done: !!play.done,
       revealed: !!play.revealed,
+      autoCheckEverOn: !!play.autoCheckEverOn,
+      hardModeComplete: !!play.hardModeComplete,
       lockedEntries: [...play.lockedEntries], // word-level locks
       lockedCells: Array.isArray(play.lockedCells) ? play.lockedCells.slice(0, play.n) : [], // per-cell locks (hints)
       hintsUsed: chain.hintsUsed || 0,
@@ -164,6 +169,9 @@ export function createChainPersistence({
     play.at = clamp(data.at ?? 0, 0, Math.max(0, play.n - 1));
     play.done = !!data.done;
     play.revealed = !!data.revealed;
+    const restoredAutoCheckEverOn = data.autoCheckEverOn != null ? !!data.autoCheckEverOn : true;
+    play.autoCheckEverOn = restoredAutoCheckEverOn || autoCheckEnabled();
+    play.hardModeComplete = !!data.hardModeComplete;
 
     chain.started = !!(data.started || play.done || play.usr.some(Boolean));
     chain.running = false;
@@ -172,6 +180,7 @@ export function createChainPersistence({
     chain.left = 0;
     chain.lastFinishElapsedSec = Math.max(0, +data.lastFinishElapsedSec || 0);
     chain.unsolvedCount = Math.max(0, +data.unsolvedCount || 0);
+    chain.hardModeComplete = !!data.hardModeComplete;
     chain.hintsUsed = Math.max(0, +data.hintsUsed || 0);
     chain.hintPenaltySecTotal = Math.max(
       0,

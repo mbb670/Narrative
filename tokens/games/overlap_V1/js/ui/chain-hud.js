@@ -246,6 +246,7 @@ export function createChainHud({
     chain.unsolvedCount = 0;
     chain.lastFinishReason = "idle";
     chain.hintsUsed = 0;
+    chain.hardModeComplete = false;
     if (chain.tickId) {
       clearInterval(chain.tickId);
       chain.tickId = 0;

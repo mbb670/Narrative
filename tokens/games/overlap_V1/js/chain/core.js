@@ -129,6 +129,9 @@ export function createChainCore({
     play.done = true;
     chain.unsolvedCount = unsolved;
     chain.lastFinishReason = reason;
+    const hardModeComplete = reason === "solved" && play.autoCheckEverOn === false;
+    play.hardModeComplete = hardModeComplete;
+    chain.hardModeComplete = hardModeComplete;
     if (typeof chainSetUIState === "function") chainSetUIState(states.DONE);
     if (typeof updatePlayUI === "function") updatePlayUI();
 

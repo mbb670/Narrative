@@ -19,8 +19,11 @@ export function createCellUI({
   updatePlayControlsVisibility,
   updateSelectAllUI,
   toasts,
+  isAutoCheckEnabled,
 } = {}) {
   const getPlayState = () => (typeof getPlay === "function" ? getPlay() : null);
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
   // Render letters, active state, and cell classes based on current play state.
   function updatePlayUI() {
@@ -37,6 +40,7 @@ export function createCellUI({
       // are still correct but visually distinct while a word finishes locking in.
       const fullySolved =
         play.mode === MODE.CHAIN &&
+        autoCheckEnabled() &&
         wordsHere.length > 0 &&
         typeof isWordCorrect === "function" &&
         wordsHere.every((w) => isWordCorrect(w));

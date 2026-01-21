@@ -8,7 +8,6 @@
 // Chain progress + stats persistence for per-puzzle storage.
 import { KEY, MODE } from "../core/config.js";
 import {
-  isChainPuzzle,
   isDateId,
   normalizePuzzleId,
   puzzleWordSignature,
@@ -29,7 +28,7 @@ export const todayKey = () => toDateKey(new Date());
 
 // Use puzzle ID + word signature to create a stable key even if ordering changes.
 export function chainPuzzleKey(p) {
-  if (!p || !isChainPuzzle(p)) return null;
+  if (!p) return null;
   const wordSig = puzzleWordSignature(p);
   const id = normalizePuzzleId(p).id || "no-id";
   return `${MODE.CHAIN}||${id}||${wordSig || "words"}`;

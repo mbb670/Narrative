@@ -12,6 +12,7 @@ import { dateFromKey, puzzleLabel } from "../utils/index.js";
 export function createShareUI({
   getPuzzles,
   getPuzzleIndex,
+  getPlay,
   getChain,
   fmtTime,
   toasts,
@@ -29,6 +30,7 @@ export function createShareUI({
   function shareResult({ mode, linkOnly = false, toastEl = null }) {
     const puzzles = typeof getPuzzles === "function" ? (getPuzzles() || []) : [];
     const pIdx = typeof getPuzzleIndex === "function" ? getPuzzleIndex() : 0;
+    const play = typeof getPlay === "function" ? getPlay() : null;
     const chain = typeof getChain === "function" ? (getChain() || {}) : {};
     const puzzle = puzzles[pIdx];
 
@@ -66,7 +68,8 @@ export function createShareUI({
     if (!linkOnly && mode === MODE.CHAIN) {
       const elapsed = Math.max(0, +chain.lastFinishElapsedSec || 0);
       const timeText = formatTime(elapsed);
-      if (timeText) msg += `\nI solved the puzzle in ${timeText}`;
+      const hardModeComplete = !!(play?.hardModeComplete || chain?.hardModeComplete);
+      if (timeText) msg += `\nI solved the puzzle in ${timeText}${hardModeComplete ? " in hard mode" : ""}`;
       const hints = Math.max(0, chain.hintsUsed || 0);
       const hintLabel = hints === 1 ? "hint" : "hints";
       if (chain.unsolvedCount > 0 && chain.lastFinishReason !== "solved") {

@@ -8,11 +8,13 @@
 // Toast helpers for game feedback.
 import { MODE } from "../core/config.js";
 
-export function createToasts({ els, getPlay, isWordCorrect }) {
+export function createToasts({ els, getPlay, isWordCorrect, isAutoCheckEnabled }) {
   // Toasts are timed UI messages; we track timers per type to avoid overlap flicker.
   const toastTimers = { success: 0, warning: 0, error: 0, hint: 0 };
   let resultsToastTimer = 0;
   const inlineToastTimers = new WeakMap();
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
   // Parse CSS custom properties that store durations (ms).
   function parseMsVar(val, fallback) {
@@ -34,6 +36,12 @@ export function createToasts({ els, getPlay, isWordCorrect }) {
   function updateWordSolvedCount(message) {
     const targets = document.querySelectorAll(".word-solved-count");
     if (!targets.length) return;
+    if (!autoCheckEnabled()) {
+      targets.forEach((el) => {
+        el.textContent = "Hard mode";
+      });
+      return;
+    }
     const play = getPlay();
     let text = message;
     if (!text) {
@@ -62,6 +70,7 @@ export function createToasts({ els, getPlay, isWordCorrect }) {
     const el = map[type];
     if (!el) return;
     if (type === "wordSolved") {
+      if (!autoCheckEnabled()) return;
       updateWordSolvedCount(message);
     } else if (type === "hint") {
       const penaltyEl = el.querySelector("#hintPenalty");

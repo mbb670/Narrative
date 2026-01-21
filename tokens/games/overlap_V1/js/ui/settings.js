@@ -8,7 +8,7 @@
 // Settings panel + color mode persistence.
 import { KEY } from "../core/config.js";
 
-export function createSettingsUI({ els } = {}) {
+export function createSettingsUI({ els, onAutoCheckChange } = {}) {
   // Settings panel is a simple show/hide container.
   const isSettingsPanelOpen = () => !!els?.settingsPanel && !els.settingsPanel.hidden;
   function openSettingsPanel() {
@@ -35,6 +35,7 @@ export function createSettingsUI({ els } = {}) {
   // Color mode persists per user and respects system preference for auto.
   const COLOR_MODE_KEY = `${KEY}__color_mode`;
   const ONSCREEN_KB_KEY = `${KEY}__show_onscreen_keyboard`;
+  const AUTOCHECK_KEY = `${KEY}__auto_check`;
   const COLOR_MODE_AUTO = "auto";
   const COLOR_MODE_LIGHT = "light";
   const COLOR_MODE_DARK = "dark";
@@ -42,6 +43,7 @@ export function createSettingsUI({ els } = {}) {
   const colorModeTabs = Array.from(document.querySelectorAll(".settings-color-mode .tab[data-mode]"));
   const prefersColorQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
   let currentColorMode = COLOR_MODE_AUTO;
+  let autoCheckEnabled = true;
 
   // Resolve "auto" to the current system preference.
   function resolveAutoColorMode() {
@@ -53,6 +55,18 @@ export function createSettingsUI({ els } = {}) {
     const resolved = mode === COLOR_MODE_AUTO ? resolveAutoColorMode() : mode;
     if (!resolved) return;
     document.documentElement.setAttribute("data-mode", resolved);
+  }
+
+  function applyAutoCheck(enabled) {
+    if (!document.body) return;
+    document.body.dataset.autocheck = enabled ? "true" : "false";
+    document.body.classList.toggle("autocheck", enabled);
+    document.querySelectorAll(".word-solved-count").forEach((el) => {
+      el.textContent = enabled ? "" : "Hard mode";
+    });
+    if (!enabled) {
+      els?.toastWordSolved?.classList.remove("is-showing");
+    }
   }
 
   // Update tab UI to reflect the current selection.
@@ -77,12 +91,35 @@ export function createSettingsUI({ els } = {}) {
     }
   }
 
+  function setAutoCheck(enabled, { persist = true, notify = true } = {}) {
+    autoCheckEnabled = !!enabled;
+    applyAutoCheck(autoCheckEnabled);
+    if (els?.autoCheckToggle) els.autoCheckToggle.checked = autoCheckEnabled;
+    if (notify && typeof onAutoCheckChange === "function") {
+      onAutoCheckChange(autoCheckEnabled);
+    }
+    if (persist) {
+      try {
+        localStorage.setItem(AUTOCHECK_KEY, autoCheckEnabled ? "1" : "0");
+      } catch {}
+    }
+  }
+
   function loadColorMode() {
     let saved = null;
     try {
       saved = localStorage.getItem(COLOR_MODE_KEY);
     } catch {}
     setColorMode(saved || COLOR_MODE_AUTO, { persist: false });
+  }
+
+  function loadAutoCheckPref() {
+    let saved = null;
+    try {
+      saved = localStorage.getItem(AUTOCHECK_KEY);
+    } catch {}
+    const enabled = saved == null ? true : saved === "1";
+    setAutoCheck(enabled, { persist: false, notify: false });
   }
 
   // Restore user preference for the on-screen keyboard.
@@ -111,6 +148,9 @@ export function createSettingsUI({ els } = {}) {
         if (enabled) localStorage.setItem(ONSCREEN_KB_KEY, "1");
         else localStorage.removeItem(ONSCREEN_KB_KEY);
       } catch {}
+    });
+    els?.autoCheckToggle?.addEventListener("change", (e) => {
+      setAutoCheck(!!e.target.checked);
     });
     document.addEventListener("pointerdown", (e) => {
       if (!isSettingsPanelOpen()) return;
@@ -141,6 +181,7 @@ export function createSettingsUI({ els } = {}) {
   function init() {
     bindEvents();
     loadColorMode();
+    loadAutoCheckPref();
     loadOnscreenKeyboardPref();
   }
 
@@ -152,6 +193,9 @@ export function createSettingsUI({ els } = {}) {
     applyColorMode,
     setColorMode,
     loadColorMode,
+    isAutoCheckEnabled: () => autoCheckEnabled,
+    setAutoCheck,
+    loadAutoCheckPref,
     loadOnscreenKeyboardPref,
     init,
   };

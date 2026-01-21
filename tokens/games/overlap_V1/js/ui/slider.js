@@ -18,7 +18,10 @@ export function createSlider({
   getCurrentView,
   isWordCorrect,
   isUserPanning,
+  isAutoCheckEnabled,
 }) {
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
   // The slider mirrors horizontal grid scroll and provides a quick scrub control.
   // It renders an SVG capsule with thick/thin segments (unsolved/solved).
   const SLIDER_CFG = {
@@ -447,7 +450,7 @@ export function createSlider({
     const currentView = getCurrentView();
 
     // In chain view, allow solved cells to thin out the slider (visual progress).
-    const allowSolved = play.mode === MODE.CHAIN && currentView === VIEW.CHAIN;
+    const allowSolved = play.mode === MODE.CHAIN && autoCheckEnabled();
     const solvedCells = allowSolved ? computeSolvedCells() : null;
 
     let runs;

@@ -17,8 +17,11 @@ export function createChainLocks({
   getSelectedEntry,
   clearSelection,
   requestPersistChainProgress,
+  isAutoCheckEnabled,
 } = {}) {
   const getPlayState = () => (typeof getPlay === "function" ? getPlay() : null);
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
   // In chain mode, correct words lock and become non-editable.
   function isCellLocked(i) {
@@ -134,6 +137,7 @@ export function createChainLocks({
   function chainApplyLocksIfEnabled() {
     const play = getPlayState();
     if (!play || play.mode !== MODE.CHAIN) return;
+    if (!autoCheckEnabled()) return;
 
     let changed = false;
     const newlyLocked = [];

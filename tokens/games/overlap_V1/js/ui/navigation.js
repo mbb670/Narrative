@@ -16,8 +16,11 @@ export function createNavigation({
   showRangeFocusForEntry,
   clamp,
   logNav,
+  isAutoCheckEnabled,
 } = {}) {
   const log = typeof logNav === "function" ? logNav : () => {};
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
   function entryContainsIndex(e, i) {
     return i >= e.start && i < e.start + e.len;
@@ -219,7 +222,9 @@ export function createNavigation({
     for (const w of sorted) {
       const pos = idx - w.start + 1;
       const status =
-        play.mode === MODE.CHAIN ? (play.lockedEntries?.has(w.eIdx) ? "solved" : "unsolved") : "";
+        play.mode === MODE.CHAIN && autoCheckEnabled()
+          ? (play.lockedEntries?.has(w.eIdx) ? "solved" : "unsolved")
+          : "";
       const clue = w.clue || "Clue";
       parts.push(`${clue}, cell ${pos} of ${w.len}${status ? `, ${status}` : ""}`);
     }

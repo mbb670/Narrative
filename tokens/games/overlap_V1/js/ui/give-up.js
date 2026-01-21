@@ -13,6 +13,7 @@ export function createGiveUpModal({
   getUnsolvedWords,
   getUnsolvedLetters,
   hintPenaltySec = 0,
+  isAutoCheckEnabled,
 } = {}) {
   const formatTime = typeof fmtTime === "function"
     ? fmtTime
@@ -26,6 +27,8 @@ export function createGiveUpModal({
   const getWords = typeof getUnsolvedWords === "function" ? getUnsolvedWords : () => 0;
   const getLetters = typeof getUnsolvedLetters === "function" ? getUnsolvedLetters : () => 0;
   const penaltyPerLetter = Number.isFinite(hintPenaltySec) ? hintPenaltySec : 0;
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
   // Shows penalty summary before revealing chain answers.
   function openGiveUpModal() {
@@ -34,6 +37,7 @@ export function createGiveUpModal({
     const unsolvedLetters = Math.max(0, getLetters() || 0);
     const penaltySec = unsolvedLetters * penaltyPerLetter;
 
+    if (els.giveUpUnsolvedLine) els.giveUpUnsolvedLine.hidden = !autoCheckEnabled();
     if (els.giveUpWordsCount) els.giveUpWordsCount.textContent = String(unsolvedWords).padStart(2, "0");
     if (els.giveUpWordLabel) els.giveUpWordLabel.textContent = unsolvedWords === 1 ? "word" : "words";
     if (els.giveUpSeconds) els.giveUpSeconds.textContent = formatTime(penaltySec);

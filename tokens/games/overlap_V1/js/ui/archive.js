@@ -32,6 +32,7 @@ export function createArchiveUI({
   chainStartNow,
   chainResume,
   fmtTime,
+  isAutoCheckEnabled,
 } = {}) {
   const formatTime = typeof fmtTime === "function"
     ? fmtTime
@@ -41,6 +42,8 @@ export function createArchiveUI({
         const rem = s % 60;
         return `${String(m).padStart(2, "0")}:${String(rem).padStart(2, "0")}`;
       };
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
   // Daily puzzle archive with month navigation and resume/admire actions.
   const ARCHIVE_MONTH_LABELS = [
@@ -171,6 +174,7 @@ export function createArchiveUI({
         if (data?.done) state = "complete";
         else if (data?.started || hasInput) state = "progress";
         else state = "not-started";
+        if (data?.done && data?.hardModeComplete) btn.dataset.hardMode = "true";
       }
 
       const isPlayable = hasPuzzle && (!isFuture || DEV_MODE);
@@ -245,7 +249,7 @@ export function createArchiveUI({
     } else if (data?.started || hasInput) {
       archiveState.selectedAction = "continue";
       if (label) label.textContent = "Continue puzzle";
-      if (meta) meta.textContent = `(${solved}/${total})`;
+      if (meta) meta.textContent = autoCheckEnabled() ? `(${solved}/${total})` : "";
     } else {
       archiveState.selectedAction = "play";
       if (label) label.textContent = "Play";

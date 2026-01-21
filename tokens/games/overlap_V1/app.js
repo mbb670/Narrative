@@ -104,6 +104,9 @@ const chainFinish = (...args) => chainCoreRef.chainFinish(...args);
 const chainMaybeFinishIfSolved = (...args) => chainCoreRef.chainMaybeFinishIfSolved(...args);
 const chainInputAllowed = (...args) => chainCoreRef.chainInputAllowed(...args);
 
+const autoCheckRef = { current: () => true };
+const isAutoCheckEnabled = () => autoCheckRef.current();
+
 const chainAutoRef = {
   findNextEditable: () => null,
   chooseAutoAdvanceTarget: () => ({ target: null, suppress: false }),
@@ -152,6 +155,7 @@ const toasts = createToasts({
   els,
   getPlay: () => play,
   isWordCorrect,
+  isAutoCheckEnabled,
 });
 let updatePlayUIImpl = () => {};
 const updatePlayUI = (...args) => updatePlayUIImpl(...args);
@@ -222,7 +226,18 @@ const setLastChainWarningKey = (key) => {
 const getLastPlayWarningKey = () => lastPlayWarningKey;
 const getLastChainWarningKey = () => lastChainWarningKey;
 
-const settingsUI = createSettingsUI({ els });
+const settingsUI = createSettingsUI({
+  els,
+  onAutoCheckChange: (enabled) => {
+    if (!play || play.done) return;
+    if (enabled) {
+      play.autoCheckEverOn = true;
+      play.hardModeComplete = false;
+      requestPersistChainProgress?.();
+    }
+  },
+});
+autoCheckRef.current = () => settingsUI.isAutoCheckEnabled?.() ?? true;
 
 // ---- Splash ---- (js/ui/splash.js)
 let splashUI = null;
@@ -239,6 +254,7 @@ const { closeSuccess, setResultsInert } = createResultsUI({ els });
 const { shareResult } = createShareUI({
   getPuzzles: () => puzzles,
   getPuzzleIndex: () => pIdx,
+  getPlay: () => play,
   getChain: () => chain,
   fmtTime,
   toasts,
@@ -276,6 +292,7 @@ const archiveUI = createArchiveUI({
   chainStartNow,
   chainResume,
   fmtTime,
+  isAutoCheckEnabled,
 });
 const { openArchiveModal, isArchiveDailyPuzzle } = archiveUI;
 
@@ -357,6 +374,8 @@ const play = {
   done: false,
   revealed: false,
   fullSolveAnimated: false,
+  autoCheckEverOn: false,
+  hardModeComplete: false,
 
   lockedCells: [],
   lockedEntries: new Set(), // eIdx
@@ -380,6 +399,7 @@ const sliderUI = createSlider({
   getCurrentView: () => currentView,
   isWordCorrect,
   isUserPanning: () => panState.isUserPanning,
+  isAutoCheckEnabled,
 });
 
 // ---- Touch + on-screen keyboard ----
@@ -450,6 +470,7 @@ const {
   setAt,
   scrollActiveCellAfterRestore,
   hintPenaltySec: HINT_PENALTY_SEC,
+  isAutoCheckEnabled,
 });
 
 
@@ -481,6 +502,7 @@ const chainLocks = createChainLocks({
   getSelectedEntry,
   clearSelection,
   requestPersistChainProgress,
+  isAutoCheckEnabled,
 });
 Object.assign(chainLockRef, chainLocks);
 
@@ -520,6 +542,7 @@ const {
   getChain: () => chain,
   isCellLocked,
   isWordCorrect,
+  isAutoCheckEnabled,
   clearSelectAll,
   addTimePenalty,
   rebuildLockedCells,
@@ -553,6 +576,7 @@ const {
   showRangeFocusForEntry,
   clamp,
   logNav,
+  isAutoCheckEnabled,
 });
 
 const chainAuto = createChainAutoAdvance({
@@ -577,6 +601,7 @@ const cellUI = createCellUI({
   updatePlayControlsVisibility,
   updateSelectAllUI,
   toasts,
+  isAutoCheckEnabled,
 });
 updatePlayUIImpl = cellUI.updatePlayUI;
 
@@ -601,6 +626,7 @@ ftueUI = createFtue({
   chainSetUIState,
   chainUiStates: CHAIN_UI,
   chainProgressSummary,
+  isAutoCheckEnabled,
 });
 
 const gridInteractions = createGridInteractions({
@@ -650,6 +676,7 @@ const giveUpUI = createGiveUpModal({
   getUnsolvedWords: countUnsolvedWords,
   getUnsolvedLetters: countUnsolvedLetters,
   hintPenaltySec: HINT_PENALTY_SEC,
+  isAutoCheckEnabled,
 });
 
 const { openGiveUpModal, closeGiveUpModal } = giveUpUI;
@@ -739,6 +766,7 @@ const playActions = createPlayActions({
   maybeToastPlayFilledWrong,
   setInlineCluesHiddenUntilChainStart,
   renderGrid,
+  isAutoCheckEnabled,
 });
 Object.assign(playActionsRef, playActions);
 
@@ -760,6 +788,7 @@ splashUI = createSplash({
   chainStartNow,
   chainResume,
   openArchiveModal,
+  isAutoCheckEnabled,
 });
 
 const tabManager = createTabs({
@@ -801,6 +830,7 @@ const chain = {
   hintsUsed: 0,
   hintPenaltySecTotal: 0,
   wordPenaltySecTotal: 0,
+  hardModeComplete: false,
 };
 
 

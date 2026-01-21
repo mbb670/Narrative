@@ -161,9 +161,9 @@
       <div class="result-heading">
         <h2 class="text-headline-semibold-lg">Give up?</h2>
         <p class="resultsSubtitle giveUpSubtitle">
-          You still have
-          <span class="giveUpWordsCount">00</span>
-          unsolved <span class="giveUpWordLabel">words</span>.
+          <span class="giveUpUnsolvedLine">You still have
+            <span class="giveUpWordsCount">00</span>
+            unsolved <span class="giveUpWordLabel">words</span>.</span>
           Giving up will add
           <span class="giveUpSeconds">00</span>
           to your total time.
@@ -292,12 +292,12 @@
             </div>
             <div class="settings-panel__section">
               <div>
-                <div>Hard Mode</div>
-                <div class="settings-panel__desc text-system-regular-sm">Correct answers aren't confirmed as you type
-                </div>
-                <div class="text-system-regular-xs coming-soon">Coming Soon!</div>
+                <div>Autocheck</div>
+                <div class="settings-panel__desc text-system-regular-sm">Lock and confirm correct words as you type</div>
               </div>
-              <div class="toggle" aria-hidden="true">
+              <div class="switch">
+                <input class="switch__input" type="checkbox" id="autoCheckToggle" role="switch" />
+                <label class="toggle" for="autoCheckToggle"></label>
               </div>
             </div>
             <div class="settings-panel__section">
@@ -351,7 +351,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V4.03</span>
+            id="splashVersion">V4.1</span>
         </p>
       </footer>
     </div>

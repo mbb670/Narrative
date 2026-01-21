@@ -44,8 +44,11 @@ export function createSplash({
   chainStartNow,
   chainResume,
   openArchiveModal,
+  isAutoCheckEnabled,
 } = {}) {
   let splashShown = false;
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
   const getPlayState = () => (typeof getPlay === "function" ? getPlay() : null);
   const getChainState = () => (typeof getChain === "function" ? getChain() : null);
@@ -143,7 +146,9 @@ export function createSplash({
       state === "complete"
         ? "Admire puzzle"
         : state === "paused"
-        ? `Continue puzzle (${solved}/${total || play?.entries?.length || 0})`
+        ? autoCheckEnabled()
+          ? `Continue puzzle (${solved}/${total || play?.entries?.length || 0})`
+          : "Continue puzzle"
         : "Play";
 
     if (els.splashPrimary) els.splashPrimary.textContent = primaryLabel;

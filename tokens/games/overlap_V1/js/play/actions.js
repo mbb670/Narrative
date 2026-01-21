@@ -75,7 +75,10 @@ export function createPlayActions({
   maybeToastPlayFilledWrong,
   setInlineCluesHiddenUntilChainStart,
   renderGrid,
+  isAutoCheckEnabled,
 } = {}) {
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
   function updateArchiveDateBanner(p = getPuzzles()[getPuzzleIndex()]) {
     if (!els.archiveDate) return;
     const show = isArchiveDailyPuzzle(p);
@@ -323,6 +326,8 @@ export function createPlayActions({
     play.done = false;
     play.revealed = false;
     play.fullSolveAnimated = false;
+    play.autoCheckEverOn = autoCheckEnabled();
+    play.hardModeComplete = false;
     resetToastGuards();
     toasts.clearToasts();
     clearSelectAll();
@@ -392,7 +397,8 @@ export function createPlayActions({
     const m = computed(p);
     setStatus(m);
 
-    play.mode = isChainPuzzle(p) ? MODE.CHAIN : MODE.PUZZLE;
+    // Unified play mode: treat all puzzles like chain while modes are simplified.
+    play.mode = MODE.CHAIN;
     play.entries = m.entries;
 
     setCols(m.total);
@@ -404,6 +410,8 @@ export function createPlayActions({
     play.done = false;
     play.revealed = false;
     play.fullSolveAnimated = false;
+    play.autoCheckEverOn = autoCheckEnabled();
+    play.hardModeComplete = false;
     resetToastGuards();
     toasts.clearToasts();
     clearSelectAll();

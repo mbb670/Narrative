@@ -692,7 +692,11 @@ body[data-chain-state="done"] .rangeClue-content {
         }
     }
 }
-
+[data-autocheck="false"]{
+.word-solved-count{
+    color: var(--foreground-disabled);
+}
+}
 
 /* Scroller only wraps puzzle */
 .gridScroll {
@@ -1998,20 +2002,22 @@ Archive
         display: block;
         border-radius: var(--radius-default);
         margin-bottom: var(--spacing-x8);
-        outline: 1px solid;
         position: relative;
+        outline: 1px solid var(--icon-color);
+        background-color: var(--meta-background-color);
 
         &::before {
 
             content: '';
-
             position: absolute;
             top: 50%;
             left: 50%;
             width: 40%;
             transform: translate(-50%, -50%);
             aspect-ratio: 1;
-
+            background-color: var(--icon-color);
+            -webkit-mask: var(--icon) center / contain no-repeat;
+            mask: var(--icon) center / contain no-repeat;
         }
     }
 
@@ -2041,59 +2047,47 @@ Archive
                 background-color: var(--opacity-lighten-subtle);
                 outline: 1px solid var(--opacity-lighten-muted);
             }
-
         }
-
     }
 
     [data-state="complete"] {
-        .archive-day-meta {
-            outline-color: var(--system-positive-default);
-
-            &::before {
-                background-color: var(--system-positive-default);
-            }
-
-        }
-
+        --icon-color: var(--system-positive-default);
     }
+    [data-hard-mode="true"] {
+    --meta-background-color: var(--system-warning-muted);
+}
 
 }
 
+[data-state="not-started"] {
+    .archive-day-meta {
+        &::before {
+            display: none;
+        }
+    }
+}
 
 [data-state="not-started"],
 [data-state="progress"] {
-    .archive-day-meta {
-        background-color: var(--system-informative-subtle);
-        outline-color: var(--system-informative-default);
-    }
+    --icon-color: var(--system-informative-default);
+    --meta-background-color: var(--system-informative-subtle);
 }
 
 [data-state="progress"] {
-    .archive-day-meta {
-        &::before {
-            background-color: var(--system-informative-default);
-            -webkit-mask: url("images/in-progress.svg") center / contain no-repeat;
-            mask: url("images/in-progress.svg") center / contain no-repeat;
-            margin-left: unset;
-        }
-    }
+    --icon: url("images/in-progress.svg");
 }
 
 [data-state="complete"] {
-    color: var(--foreground-subtle);
+    color: var(--foreground-subtle)!important;
+    --icon: url("images/check-solid.svg");
+    --icon-color: var(--system-positive-muted);
+    --meta-background-color: var(--system-positive-subtle);
+}
 
-    .archive-day-meta {
-        background-color: var(--system-positive-subtle);
-        outline-color: var(--system-positive-muted);
-
-        &::before {
-            background-color: var(--system-positive-muted);
-            -webkit-mask: url("images/check-solid.svg") center / contain no-repeat;
-            mask: url("images/check-solid.svg") center / contain no-repeat;
-            margin-left: unset;
-        }
-    }
+[data-hard-mode="true"] {
+    --icon: url("images/star.svg");
+    --icon-color: var(--system-warning-default)!important;
+    --meta-background-color: var(--system-warning-subtle);
 }
 
 .is-empty {

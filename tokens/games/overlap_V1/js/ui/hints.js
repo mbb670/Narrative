@@ -14,6 +14,7 @@ export function createHints({
   getChain,
   isCellLocked,
   isWordCorrect,
+  isAutoCheckEnabled,
   clearSelectAll,
   addTimePenalty,
   rebuildLockedCells,
@@ -55,6 +56,8 @@ export function createHints({
     if (!e) return false;
     return i >= e.start && i < e.start + e.len;
   };
+  const autoCheckEnabled =
+    typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
   function setHintDisplay(rc, visible) {
     const hint = rc?.querySelector(".rangeClue-hint");
@@ -280,7 +283,7 @@ export function createHints({
       addTimePenalty(hintPenalty, "hint");
 
       let lockedByHint = false;
-      if (isWordCorrect(entry)) {
+      if (autoCheckEnabled() && isWordCorrect(entry)) {
         lockedByHint = !play.lockedEntries.has(entry.eIdx);
         play.lockedEntries.add(entry.eIdx);
         rebuildLockedCells();
