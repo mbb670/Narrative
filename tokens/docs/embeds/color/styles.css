@@ -51,6 +51,8 @@ body {
   .card,
   .expander {
     display: flex;
+    background: white;
+     border-color: #D6D6D6!important;
 
     .info {
       width: 100%;
@@ -63,6 +65,11 @@ body {
       border: unset;
       border-right: 1px solid var(--border-subtle);
     }
+
+    .token{
+      background-color: #F5F5F5!important;
+      border-color: #D6D6D6!important;
+    }
   }
 }
 
@@ -74,6 +81,16 @@ body {
 
 .token-swap {
   margin: unset;
+  background-color: #F5F5F5;
+  border-color: #D6D6D6!important;
+  *{
+    border-color: #D6D6D6!important;
+  }
+}
+  #switch-theme{
+    [aria-checked="true"]{
+    background: #D6D6D6!important;
+  }
 }
 
 .format-switcher {
