@@ -76,7 +76,8 @@ export function createKeyboard({
   // Focus the appropriate input target (stage or hidden input).
   const focusForTyping = () => {
     if (!hasInteracted) return;
-    if (!els?.panelPlay || !els.panelPlay.classList.contains("is-active")) return;
+    const currentView = getView();
+    if (currentView && currentView !== VIEW.PLAY) return;
     if (!document.hasFocus()) return;
 
     const a = document.activeElement;

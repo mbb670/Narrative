@@ -53,17 +53,6 @@ export function bindControlEvents({
   clearAllChainProgress,
   clearChainStats,
 } = {}) {
-  // Prev/Next
-  els.prev.addEventListener("click", () => {
-    if (play.mode === MODE.CHAIN) chainForceIdleZero();
-    loadByViewOffset(-1);
-  });
-
-  els.next.addEventListener("click", () => {
-    if (play.mode === MODE.CHAIN) chainForceIdleZero();
-    loadByViewOffset(1);
-  });
-
   // Reset / Reveal
   els.reset.addEventListener("click", () => {
     resetPlay();

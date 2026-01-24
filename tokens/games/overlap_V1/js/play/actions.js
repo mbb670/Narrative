@@ -16,14 +16,12 @@ export function createPlayActions({
   getPuzzles,
   getPuzzleIndex,
   setPuzzleIndex,
-  getCurrentView,
   clamp,
   applyPaletteToDom,
   computed,
   normPuzzle,
   setStatus,
   setCols,
-  puzzleLabel,
   puzzleDateLabel,
   isArchiveDailyPuzzle,
   updatePlayUI,
@@ -67,7 +65,6 @@ export function createPlayActions({
   addTimePenalty,
   hintPenaltySec,
   pulseRangeHintIntro,
-  indicesForView,
   closeSuccess,
   closeChainResults,
   resetToastGuards,
@@ -449,16 +446,6 @@ export function createPlayActions({
       pulseRangeHintIntro();
     }
     updateResetRevealVisibility();
-
-    const list = indicesForView(getCurrentView());
-    const pos = list.indexOf(nextIdx);
-    const posText = list.length ? `${(pos >= 0 ? pos : 0) + 1} / ${list.length}` : `1 / ${puzzles.length}`;
-
-    els.meta.replaceChildren(
-      document.createTextNode(puzzleLabel(p)),
-      document.createTextNode(" "),
-      Object.assign(document.createElement("span"), { textContent: `• ${posText}` })
-    );
 
     updateArchiveDateBanner(p);
     updatePlayUI();

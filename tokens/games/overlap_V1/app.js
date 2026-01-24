@@ -18,7 +18,6 @@ import {
   setLastPlayedChain,
   setLastArchivePlayed,
   puzzleDateLabel,
-  puzzleLabel,
   isDailyChainPuzzle,
 } from "./js/utils/index.js";
 import { applyPaletteToDom } from "./js/core/palette.js";
@@ -713,14 +712,12 @@ const playActions = createPlayActions({
   setPuzzleIndex: (idx) => {
     pIdx = idx;
   },
-  getCurrentView: () => currentView,
   clamp,
   applyPaletteToDom,
   computed,
   normPuzzle,
   setStatus,
   setCols,
-  puzzleLabel,
   puzzleDateLabel,
   isArchiveDailyPuzzle,
   updatePlayUI,
@@ -764,7 +761,6 @@ const playActions = createPlayActions({
   addTimePenalty,
   hintPenaltySec: HINT_PENALTY_SEC,
   pulseRangeHintIntro,
-  indicesForView,
   closeSuccess,
   closeChainResults,
   resetToastGuards,

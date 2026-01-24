@@ -6,31 +6,25 @@
     display: none;
 }
 
-
-
 :root {
     --grid-line: var(--border-subtle);
-    --cols: 10;
     --border-w: var(--unit-2);
 
-    --letter: 62cqmin;
-    --range-clue-size: 45cqmin;
-
     --cell: clamp(56px, 8vw, 96px);
+    --cell-letter-placement: 4/6;
+    --letter: 62cqmin;
+
     --range-radius: var(--radius-relaxed);
     --range-transparency-pc: 10%;
-
+    --range-clue-size: 45cqmin;
 
     --grid-top-space: var(--unit-32);
     --grid-letter-space: var(--spacing-x144);
     --grid-bottom-space: var(--spacing-x12);
 
-    --cell-letter-placement: 4/6;
-
     --slider-solved: var(--background-medium);
     --slider-color-mix-base: var(--background-default);
     --slider-color-mix-amount: 50;
-
 }
 
 @media (max-width:640px) {
@@ -123,16 +117,7 @@ body {
     position: relative;
     height: 100vh;
     height: 100svh;
-    /* -webkit-user-select: none; */
     -webkit-tap-highlight-color: transparent;
-}
-
-button {
-    touch-action: manipulation;
-}
-
-.wrap {
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -160,7 +145,6 @@ Logo Design
 
     &::before,
     &::after {
-
         content: '';
         width: 70%;
         aspect-ratio: 1;
@@ -197,9 +181,7 @@ Logo Design
     }
 }
 
-
 .logo-icon-animation {
-
     &::before,
     &::after {
         animation: logoAnimation 8s ease-in-out infinite alternate both;
@@ -251,6 +233,9 @@ Logo Design
 /* -----------------------------
 Interactive elements
 ----------------------------- */
+button {
+    touch-action: manipulation;
+}
 
 .tabs {
     padding: var(--unit-6);
@@ -269,9 +254,8 @@ Interactive elements
     border-radius: var(--radius-default);
 }
 
-
 /* Base (shared) */
-:is(.tab, .pill, .btn) {
+:is(.tab, .btn) {
     --background-color: transparent;
     border: 1px solid var(--border-subtle);
     padding: var(--spacing-x8) var(--spacing-x12);
@@ -312,9 +296,7 @@ Interactive elements
     }
 }
 
-/* Tabs + pills */
-.tab,
-.pill {
+.tab {
     border: 0;
     height: var(--unit-32);
     padding-inline: var(--spacing-x8);
@@ -333,19 +315,6 @@ Interactive elements
         &::after {
             background-color: var(--foreground-default) !important;
         }
-    }
-}
-
-.pill {
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--border-subtle);
-    color: var(--foreground-muted);
-
-    &.is-hot {
-        border-color: var(--border-strong);
-        --background-color: var(--background-strong);
-        color: var(--foreground-alt);
     }
 }
 
@@ -455,83 +424,17 @@ header {
     }
 }
 
-.builder-toggle {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-x2);
-
-    button {
-        padding: var(--unit-10);
-    }
-
-    #builderOpen {
-        --icon: url("images/builder-icon.svg");
-        --icon-color: var(--foreground-disabled);
-    }
-
-    #builderClose {
-        --icon: url("images/close.svg");
-        --icon-color: var(--foreground-disabled);
-    }
-}
 
 #pClear {
     display: none;
 }
 
-.is-dev #pClear {
-    display: block;
-}
-
-/* Prev / Next arrows */
-#prev,
-#next {
-    span {
-        display: none;
-    }
-
-    &::before,
-    &::after {
-        display: block;
-        width: var(--spacing-x16);
-        aspect-ratio: 1;
-        background-color: var(--foreground-disabled);
-        -webkit-mask: url("images/arrow.svg") center / contain no-repeat;
-        mask: url("images/arrow.svg") center / contain no-repeat;
-    }
-}
-
-#prev {
-    &::before {
-        content: "";
-        rotate: 180deg;
-    }
-}
-
-#next {
-    &::after {
-        content: "";
-    }
-}
-
-
-.panel {
-    display: none;
-    flex-grow: 1;
-    flex-direction: column;
-}
-
-.panel.is-active {
-    display: block;
-
-}
-
-#panelBuild {
-    padding: var(--layout-grid-margin);
-}
+/* -----------------------------
+Main Stage
+----------------------------- */
 
 .stage {
+    flex-grow: 1;
     margin-inline: auto;
     height: 100%;
     place-content: center;
@@ -545,74 +448,7 @@ header {
     &:focus {
         outline: none;
     }
-
 }
-
-.game-data {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* margin: var(--spacing-x16) var(--layout-grid-margin) var(--spacing-x4); */
-    height: var(--unit-48);
-    max-width: var(--layout-content-md-max);
-    /* width: 100%; */
-    gap: var(--spacing-x16);
-
-    /* box-sizing: border-box; */
-    padding-inline: var(--layout-grid-margin);
-    align-self: center;
-
-    .puzzle-cycle {
-        display: flex;
-        place-items: center;
-        gap: var(--spacing-x12);
-        margin: 0 auto;
-    }
-
-    .meta {
-        color: var(--foreground-muted);
-        flex: 1;
-        text-wrap: nowrap;
-        display: none;
-
-        span {
-            color: var(--foreground-subtle);
-        }
-    }
-
-    #prev,
-    #next {
-        display: none;
-    }
-
-    display: none;
-}
-
-
-body[data-view="play"] {
-    .game-data {
-        margin-bottom: 0;
-        /* display: block; */
-    }
-
-    .meta {
-        text-align: center;
-    }
-
-    #prev,
-    #next {
-        display: block;
-    }
-
-    .puzzle-actions {
-        justify-content: center;
-    }
-}
-
-/* -----------------------------
-Word Chain HUD (start + timer)
------------------------------ */
-
 
 
 body[data-chain-state="paused"] .rangeClue {

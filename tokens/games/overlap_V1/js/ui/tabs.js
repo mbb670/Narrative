@@ -51,8 +51,6 @@ export function createTabs({
     // Global hook for CSS
     if (document?.body) document.body.dataset.view = next;
 
-    els?.panelPlay?.classList.toggle("is-active", true);
-
     updateKeyboard();
 
     if (!skipEnsure) ensurePuzzleView();

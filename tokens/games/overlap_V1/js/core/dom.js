@@ -10,13 +10,9 @@ const $ = (s) => document.querySelector(s);
 
 export const els = {
   logo: $("#logo"),
-  panelPlay: $("#panelPlay"),
   stage: $("#stage"),
   gridScroll: $("#gridScroll"),
   grid: $("#grid"),
-  meta: $("#meta"),
-  prev: $("#prev"),
-  next: $("#next"),
   reset: $("#reset"),
   reveal: $("#reveal"),
   resultsModal: document.getElementById("results"),

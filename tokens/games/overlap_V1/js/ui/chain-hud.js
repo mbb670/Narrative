@@ -94,8 +94,8 @@ export function createChainHud({
     const hud = document.querySelector(".chainHud");
     if (!hud) return null;
 
-    const host = els?.helper || els?.meta?.parentElement || document.body;
-    // Ensure the HUD lives near the meta/helper region for consistent layout.
+    const host = els?.helper || document.body;
+    // Ensure the HUD lives near the helper region for consistent layout.
     if (host && hud.parentElement !== host) host.appendChild(hud);
 
     const startBtn = hud.querySelector("#chainStartBtn");

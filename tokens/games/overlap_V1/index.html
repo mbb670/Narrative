@@ -26,7 +26,7 @@
 
 
   <header>
-    <section class="header-content">
+    <div class="header-content">
       <div class="logo logo-hover" id="logo">
         <div class="logo-icon">
         </div>
@@ -51,64 +51,50 @@
         </div>
         <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
       </div>
-    </section>
+    </div>
   </header>
 
-  <!-- PLAY -->
-  <section class="panel is-active" id="panelPlay" role="tabpanel" aria-labelledby="tabPlay">
+  <!-- Main Stage -->
+  <section class="stage" id="stage" tabindex="0" role="application" aria-label="Overlap puzzle">
     <p id="archiveDate" class="text-system-regular-sm" hidden></p>
-    <div class="stage" id="stage" tabindex="0" role="application" aria-label="Overlap puzzle">
-      <div class="game-data">
-        <div class="puzzle-cycle">
-          <button class="pill text-system-semibold-sm" id="prev" type="button"><span>Prev</span></button>
-          <div class="meta text-system-semibold-sm" id="meta"></div>
+    
+    <div class="gridScroll" id="gridScroll">
+      <div class="grid" id="grid" aria-describedby="sr"></div>
 
-          <button class="pill text-system-semibold-sm" id="next" type="button"><span>Next</span></button>
-        </div>
+      <div class="toast-stack text-system-semibold-sm" aria-live="polite" aria-atomic="true">
+        <div class="toast toast-success elevation-fixed-top" id="toastSuccess" role="status">🎉 Success! You solved
+          the puzzle!</div>
+        <div class="toast toast-warning elevation-fixed-top" id="toastWarning" role="status">Not quite! Some or all
+          words are incorrect</div>
+        <div class="toast toast-danger elevation-fixed-top" id="toastError" role="status">Puzzle not complete!</div>
+        <div class="toast toast-hint elevation-fixed-top" id="toastHint" role="status">+<span id="hintPenalty">00</span>
+          seconds</div>
+        <div class="toast toast-error elevation-fixed-top" id="toastError-puzzle" role="status"><span>Puzzle broken -
+            Contact Matt & let him know!</span><span class="text-system-regular-xs" id="status"></span></div>
       </div>
-      <div class="gridScroll" id="gridScroll">
-        <div class="grid" id="grid" aria-describedby="sr"></div>
-
-        <div class="toast-stack text-system-semibold-sm" aria-live="polite" aria-atomic="true">
-          <div class="toast toast-success elevation-fixed-top" id="toastSuccess" role="status">🎉 Success! You solved
-            the puzzle!</div>
-          <div class="toast toast-warning elevation-fixed-top" id="toastWarning" role="status">Not quite! Some or all
-            words are incorrect</div>
-          <div class="toast toast-danger elevation-fixed-top" id="toastError" role="status">Puzzle not complete!</div>
-          <div class="toast toast-hint elevation-fixed-top" id="toastHint" role="status">+<span
-              id="hintPenalty">00</span> seconds</div>
-          <div class="toast toast-error elevation-fixed-top" id="toastError-puzzle" role="status"><span>Puzzle broken -
-              Contact Matt & let him know!</span><span class="text-system-regular-xs" id="status"></span></div>
-        </div>
-      </div>
-      <div class="puzzle-nav" aria-label="Navigation">
-        <div class="puzzle-nav-prev">
-          <button class="btn btn-icon" id="navWordPrev" type="button" aria-label="Previous unresolved word"
-            title="Previous word"></button>
-          <button class="btn btn-icon" id="navCellPrev" type="button" aria-label="Previous unresolved cell"
-            title="Previous letter"></button>
-        </div>
-        <div class="toast-stack toast-stack-working text-system-semibold-sm" aria-live="polite" aria-atomic="true">
-          <div class="toast toast-word-solved elevation-fixed-top" id="toastWordSolved" role="status">
-            Word Solved!
-          </div>
-          <div class="word-solved-count text-system-regular-md"></div>
-        </div>
-
-        <div class="puzzle-nav-next">
-          <button class="btn btn-icon" id="navCellNext" type="button" aria-label="Next unresolved cell"
-            title="Next letter"></button>
-          <button class="btn btn-icon" id="navWordNext" type="button" aria-label="Next unresolved word"
-            title="Next word"></button>
-        </div>
-      </div>
-      <div class="game-slider"></div>
     </div>
-  </section>
+    <div class="puzzle-nav" aria-label="Navigation">
+      <div class="puzzle-nav-prev">
+        <button class="btn btn-icon" id="navWordPrev" type="button" aria-label="Previous unresolved word"
+          title="Previous word"></button>
+        <button class="btn btn-icon" id="navCellPrev" type="button" aria-label="Previous unresolved cell"
+          title="Previous letter"></button>
+      </div>
+      <div class="toast-stack toast-stack-working text-system-semibold-sm" aria-live="polite" aria-atomic="true">
+        <div class="toast toast-word-solved elevation-fixed-top" id="toastWordSolved" role="status">
+          Word Solved!
+        </div>
+        <div class="word-solved-count text-system-regular-md"></div>
+      </div>
 
-  <!-- BUILDER -->
-  <section class="panel" id="panelBuild" role="tabpanel" aria-labelledby="tabBuild">
-
+      <div class="puzzle-nav-next">
+        <button class="btn btn-icon" id="navCellNext" type="button" aria-label="Next unresolved cell"
+          title="Next letter"></button>
+        <button class="btn btn-icon" id="navWordNext" type="button" aria-label="Next unresolved word"
+          title="Next word"></button>
+      </div>
+    </div>
+    <div class="game-slider"></div>
   </section>
 
   <div class="keyboard"></div>
@@ -293,7 +279,8 @@
             <div class="settings-panel__section">
               <div>
                 <div>Autocheck</div>
-                <div class="settings-panel__desc text-system-regular-sm">Lock and confirm correct words as you type</div>
+                <div class="settings-panel__desc text-system-regular-sm">Lock and confirm correct words as you type
+                </div>
               </div>
               <div class="switch">
                 <input class="switch__input" type="checkbox" id="autoCheckToggle" role="switch" />
@@ -331,7 +318,7 @@
           </div>
         </div>
       </div>
-         <!-- <div class="inline-notification">
+      <!-- <div class="inline-notification">
             <h3 class="text-system-semibold-sm">Hello Overlap beta testers!</h3>
             <p class="text-system-regular-sm">I’ve begun a major overhaul of the Overlap backend. I haven’t had a chance to test every part of the game yet, so if you notice any bugs or issues, please let me know ASAP.</p>
             <p class="text-system-regular-sm">&lt;3 Matt</p>
@@ -351,7 +338,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V4.12</span>
+            id="splashVersion">V4.13</span>
         </p>
       </footer>
     </div>
