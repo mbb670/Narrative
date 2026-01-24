@@ -42,8 +42,9 @@ export function createTabs({
   const chainStates = chainUiStates || { IDLE: "idle", RUNNING: "running", PAUSED: "paused", DONE: "done" };
 
   // Single view: always set play view for layout hooks.
-  function setTab(which) {
+  function setTab(which, opts = {}) {
     const next = VIEW.PLAY;
+    const skipEnsure = opts && opts.skipEnsure === true;
     setViewSafe(next);
 
     // "view" controls which puzzle list is active and which UI elements are visible.
@@ -54,7 +55,7 @@ export function createTabs({
 
     updateKeyboard();
 
-    ensurePuzzleView();
+    if (!skipEnsure) ensurePuzzleView();
     sliderUI?.updateSliderUI?.();
     focusForTypingSafe();
 

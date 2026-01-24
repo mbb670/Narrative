@@ -274,6 +274,25 @@ const { openChainResults, closeChainResults } = createChainResults({
   },
 });
 
+// ---- FTUE ---- (js/ui/ftue.js)
+let ftueUI = null;
+const ftueIsOpen = () => ftueUI?.ftueIsOpen?.() ?? false;
+const openFtue = (startStep = 0, opts = {}) => ftueUI?.openFtue?.(startStep, opts);
+const closeFtue = () => ftueUI?.closeFtue?.();
+const nextFtue = () => ftueUI?.nextFtue?.();
+const prevFtue = () => ftueUI?.prevFtue?.();
+const renderFtueStep = () => ftueUI?.renderFtueStep?.();
+const maybeShowFtue = () => ftueUI?.maybeShowFtue?.();
+const hasSeenFtue = () => ftueUI?.hasSeenFtue?.() ?? false;
+const setFtueStep = (step) => ftueUI?.setFtueStep?.(step);
+const getFtueStep = () => ftueUI?.getFtueStep?.() ?? 0;
+const getFtueStepCount = () => ftueUI?.getFtueStepCount?.() ?? 0;
+const onFtueTouchStart = (e) => ftueUI?.onFtueTouchStart?.(e);
+const onFtueTouchEnd = (e) => ftueUI?.onFtueTouchEnd?.(e);
+const ftuePlay = () => ftueUI?.ftuePlay?.();
+const ftuePause = () => ftueUI?.ftuePause?.();
+const ftueIsPaused = () => ftueUI?.isPaused?.() ?? false;
+
 const archiveUI = createArchiveUI({
   els,
   getPuzzles: () => puzzles,
@@ -290,6 +309,8 @@ const archiveUI = createArchiveUI({
   getChain: () => chain,
   chainStartNow,
   chainResume,
+  hasSeenFtue,
+  openFtue,
   fmtTime,
   isAutoCheckEnabled,
 });
@@ -316,25 +337,6 @@ const { setInlineCluesHiddenUntilChainStart, requestChainClues } = createChainCl
   getPlay: () => play,
   getChain: () => chain,
 });
-
-// ---- FTUE ---- (js/ui/ftue.js)
-let ftueUI = null;
-const ftueIsOpen = () => ftueUI?.ftueIsOpen?.() ?? false;
-const openFtue = (startStep = 0, opts = {}) => ftueUI?.openFtue?.(startStep, opts);
-const closeFtue = () => ftueUI?.closeFtue?.();
-const nextFtue = () => ftueUI?.nextFtue?.();
-const prevFtue = () => ftueUI?.prevFtue?.();
-const renderFtueStep = () => ftueUI?.renderFtueStep?.();
-const maybeShowFtue = () => ftueUI?.maybeShowFtue?.();
-const hasSeenFtue = () => ftueUI?.hasSeenFtue?.() ?? false;
-const setFtueStep = (step) => ftueUI?.setFtueStep?.(step);
-const getFtueStep = () => ftueUI?.getFtueStep?.() ?? 0;
-const getFtueStepCount = () => ftueUI?.getFtueStepCount?.() ?? 0;
-const onFtueTouchStart = (e) => ftueUI?.onFtueTouchStart?.(e);
-const onFtueTouchEnd = (e) => ftueUI?.onFtueTouchEnd?.(e);
-const ftuePlay = () => ftueUI?.ftuePlay?.();
-const ftuePause = () => ftueUI?.ftuePause?.();
-const ftueIsPaused = () => ftueUI?.isPaused?.() ?? false;
 
 // ---- Clear-all ---- (js/play/actions.js)
 

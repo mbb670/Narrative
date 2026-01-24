@@ -19,8 +19,8 @@ export function createTabState() {
     setTabManager: (manager) => {
       tabManager = manager;
     },
-    setTab: (which) => {
-      tabManager?.setTab(which);
+    setTab: (which, opts) => {
+      tabManager?.setTab(which, opts);
     },
   };
 }

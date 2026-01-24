@@ -49,7 +49,7 @@ export function createFtue({
     {
       title: "Complete the chain to finish the puzzle",
       desc: "Solve every word to complete the chain. Speed counts!",
-      tip: "Tip: A new puzzle drops every day.",
+      tip: "Tip: A new puzzle drops every day!",
     },
   ];
 

@@ -38,6 +38,8 @@ export function createArchiveUI({
   getChain,
   chainStartNow,
   chainResume,
+  hasSeenFtue,
+  openFtue,
   fmtTime,
   isAutoCheckEnabled,
 } = {}) {
@@ -51,6 +53,9 @@ export function createArchiveUI({
       };
   const autoCheckEnabled =
     typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
+  const hasSeenFtueSafe =
+    typeof hasSeenFtue === "function" ? hasSeenFtue : () => true;
+  const openFtueSafe = typeof openFtue === "function" ? openFtue : null;
 
   // Daily puzzle archive with month navigation and resume/admire actions.
   const ARCHIVE_MONTH_LABELS = [
@@ -440,6 +445,14 @@ export function createArchiveUI({
 
       const play = typeof getPlay === "function" ? getPlay() : null;
       const chain = typeof getChain === "function" ? getChain() : null;
+      const needsFtue =
+        !hasSeenFtueSafe() &&
+        (action === "play" || action === "continue") &&
+        typeof openFtueSafe === "function";
+      if (needsFtue) {
+        openFtueSafe(0);
+        return;
+      }
       if (action === "play" || action === "continue") {
         if (play?.mode === MODE.CHAIN && !play?.done) {
           if (!chain?.started && typeof chainStartNow === "function") chainStartNow();

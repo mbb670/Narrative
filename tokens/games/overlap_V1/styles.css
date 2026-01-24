@@ -1632,6 +1632,17 @@ Splash main
 FTUE
 ----------------------------- */
 
+  .archive{
+
+
+        transition:none!important;
+        
+    }
+     .archive__dialog{
+        transition:unset;
+        transform: unset;
+     }
+
 
 .ftue-modal,
 .splash,
@@ -1711,7 +1722,6 @@ FTUE
         transition-delay: 0.1s;
         transform: translateY(var(--spacing-x24));
         padding: var(--spacing-x32) !important;
-
     }
 
     .ftue-modal__body {
