@@ -683,7 +683,7 @@ const countTriples = (sequence = []) => sequence.reduce((acc, item) => acc + (it
 const fetchMonthEntries = async (year, monthIndex) => {
     const monthStr = String(monthIndex + 1).padStart(2, '0');
     try {
-        const res = await fetch(`../data/chain/daily/${year}/${monthStr}.json`);
+        const res = await fetch(`../overlap_v1/data/chain/daily/${year}/${monthStr}.json`);
         if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data)) return data;
