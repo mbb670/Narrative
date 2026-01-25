@@ -20,3 +20,9 @@
 @import url("styles/modals/ftue.css");
 @import url("styles/modals/archive.css");
 @import url("styles/modals/results.css");
+
+
+/* [data-game-state="idle"] */
+/* [data-game-state="running"] */
+/* [data-game-state="paused"] */
+/* [data-game-state="done"] */

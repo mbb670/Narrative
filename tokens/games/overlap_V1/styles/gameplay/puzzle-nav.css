@@ -35,3 +35,14 @@ Puzzle Navigation
         color: var(--foreground-disabled);
     }
 }
+
+[data-game-state="done"]{
+    .toast-stack-working{
+        &::after{
+            content: 'Puzzle Complete!';
+        }
+    }
+    .word-solved-count{
+        display: none;
+    }
+}

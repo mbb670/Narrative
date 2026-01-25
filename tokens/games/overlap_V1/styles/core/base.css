@@ -96,6 +96,9 @@ Stats
 .stat-penalty {
     color: var(--foreground-subtle);
     margin-top: var(--spacing-x2);
+    span{
+        color: inherit;
+    }
 }
 
 .stat-extras {
