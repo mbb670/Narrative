@@ -207,9 +207,9 @@
     <div class="archive__main">
       <div class="archive__controls">
         <button class="btn btn-icon" id="archivePrevMonth" type="button" aria-label="Previous month"></button>
-        <div class="archive__calendar-select">
-          <select class="dropdown text-system-regular-sm" id="archiveMonthSelect" aria-label="Month"></select>
-          <select class="dropdown text-system-regular-sm" id="archiveYearSelect" aria-label="Year"></select>
+        <div class="archive__calendar-select text-system-regular-sm">
+          <label class="select-dropdown"><select class="dropdown" id="archiveMonthSelect" aria-label="Month"></select></label>
+          <label class="select-dropdown"><select class="dropdown" id="archiveYearSelect" aria-label="Year"></select></label>
         </div>
         <button class="btn btn-icon" id="archiveNextMonth" type="button" aria-label="Next month"></button>
       </div>
@@ -238,13 +238,13 @@
 
   <!-- Splash -->
   <dialog class="splash elevation-overlay" id="splashModal" aria-labelledby="splashTitle">
-    <div class="splash__utilities">
+    <div class="dialog__header">
       <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
-      <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
+      <button class="btn btn-icon share-btn btn-ghost" id="shareBtn" type="button">
         <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
           aria-live="polite" aria-atomic="true">Copied to clipboard</div>
       </button>
-      <button class="btn btn-icon settings-btn text-system-semibold-sm" id="settingsBtn" type="button"
+      <button class="btn btn-icon settings-btn btn-ghost" id="settingsBtn" type="button"
         aria-haspopup="dialog" aria-expanded="false" aria-controls="settingsPanel"></button>
       <div class="settings-panel elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
         aria-modal="false" aria-hidden="true" hidden>
@@ -322,7 +322,7 @@
       </div>
       <p class="credit splash__meta text-system-regular-xs">
         Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-          id="splashVersion">V4.23</span>
+          id="splashVersion">V4.24</span>
       </p>
     </footer>
   </dialog>

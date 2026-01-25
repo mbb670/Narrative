@@ -78,7 +78,7 @@ Give Up modal
         max-width: var(--spacing-x144);
         --icon: url("../../images/icons/share.svg");
         --icon-color: var(--foreground-alt);
-        --icon-width: var(--spacing-x16);
+        --icon-size: var(--spacing-x16);
     }
 
 }

@@ -14,8 +14,6 @@ dialog {
     max-height: 768px;
     padding: var(--spacing-x32);
     transition: transform 400ms ease-out, opacity 400ms ease-out;
-    opacity: 0;
-    transform: translateY(var(--spacing-x24));
     border-radius: var(--radius-soft);
     flex-direction: column;
     gap: var(--spacing-x24);
@@ -55,7 +53,7 @@ dialog {
     .btn {
         color: var(--foreground-muted);
         --icon-color: var(--foreground-muted);
-        --icon-width: var(--spacing-x12);
+        --icon-size: var(--spacing-x12);
         font-family: inherit;
         font-size: inherit;
         line-height: inherit;

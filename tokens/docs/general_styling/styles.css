@@ -27,7 +27,8 @@ button {
 
 .interactive-background,
 button,
-select {
+select,
+.select-dropdown {
   transition: background 100ms linear;
   background: color-mix(
     in srgb,

@@ -1,7 +1,6 @@
 /* -----------------------------
-Splash settings
+Splash
 ----------------------------- */
-
 #pClear {
     display: none;
 }
@@ -13,88 +12,31 @@ Splash settings
 }
 
 .splash {
-    
-        .splash__utilities {
-            position: relative;
-            display: flex;
-            justify-content: flex-end;
-            z-index: 2;
-            --icon-color: var(--foreground-subtle);
+    .dialog__header {
+        display: flex;
+        justify-content: flex-end;
+        z-index: 2;
 
-        }
-
-        .settings-btn,
-        .share-btn {
-            border: unset;
+        >button {
+            --icon-size: 100%;
             padding: var(--unit-10);
-            margin: calc(-1 * var(--spacing-x4)) calc(-1 * var(--spacing-x4)) 0 0;
         }
+    }
 
-        .share-btn {
-            --icon: url("../../images/icons/share.svg");
-            position: relative;
-        }
+    .share-btn {
+        --icon: url("../../images/icons/share.svg");
+        position: relative;
+    }
 
-        .settings-btn {
-            --icon: url("../../images/icons/settings.svg");
-        }
+    .splashShareToast{
+        left:-4px;
+    }
 
-        .settings-panel {
-            position: absolute;
-            /* top: calc(100% + var(--spacing-x8)); */
-            /* right: 0; */
-            width: min(320px, 90vw);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-soft);
-            padding: unset;
-            gap: unset;
-            background-color: var(--background-muted);
-        }
+    .settings-btn {
+        --icon: url("../../images/icons/settings.svg");
+    }
 
-        .settings-panel[hidden] {
-            display: none !important;
-        }
-
-        .settings-panel__header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: var(--spacing-x12) var(--spacing-x8) var(--spacing-x12) var(--spacing-x24);
-        }
-
-        .settings-panel__section {
-            padding: var(--spacing-x24);
-            display: flex;
-            justify-content: space-between;
-            gap: var(--spacing-x24);
-            border-top: 1px solid var(--border-subtle);
-        }
-
-        .settings-color-mode {
-            flex-direction: column;
-            gap: var(--spacing-x8);
-
-            .tabs {
-                width: 100%;
-                background-color: var(--background-subtle);
-
-                .tab {
-                    flex: 1;
-                }
-            }
-        }
-
-        .settings-panel__desc {
-            color: var(--foreground-muted);
-            margin-top: var(--spacing-x4);
-        }
-
-
-/* -----------------------------
-Splash
------------------------------ */
-
-.splash__main {
+    .splash__main {
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -103,6 +45,7 @@ Splash
         .splash__brand {
             .logo-icon {
                 width: 18%;
+                max-width: var(--unit-64);
                 margin: 0 auto;
             }
 
@@ -122,7 +65,6 @@ Splash
                 .splash__date {
                     color: var(--foreground-subtle);
                 }
-
             }
         }
 
@@ -130,7 +72,6 @@ Splash
             width: 100%;
             margin-bottom: var(--spacing-x8);
         }
-
 
         .splash__row {
             display: flex;
@@ -140,16 +81,15 @@ Splash
                 flex: 1;
             }
         }
-
     }
 
-    .splash__actions{
-        button{
-                font-family: inherit;
-        font-size: inherit;
-        line-height: inherit;
-        font-weight: inherit;
-        letter-spacing: inherit;
+    .splash__actions {
+        button {
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            font-weight: inherit;
+            letter-spacing: inherit;
         }
     }
 
@@ -179,4 +119,57 @@ Splash
             }
         }
     }
+}
+
+/* -----------------------------
+Splash settings
+----------------------------- */
+.settings-panel {
+    position: absolute;
+    top: var(--spacing-x16);
+    right: var(--spacing-x16);
+    width: min(320px, 90vw);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-soft);
+    padding: unset;
+    gap: unset;
+    background-color: var(--background-muted);
+}
+
+.settings-panel[hidden] {
+    display: none !important;
+}
+
+.settings-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-x12) var(--spacing-x8) var(--spacing-x12) var(--spacing-x24);
+}
+
+.settings-panel__section {
+    padding: var(--spacing-x24);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-x24);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.settings-color-mode {
+    flex-direction: column;
+    gap: var(--spacing-x8);
+
+    .tabs {
+        width: 100%;
+        background-color: var(--background-subtle);
+
+        .tab {
+            flex: 1;
+        }
+    }
+}
+
+.settings-panel__desc {
+    color: var(--foreground-muted);
+    margin-top: var(--spacing-x4);
 }

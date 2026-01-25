@@ -35,7 +35,7 @@ Buttons
     &::before,
     &::after {
         aspect-ratio: 1;
-        width: var(--icon-width, var(--spacing-x12));
+        width: var(--icon-size, var(--spacing-x12));
         -webkit-mask: var(--icon) center / contain no-repeat;
         mask: var(--icon) center / contain no-repeat;
         rotate: var(--icon-rotation);
@@ -85,11 +85,6 @@ Buttons
     &::before {
         content: '';
         display: block;
-        aspect-ratio: 1;
-        background-color: var(--icon-color);
-        rotate: var(--icon-rotation);
-        -webkit-mask: var(--icon) center / contain no-repeat;
-        mask: var(--icon) center / contain no-repeat;
     }
 }
 
@@ -140,9 +135,40 @@ Tabs
 /* -----------------------------
 Dropdowns
 ----------------------------- */
-.dropdown {
+
+
+.select-dropdown {
+    display: flex;
+    overflow: hidden;
+    --icon: url("../../images/icons/up-down-arrows.svg");
+    --icon-color: var(--foreground-subtle);
+
     border: 1px solid var(--border-muted);
     border-radius: var(--radius-default);
+    position: relative;
+    --background-color: transparent;
+
+    &::after {
+        content: '';
+        aspect-ratio: 1;
+        width: var(--icon-size, var(--spacing-x12));
+        -webkit-mask: var(--icon) center / contain no-repeat;
+        mask: var(--icon) center / contain no-repeat;
+        background-color: var(--icon-color);
+        position: absolute;
+        top: 50%;
+        right: var(--spacing-x12);
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+}
+
+.dropdown {
+    --background-color: initial !important;
+    border: unset;
+    appearance: none;
+    padding-inline: var(--spacing-x12);
+    border-radius: unset;
 }
 
 /* -----------------------------
