@@ -7,6 +7,7 @@
  */
 // First-time user experience (FTUE) demo and modal flow.
 import { FORCE_FTUE, FTUE_SEEN_KEY, IS_IOS, MODE } from "../core/config.js";
+import { bindDialogDismiss } from "./dialogs.js";
 
 export function createFtue({
   els,
@@ -34,6 +35,8 @@ export function createFtue({
   const getChainSummary =
     typeof chainProgressSummary === "function" ? chainProgressSummary : () => ({ state: "default", solved: 0, total: 0 });
 
+  bindDialogDismiss(els?.ftueModal);
+
   // First-time user experience is a scripted demo board with timed typing animations.
   const FTUE_STEPS = [
     {
@@ -54,7 +57,6 @@ export function createFtue({
   ];
 
   let ftueStep = 0;
-  let ftueDialogTimer = null;
   let ftueShowTimer = null;
   let ftueNavBlockedUntil = 0;
   let ftueTouchStart = null;
@@ -80,7 +82,8 @@ export function createFtue({
   };
 
   // Modal state helpers for FTUE.
-  const ftueIsOpen = () => !!els?.ftueModal?.classList.contains("is-open");
+  const ftueIsOpen = () =>
+    !!els?.ftueModal && (els.ftueModal.open || els.ftueModal.hasAttribute("open"));
   let _ftuePrevOverflow = "";
   // Prevent interaction with the live board while FTUE is open.
   function ftueDisableInteractions() {
@@ -159,8 +162,6 @@ export function createFtue({
   // Open the FTUE modal and pause any live chain progress underneath.
   function openFtue(startStep = 0, opts = {}) {
     if (!els?.ftueModal) return;
-    clearTimeout(ftueDialogTimer);
-    if (els?.ftueDialog) els.ftueDialog.classList.remove("is-open");
     ftueNavBlockedUntil = 0;
     setFtueStep(startStep);
     ftueDemo.paused = false;
@@ -187,14 +188,11 @@ export function createFtue({
 
     ensureFtueBoard();
     renderFtueStep();
-    els.ftueModal.classList.remove("is-open");
-    els.ftueModal.setAttribute("aria-hidden", "false");
-    els.ftueModal.removeAttribute("hidden");
     // document.body.classList.add("is-ftue-open");
     ftueDisableInteractions();
-    const noAnim = opts.noAnim === true;
+    const noAnim = opts.noAnim === true || opts.instant === true;
     const applyNoAnim = () => {
-      [els.ftueModal, els.ftueDialog].forEach((el) => {
+      [els.ftueModal].forEach((el) => {
         if (!el) return;
         el.dataset.ftuePrevTransition = el.style.transition || "";
         el.dataset.ftuePrevAnim = el.style.animationDuration || "";
@@ -203,7 +201,7 @@ export function createFtue({
       });
     };
     const restoreNoAnim = () => {
-      [els.ftueModal, els.ftueDialog].forEach((el) => {
+      [els.ftueModal].forEach((el) => {
         if (!el) return;
         if (el.dataset.ftuePrevTransition != null) {
           el.style.transition = el.dataset.ftuePrevTransition;
@@ -222,26 +220,16 @@ export function createFtue({
 
     if (noAnim) applyNoAnim();
 
-    const finishOpen = () => {
-      els.ftueModal?.classList.add("is-open");
-      if (els.ftueDialog && ftueIsOpen()) {
-        els.ftueDialog.classList.add("is-open");
+    if (!ftueIsOpen()) {
+      if (typeof els.ftueModal.showModal === "function") {
+        els.ftueModal.showModal();
+      } else {
+        els.ftueModal.setAttribute("open", "");
       }
-      if (noAnim) {
-        // restore styles after paint so future opens animate
-        setTimeout(restoreNoAnim, 50);
-      }
-    };
-
-    if (opts.instant || noAnim) {
-      finishOpen();
-    } else {
-      requestAnimationFrame(finishOpen);
-      ftueDialogTimer = window.setTimeout(() => {
-        if (els.ftueDialog && ftueIsOpen()) {
-          els.ftueDialog.classList.add("is-open");
-        }
-      }, FTUE_DIALOG_DELAY);
+    }
+    if (noAnim) {
+      // restore styles after paint so future opens animate
+      setTimeout(restoreNoAnim, 50);
     }
   }
 
@@ -249,20 +237,21 @@ export function createFtue({
   function closeFtue() {
     if (!els?.ftueModal) return;
     clearFtueTimers();
-    clearTimeout(ftueDialogTimer);
-    ftueDialogTimer = null;
     ftueDemo.paused = true;
-    if (els?.ftueDialog) els.ftueDialog.classList.remove("is-open");
-    els.ftueModal.classList.remove("is-open");
-    [els.ftueModal, els.ftueDialog].forEach((el) => {
+    [els.ftueModal].forEach((el) => {
       if (!el) return;
       el.style.transition = "";
       el.style.animationDuration = "";
       delete el.dataset.ftuePrevTransition;
       delete el.dataset.ftuePrevAnim;
     });
-    els.ftueModal.setAttribute("aria-hidden", "true");
-    els.ftueModal.setAttribute("hidden", "true");
+    if (ftueIsOpen()) {
+      if (typeof els.ftueModal.close === "function") {
+        els.ftueModal.close();
+      } else {
+        els.ftueModal.removeAttribute("open");
+      }
+    }
     // document.body.classList.remove("is-ftue-open");
     markFtueSeen();
     ftueEnableInteractions();
@@ -292,9 +281,8 @@ export function createFtue({
   function maybeShowFtue() {
     if (!els?.ftueModal) return;
     clearTimeout(ftueShowTimer);
-    if (FORCE_FTUE || !hasSeenFtue()) {
-      ftueShowTimer = window.setTimeout(() => openFtue(0), FTUE_DIALOG_DELAY);
-    }
+    if (!FORCE_FTUE) return;
+    ftueShowTimer = window.setTimeout(() => openFtue(0), FTUE_DIALOG_DELAY);
   }
 
   // All FTUE animations are timer-driven; reset between steps.

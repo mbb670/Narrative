@@ -35,7 +35,7 @@
 
       <div class="puzzle-controls text-system-semibold-sm">
         <button class="btn" id="reveal" type="button">Give Up</button>
-        <button class="btn" id="pause" type="button">00:00</button>
+        <button class="btn icon-trailing" id="pause" type="button">00:00</button>
         <button class="btn primary" id="viewResults" type="button" hidden>View Results</button>
       </div>
     </div>
@@ -111,8 +111,7 @@
 
   <!-- Results -->
   <dialog class="results card text-system-regular-md elevation-overlay" id="results" aria-label="Results">
-    <button class="btn btn-icon resultsClose text-system-regular-lg" type="button"
-      aria-label="Close results"></button>
+    <button class="btn btn-icon resultsClose text-system-regular-lg" type="button" aria-label="Close results"></button>
     <div class="result-heading">
       <h2 class="text-headline-semibold-lg resultsTitle">Solved!</h2>
       <p class="resultsSubtitle"></p>
@@ -142,63 +141,62 @@
       </div>
     </div>
     <div class="actions">
-      <button class="btn primary resultsShare text-system-regular-md" type="button">Share</button>
+      <button class="btn primary icon-leading resultsShare text-system-regular-md" type="button">Share</button>
     </div>
     <div class="toast resultsShareToast" aria-live="polite" aria-atomic="true"></div>
   </dialog>
 
   <!-- FTUE modal -->
-  <div id="ftueModal" class="ftue-modal" aria-hidden="true" hidden>
-    <div class="ftue-modal__dialog card elevation-overlay" role="dialog" aria-modal="true" aria-labelledby="ftueTitle">
+  <dialog id="ftueModal" class="ftue-modal card elevation-overlay" aria-labelledby="ftueTitle">
+    <div class="dialog__header">
+      <button type="button" class="ftue-prev btn icon-leading text-system-semibold-xs"
+        aria-label="Previous step">Back</button>
+      <button type="button" class="ftue-skip btn icon-trailing text-system-semibold-xs" aria-label="Skip to game">Skip
+        to
+        game</button>
+    </div>
 
-      <div class="ftue-modal__header">
-        <button type="button" class="ftue-prev btn text-system-semibold-xs" aria-label="Previous step">Back</button>
-        <button type="button" class="ftue-skip btn text-system-semibold-xs" aria-label="Skip to game">Skip to
-          game</button>
+    <section class="ftue-modal__body">
+
+      <div class="ftue-board" aria-hidden="true">
+        <div class="gridScroll ftueGridScroll" id="ftueGridScroll">
+          <div class="grid ftueGrid" id="ftueGrid"></div>
+        </div>
+        <div class="ftue-toast toast elevation-fixed-top text-system-semibold-sm" role="status">🎉 Puzzle Solved!
+        </div>
+
       </div>
 
-      <section class="ftue-modal__body">
+      <div class="ftue-text">
+        <h2 id="ftueTitle" class="ftue-title text-headline-semibold-lg">Welcome!</h2>
+        <p class="ftue-desc text-system-regular-md">Learn how to play.</p>
+      </div>
 
-        <div class="ftue-board" aria-hidden="true">
-          <div class="gridScroll ftueGridScroll" id="ftueGridScroll">
-            <div class="grid ftueGrid" id="ftueGrid"></div>
-          </div>
-          <div class="ftue-toast toast elevation-fixed-top text-system-semibold-sm" role="status">🎉 Puzzle Solved!
-          </div>
+      <!-- <div class="ftue-secondary">
+        <button type="button" class="ftue-playpause btn icon" aria-pressed="false" aria-label="Pause animation">
+          <span class="ftue-playpause-icon" aria-hidden="true">⏸</span>
+        </button>
+      </div> -->
+    </section>
 
-        </div>
+    <div class="ftue-modal__footer">
+      <p class="ftue-tip text-system-regular-md">Tip text</p>
+      <button type="button" class="ftue-next btn primary text-system-semibold-md">Next</button>
 
-        <div class="ftue-text">
-          <h2 id="ftueTitle" class="ftue-title text-headline-semibold-lg">Welcome!</h2>
-          <p class="ftue-desc text-system-regular-md">Learn how to play.</p>
-        </div>
-
-        <!-- <div class="ftue-secondary">
-          <button type="button" class="ftue-playpause btn icon" aria-pressed="false" aria-label="Pause animation">
-            <span class="ftue-playpause-icon" aria-hidden="true">⏸</span>
-          </button>
-        </div> -->
-      </section>
-
-      <div class="ftue-modal__footer">
-        <p class="ftue-tip text-system-regular-md">Tip text</p>
-        <button type="button" class="ftue-next btn primary text-system-semibold-md">Next</button>
-
-        <div class="ftue-dots" aria-hidden="true">
-          <span class="ftue-dot" data-step="0"></span>
-          <span class="ftue-dot" data-step="1"></span>
-          <span class="ftue-dot" data-step="2"></span>
-        </div>
+      <div class="ftue-dots" aria-hidden="true">
+        <span class="ftue-dot" data-step="0"></span>
+        <span class="ftue-dot" data-step="1"></span>
+        <span class="ftue-dot" data-step="2"></span>
       </div>
     </div>
-  </div>
+  </dialog>
 
 
 
   <!-- Archive -->
   <dialog class="archive card elevation-overlay" id="archiveModal" aria-labelledby="archiveTitle">
-    <div class="archive__header">
-      <button class="btn text-system-semibold-xs" id="archiveBackBtn" type="button">Back</button>
+    <div class="dialog__header">
+      <button class="btn icon-leading text-system-semibold-xs" id="archiveBackBtn" type="button">Back</button>
       <h2 class="archive__title text-subheadline-semibold-sm" id="archiveTitle">Archive</h2>
       <button class="btn text-system-semibold-xs" id="archiveTodayBtn" type="button">Today</button>
     </div>
@@ -234,9 +232,8 @@
 
   <!-- Splash -->
   <dialog class="splash card elevation-overlay" id="splashModal" aria-labelledby="splashTitle">
-    <div class="splash__top">
-      <div class="splash__utilities">
-                <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
+    <div class="splash__utilities">
+        <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
         <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
           <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
             aria-live="polite" aria-atomic="true">Copied to clipboard</div>
@@ -281,6 +278,7 @@
           </div>
         </div>
       </div>
+    <div class="splash__top">
       <div class="splash__main">
         <div class="splash__brand">
           <div class="logo-icon logo-icon-animation"></div>
@@ -300,7 +298,7 @@
         </div>
       </div>
     </div>
-      <!-- <div class="inline-notification">
+    <!-- <div class="inline-notification">
             <h3 class="text-system-semibold-sm">Hello Overlap beta testers!</h3>
             <p class="text-system-regular-sm">I’ve begun a major overhaul of the Overlap backend. I haven’t had a chance to test every part of the game yet, so if you notice any bugs or issues, please let me know ASAP.</p>
             <p class="text-system-regular-sm">&lt;3 Matt</p>
@@ -320,7 +318,7 @@
       </div>
       <p class="credit splash__meta text-system-regular-xs">
         Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-          id="splashVersion">V4.19</span>
+          id="splashVersion">V4.2</span>
       </p>
     </footer>
   </dialog>

@@ -68,7 +68,6 @@ export const els = {
   ftueToast: document.querySelector(".ftue-toast"),
   ftueGrid: $("#ftueGrid"),
   ftueGridScroll: $("#ftueGridScroll"),
-  ftueDialog: document.querySelector(".ftue-modal__dialog"),
   ftuePlayPause: document.querySelector(".ftue-playpause"),
   ftuePlayPauseIcon: document.querySelector(".ftue-playpause-icon"),
   pClear: $("#pClear"),
