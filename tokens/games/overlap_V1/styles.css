@@ -12,7 +12,6 @@
 
     --cell: clamp(56px, 8vw, 96px);
     --cell-letter-placement: 4/6;
-    --letter: 62cqmin;
 
     --range-radius: var(--radius-relaxed);
     --range-transparency-pc: 10%;
@@ -176,12 +175,11 @@ Logo Design
         --shift: 32%;
         --layer: 0;
         box-shadow: -12cqmin -12cqmin 24cqmin 0 var(--color-alpha-black-a100);
-
-
     }
 }
 
 .logo-icon-animation {
+
     &::before,
     &::after {
         animation: logoAnimation 8s ease-in-out infinite alternate both;
@@ -418,15 +416,60 @@ header {
     }
 }
 
-.is-dev {
-    #pClear {
-        display: block;
+.puzzle-controls {
+    display: flex;
+    gap: var(--spacing-x8);
+
+    button {
+        min-height: var(--unit-40);
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
+        font-weight: inherit;
+        letter-spacing: inherit;
     }
 }
 
+#pause {
+    --background-color: var(--background-subtle);
+    color: var(--foreground-muted);
+    border: unset;
+    display: flex;
+    gap: var(--spacing-x4);
 
-#pClear {
-    display: none;
+    &::after {
+        content: '';
+        background-color: var(--foreground-muted);
+        width: var(--spacing-x12);
+        aspect-ratio: 1;
+        -webkit-mask: var(--gamePause-icon) center / contain no-repeat;
+        mask: var(--gamePause-icon) center / contain no-repeat;
+    }
+
+    &[data-state="running"] {
+        --gamePause-icon: url("images/pause.svg") !important;
+    }
+
+    &[data-state="paused"],
+    &[data-state="idle"] {
+        --gamePause-icon: url("images/play.svg");
+    }
+}
+
+[data-game-state="done"] {
+
+    .rangeClue-content {
+        pointer-events: none;
+    }
+
+    #pause,
+    #reveal {
+        display: none !important;
+    }
+
+    #viewResults {
+        display: block !important;
+    }
 }
 
 /* -----------------------------
@@ -450,94 +493,17 @@ Main Stage
     }
 }
 
-
-body[data-chain-state="paused"] .rangeClue {
-    display: none !important;
-}
-
-body[data-chain-state="done"] .rangeClue-content {
-    pointer-events: none;
-}
-
-#chainStartBtn {
-    --background-color: var(--background-strong);
-    color: var(--foreground-alt);
-    border: unset;
-    display: flex;
-    gap: var(--spacing-x4);
-
-    &::after {
-        width: var(--spacing-x12);
-        aspect-ratio: 1;
-    }
-
-    &[data-state="running"] {
-        --background-color: var(--background-subtle);
-        color: var(--foreground-default);
-        /* border: 1px solid var(--border-subtle); */
-
-        &::after {
-            content: '';
-            background-color: var(--foreground-muted);
-            -webkit-mask: url("images/pause.svg") center / contain no-repeat;
-            mask: url("images/pause.svg") center / contain no-repeat;
-        }
-
-    }
-
-    &[data-state="paused"] {
-        &::after {
-            content: '';
-            background-color: var(--foreground-alt);
-            -webkit-mask: url("images/play.svg") center / contain no-repeat;
-            mask: url("images/play.svg") center / contain no-repeat;
-        }
-
-    }
-}
-
-
-
-.puzzle-nav {
-    display: flex;
-    justify-content: space-between;
-    padding-inline: var(--layout-grid-margin);
-    max-width: var(--layout-content-md-max);
-    align-self: center;
-    width: 100%;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-
-    #navWordPrev,
-    #navWordNext {
-        --icon: url("images/double-right-arrow.svg");
-    }
-
-    .puzzle-nav-prev {
-        button {
-            --icon-rotation: 180deg;
-        }
-    }
-}
-[data-autocheck="false"]{
-.word-solved-count{
-    color: var(--foreground-disabled);
-}
-}
-
-/* Scroller only wraps puzzle */
+/* -----------------------------
+Puzzle Grid
+----------------------------- */
 .gridScroll {
     max-width: 100%;
     overflow-y: hidden;
-
     padding-inline: var(--layout-grid-margin) !important;
-
     scrollbar-gutter: stable;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
     touch-action: pan-x pan-y;
-
     flex-grow: 1;
     place-content: center;
     scrollbar-width: none;
@@ -547,6 +513,400 @@ body[data-chain-state="done"] .rangeClue-content {
 .gridScroll::-webkit-scrollbar {
     display: none;
 }
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), var(--cell));
+    --grid-rows: repeat(3, var(--grid-top-space)) var(--grid-letter-space) repeat(3, var(--grid-bottom-space));
+    grid-template-rows: var(--grid-rows);
+    width: calc(var(--cell)*var(--cols));
+    margin: 0 auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+}
+
+/* -----------------------------
+Range
+----------------------------- */
+
+.range {
+    border: var(--border-w) solid var(--color);
+    pointer-events: none;
+    background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 85%), transparent var(--range-transparency-pc));
+    grid-column: var(--gs) / var(--ge);
+    display: grid;
+    grid-template-rows: subgrid;
+    border-radius: var(--range-radius);
+    position: relative;
+    margin-right: calc(var(--border-w) * -0.75);
+    box-shadow: var(--unit-12) var(--spacing-x16) var(--spacing-x48) 0 var(--color-alpha-black-a200);
+    transition:
+        opacity 650ms ease,
+        border-color 650ms ease,
+        background-color 650ms ease,
+        box-shadow 650ms ease;
+}
+
+.range.range-solve-anim {
+    animation: rangeSolve 850ms ease;
+    will-change: box-shadow;
+}
+
+@keyframes rangeSolve {
+    0% {
+        box-shadow:
+            inset 0 0 0 0 color-mix(in srgb, var(--color) 40%, transparent),
+            0 0 0 0 color-mix(in srgb, var(--color) 20%, transparent);
+    }
+
+    45% {
+        box-shadow:
+            inset 0 0 0 144px color-mix(in srgb, var(--color) 35%, transparent),
+            0 0 18px 6px color-mix(in srgb, var(--color) 35%, transparent);
+    }
+
+    100% {
+        box-shadow:
+            inset 0 0 0 144px color-mix(in srgb, var(--color) 0%, transparent),
+            0 0 0 0 color-mix(in srgb, var(--color) 0%, transparent);
+    }
+}
+
+/* Range focus overlay */
+.range-focus {
+    z-index: 10 !important;
+    border: 4px solid var(--color);
+    background: transparent;
+    display: none !important;
+    pointer-events: none;
+    box-shadow: inset 0 0 var(--spacing-x16) var(--spacing-x16) color-mix(in srgb, var(--color) 16%, transparent);
+}
+
+.range-focus.is-active {
+    display: grid !important;
+}
+
+.range-full {
+    grid-row: 1 / -1;
+    z-index: 1;
+    --range-check-offset: -1;
+}
+
+.range-mid {
+    grid-row: 2 / -2;
+    z-index: 2;
+    --range-check-offset: -2;
+}
+
+.range-inner {
+    grid-row: 3 / -3;
+    z-index: 3;
+    --range-check-offset: -3;
+}
+
+.range.is-locked {
+    box-shadow: none !important;
+
+    &,
+    &+.rangeClue :is(.rangeClue-string, .rangeClue-content) {
+        opacity: 0.4;
+        --color: var(--foreground-muted) !important;
+        pointer-events: none;
+        border-width: calc(var(--border-w)/2);
+    }
+
+    &+.rangeClue .rangeClue-content::after {
+        content: '';
+        display: block;
+        aspect-ratio: 1;
+        background-color: var(--foreground-muted);
+        -webkit-mask: url("images/circle-check.svg") center / contain no-repeat;
+        mask: url("images/circle-check.svg") center / contain no-repeat;
+        padding: var(--spacing-x2) var(--spacing-x8);
+    }
+}
+
+
+/* -----------------------------
+Range Clues
+----------------------------- */
+
+.rangeClue {
+    grid-row: 1/2;
+    container-type: size;
+    height: 100%;
+    align-content: center;
+    width: 100%;
+    grid-column: var(--gs) / var(--ge);
+    z-index: 20;
+    pointer-events: none;
+
+    .rangeClue-content {
+        display: flex;
+        position: sticky;
+        left: 0;
+        width: max-content;
+        margin: 20cqmin;
+        pointer-events: all;
+        gap: var(--spacing-x4);
+
+        button {
+            color: color-mix(in srgb, var(--color), var(--foreground-default) 85%) !important;
+            font-size: var(--range-clue-size);
+            padding: var(--spacing-x2) var(--spacing-x8);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            --background-color: color-mix(in srgb, var(--color), var(--background-default) 70%);
+            border-radius: var(--radius-full);
+            border: 0.5px solid var(--color);
+            position: relative;
+            &::before {
+                content: '';
+                width: 110%;
+                height: 140%;
+                position: absolute;
+                top: -30%;
+                left: -5%;
+            }
+
+        }
+
+        &.is-hidden {
+            display: none !important;
+        }
+    }
+}
+
+.rangeClue-hint {
+    display: none;
+    opacity: 0;
+    transform: translateX(-12px);
+    pointer-events: none;
+    transition: opacity 160ms ease, transform 160ms ease;
+
+    &::before {
+        width: 140% !important;
+        left: -20% !important;
+    }
+
+}
+
+[data-game-state="paused"], [data-game-state="idle"] {
+    .rangeClue {
+        display: none !important;
+    }
+}
+
+[data-game-state="done"] {
+    .rangeClue-content {
+        pointer-events: none;
+    }
+}
+
+.rangeClue.is-hint-visible .rangeClue-hint,
+.rangeClue .rangeClue-content:focus-within .rangeClue-hint,
+.rangeClue .rangeClue-string:focus-visible~.rangeClue-hint,
+.rangeClue.is-hint-intro .rangeClue-hint {
+    display: inline-flex;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+@media (hover: hover) {
+    .rangeClue .rangeClue-content:hover .rangeClue-hint,
+    .rangeClue .rangeClue-string:hover~.rangeClue-hint {
+        display: inline-flex;
+        opacity: 1;
+        transform: translateX(0);
+        pointer-events: auto;
+    }
+}
+
+.rangeClue.is-hidden .rangeClue-hint  {
+    display: none !important;
+}
+
+
+/* -----------------------------
+Cells
+----------------------------- */
+
+.cell {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    position: relative;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    /* grid-template-rows: subgrid; */
+    grid-template-rows: var(--grid-rows);
+    text-transform: uppercase;
+    color: var(--foreground-default);
+    user-select: none;
+    touch-action: pan-x;
+    mix-blend-mode: multiply;
+    z-index: 10;
+    grid-row: 1/-1;
+    container-type: size;
+    font-weight: var(--system-strong);
+    font-family: var(--system-fontfamily);
+
+    .letter {
+        grid-row: var(--cell-letter-placement);
+        font-size: 62cqmin;
+        height: 100%;
+        place-content: center;
+        display: grid;
+        place-items: center;
+        transform-origin: center;
+    }
+
+    .num {
+        position: absolute;
+        top:105%;
+        z-index: 20;
+        padding: var(--spacing-x4);
+        color: var(--foreground-subtle);
+        display: none;
+    }
+
+    &::before {
+        content: '';
+        width: 100%;
+        border-left: calc(var(--border-w) / 2) solid var(--grid-line);
+        grid-row: 1/-1;
+        height: 100%;
+        position: absolute;
+        left: 0;
+    }
+
+    &::after {
+        position: absolute;
+        top: calc(100% + var(--spacing-x8));
+        display: block;
+        aspect-ratio: 1;
+        opacity: 0.8;
+        width: var(--spacing-x8);
+        border-radius: var(--radius-full);
+        background-color: var(--background-medium);
+    }
+}
+
+.cell-range-start {
+    &::before {
+        border-radius: var(--radius-relaxed) 0 0 var(--radius-relaxed);
+    }
+}
+
+.cell-range-end {
+    &::before {
+        border-radius: 0 var(--radius-relaxed) var(--radius-relaxed) 0;
+    }
+}
+
+.cell.is-active,
+.cell.is-select-all {
+    &::before {
+        background-color: var(--opacity-dimm-subtle) !important;
+    }
+}
+
+.cell-height-full {
+    &::before {
+        grid-row: 1/-1 !important;
+    }
+}
+
+.cell-height-mid {
+    &::before {
+        grid-row: 2/-2 !important;
+    }
+}
+
+.cell-height-inner {
+    &::before {
+        grid-row: 3/-3 !important;
+    }
+}
+
+.cell-solved {
+    .letter {
+        opacity: 0.16;
+        transition: opacity 220ms ease;
+    }
+
+    /* keep solved letters full-strength while animating, then fade after */
+    .letter.solve-anim {
+        opacity: 1;
+    }
+}
+
+.cell-locked {
+    &::after {
+        content: '';
+    }
+}
+
+@supports (font: -apple-system-body) {
+    .cell {
+        grid-template-rows: var(--grid-rows) !important;
+    }
+
+}
+
+.letter.solve-anim {
+    animation: solveWave 600ms ease var(--solve-delay, 0ms) both;
+    will-change: transform, color, text-shadow;
+    opacity: 1;
+}
+
+@keyframes solveWave {
+    0% {
+        transform: scale(0.96);
+        text-shadow: none;
+    }
+
+    35% {
+        transform: scale(1.2);
+        text-shadow: 12px 12px 16px color-mix(in srgb, var(--foreground-default) 30%, transparent);
+        /* opacity: 0.4; */
+    }
+
+    100% {
+        transform: scale(1);
+        text-shadow: none;
+        /* opacity: 0.4; */
+    }
+}
+.is-dev .num {
+    display: block;
+}
+
+[data-mode="dark"] {
+    .cell {
+        mix-blend-mode: screen !important;
+    }
+
+    .cell.is-active,
+    .cell.is-select-all {
+        &::before {
+            background-color: var(--opacity-lighten-subtle) !important;
+        }
+    }
+}
+
+.cell.is-bad {
+    background: var(--system-critical-medium);
+}
+
+
+/* -----------------------------
+Toasts
+----------------------------- */
 
 .toast-stack {
     display: flex;
@@ -631,566 +991,37 @@ body[data-chain-state="done"] .rangeClue-content {
     opacity: 0.6;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(var(--cols), var(--cell));
-    --grid-rows: repeat(3, var(--grid-top-space)) var(--grid-letter-space) repeat(3, var(--grid-bottom-space));
-
-    grid-template-rows: var(--grid-rows);
-    width: calc(var(--cell)*var(--cols));
-    margin: 0 auto;
-    /* background: transparent; */
-    /* box-shadow:
-        inset 0 calc(var(--border-w) * -1) 0 0 var(--grid-line),
-        inset 0 var(--border-w) 0 0 var(--grid-line),
-        inset calc(var(--border-w) * -1) 0 0 0 var(--grid-line),
-        inset var(--border-w) 0 0 0 var(--grid-line);
-    border-radius: var(--range-radius); */
-
-
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    touch-action: pan-x pan-y;
-    /* overflow-x: clip; */
-    /* overflow-y: visible; */
-    /* overflow: clip; */
-
-
-
-}
-
-.range {
-
-    border: var(--border-w) solid var(--color);
-    pointer-events: none;
-    background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 85%), transparent var(--range-transparency-pc));
-    grid-column: var(--gs) / var(--ge);
-    display: grid;
-    grid-template-rows: subgrid;
-    border-radius: var(--range-radius);
-    position: relative;
-    margin-right: calc(var(--border-w) * -0.75);
-    box-shadow: var(--unit-12) var(--spacing-x16) var(--spacing-x48) 0 var(--color-alpha-black-a200);
-    transition:
-        opacity 650ms ease,
-        border-color 650ms ease,
-        background-color 650ms ease,
-        box-shadow 650ms ease;
-    /* &::after{
-       transition:
-       opacity 650ms ease,
-        transform 650ms ease;
-        transform: scale(0);
-        transform-origin: center;
-        opacity: 0;
-
-        content: '';
-        display: block;
-    } */
-}
-
-
-.range.range-solve-anim {
-    animation: rangeSolve 850ms ease;
-    will-change: box-shadow;
-}
-
-@keyframes rangeSolve {
-    0% {
-        box-shadow:
-            inset 0 0 0 0 color-mix(in srgb, var(--color) 40%, transparent),
-            0 0 0 0 color-mix(in srgb, var(--color) 20%, transparent);
-    }
-
-    45% {
-        box-shadow:
-            inset 0 0 0 144px color-mix(in srgb, var(--color) 35%, transparent),
-            0 0 18px 6px color-mix(in srgb, var(--color) 35%, transparent);
-    }
-
-    100% {
-        box-shadow:
-            inset 0 0 0 144px color-mix(in srgb, var(--color) 0%, transparent),
-            0 0 0 0 color-mix(in srgb, var(--color) 0%, transparent);
-    }
-}
-
-/* Range focus overlay */
-.range-focus {
-    z-index: 10 !important;
-    border: 4px solid var(--color);
-    background: transparent;
-    display: none !important;
-    pointer-events: none;
-    box-shadow: inset 0 0 var(--spacing-x16) var(--spacing-x16) color-mix(in srgb, var(--color) 16%, transparent);
-}
-
-.range-focus.is-active {
-    display: grid !important;
-}
-
-.range-full {
-    grid-row: 1 / -1;
-    z-index: 1;
-    --range-check-offset: -1;
-}
-
-.range-mid {
-    grid-row: 2 / -2;
-    z-index: 2;
-    --range-check-offset: -2;
-}
-
-.range-inner {
-    grid-row: 3 / -3;
-    z-index: 3;
-    --range-check-offset: -3;
-}
-
-.range.is-locked {
-    box-shadow: none !important;
-
-    &,
-    &+.rangeClue :is(.rangeClue-string, .rangeClue-content) {
-        opacity: 0.4;
-        --color: var(--foreground-muted) !important;
-        /* --color: var(--opacity-dimm-default) !important; */
-        pointer-events: none;
-        border-width: calc(var(--border-w)/2);
-    }
-
-    /* &+.rangeClue {
-        opacity: 0.3;
-    } */
-
-    &+.rangeClue .rangeClue-content::after
-
-    /* &::after  */
-        {
-        content: '';
-        display: block;
-        aspect-ratio: 1;
-        background-color: var(--foreground-muted);
-        -webkit-mask: url("images/circle-check.svg") center / contain no-repeat;
-        mask: url("images/circle-check.svg") center / contain no-repeat;
-        padding: var(--spacing-x2) var(--spacing-x8);
-        /* transform: scale(1);
-        opacity: 1; */
-    }
-
-    /* &::after{
-        position: absolute;
-        top: calc(var(--grid-top-space) * var(--range-check-offset));
-        left: 50%;
-        transform: translate(-50%);
-        height: var(--spacing-x16);
-    } */
-}
-
-.rangeClue {
-
-    grid-row: 1/2;
-    container-type: size;
-    height: 100%;
-    align-content: center;
-    width: 100%;
-    grid-column: var(--gs) / var(--ge);
-    z-index: 20;
-    pointer-events: none;
-
-    .rangeClue-content {
-        display: flex;
-        position: sticky;
-        left: 0;
-        width: max-content;
-        margin: 20cqmin;
-        pointer-events: all;
-        gap: var(--spacing-x4);
-
-        button {
-            color: color-mix(in srgb, var(--color), var(--foreground-default) 85%) !important;
-            font-size: var(--range-clue-size);
-            padding: var(--spacing-x2) var(--spacing-x8);
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            --background-color: color-mix(in srgb, var(--color), var(--background-default) 70%);
-            border-radius: var(--radius-full);
-            border: 0.5px solid var(--color);
-
-            position: relative;
-
-
-            &::before {
-                content: '';
-                width: 110%;
-                height: 140%;
-                position: absolute;
-                top: -30%;
-                left: -5%;
-            }
-
-        }
-
-        &.is-hidden {
-            display: none !important;
-        }
-    }
-}
-
-
-/* ---- Range clue hint visibility (overrides) ---- */
-.rangeClue-hint {
-    display: none;
-    opacity: 0;
-    transform: translateX(-12px);
-    pointer-events: none;
-    transition: opacity 160ms ease, transform 160ms ease;
-
-    &::before {
-        width: 140% !important;
-        left: -20% !important;
-    }
-
-}
-
-.rangeClue.is-hint-visible .rangeClue-hint,
-.rangeClue .rangeClue-content:focus-within .rangeClue-hint,
-.rangeClue .rangeClue-string:focus-visible~.rangeClue-hint,
-.rangeClue.is-hint-intro .rangeClue-hint {
-    display: inline-flex;
-    opacity: 1;
-    transform: translateX(0);
-    pointer-events: auto;
-}
-
-@media (hover: hover) {
-
-    .rangeClue .rangeClue-content:hover .rangeClue-hint,
-    .rangeClue .rangeClue-string:hover~.rangeClue-hint {
-        display: inline-flex;
-        opacity: 1;
-        transform: translateX(0);
-        pointer-events: auto;
-    }
-}
-
-.rangeClue.is-hidden .rangeClue-hint {
-    display: none !important;
-}
-
-.chain-prestart .rangeClue {
-    display: none !important;
-}
-
-
-/* word chain: style clue when solved/locked */
-
-
-/* @supports not (background:color-mix(in srgb, red 10%, transparent)) {
-    .range {
-        background: transparent
-    }
-} */
-
-
-.cell {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    position: relative;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    /* grid-template-rows: subgrid; */
-    grid-template-rows: var(--grid-rows);
-    text-transform: uppercase;
-    color: var(--foreground-default);
-    user-select: none;
-    touch-action: pan-x;
-    mix-blend-mode: multiply;
-
-
-    z-index: 10;
-
-    grid-row: 1/-1;
-    container-type: size;
-
-    font-weight: var(--system-strong);
-    font-family: var(--system-fontfamily);
-
-
-    .letter {
-        grid-row: var(--cell-letter-placement);
-        font-size: var(--letter);
-        height: 100%;
-        place-content: center;
-        display: grid;
-        place-items: center;
-        transform-origin: center;
-
-    }
-
-    .num {
-        grid-row: -2/-1;
-        justify-self: start;
-        align-self: flex-end;
-        padding: var(--spacing-x4);
-        color: var(--foreground-subtle);
-        display: none;
-    }
-
-    &::before {
-        content: '';
-        width: 100%;
-        border-left: calc(var(--border-w) / 2) solid var(--grid-line);
-        grid-row: 1/-1;
-        height: 100%;
-        position: absolute;
-        left: 0;
-    }
-
-    &::after {
-        position: absolute;
-        bottom: -8px;
-        transform: translateY(100%);
-        display: block;
-        width: 24cqmin;
-        aspect-ratio: 1;
-        background-color: var(--foreground-disabled);
-        opacity: 0.8;
-    }
-}
-
-.cell-range-start {
-    &::before {
-        border-radius: var(--radius-relaxed) 0 0 var(--radius-relaxed);
-    }
-}
-
-.cell-range-end {
-    &::before {
-        border-radius: 0 var(--radius-relaxed) var(--radius-relaxed) 0;
-    }
-}
-
-.cell.is-active,
-.cell.is-select-all {
-    &::before {
-        background-color: var(--opacity-dimm-subtle) !important;
-    }
-}
-
-.cell-height-full {
-    &::before {
-        grid-row: 1/-1 !important;
-    }
-}
-
-.cell-height-mid {
-    &::before {
-        grid-row: 2/-2 !important;
-    }
-}
-
-.cell-height-inner {
-    &::before {
-        grid-row: 3/-3 !important;
-    }
-}
-
-.cell-solved {
-    .letter {
-        opacity: 0.16;
-        transition: opacity 220ms ease;
-    }
-
-    /* keep solved letters full-strength while animating, then fade after */
-    .letter.solve-anim {
-        opacity: 1;
-    }
-
-    /* &::after{
-        content:'';
-        -webkit-mask: url("images/check.svg") center / contain no-repeat;
-        mask: url("images/check.svg") center / contain no-repeat;
-    } */
-}
-
-.cell-locked {
-    &::after {
-        content: '';
-        /* -webkit-mask: url("images/lock.svg") center / contain no-repeat;
-        mask: url("images/lock.svg") center / contain no-repeat; */
-        width: var(--spacing-x8);
-        border-radius: var(--radius-full);
-        background-color: var(--background-medium);
-    }
-}
-
-@supports (font: -apple-system-body) {
-    .cell {
-        grid-template-rows: var(--grid-rows) !important;
-    }
-
-}
-
-.letter.solve-anim {
-    animation: solveWave 600ms ease var(--solve-delay, 0ms) both;
-    will-change: transform, color, text-shadow;
-    opacity: 1;
-}
-
-@keyframes solveWave {
-    0% {
-        transform: scale(0.96);
-        text-shadow: none;
-    }
-
-    35% {
-        transform: scale(1.2);
-        text-shadow: 12px 12px 16px color-mix(in srgb, var(--foreground-default) 30%, transparent);
-        /* opacity: 0.4; */
-    }
-
-    100% {
-        transform: scale(1);
-        text-shadow: none;
-        /* opacity: 0.4; */
-    }
-}
-
-/* .grid.showNums .num {
-    display: block
-} */
-.is-dev .cell .num {
-    display: block;
-}
-
-[data-mode="dark"] {
-    .cell {
-        mix-blend-mode: screen !important;
-    }
-
-    .cell.is-active,
-    .cell.is-select-all {
-        &::before {
-            background-color: var(--opacity-lighten-subtle) !important;
-        }
-    }
-}
-
-/* .cell.is-active {
-    background: var(--opacity-dimm-subtle) !important;
-
-    &::after, &::before{
-    content: '';
-    width: var(--spacing-x8);
-    aspect-ratio: 1;
-    border-radius: var(--radius-full);
-    background: var(--background-subtle);
-    position: absolute;
-    bottom: calc(var(--spacing-x32) * -1);
-    pointer-events: none;
-
-    width: 1px;
-    height: 16px;
-    aspect-ratio: unset;
-    background: var(--background-medium);
-    }
-
-    &::before{
-    bottom:unset;
-    top: calc(var(--spacing-x32) * -1);
-    }
-} */
-
-.cell.is-bad {
-    background: rgba(255, 43, 29, .09);
-    box-shadow: inset 0 0 0 2px rgba(255, 43, 29, .35)
-}
-
-.clue {
-    display: inline-flex;
-    align-items: center;
-    cursor: default;
-    gap: var(--spacing-x8);
-    /* padding: var(--spacing-x8); */
-    color: var(--foreground-default);
-    /* text-transform: uppercase */
-}
-
-
-.range-swatch {
-    width: var(--spacing-x24);
-    aspect-ratio: 1;
-    border: var(--border-w) solid var(--color);
-    flex: 0 0 auto;
-    background: color-mix(in srgb, color-mix(in srgb, var(--color), var(--background-default) 85%), transparent var(--range-transparency-pc));
-}
-
-.helper {
-    /* margin: var(--spacing-x24) auto; */
-    /* text-align: center; */
-    /* color: var(--foreground-muted); */
+/* -----------------------------
+Puzzle Navigation
+----------------------------- */
+
+.puzzle-nav {
     display: flex;
-    justify-content: end;
-    gap: var(--spacing-x8);
-    /* flex-wrap: wrap; */
-    align-items: center;
-    /* padding-inline: var(--layout-grid-margin); */
-    /* width: 100%; */
-    /* max-width: var(--layout-content-md-max); */
-    /* margin: var(--spacing-x12) auto; */
-    /* flex-wrap: wrap; */
+    justify-content: space-between;
+    padding-inline: var(--layout-grid-margin);
+    max-width: var(--layout-content-md-max);
+    align-self: center;
+    width: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
 
-    button {
-        min-height: var(--unit-40);
+    #navWordPrev,
+    #navWordNext {
+        --icon: url("images/double-right-arrow.svg");
     }
 
-    .chainHud {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-x8);
-        justify-content: space-between;
-        /* justify-content: flex-end; */
-        flex: 1;
-    }
-
-    /* .chainTimerLabel {
-        font-variant-numeric: tabular-nums;
-        background: var(--background-subtle);
-        color: var(--foreground-muted);
-        padding: var(--spacing-x2) var(--spacing-x4);
-        border-radius: var(--radius-slight);
-    } */
-
-    .puzzle-actions {
-        display: flex;
-        gap: var(--spacing-x8);
-        justify-content: end;
-        flex-wrap: wrap;
-        flex: 1;
-
+    .puzzle-nav-prev {
         button {
-            color: var(--foreground-muted);
+            --icon-rotation: 180deg;
         }
     }
-
-    #shareInline {
-        display: none;
-    }
 }
 
-body[data-view="play"] {
-    #next,
-    #prev {
-        display: block;
+[data-autocheck="false"] {
+    .word-solved-count {
+        color: var(--foreground-disabled);
     }
-}
-
-#reset {
-    display: none;
 }
 
 /* Slider (word chain scroll) */
@@ -1283,6 +1114,16 @@ body:has(#showOnscreenKeyboard:checked) {
 /* -----------------------------
 Splash settings
 ----------------------------- */
+
+#pClear {
+    display: none;
+}
+
+.is-dev {
+    #pClear {
+        display: block;
+    }
+}
 
 .splash {
     .splash__top {
@@ -1468,16 +1309,17 @@ Splash main
 FTUE
 ----------------------------- */
 
-  .archive{
+.archive {
 
 
-        transition:none!important;
-        
-    }
-     .archive__dialog{
-        transition:unset;
-        transform: unset;
-     }
+    transition: none !important;
+
+}
+
+.archive__dialog {
+    transition: unset;
+    transform: unset;
+}
 
 
 .ftue-modal,
@@ -1888,9 +1730,10 @@ Archive
     [data-state="complete"] {
         --icon-color: var(--system-positive-default);
     }
+
     [data-hard-mode="true"] {
-    --meta-background-color: var(--system-warning-muted);
-}
+        --meta-background-color: var(--system-warning-muted);
+    }
 
 }
 
@@ -1913,7 +1756,7 @@ Archive
 }
 
 [data-state="complete"] {
-    color: var(--foreground-subtle)!important;
+    color: var(--foreground-subtle) !important;
     --icon: url("images/check-solid.svg");
     --icon-color: var(--system-positive-muted);
     --meta-background-color: var(--system-positive-subtle);
@@ -1921,7 +1764,7 @@ Archive
 
 [data-hard-mode="true"] {
     --icon: url("images/star.svg");
-    --icon-color: var(--system-warning-default)!important;
+    --icon-color: var(--system-warning-default) !important;
     --meta-background-color: var(--system-warning-subtle);
 }
 

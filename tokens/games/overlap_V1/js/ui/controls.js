@@ -20,7 +20,8 @@ export function bindControlEvents({
   splashState,
   openArchiveModal,
   setTab,
-  loadByViewOffset,
+  loadPuzzle,
+  findTodayChainIndex,
   chainForceIdleZero,
   resetPlay,
   revealPlay,
@@ -53,11 +54,7 @@ export function bindControlEvents({
   clearAllChainProgress,
   clearChainStats,
 } = {}) {
-  // Reset / Reveal
-  els.reset.addEventListener("click", () => {
-    resetPlay();
-    if (play.mode === MODE.CHAIN) chainForceIdleZero();
-  });
+  // Reveal
   els.reveal.addEventListener("click", () => {
     markInteracted();
     if (play.mode === MODE.CHAIN && !play.done) {
@@ -108,15 +105,12 @@ export function bindControlEvents({
     e.preventDefault();
     // Update splash content to tutorial context then open FTUE
     closeSplash();
+    const todayIdx =
+      typeof findTodayChainIndex === "function" ? findTodayChainIndex() : null;
+    if (todayIdx != null && typeof loadPuzzle === "function") {
+      loadPuzzle(todayIdx, { skipLastPlayed: true });
+    }
     openFtue(0, { instant: true, noAnim: true });
-  });
-  els.nextPuzzleBtn?.addEventListener("click", () => {
-    markInteracted();
-    loadByViewOffset(1);
-  });
-  els.shareInline?.addEventListener("click", () => {
-    markInteracted();
-    shareResult({ mode: play.mode });
   });
   els.shareBtn?.addEventListener("click", () => {
     markInteracted();

@@ -33,23 +33,10 @@
         <h1 class="text-subheadline-semibold-lg">Overlap</h1>
       </div>
 
-      <div class="helper">
-
-
-        <div class="puzzle-actions">
-          <button class="btn text-system-semibold-sm" id="reset" type="button">Reset</button>
-          <button class="btn text-system-semibold-sm" id="shareInline" type="button" style="display:none">Share</button>
-          <button class="btn text-system-semibold-sm" id="reveal" type="button">Give Up</button>
-          <button class="btn primary text-system-semibold-sm" id="nextPuzzleBtn" type="button" style="display:none">Next
-            puzzle</button>
-        </div>
-        <div class="chainHud" hidden>
-          <button class="btn text-system-semibold-sm" id="chainStartBtn" type="button">
-            <span class="chainTimerLabel" aria-hidden="true">00:00</span>
-            <span class="chainStartLabel">Start</span>
-          </button>
-        </div>
-        <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
+      <div class="puzzle-controls text-system-semibold-sm">
+        <button class="btn" id="reveal" type="button">Give Up</button>
+        <button class="btn" id="pause" type="button">00:00</button>
+        <button class="btn primary" id="viewResults" type="button" hidden>View Results</button>
       </div>
     </div>
   </header>
@@ -57,7 +44,7 @@
   <!-- Main Stage -->
   <section class="stage" id="stage" tabindex="0" role="application" aria-label="Overlap puzzle">
     <p id="archiveDate" class="text-system-regular-sm" hidden></p>
-    
+
     <div class="gridScroll" id="gridScroll">
       <div class="grid" id="grid" aria-describedby="sr"></div>
 
@@ -95,10 +82,34 @@
       </div>
     </div>
     <div class="game-slider"></div>
+    <div class="keyboard"></div>
   </section>
-
-  <div class="keyboard"></div>
   </main>
+
+  <!-- MODALS -->
+
+  <!-- Give Up confirm -->
+  <div class="give-up results text-system-regular-md" id="giveUpModal" role="dialog" aria-modal="true"
+    aria-label="Confirm give up" hidden>
+    <div class="card results__dialog">
+      <div class="result-heading">
+        <h2 class="text-headline-semibold-lg">Give up?</h2>
+        <p class="resultsSubtitle giveUpSubtitle">
+          <span class="giveUpUnsolvedLine">You still have
+            <span class="giveUpWordsCount">00</span>
+            unsolved <span class="giveUpWordLabel">words</span>.</span>
+          Giving up will add
+          <span class="giveUpSeconds">00</span>
+          to your total time.
+        </p>
+      </div>
+      <div class="actions">
+        <button class="btn text-system-regular-md" id="giveUpCancel" type="button">Cancel</button>
+        <button class="btn primary text-system-regular-md" id="giveUpConfirm" type="button">Yes, give up</button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Results -->
   <div class="results text-system-regular-md" id="results" role="dialog" aria-modal="true" aria-label="Results">
@@ -139,29 +150,6 @@
       <div class="toast resultsShareToast" aria-live="polite" aria-atomic="true"></div>
     </div>
   </div>
-
-  <!-- Give Up confirm -->
-  <div class="give-up results text-system-regular-md" id="giveUpModal" role="dialog" aria-modal="true"
-    aria-label="Confirm give up" hidden>
-    <div class="card results__dialog">
-      <div class="result-heading">
-        <h2 class="text-headline-semibold-lg">Give up?</h2>
-        <p class="resultsSubtitle giveUpSubtitle">
-          <span class="giveUpUnsolvedLine">You still have
-            <span class="giveUpWordsCount">00</span>
-            unsolved <span class="giveUpWordLabel">words</span>.</span>
-          Giving up will add
-          <span class="giveUpSeconds">00</span>
-          to your total time.
-        </p>
-      </div>
-      <div class="actions">
-        <button class="btn text-system-regular-md" id="giveUpCancel" type="button">Cancel</button>
-        <button class="btn primary text-system-regular-md" id="giveUpConfirm" type="button">Yes, give up</button>
-      </div>
-    </div>
-  </div>
-
 
   <!-- FTUE modal -->
   <div id="ftueModal" class="ftue-modal" aria-hidden="true" hidden>
@@ -255,6 +243,7 @@
     <div class="splash__dialog card elevation-overlay">
       <div class="splash__top">
         <div class="splash__utilities">
+                  <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
           <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
             <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
               aria-live="polite" aria-atomic="true">Copied to clipboard</div>
@@ -338,7 +327,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V4.13</span>
+            id="splashVersion">V4.14</span>
         </p>
       </footer>
     </div>

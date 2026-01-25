@@ -28,9 +28,6 @@ export function createChainClues({
 
     const preStart = play.mode === MODE.CHAIN && !chain.started;
 
-    // toggle a class so you can also handle with CSS if you want
-    document.documentElement.classList.toggle("chain-prestart", preStart);
-
     // hard-hide inline clues during pre-start (covers common selectors)
     els?.grid?.querySelectorAll(".rangeClue").forEach((el) => {
       el.classList.toggle("is-hidden", preStart);

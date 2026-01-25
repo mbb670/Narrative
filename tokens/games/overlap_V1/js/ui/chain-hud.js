@@ -50,6 +50,19 @@ export function createChainHud({
       };
   const states = chainUiStates || { IDLE: "idle", RUNNING: "running", PAUSED: "paused", DONE: "done" };
 
+  function chainActionLabel(state) {
+    if (state === states.RUNNING) return "Pause";
+    return "Play";
+  }
+
+  function updatePauseButtonUI(state, ui, timeSec) {
+    if (!ui?.startBtn) return;
+    const timeText = formatTime(timeSec || 0);
+    ui.startBtn.textContent = timeText;
+    const action = chainActionLabel(state);
+    ui.startBtn.setAttribute("aria-label", `${action} (${timeText})`);
+  }
+
   // Update global chain state and HUD labels/timer visibility.
   function chainSetUIState(state, ui = ensureChainUI()) {
     if (!ui) return;
@@ -57,32 +70,15 @@ export function createChainHud({
     if (!chain) return;
 
     // global hook for CSS
-    document.body.dataset.chainState = state;
+    document.body.dataset.gameState = state;
 
     // button hook for CSS
     ui.startBtn.dataset.state = state;
 
-    const visibleLabel =
-      state === states.IDLE ? "Start" :
-      state === states.DONE ? "View results" :
-      "";
-    const ariaLabel =
-      state === states.IDLE ? "Start" :
-      state === states.RUNNING ? "Pause" :
-      state === states.PAUSED ? "Resume" :
-      "View results";
-    if (ui.label) ui.label.textContent = visibleLabel;
-    else ui.startBtn.textContent = visibleLabel;
-    ui.startBtn.setAttribute("aria-label", ariaLabel);
+    const current = Number.isFinite(chain.elapsed) ? chain.elapsed : 0;
+    updatePauseButtonUI(state, ui, current);
 
-    const showTimer = state === states.RUNNING || state === states.PAUSED;
-    if (ui.timer) {
-      ui.timer.hidden = !showTimer;
-      const current = Number.isFinite(chain.elapsed) ? chain.elapsed : 0;
-      ui.timer.textContent = formatTime(current);
-    }
-
-    // toggle reset/reveal visibility in chain mode
+    // toggle reveal visibility in chain mode
     if (typeof updateResetRevealVisibility === "function") updateResetRevealVisibility(state);
     if (typeof updatePuzzleActionsVisibility === "function") updatePuzzleActionsVisibility(state);
   }
@@ -91,28 +87,19 @@ export function createChainHud({
   function ensureChainUI() {
     if (chainUI) return chainUI;
 
-    const hud = document.querySelector(".chainHud");
-    if (!hud) return null;
+    const startBtn = document.querySelector("#pause");
+    if (!startBtn) return null;
+    const hud = startBtn.closest(".chainHud") || startBtn;
 
     const host = els?.helper || document.body;
     // Ensure the HUD lives near the helper region for consistent layout.
-    if (host && hud.parentElement !== host) host.appendChild(hud);
-
-    const startBtn = hud.querySelector("#chainStartBtn");
+    if (hud !== startBtn && host && hud.parentElement !== host) host.appendChild(hud);
     startBtn?.addEventListener("click", () => {
       if (typeof markInteracted === "function") markInteracted();
       const play = getPlayState();
       const chain = getChainState();
       if (!play || !chain || play.mode !== MODE.CHAIN) return;
-
-      // If completed, button becomes "View results"
-      if (play.done) {
-        if (typeof openChainResults === "function") {
-          const stats = typeof scoreChain === "function" ? scoreChain() : {};
-          openChainResults(stats, chain.lastFinishReason || "solved");
-        }
-        return;
-      }
+      if (play.done) return;
 
       if (!chain.started) {
         if (typeof chainStartNow === "function") chainStartNow();
@@ -123,11 +110,22 @@ export function createChainHud({
       }
     });
 
+    const viewResultsBtn = els?.viewResultsBtn;
+    viewResultsBtn?.addEventListener("click", () => {
+      if (typeof markInteracted === "function") markInteracted();
+      const play = getPlayState();
+      const chain = getChainState();
+      if (!play || !chain || play.mode !== MODE.CHAIN) return;
+      if (!play.done) return;
+      if (typeof openChainResults === "function") {
+        const stats = typeof scoreChain === "function" ? scoreChain() : {};
+        openChainResults(stats, chain.lastFinishReason || "solved");
+      }
+    });
+
     chainUI = {
       hud,
       startBtn,
-      timer: startBtn?.querySelector(".chainTimerLabel"),
-      label: startBtn?.querySelector(".chainStartLabel"),
     };
 
     const play = getPlayState();
@@ -165,7 +163,7 @@ export function createChainHud({
     // snapshot time so resume is accurate
     const elapsed = Math.max(0, (Date.now() - chain.startAt) / 1000);
     chain.elapsed = elapsed;
-    if (ui.timer) ui.timer.textContent = formatTime(elapsed);
+    updatePauseButtonUI(states.PAUSED, ui, elapsed);
 
     chain.running = false;
     chainSetUIState(states.PAUSED, ui);
@@ -266,7 +264,7 @@ export function createChainHud({
       if (!chain.running) return;
       const elapsed = (Date.now() - chain.startAt) / 1000;
       chain.elapsed = elapsed;
-      if (ui.timer) ui.timer.textContent = formatTime(elapsed);
+      updatePauseButtonUI(states.RUNNING, ui, elapsed);
 
       // Throttle persistence so the latest time is saved even without typing.
       const now = performance.now ? performance.now() : Date.now();
@@ -286,7 +284,7 @@ export function createChainHud({
     chain.hintsUsed = 0;
     chain.hintPenaltySecTotal = 0;
     chain.wordPenaltySecTotal = 0;
-    if (ui.timer) ui.timer.textContent = formatTime(0);
+    updatePauseButtonUI(states.IDLE, ui, 0);
   }
 
   function chainForceIdleZero() {
@@ -300,7 +298,7 @@ export function createChainHud({
     chain.left = 0;
     chain.elapsed = 0;
     const ui = ensureChainUI();
-    if (ui?.timer) ui.timer.textContent = formatTime(0);
+    if (ui) updatePauseButtonUI(states.IDLE, ui, 0);
     chainSetUIState(states.IDLE, ui);
     if (typeof setInlineCluesHiddenUntilChainStart === "function") {
       setInlineCluesHiddenUntilChainStart();
@@ -319,7 +317,7 @@ export function createChainHud({
     chain.left = 0;
     chain.elapsed = 0;
     const ui = ensureChainUI();
-    if (ui?.timer) ui.timer.textContent = formatTime(0);
+    if (ui) updatePauseButtonUI(states.DONE, ui, 0);
     chainSetUIState(states.DONE, ui);
     if (typeof setInlineCluesHiddenUntilChainStart === "function") {
       setInlineCluesHiddenUntilChainStart(); // will unhide since started=true

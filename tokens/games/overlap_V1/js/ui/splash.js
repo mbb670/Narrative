@@ -32,6 +32,8 @@ export function createSplash({
   getPlay,
   getChain,
   getPuzzles,
+  getPuzzleIndex,
+  loadPuzzle,
   findTodayChainIndex,
   isWordCorrect,
   chainStatsSummary,
@@ -54,12 +56,44 @@ export function createSplash({
   const getPlayState = () => (typeof getPlay === "function" ? getPlay() : null);
   const getChainState = () => (typeof getChain === "function" ? getChain() : null);
   const getPuzzleList = () => (typeof getPuzzles === "function" ? getPuzzles() : []);
+  const getPuzzleIndexSafe = () => (typeof getPuzzleIndex === "function" ? getPuzzleIndex() : null);
+  const findTodayPuzzle = () => {
+    const today = todayKey();
+    if (!today) return null;
+    const puzzles = getPuzzleList();
+    const idx = typeof findTodayChainIndex === "function" ? findTodayChainIndex() : null;
+    const fromIdx = idx != null ? puzzles[idx] : null;
+    if (fromIdx) return fromIdx;
+    return puzzles.find((p) => normalizePuzzleId(p).id === today) || null;
+  };
+  const ensureTodayPuzzleLoaded = () => {
+    if (typeof loadPuzzle !== "function") return;
+    const puzzles = getPuzzleList();
+    const today = todayKey();
+    if (!today || !puzzles.length) return;
+    let idx = typeof findTodayChainIndex === "function" ? findTodayChainIndex() : null;
+    if (idx == null) {
+      idx = puzzles.findIndex((p) => normalizePuzzleId(p).id === today);
+    }
+    if (idx == null || idx < 0) return;
+    const curIdx = getPuzzleIndexSafe();
+    if (curIdx === idx) return;
+    loadPuzzle(idx);
+  };
 
   // Summary when we are actively in chain view.
   function chainSummaryFromLive() {
     const play = getPlayState();
     const chain = getChainState();
     if (!play || !chain || play.mode !== MODE.CHAIN) return null;
+    const puzzles = getPuzzleList();
+    const idx = getPuzzleIndexSafe();
+    const p = idx != null ? puzzles[idx] : null;
+    if (!p) return null;
+    const today = todayKey();
+    const puzzleId = normalizePuzzleId(p).id;
+    const isCurrentDaily = isDailyChainPuzzle(p) && today && puzzleId === today;
+    if (!isCurrentDaily) return null;
 
     const total = play.entries?.length || 0;
     const solved =
@@ -72,9 +106,7 @@ export function createSplash({
 
   // Summary from persisted chain progress when not in chain view.
   function chainSummaryFromStore() {
-    const idx = typeof findTodayChainIndex === "function" ? findTodayChainIndex() : null;
-    const puzzles = getPuzzleList();
-    const p = idx != null ? puzzles[idx] : null;
+    const p = findTodayPuzzle();
     if (!p) return null;
     const key = chainPuzzleKey(p);
     if (!key) return null;
@@ -90,9 +122,10 @@ export function createSplash({
     if (!data) return { state: "default", solved: 0, total: computed(p).entries?.length || 0 };
 
     const model = computed(p);
-    const total = model.entries?.length || 0;
+    const total =
+      Number.isFinite(data?.stats?.total) ? data.stats.total : (model.entries?.length || 0);
     const usr = Array.isArray(data.usr) ? data.usr : [];
-    const solved = (model.entries || []).filter((e) => {
+    const solvedFromUsr = (model.entries || []).filter((e) => {
       for (let i = 0; i < e.len; i++) {
         const idx = e.start + i;
         if (!usr[idx]) return false;
@@ -100,6 +133,10 @@ export function createSplash({
       }
       return true;
     }).length;
+    const lockedCount = Array.isArray(data.lockedEntries) ? data.lockedEntries.length : 0;
+    const solved =
+      Number.isFinite(data?.stats?.solved) ? data.stats.solved :
+      solvedFromUsr || lockedCount;
 
     const anyInput = usr.some(Boolean);
     const state = data.done
@@ -212,13 +249,14 @@ export function createSplash({
   // Primary CTA handles FTUE gating and resumes/starts the chain.
   function handleSplashPrimary() {
     const seen = typeof hasSeenFtue === "function" ? hasSeenFtue() : true;
-    const play = getPlayState();
-    const chain = getChainState();
-    if (!play || !chain) return;
 
     if (!seen) {
       // First-time: move to chain view in an idle state, then show FTUE (chain must not start yet)
       if (typeof setTab === "function") setTab(VIEW.PLAY);
+      ensureTodayPuzzleLoaded();
+      const play = getPlayState();
+      const chain = getChainState();
+      if (!play || !chain) return;
       if (typeof chainForceIdleZero === "function") chainForceIdleZero();
       chain.started = false;
       chain.running = false;
@@ -233,6 +271,10 @@ export function createSplash({
 
     const state = splashState();
     if (typeof setTab === "function") setTab(VIEW.PLAY);
+    ensureTodayPuzzleLoaded();
+    const play = getPlayState();
+    const chain = getChainState();
+    if (!play || !chain) return;
     if (state === "complete") {
       closeSplash();
       return;

@@ -47,10 +47,6 @@ export function createTabs({
     const skipEnsure = opts && opts.skipEnsure === true;
     setViewSafe(next);
 
-    // "view" controls which puzzle list is active and which UI elements are visible.
-    // Global hook for CSS
-    if (document?.body) document.body.dataset.view = next;
-
     updateKeyboard();
 
     if (!skipEnsure) ensurePuzzleView();

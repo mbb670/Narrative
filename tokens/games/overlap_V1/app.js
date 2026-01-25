@@ -693,7 +693,6 @@ const { openGiveUpModal, closeGiveUpModal } = giveUpUI;
 const {
   indicesForView,
   findTodayChainIndex,
-  loadByViewOffset,
   ensureCurrentPuzzleMatchesView,
 } = createViewHelpers({
   getPuzzles: () => puzzles,
@@ -777,6 +776,8 @@ splashUI = createSplash({
   getPlay: () => play,
   getChain: () => chain,
   getPuzzles: () => puzzles,
+  getPuzzleIndex: () => pIdx,
+  loadPuzzle,
   findTodayChainIndex,
   isWordCorrect,
   chainStatsSummary,
@@ -946,7 +947,8 @@ bindControlEvents({
   splashState,
   openArchiveModal,
   setTab,
-  loadByViewOffset,
+  loadPuzzle,
+  findTodayChainIndex,
   chainForceIdleZero,
   resetPlay,
   revealPlay,

@@ -216,7 +216,7 @@ export function createHints({
     const chain = getChain();
     if (play.mode === MODE.CHAIN && !chain.started) return;
     const clues = els.grid?.querySelectorAll(".rangeClue:not(.is-hidden)") || [];
-    if (!clues.length || document.documentElement.classList.contains("chain-prestart")) return;
+    if (!clues.length) return;
 
     if (_rangeHintIntroTimer) clearTimeout(_rangeHintIntroTimer);
     if (_rangeHintIntroClearTimer) clearTimeout(_rangeHintIntroClearTimer);
