@@ -6,6 +6,7 @@
  * Key interactions: Uses play/actions and dom cache.
  */
 // Give-up confirm modal helpers.
+import { bindDialogDismiss } from "./dialogs.js";
 
 export function createGiveUpModal({
   els,
@@ -30,6 +31,8 @@ export function createGiveUpModal({
   const autoCheckEnabled =
     typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
 
+  bindDialogDismiss(els?.giveUpModal, () => els.giveUpCancel?.click());
+
   // Shows penalty summary before revealing chain answers.
   function openGiveUpModal() {
     if (!els?.giveUpModal) return;
@@ -42,9 +45,9 @@ export function createGiveUpModal({
     if (els.giveUpWordLabel) els.giveUpWordLabel.textContent = unsolvedWords === 1 ? "word" : "words";
     if (els.giveUpSeconds) els.giveUpSeconds.textContent = formatTime(penaltySec);
 
-    els.giveUpModal.hidden = false;
-    els.giveUpModal.classList.add("is-open");
-    els.giveUpModal.setAttribute("aria-hidden", "false");
+    if (typeof els.giveUpModal.showModal === "function") {
+      els.giveUpModal.showModal();
+    }
 
     try {
       els.giveUpConfirm?.focus({ preventScroll: true });
@@ -53,9 +56,9 @@ export function createGiveUpModal({
 
   function closeGiveUpModal() {
     if (!els?.giveUpModal) return;
-    els.giveUpModal.classList.remove("is-open");
-    els.giveUpModal.hidden = true;
-    els.giveUpModal.setAttribute("aria-hidden", "true");
+    if (typeof els.giveUpModal.close === "function") {
+      els.giveUpModal.close();
+    }
   }
 
   return { openGiveUpModal, closeGiveUpModal };

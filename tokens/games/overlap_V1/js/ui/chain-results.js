@@ -7,6 +7,7 @@
  */
 // Chain results modal helpers.
 import { MODE } from "../core/config.js";
+import { bindDialogDismiss } from "./dialogs.js";
 import { puzzleDateLabel, puzzleLabel } from "../utils/index.js";
 
 export function createChainResults({
@@ -47,27 +48,7 @@ export function createChainResults({
     const cClose = els?.resultsClose;
     const cShare = els?.resultsShare;
 
-    wrap.addEventListener("click", (e) => {
-      if (e.target !== wrap) return;
-      const rect = wrap.getBoundingClientRect();
-      const isBackdropClick =
-        e.clientX < rect.left ||
-        e.clientX > rect.right ||
-        e.clientY < rect.top ||
-        e.clientY > rect.bottom;
-      if (!isBackdropClick) return;
-      if (typeof onOverlayClose === "function") onOverlayClose();
-      closeChainResults();
-    });
-    wrap.addEventListener("cancel", (e) => {
-      e.preventDefault();
-      if (typeof onOverlayClose === "function") onOverlayClose();
-      closeChainResults();
-    });
-    wrap.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      e.stopPropagation();
+    bindDialogDismiss(wrap, () => {
       if (typeof onOverlayClose === "function") onOverlayClose();
       closeChainResults();
     });

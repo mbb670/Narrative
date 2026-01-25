@@ -89,26 +89,24 @@
   <!-- MODALS -->
 
   <!-- Give Up confirm -->
-  <div class="give-up results text-system-regular-md" id="giveUpModal" role="dialog" aria-modal="true"
-    aria-label="Confirm give up" hidden>
-    <div class="card results__dialog">
-      <div class="result-heading">
-        <h2 class="text-headline-semibold-lg">Give up?</h2>
-        <p class="resultsSubtitle giveUpSubtitle">
-          <span class="giveUpUnsolvedLine">You still have
-            <span class="giveUpWordsCount">00</span>
-            unsolved <span class="giveUpWordLabel">words</span>.</span>
-          Giving up will add
-          <span class="giveUpSeconds">00</span>
-          to your total time.
-        </p>
-      </div>
-      <div class="actions">
-        <button class="btn text-system-regular-md" id="giveUpCancel" type="button">Cancel</button>
-        <button class="btn primary text-system-regular-md" id="giveUpConfirm" type="button">Yes, give up</button>
-      </div>
+  <dialog class="give-up results card text-system-regular-md elevation-overlay" id="giveUpModal"
+    aria-label="Confirm give up">
+    <div class="result-heading">
+      <h2 class="text-headline-semibold-lg">Give up?</h2>
+      <p class="resultsSubtitle giveUpSubtitle">
+        <span class="giveUpUnsolvedLine">You still have
+          <span class="giveUpWordsCount">00</span>
+          unsolved <span class="giveUpWordLabel">words</span>.</span>
+        Giving up will add
+        <span class="giveUpSeconds">00</span>
+        to your total time.
+      </p>
     </div>
-  </div>
+    <div class="actions">
+      <button class="btn text-system-regular-md" id="giveUpCancel" type="button">Cancel</button>
+      <button class="btn primary text-system-regular-md" id="giveUpConfirm" type="button">Yes, give up</button>
+    </div>
+  </dialog>
 
 
   <!-- Results -->
@@ -325,7 +323,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V4.15</span>
+            id="splashVersion">V4.16</span>
         </p>
       </footer>
     </div>

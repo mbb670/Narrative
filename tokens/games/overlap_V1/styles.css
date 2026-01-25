@@ -1948,6 +1948,12 @@ Results
     --icon: url("images/close.svg");
 }
 
+.give-up{
+    .actions{
+        width: 100%;
+    }
+}
+
 .giveUpSubtitle {
     margin-top: var(--spacing-x8);
 
@@ -2138,13 +2144,13 @@ body:has(#showOnscreenKeyboard:checked) .keyboard {
 }
 
 /* Results dialog overrides */
-.results {
-    display: none;
-   
-}
 
-.results[open] {
+
+.results, .give-up {
+    display: none;
+    &[open]{
     display: flex;
+    }
 }
 
 dialog{
