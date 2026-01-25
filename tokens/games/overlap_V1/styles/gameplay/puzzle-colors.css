@@ -1,0 +1,71 @@
+/* -----------------------------
+Puzzle Colors
+----------------------------- */
+
+:root {
+    --puzzle-color-1: #59D3FF;
+    --puzzle-color-2: #313A73;
+    --puzzle-color-3: #61A87D;
+    --puzzle-color-4: #7EE081;
+    --puzzle-color-5: #d1f3d0;
+}
+
+/* [data-puzzle-palette="MON"] {
+    --puzzle-color-1: #ff2b1d;
+    --puzzle-color-2: #ff7a1a;
+    --puzzle-color-3: #f5b800;
+    --puzzle-color-4: #2f8f1d;
+    --puzzle-color-5: #2b74ff;
+}
+
+[data-puzzle-palette="TUE"] {
+    --puzzle-color-1: #ff5f6d;
+    --puzzle-color-2: #ffc371;
+    --puzzle-color-3: #ffe29f;
+    --puzzle-color-4: #c4f1be;
+    --puzzle-color-5: #7aa2ff;
+}
+
+[data-mode="dark"] [data-puzzle-palette="TUE"] {
+    --puzzle-color-1: red;
+    --puzzle-color-2: orange;
+    --puzzle-color-3: yellow;
+    --puzzle-color-4: green;
+    --puzzle-color-5: blue;
+}
+
+
+[data-puzzle-palette="WED"] {
+    --puzzle-color-1: #59D3FF;
+    --puzzle-color-2: #313A73;
+    --puzzle-color-3: #61A87D;
+    --puzzle-color-4: #7EE081;
+    --puzzle-color-5: #d1f3d0;
+}
+
+[data-puzzle-palette="THU"] {
+    --puzzle-color-1: #FF8360;
+    --puzzle-color-2: #E8E288;
+    --puzzle-color-3: #7DCE82;
+    --puzzle-color-4: #3CDBD3;
+    --puzzle-color-5: #00FFF5;
+}
+
+[data-puzzle-palette="FRI"] {
+    --puzzle-color-1: #034732;
+    --puzzle-color-2: #008148;
+    --puzzle-color-3: #C6C013;
+    --puzzle-color-4: #EF8A17;
+    --puzzle-color-5: #EF2917;
+}
+
+
+[data-puzzle-palette="SAT"] {
+    --puzzle-color-1: #173f5f;
+    --puzzle-color-2: #20639b;
+    --puzzle-color-3: #3caea3;
+    --puzzle-color-4: #f6d55c;
+    --puzzle-color-5: #ed553b;
+} */
+
+

@@ -1,0 +1,222 @@
+/* -----------------------------
+Archive
+----------------------------- */
+
+.archive {
+    justify-content: space-between;
+}
+
+.archive__controls {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-x8);
+    margin-bottom: var(--spacing-x32);
+
+
+    .archive__calendar-select {
+        display: inherit;
+        gap: inherit;
+
+        #archiveMonthSelect {
+            width: var(--unit-112);
+            width: 112px;
+        }
+
+        #archiveYearSelect {
+            width: var(--unit-80);
+        }
+    }
+
+    #archiveNextMonth,
+    #archivePrevMonth {
+        --icon-color: var(--foreground-subtle);
+    }
+
+    #archivePrevMonth {
+        --icon-rotation: 180deg;
+
+    }
+}
+
+[disabled=""] {
+    color: var(--foreground-disabled);
+    opacity: 0.8;
+}
+
+.archive__weekdays {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding-bottom: var(--spacing-x8);
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--foreground-subtle);
+    margin-bottom: var(--spacing-x8);
+}
+
+.archive__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: var(--spacing-x8);
+}
+
+.archive-day {
+    padding: var(--unit-6);
+    --background-color: transparent;
+    border-radius: var(--radius-soft);
+    color: var(--foreground-muted);
+    font-size: inherit;
+    line-height: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+
+    .archive-day-label{
+        color: inherit;
+    }
+
+    .archive-day-meta {
+        aspect-ratio: 1;
+        display: block;
+        border-radius: var(--radius-default);
+        margin-bottom: var(--spacing-x8);
+        position: relative;
+        outline: 1px solid var(--icon-color);
+        background-color: var(--meta-background-color);
+
+        &::before {
+
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40%;
+            transform: translate(-50%, -50%);
+            aspect-ratio: 1;
+            background-color: var(--icon-color);
+            -webkit-mask: var(--icon) center / contain no-repeat;
+            mask: var(--icon) center / contain no-repeat;
+        }
+    }
+
+    &.is-selected {
+        position: relative;
+        pointer-events: none;
+
+        &::after {
+            content: '';
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-radius: var(--radius-soft);
+            background-color: var(--opacity-dimm-none);
+            outline: 1px solid var(--opacity-dimm-muted);
+            z-index: -1;
+        }
+    }
+}
+
+[data-mode="dark"] {
+    .archive-day {
+        &.is-selected {
+            &::after {
+                background-color: var(--opacity-lighten-subtle);
+                outline: 1px solid var(--opacity-lighten-muted);
+            }
+        }
+    }
+
+    [data-state="complete"] {
+        --icon-color: var(--system-positive-default);
+    }
+
+    [data-hard-mode="true"] {
+        --meta-background-color: var(--system-warning-muted);
+    }
+
+}
+
+[data-state="not-started"] {
+    .archive-day-meta {
+        &::before {
+            display: none;
+        }
+    }
+}
+
+[data-state="not-started"],
+[data-state="progress"] {
+    --icon-color: var(--system-informative-default);
+    --meta-background-color: var(--system-informative-subtle);
+}
+
+[data-state="progress"] {
+    --icon: url("../../images/icons/in-progress.svg");
+}
+
+[data-state="complete"] {
+    color: var(--foreground-subtle) !important;
+    --icon: url("../../images/icons/check-solid.svg");
+    --icon-color: var(--system-positive-muted);
+    --meta-background-color: var(--system-positive-subtle);
+}
+
+[data-hard-mode="true"] {
+    --icon: url("../../images/icons/star.svg");
+    --icon-color: var(--system-warning-default) !important;
+    --meta-background-color: var(--system-warning-subtle);
+}
+
+.is-empty {
+    pointer-events: none;
+
+    .archive-day-meta {
+        display: none;
+    }
+}
+
+[data-future="true"],
+[data-has-puzzle="false"] {
+    pointer-events: none;
+    position: relative;
+    color: transparent;
+
+    .archive-day-meta {
+
+        &::after {
+            content: '';
+            background-color: var(--background-subtle);
+            width: var(--spacing-x12);
+            aspect-ratio: 1;
+            border-radius: var(--radius-full);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+        }
+    }
+}
+
+.is-dev [data-has-puzzle="true"] {
+    pointer-events: all;
+    color: var(--foreground-default);
+}
+
+
+#archiveActionBtn {
+    width: 100%;
+    height: var(--unit-48);
+    span{
+        color: inherit;
+    }
+}
+
+#archiveDate {
+    color: var(--foreground-muted);
+    margin-top: var(--spacing-x8);
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+    text-align: center;
+}

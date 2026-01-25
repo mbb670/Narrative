@@ -1,0 +1,100 @@
+/* -----------------------------
+Logo Design
+----------------------------- */
+
+.logo {
+    display: flex;
+    gap: var(--spacing-x8);
+    cursor: pointer;
+}
+
+.logo-icon {
+    width: 100px;
+    aspect-ratio: 1;
+    position: relative;
+    container-type: size;
+
+    &::before,
+    &::after {
+        content: '';
+        width: 70%;
+        aspect-ratio: 1;
+        background: var(--system-positive-subtle);
+        display: block;
+        border-radius: 24%;
+        border: 4cqmin solid var(--system-positive-default);
+        position: absolute;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+        transition: transform 0.15s ease-in-out;
+
+    }
+
+    &::before {
+        top: 0;
+        left: 0;
+        --shift: -32%;
+        --layer: 1;
+        box-shadow: 12cqmin 12cqmin 24cqmin 0 var(--color-alpha-black-a100);
+
+    }
+
+    &::after {
+        background: var(--system-informative-subtle);
+        border-color: var(--system-informative-default);
+        bottom: 0;
+        right: 0;
+        --shift: 32%;
+        --layer: 0;
+        box-shadow: -12cqmin -12cqmin 24cqmin 0 var(--color-alpha-black-a100);
+    }
+}
+
+.logo-icon-animation {
+
+    &::before,
+    &::after {
+        animation: logoAnimation 8s ease-in-out infinite alternate both;
+    }
+}
+
+.logo-hover {
+    &:hover {
+        .logo-icon {
+
+            &::before,
+            &::after {
+                transform: translate3d(calc(var(--shift)/2), calc(var(--shift)/2), 0);
+            }
+        }
+    }
+}
+
+@keyframes logoAnimation {
+
+    /* pause at center */
+    0%,
+    45% {
+        transform: translate3d(0, 0, 0);
+        z-index: 0;
+    }
+
+    /* move out */
+    50% {
+        transform: translate3d(var(--shift), var(--shift), 0);
+        z-index: 0;
+    }
+
+    /* jump z-index after move completes + pause at the far end */
+    50.1% {
+        transform: translate3d(var(--shift), var(--shift), 0);
+        z-index: var(--layer);
+    }
+
+    /* move back + pause at center */
+    55%,
+    100% {
+        transform: translate3d(0, 0, 0);
+        z-index: var(--layer);
+    }
+}

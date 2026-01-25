@@ -1,0 +1,168 @@
+/* -----------------------------
+Interactive elements
+----------------------------- */
+button {
+    touch-action: manipulation;
+}
+
+.tabs {
+    padding: var(--unit-6);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-x2);
+    background-color: var(--background-muted);
+    border-radius: var(--radius-soft);
+    height: max-content;
+    width: 100%;
+    width: max-content;
+}
+
+.dropdown {
+    border: 1px solid var(--border-muted);
+    border-radius: var(--radius-default);
+}
+
+/* Base (shared) */
+:is(.tab, .btn) {
+    --background-color: transparent;
+    border: 1px solid var(--border-subtle);
+    padding: var(--spacing-x8) var(--spacing-x12);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    color: var(--foreground-default);
+}
+
+/* Button */
+.btn {
+    border-radius: var(--radius-default);
+    align-items: center;
+    place-content: center;
+    display: flex;
+    gap: var(--unit-6);
+
+    &.primary {
+        border-color: var(--border-strong);
+        --background-color: var(--background-strong);
+        color: var(--foreground-alt)!important;
+    }
+
+        &::before, &::after{
+        aspect-ratio: 1;
+        width: var(--icon-width, var(--spacing-x12));
+        -webkit-mask: var(--icon) center / contain no-repeat;
+        mask: var(--icon) center / contain no-repeat;
+        rotate: var(--icon-rotation);
+        background-color: var(--icon-color);
+    }
+}
+
+.icon-leading{
+ &::before{
+        content: '';
+    }
+}
+
+.icon-trailing{
+ &::after{
+        content: '';
+    }
+}
+
+/* Icon Button */
+.btn-icon {
+    aspect-ratio: 1;
+    width: var(--unit-36);
+    padding: var(--spacing-x12);
+    --icon: url("../../images/icons/arrow.svg");
+    --icon-color: var(--foreground-subtle);
+    --icon-rotation: 0;
+
+    &::before {
+        content: '';
+        display: block;
+        aspect-ratio: 1;
+        background-color: var(--icon-color);
+        rotate: var(--icon-rotation);
+        -webkit-mask: var(--icon) center / contain no-repeat;
+        mask: var(--icon) center / contain no-repeat;
+    }
+}
+
+.tab {
+    border: 0;
+    height: var(--unit-32);
+    padding-inline: var(--spacing-x8);
+    padding-block: 0;
+    border-radius: var(--radius-default);
+    color: var(--foreground-subtle);
+
+    &.is-active {
+        --background-color: unset;
+        background: var(--background-default) !important;
+        color: var(--foreground-default);
+        outline: 1px solid var(--border-subtle);
+        box-shadow: 0 var(--unit-2) var(--unit-8) 0 var(--color-alpha-black-A100);
+
+        &::before,
+        &::after {
+            background-color: var(--foreground-default) !important;
+        }
+    }
+}
+
+.tab {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+}
+
+.toggle {
+    width: var(--unit-48);
+    height: var(--unit-24);
+    border-radius: var(--radius-full);
+    background: var(--background-subtle);
+    border: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    padding: var(--unit-2);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    transition: background-color 160ms ease, border-color 160ms ease;
+
+    &::before {
+        content: '';
+        height: 100%;
+        aspect-ratio: 1;
+        background-color: var(--foreground-disabled);
+        display: block;
+        border-radius: var(--radius-full);
+        box-shadow: 0 var(--unit-2) var(--unit-4) var(--color-alpha-black-A100);
+
+        /* slide animation */
+        transform: translateX(0);
+        transition: transform 160ms ease, background-color 160ms ease;
+    }
+}
+
+.switch__input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.switch__input:checked+.toggle {
+    background: var(--foreground-default);
+    border-color: var(--foreground-default);
+
+    &::before {
+        background-color: var(--foreground-alt);
+
+        /* travel distance = width - height */
+        transform: translateX(calc(var(--unit-48) - var(--unit-24)));
+    }
+}

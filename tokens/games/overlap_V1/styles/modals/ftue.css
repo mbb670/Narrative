@@ -1,0 +1,225 @@
+/* -----------------------------
+FTUE
+----------------------------- */
+
+.ftue-modal,
+.archive {
+
+    .ftue-desc,
+    .ftue-tip {
+        color: var(--foreground-muted);
+    }
+
+    .ftue-tip {
+        color: var(--foreground-subtle);
+    }
+
+    .dialog__header{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: calc(var(--spacing-x16) * -1);
+
+        .btn {
+            border: unset;
+            color: var(--foreground-muted);
+            --icon-color: var(--foreground-muted);
+            --icon-width: var(--spacing-x12);
+        }
+
+
+        .ftue-prev,
+        #archiveBackBtn {
+            --icon-rotation: 180deg;
+            --icon: url("../../images/icons/arrow.svg");
+        }
+
+        .ftue-skip {
+             --icon: url("../../images/icons/close.svg");
+        }
+    }
+
+    .ftue-modal__body {
+        flex: 1;
+        align-content: center;
+    }
+
+    .ftue-text {
+        padding-inline: 2%;
+        margin-top: calc(-1 * var(--spacing-x16));
+        z-index: 1;
+    }
+
+    .ftue-title,
+    .ftue-desc {
+        max-width: 400px;
+        text-wrap: balance;
+        text-align: center;
+    }
+
+    .ftue-desc {
+        margin-block: var(--spacing-x8);
+    }
+
+    .ftue-board {
+        padding-inline: unset !important;
+        margin-inline: calc(var(--spacing-x32) * -1);
+        position: relative;
+        --grid-top-space: var(--spacing-x48);
+        --cols: 16;
+
+
+        .gridScroll {
+            padding-block: var(--spacing-x2);
+            pointer-events: none;
+            cursor: default;
+
+            * {
+                pointer-events: none;
+            }
+
+            .grid {
+                width: unset !important;
+                transform: scale(0.75);
+                transform-origin: left;
+                grid-template-columns: repeat(var(--cols), var(--cell));
+
+                &::after {
+                    content: '';
+                    height: 100%;
+                }
+            }
+
+            .rangeClue {
+                display: block !important;
+            }
+
+            .letter {
+                color: var(--foreground-default) !important;
+
+            }
+
+            [data-i="5"],
+            [data-i="6"] {
+                &::before {
+                    grid-row: 2/-2 !important;
+                }
+            }
+
+            [data-i="7"],
+            [data-i="8"] {
+                &::before {
+                    grid-row: 3/-3 !important;
+                }
+            }
+
+            [data-i="0"],
+            [data-i="9"] {
+                &::before {
+                    border-radius: var(--radius-relaxed) 0 0 var(--radius-relaxed);
+                }
+            }
+
+            [data-i="4"],
+            [data-i="6"],
+            [data-i="14"] {
+                &::before {
+                    border-radius: 0 var(--radius-relaxed) var(--radius-relaxed) 0;
+                }
+            }
+
+        }
+
+    }
+
+    .ftue-toast {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -40%);
+
+        &.is-showing {
+            transform: translate(-50%, -50%);
+        }
+    }
+
+
+
+
+
+    .ftue-secondary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+    }
+
+
+    .ftue-dots {
+        display: flex;
+        gap: var(--unit-6);
+        justify-content: center;
+
+
+        .ftue-dot {
+            cursor: pointer;
+            background-color: var(--background-medium);
+            height: var(--spacing-x8);
+            width: var(--spacing-x8);
+            border-radius: var(--radius-full);
+            transition: width 300ms ease-in-out, background-color 300ms ease-in-out;
+
+            &.is-active {
+                background-color: var(--background-strong) !important;
+                width: var(--spacing-x24);
+            }
+        }
+    }
+
+    .ftue-modal__footer {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-x12);
+        align-items: center;
+    }
+
+    .ftue-next,
+    #splashTutorialBtn,
+    #splashPuzzleBtn,
+    #splashPrimary {
+        height: var(--unit-56);
+        width: 100%;
+        /* margin-block: var(--spacing-x12); */
+    }
+}
+
+/* the extended dot width breaks the transitions on safari */
+@supports (font: -apple-system-body) {
+    .ftue-dot.is-active {
+        width: var(--spacing-x8) !important;
+    }
+
+}
+
+@media (max-width:640px) {
+    .ftue-text {
+        padding-right: unset !important;
+    }
+
+    .ftue-board {
+        .gridScroll {
+            padding-block: var(--spacing-x32) !important;
+
+            .grid {
+                transform: scale(0.85) !important;
+            }
+        }
+
+    }
+
+    .ftue-next,
+    #splashTutorialBtn,
+    #splashPuzzleBtn,
+    #splashPrimary {
+        height: var(--unit-48) !important;
+    }
+}

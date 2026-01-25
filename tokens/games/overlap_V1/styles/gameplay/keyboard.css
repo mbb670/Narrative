@@ -1,0 +1,136 @@
+/* -----------------------------
+Keyboard 
+----------------------------- */
+
+
+.keyboard {
+    display: none;
+    padding: var(--spacing-x12);
+    gap: var(--unit-4);
+    flex-direction: column;
+    justify-content: flex-end;
+    max-width: var(--layout-content-md-max);
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    touch-action: none;
+    overflow: visible;
+    overflow: visible;
+    z-index: 10;
+
+}
+
+.keyboard.is-visible,
+body:has(#showOnscreenKeyboard:checked) .keyboard {
+    display: flex !important;
+}
+
+.keyboard-row {
+    display: flex;
+    gap: inherit;
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: center;
+    box-sizing: border-box;
+    height: var(--unit-56);
+    container-type: size;
+    touch-action: none;
+    overflow: visible;
+
+    &:nth-of-type(2) {
+        padding-inline: 5% !important;
+    }
+}
+
+.keyboard,
+.keyboard * {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+
+
+    -webkit-user-drag: none;
+}
+
+.keyboard-key {
+    appearance: none;
+    background: var(--background-subtle) !important;
+    color: var(--foreground-default);
+    border-radius: var(--radius-slight);
+    font: inherit;
+    text-transform: uppercase;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    flex: 1 1 0;
+    min-width: var(--unit-24);
+    font-size: 35cqmin;
+    position: relative;
+}
+
+.keyboard-key:focus-visible {
+    outline: 2px solid var(--foreground-default);
+    outline-offset: 2px;
+}
+
+.keyboard-key.is-pressed,
+.keyboard-key:active {
+    filter: brightness(0.9);
+    color: transparent;
+}
+
+.keyboard-key--backspace,
+.keyboard-key--enter {
+    flex: 1.75 1 0;
+
+    &::before {
+        content: '';
+        display: block;
+        width: var(--unit-20);
+        aspect-ratio: 1;
+        margin: 0 auto;
+        background-color: var(--foreground-default);
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+    }
+}
+
+.keyboard-key--backspace {
+    &::before {
+        -webkit-mask: url("../../images/icons/keyboard-delete.svg") center / contain no-repeat;
+        mask: url("../../images/icons/keyboard-delete.svg") center / contain no-repeat;
+    }
+}
+
+.keyboard-key--enter {
+    &::before {
+        width: var(--unit-18);
+        -webkit-mask: url("../../images/icons/arrow-right-start.svg") center / contain no-repeat;
+        mask: url("../../images/icons/arrow-right-start.svg") center / contain no-repeat;
+    }
+}
+
+.keyboard-key-preview {
+    position: absolute;
+    pointer-events: none;
+    border-radius: var(--radius-default);
+    background: inherit;
+    color: var(--foreground-default);
+    font-size: calc(var(--text-system-semibold-sm, 1rem) * 1.6);
+    text-align: center;
+    opacity: 0;
+    left: -20%;
+    width: 140%;
+    height: 120%;
+    top: -120%;
+    margin-top: calc(var(--spacing-x4) * -1);
+    place-content: center;
+}
+
+.keyboard-key-preview.is-visible {
+    opacity: 1;
+}

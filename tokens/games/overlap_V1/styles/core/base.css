@@ -1,0 +1,87 @@
+.token-swap {
+    display: none;
+}
+
+:root {
+    --grid-line: var(--border-subtle);
+    --border-w: var(--unit-2);
+
+    --cell: clamp(56px, 8vw, 96px);
+    --cell-letter-placement: 4/6;
+
+    --range-radius: var(--radius-relaxed);
+    --range-transparency-pc: 10%;
+    --range-clue-size: 45cqmin;
+
+    --grid-top-space: var(--unit-32);
+    --grid-letter-space: var(--spacing-x144);
+    --grid-bottom-space: var(--spacing-x12);
+
+    --slider-solved: var(--background-medium);
+    --slider-color-mix-base: var(--background-default);
+    --slider-color-mix-amount: 50;
+}
+
+@media (max-width:640px) {
+    :root {
+        --border-w: 1px;
+        --grid-letter-space: var(--unit-80);
+    }
+}
+
+/* -----------------------------
+Base Styles
+----------------------------- */
+
+body {
+    margin: 0 auto;
+    background: var(--background-default);
+    color: var(--foreground-default);
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+* {
+    box-sizing: border-box;
+    color: var(--foreground-default);
+}
+
+/* Focus rings only on keyboard navigation */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+[inert] {
+    pointer-events: none;
+    user-select: none;
+}
+
+.using-pointer :focus,
+.using-pointer :focus-visible {
+    outline: none !important;
+}
+
+/* -----------------------------
+Global elements
+----------------------------- */
+
+.inline-notification {
+    background-color: var(--system-informative-subtle);
+    border-left: var(--spacing-x4) solid var(--system-informative-default);
+    padding: var(--spacing-x24);
+
+    h3 {
+        color: var(--system-informative-strong);
+    }
+
+    p {
+        margin-top: var(--unit-6);
+        color: var(--system-informative-strong);
+        opacity: 0.7;
+    }
+}

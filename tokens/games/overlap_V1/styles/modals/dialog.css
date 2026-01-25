@@ -1,0 +1,47 @@
+/* Results dialog overrides */
+
+
+dialog {
+    display: none;
+    border: none;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    position: relative;
+    background: var(--background-default);
+    width: calc(100vw - (2 * var(--layout-grid-margin)));   
+    height: calc(100svh - (2 * var(--layout-grid-margin))); 
+    max-width: var(--layout-content-md-max);
+    max-height: 768px;
+    padding: var(--spacing-x32);
+    transition: transform 400ms ease-out, opacity 400ms ease-out;
+    opacity: 0;
+    transform: translateY(var(--spacing-x24));
+    border-radius: var(--radius-soft);
+    flex-direction: column;
+    gap: var(--spacing-x24);
+
+     &::backdrop {
+        background-color: var(--opacity-dimm-strong);
+        background-color: color-mix(in oklab, var(--background-default), transparent 10%);
+    }
+
+    &[open] {
+        display: flex;
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+[data-mode="dark"] {
+    dialog{
+        background-color: color-mix(in srgb, var(--background-default), var(--foreground-default) 5%)!important;
+    }
+}
+
+@starting-style {
+    dialog[open]{
+        opacity: 0;
+        transform: translateY(var(--spacing-x24));
+    }
+}

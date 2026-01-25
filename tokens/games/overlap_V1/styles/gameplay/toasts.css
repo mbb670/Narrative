@@ -1,0 +1,86 @@
+/* -----------------------------
+Toasts
+----------------------------- */
+
+.toast-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-x8);
+    margin-top: var(--spacing-x12);
+
+    pointer-events: none;
+    position: sticky;
+    left: 0;
+    z-index: 10;
+}
+
+.toast-stack-working {
+    /* border: 1px solid; */
+    flex: 1;
+    margin-top: unset;
+    justify-content: center;
+    color: var(--foreground-subtle);
+
+    .toast {
+        transform: translateY(8px);
+        place-content: center;
+        bottom: 100%;
+    }
+}
+
+.toast {
+    opacity: 0;
+    transition: opacity 180ms ease, transform 180ms ease;
+    padding: var(--spacing-x8) var(--spacing-x12);
+    border-radius: var(--radius-default);
+    /* background: color-mix(in srgb, var(--background-contrast), var(--background-default) 25%); */
+    /* color: var(--foreground-default); */
+    position: absolute;
+    border: 1px solid;
+    transform: translateY(-8px);
+    border-color: transparent;
+    color: var(--foreground-alt);
+    background: var(--background-strong);
+    pointer-events: none;
+
+    &.is-showing {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.toast-success {
+    border-color: var(--system-positive-default);
+    color: var(--system-positive-strong);
+    background: var(--system-positive-subtle);
+
+}
+
+.toast-word-solved,
+.resultsShareToast,
+.splashShareToast {
+    background: var(--background-default);
+    color: var(--foreground-muted);
+    border-color: var(--border-subtle);
+
+    span {
+        color: var(--foreground-subtle);
+    }
+}
+
+/* .toast-warning {
+    border-color: var(--system-warning-default);
+    color: var(--system-warning-strong);
+    background: var(--system-warning-subtle);
+} */
+
+.toast-error {
+    border-color: var(--system-critical-default);
+    color: var(--system-critical-strong);
+    background: var(--system-critical-subtle);
+}
+
+.bad {
+    opacity: 0.6;
+}

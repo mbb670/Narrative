@@ -1,0 +1,76 @@
+/* -----------------------------
+Header
+----------------------------- */
+
+header {
+    padding: var(--spacing-x12) var(--layout-grid-margin);
+    border-bottom: 1px solid var(--border-subtle);
+
+    .logo-icon {
+        width: var(--spacing-x32);
+        height: var(--spacing-x32);
+        margin-top: var(--spacing-x4);
+    }
+
+    .header-content {
+        margin-inline: auto;
+        max-width: var(--layout-content-lg-max);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.puzzle-controls {
+    display: flex;
+    gap: var(--spacing-x8);
+
+    button {
+        min-height: var(--unit-40);
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
+        font-weight: inherit;
+        letter-spacing: inherit;
+    }
+}
+
+#pause {
+    --background-color: var(--background-subtle);
+    color: var(--foreground-muted);
+    border: unset;
+    display: flex;
+    gap: var(--spacing-x4);
+    --icon:url("../../images/icons/pause.svg");
+    --icon-color: var(--foreground-muted);
+    --icon-size: var(--spacing-x12);
+
+    /* &[data-state="running"] {
+        --gamePause-icon: url("../../images/icons/pause.svg") !important;
+    }
+
+    &[data-state="paused"],
+    &[data-state="idle"] {
+        --gamePause-icon: url("../../images/icons/play.svg")!important;
+    } */
+}
+
+#viewResults {
+        display: none;
+    }
+
+[data-game-state="done"] {
+
+    .rangeClue-content {
+        pointer-events: none;
+    }
+
+    #pause,
+    #reveal {
+        display: none !important;
+    }
+
+    #viewResults {
+        display: flex !important;
+    }
+}

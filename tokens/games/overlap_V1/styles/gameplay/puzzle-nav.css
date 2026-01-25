@@ -1,0 +1,37 @@
+/* -----------------------------
+Puzzle Navigation
+----------------------------- */
+
+.puzzle-nav {
+    display: flex;
+    justify-content: space-between;
+    padding-inline: var(--layout-grid-margin);
+    max-width: var(--layout-content-md-max);
+    align-self: center;
+    width: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    #navWordPrev,
+    #navWordNext {
+        --icon: url("../../images/icons/double-right-arrow.svg");
+    }
+
+    .puzzle-nav-prev, .puzzle-nav-next{
+        display: flex;
+        gap: var(--spacing-x4);
+    }
+
+    .puzzle-nav-prev {
+        button {
+            --icon-rotation: 180deg;
+        }
+    }
+}
+
+[data-autocheck="false"] {
+    .word-solved-count {
+        color: var(--foreground-disabled);
+    }
+}

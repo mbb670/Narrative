@@ -1,0 +1,53 @@
+/* -----------------------------
+Main Stage
+----------------------------- */
+
+.stage {
+    flex-grow: 1;
+    margin-inline: auto;
+    height: 100%;
+    place-content: center;
+    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-x8);
+    width: 100%;
+    overflow: hidden;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+/* -----------------------------
+Puzzle Grid
+----------------------------- */
+.gridScroll {
+    max-width: 100%;
+    overflow-y: hidden;
+    padding-inline: var(--layout-grid-margin) !important;
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+    flex-grow: 1;
+    place-content: center;
+    scrollbar-width: none;
+    contain: paint;
+}
+
+.gridScroll::-webkit-scrollbar {
+    display: none;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), var(--cell));
+    --grid-rows: repeat(3, var(--grid-top-space)) var(--grid-letter-space) repeat(3, var(--grid-bottom-space));
+    grid-template-rows: var(--grid-rows);
+    width: calc(var(--cell)*var(--cols));
+    margin: 0 auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+}
