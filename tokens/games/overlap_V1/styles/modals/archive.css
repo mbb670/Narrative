@@ -206,7 +206,6 @@ Archive
 
 #archiveActionBtn {
     width: 100%;
-    height: var(--unit-48);
     span{
         color: inherit;
     }

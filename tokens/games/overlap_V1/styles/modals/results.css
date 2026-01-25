@@ -3,6 +3,7 @@ Results
 ----------------------------- */
 .results{
     overflow: visible!important;
+    height: max-content;
 }
 
 .result-heading {
@@ -17,36 +18,9 @@ Results
     width: 100%;
 }
 
-.stat-label,
-.resultsSubtitle,
-.stat-penalty {
+.resultsSubtitle{
     color: var(--foreground-subtle);
     margin-top: var(--spacing-x2);
-}
-
-.stat-extras {
-    display: flex;
-    gap: var(--spacing-x8);
-    margin-top: var(--spacing-x8);
-}
-
-.stat-container {
-    flex: 1;
-}
-
-.stat-penalty {
-    text-align: center;
-}
-
-.stat {
-    flex: 1;
-    padding: var(--spacing-x8);
-    background-color: var(--background-muted);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-default);
-    text-align: center;
-    min-height: var(--spacing-x80);
-    align-content: center;
 }
 
 .resultsShareToast,
@@ -70,8 +44,12 @@ Results
     --icon: url("../../images/icons/close.svg");
 }
 
+/* -----------------------------
+Give Up modal
+----------------------------- */
+
 .give-up {
-    .actions {
+    .modal-actions {
         width: 100%;
     }
 }
@@ -85,7 +63,7 @@ Results
     }
 }
 
-.actions {
+.modal-actions {
     display: flex;
     justify-content: center;
     gap: var(--spacing-x8);
@@ -97,6 +75,7 @@ Results
     .resultsShare {
         min-width: 120px;
         min-height: 36px;
+        max-width: var(--spacing-x144);
         --icon: url("../../images/icons/share.svg");
         --icon-color: var(--foreground-alt);
         --icon-width: var(--spacing-x16);

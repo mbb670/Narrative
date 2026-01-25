@@ -2,8 +2,7 @@
 FTUE
 ----------------------------- */
 
-.ftue-modal,
-.archive {
+.ftue-modal{
 
     .ftue-desc,
     .ftue-tip {
@@ -12,31 +11,6 @@ FTUE
 
     .ftue-tip {
         color: var(--foreground-subtle);
-    }
-
-    .dialog__header{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: calc(var(--spacing-x16) * -1);
-
-        .btn {
-            border: unset;
-            color: var(--foreground-muted);
-            --icon-color: var(--foreground-muted);
-            --icon-width: var(--spacing-x12);
-        }
-
-
-        .ftue-prev,
-        #archiveBackBtn {
-            --icon-rotation: 180deg;
-            --icon: url("../../images/icons/arrow.svg");
-        }
-
-        .ftue-skip {
-             --icon: url("../../images/icons/close.svg");
-        }
     }
 
     .ftue-modal__body {
@@ -142,10 +116,6 @@ FTUE
         }
     }
 
-
-
-
-
     .ftue-secondary {
         display: flex;
         justify-content: space-between;
@@ -153,12 +123,10 @@ FTUE
 
     }
 
-
     .ftue-dots {
         display: flex;
         gap: var(--unit-6);
         justify-content: center;
-
 
         .ftue-dot {
             cursor: pointer;
@@ -181,15 +149,10 @@ FTUE
         gap: var(--spacing-x12);
         align-items: center;
     }
+}
 
-    .ftue-next,
-    #splashTutorialBtn,
-    #splashPuzzleBtn,
-    #splashPrimary {
-        height: var(--unit-56);
-        width: 100%;
-        /* margin-block: var(--spacing-x12); */
-    }
+.ftue-next{
+    width: 100%;
 }
 
 /* the extended dot width breaks the transitions on safari */
@@ -214,12 +177,5 @@ FTUE
             }
         }
 
-    }
-
-    .ftue-next,
-    #splashTutorialBtn,
-    #splashPuzzleBtn,
-    #splashPrimary {
-        height: var(--unit-48) !important;
     }
 }

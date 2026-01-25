@@ -84,12 +84,12 @@
     <div class="game-slider"></div>
     <div class="keyboard"></div>
   </section>
-  </main>
+
 
   <!-- MODALS -->
 
   <!-- Give Up confirm -->
-  <dialog class="give-up results card text-system-regular-md elevation-overlay" id="giveUpModal"
+  <dialog class="give-up results text-system-regular-md elevation-overlay" id="giveUpModal"
     aria-label="Confirm give up">
     <div class="result-heading">
       <h2 class="text-headline-semibold-lg">Give up?</h2>
@@ -102,15 +102,17 @@
         to your total time.
       </p>
     </div>
-    <div class="actions">
+    <div class="modal-actions">
       <button class="btn text-system-regular-md" id="giveUpCancel" type="button">Cancel</button>
       <button class="btn primary text-system-regular-md" id="giveUpConfirm" type="button">Yes, give up</button>
     </div>
   </dialog>
 
 
+
+
   <!-- Results -->
-  <dialog class="results card text-system-regular-md elevation-overlay" id="results" aria-label="Results">
+  <dialog class="results text-system-regular-md elevation-overlay" id="results" aria-label="Results">
     <button class="btn btn-icon resultsClose text-system-regular-lg" type="button" aria-label="Close results"></button>
     <div class="result-heading">
       <h2 class="text-headline-semibold-lg resultsTitle">Solved!</h2>
@@ -140,19 +142,21 @@
         </div>
       </div>
     </div>
-    <div class="actions">
+    <div class="modal-actions">
       <button class="btn primary icon-leading resultsShare text-system-regular-md" type="button">Share</button>
     </div>
     <div class="toast resultsShareToast" aria-live="polite" aria-atomic="true"></div>
   </dialog>
 
+
+
+
   <!-- FTUE modal -->
-  <dialog id="ftueModal" class="ftue-modal card elevation-overlay" aria-labelledby="ftueTitle">
-    <div class="dialog__header">
-      <button type="button" class="ftue-prev btn icon-leading text-system-semibold-xs"
+  <dialog id="ftueModal" class="ftue-modal elevation-overlay" aria-labelledby="ftueTitle">
+    <div class="dialog__header text-system-semibold-xs">
+      <button type="button" class="ftue-prev btn icon-leading back-btn btn-ghost"
         aria-label="Previous step">Back</button>
-      <button type="button" class="ftue-skip btn icon-trailing text-system-semibold-xs" aria-label="Skip to game">Skip
-        to
+      <button type="button" class="ftue-skip btn icon-trailing close-btn btn-ghost" aria-label="Skip to game">Skip to
         game</button>
     </div>
 
@@ -181,7 +185,7 @@
 
     <div class="ftue-modal__footer">
       <p class="ftue-tip text-system-regular-md">Tip text</p>
-      <button type="button" class="ftue-next btn primary text-system-semibold-md">Next</button>
+      <button type="button" class="ftue-next btn primary btn-large text-system-semibold-md">Next</button>
 
       <div class="ftue-dots" aria-hidden="true">
         <span class="ftue-dot" data-step="0"></span>
@@ -194,11 +198,11 @@
 
 
   <!-- Archive -->
-  <dialog class="archive card elevation-overlay" id="archiveModal" aria-labelledby="archiveTitle">
-    <div class="dialog__header">
-      <button class="btn icon-leading text-system-semibold-xs" id="archiveBackBtn" type="button">Back</button>
+  <dialog class="archive elevation-overlay" id="archiveModal" aria-labelledby="archiveTitle">
+    <div class="dialog__header text-system-semibold-xs">
+      <button class="btn icon-leading back-btn btn-ghost" id="archiveBackBtn" type="button">Back</button>
       <h2 class="archive__title text-subheadline-semibold-sm" id="archiveTitle">Archive</h2>
-      <button class="btn text-system-semibold-xs" id="archiveTodayBtn" type="button">Today</button>
+      <button class="btn btn-ghost" id="archiveTodayBtn" type="button">Today</button>
     </div>
     <div class="archive__main">
       <div class="archive__controls">
@@ -223,78 +227,78 @@
       </div>
     </div>
     <div class="archive__footer">
-      <button class="btn primary text-system-semibold-md" id="archiveActionBtn" type="button">
+      <button class="btn primary btn-large text-system-semibold-md" id="archiveActionBtn" type="button">
         <span class="archiveActionLabel" id="archiveActionLabel">Play</span>
         <span class="archiveActionMeta" id="archiveActionMeta"></span>
       </button>
     </div>
   </dialog>
 
+
+
   <!-- Splash -->
-  <dialog class="splash card elevation-overlay" id="splashModal" aria-labelledby="splashTitle">
+  <dialog class="splash elevation-overlay" id="splashModal" aria-labelledby="splashTitle">
     <div class="splash__utilities">
-        <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
-        <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
-          <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
-            aria-live="polite" aria-atomic="true">Copied to clipboard</div>
-        </button>
-        <button class="btn btn-icon settings-btn text-system-semibold-sm" id="settingsBtn" type="button"
-          aria-haspopup="dialog" aria-expanded="false" aria-controls="settingsPanel"></button>
-        <div class="settings-panel card elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
-          aria-modal="false" aria-hidden="true" hidden>
-          <div class="settings-panel__header">
-            <h2 class="text-subheadline-semibold-xs">Settings</h2>
-            <button class="btn btn-icon settings-panel__close" id="settingsCloseBtn" type="button"
-              aria-label="Close settings"></button>
+      <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
+      <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
+        <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
+          aria-live="polite" aria-atomic="true">Copied to clipboard</div>
+      </button>
+      <button class="btn btn-icon settings-btn text-system-semibold-sm" id="settingsBtn" type="button"
+        aria-haspopup="dialog" aria-expanded="false" aria-controls="settingsPanel"></button>
+      <div class="settings-panel elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
+        aria-modal="false" aria-hidden="true" hidden>
+        <div class="settings-panel__header">
+          <h2 class="text-subheadline-semibold-xs">Settings</h2>
+          <button class="btn btn-icon close-btn btn-ghost settings-panel__close" id="settingsCloseBtn" type="button"
+            aria-label="Close settings"></button>
+        </div>
+        <div class="settings-panel__section settings-color-mode">
+          <div>Mode</div>
+          <div class="tabs text-system-semibold-sm" role="tablist" aria-label="Color mode">
+            <button class="tab is-active" type="button" data-mode="auto">Auto</button>
+            <button class="tab" type="button" data-mode="light">Light</button>
+            <button class="tab" type="button" data-mode="dark">Dark</button>
           </div>
-          <div class="settings-panel__section settings-color-mode">
-            <div>Mode</div>
-            <div class="tabs text-system-semibold-sm" role="tablist" aria-label="Color mode">
-              <button class="tab is-active" type="button" data-mode="auto">Auto</button>
-              <button class="tab" type="button" data-mode="light">Light</button>
-              <button class="tab" type="button" data-mode="dark">Dark</button>
-            </div>
-          </div>
-          <div class="settings-panel__section">
-            <div>
-              <div>Autocheck</div>
-              <div class="settings-panel__desc text-system-regular-sm">Lock and confirm correct words as you type
-              </div>
-            </div>
-            <div class="switch">
-              <input class="switch__input" type="checkbox" id="autoCheckToggle" role="switch" />
-              <label class="toggle" for="autoCheckToggle"></label>
+        </div>
+        <div class="settings-panel__section">
+          <div>
+            <div>Autocheck</div>
+            <div class="settings-panel__desc text-system-regular-sm">Lock and confirm correct words as you type
             </div>
           </div>
-          <div class="settings-panel__section">
-            <div>
-              <div>On-screen Keyboard</div>
-              <div class="settings-panel__desc text-system-regular-sm">Always show the on-screen keyboard</div>
-            </div>
-            <div class="switch">
-              <input class="switch__input" type="checkbox" id="showOnscreenKeyboard" role="switch" />
-              <label class="toggle" for="showOnscreenKeyboard"></label>
-            </div>
+          <div class="switch">
+            <input class="switch__input" type="checkbox" id="autoCheckToggle" role="switch" />
+            <label class="toggle" for="autoCheckToggle"></label>
+          </div>
+        </div>
+        <div class="settings-panel__section">
+          <div>
+            <div>On-screen Keyboard</div>
+            <div class="settings-panel__desc text-system-regular-sm">Always show the on-screen keyboard</div>
+          </div>
+          <div class="switch">
+            <input class="switch__input" type="checkbox" id="showOnscreenKeyboard" role="switch" />
+            <label class="toggle" for="showOnscreenKeyboard"></label>
           </div>
         </div>
       </div>
-    <div class="splash__top">
-      <div class="splash__main">
-        <div class="splash__brand">
-          <div class="logo-icon logo-icon-animation"></div>
-          <div class="splash__text">
-            <h1 class="splash__title text-display-semibold-lg" id="splashTitle">Overlap</h1>
-            <p class="splash__subtitle text-system-regular-md" id="splashSubtitle">Horizontal Crossword Puzzle</p>
-            <p class="splash__date text-system-regular-md" id="splashDate"></p>
-          </div>
+    </div>
+    <div class="splash__main">
+      <div class="splash__brand">
+        <div class="logo-icon logo-icon-animation"></div>
+        <div class="splash__text">
+          <h1 class="splash__title text-display-semibold-lg" id="splashTitle">Overlap</h1>
+          <p class="splash__subtitle text-system-regular-md" id="splashSubtitle">Horizontal Crossword Puzzle</p>
+          <p class="splash__date text-system-regular-md" id="splashDate"></p>
         </div>
-        <div class="splash__actions">
-          <button autofocus class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
-          <div class="splash__row">
-            <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button">Archive</button>
-            <!-- <button class="btn text-system-semibold-md" id="splashPuzzleBtns" type="button">Puzzles</button> -->
-            <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">How to play</button>
-          </div>
+      </div>
+      <div class="splash__actions text-system-semibold-md">
+        <button autofocus class="btn primary btn-large" id="splashPrimary" type="button">Play</button>
+        <div class="splash__row">
+          <button class="btn btn-large" id="splashArchiveBtn" type="button">Archive</button>
+          <!-- <button class="btn btn-large" id="splashPuzzleBtns" type="button">Puzzles</button> -->
+          <button class="btn btn-large" id="splashTutorialBtn" type="button">How to play</button>
         </div>
       </div>
     </div>
@@ -318,11 +322,13 @@
       </div>
       <p class="credit splash__meta text-system-regular-xs">
         Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-          id="splashVersion">V4.21</span>
+          id="splashVersion">V4.22</span>
       </p>
     </footer>
   </dialog>
 
+
+  </main>
   <script type="module" src="app.js"></script>
 </body>
 

@@ -85,3 +85,40 @@ Global elements
         opacity: 0.7;
     }
 }
+
+
+/* -----------------------------
+Stats
+----------------------------- */
+
+
+.stat-label,
+.stat-penalty {
+    color: var(--foreground-subtle);
+    margin-top: var(--spacing-x2);
+}
+
+.stat-extras {
+    display: flex;
+    gap: var(--spacing-x8);
+    margin-top: var(--spacing-x8);
+}
+
+.stat-container {
+    flex: 1;
+}
+
+.stat-penalty {
+    text-align: center;
+}
+
+.stat {
+    flex: 1;
+    padding: var(--spacing-x8);
+    background-color: var(--background-muted);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-default);
+    text-align: center;
+    min-height: var(--spacing-x80);
+    align-content: center;
+}

@@ -5,25 +5,8 @@ button {
     touch-action: manipulation;
 }
 
-.tabs {
-    padding: var(--unit-6);
-    display: flex;
-    justify-content: center;
-    gap: var(--spacing-x2);
-    background-color: var(--background-muted);
-    border-radius: var(--radius-soft);
-    height: max-content;
-    width: 100%;
-    width: max-content;
-}
-
-.dropdown {
-    border: 1px solid var(--border-muted);
-    border-radius: var(--radius-default);
-}
-
-/* Base (shared) */
-:is(.tab, .btn) {
+.tab,
+.btn {
     --background-color: transparent;
     border: 1px solid var(--border-subtle);
     padding: var(--spacing-x8) var(--spacing-x12);
@@ -32,7 +15,10 @@ button {
     color: var(--foreground-default);
 }
 
-/* Button */
+
+/* -----------------------------
+Buttons
+----------------------------- */
 .btn {
     border-radius: var(--radius-default);
     align-items: center;
@@ -43,10 +29,11 @@ button {
     &.primary {
         border-color: var(--border-strong);
         --background-color: var(--background-strong);
-        color: var(--foreground-alt)!important;
+        color: var(--foreground-alt) !important;
     }
 
-        &::before, &::after{
+    &::before,
+    &::after {
         aspect-ratio: 1;
         width: var(--icon-width, var(--spacing-x12));
         -webkit-mask: var(--icon) center / contain no-repeat;
@@ -56,16 +43,34 @@ button {
     }
 }
 
-.icon-leading{
- &::before{
+.btn-large {
+    height: var(--unit-48);
+}
+
+.icon-leading {
+    &::before {
         content: '';
     }
 }
 
-.icon-trailing{
- &::after{
+.icon-trailing {
+    &::after {
         content: '';
     }
+}
+
+.btn-ghost {
+    border: none !important;
+    --background-color: transparent;
+}
+
+.back-btn {
+    --icon-rotation: 180deg;
+    --icon: url("../../images/icons/arrow.svg") !important;
+}
+
+.close-btn {
+    --icon: url("../../images/icons/close.svg") !important;
 }
 
 /* Icon Button */
@@ -88,6 +93,23 @@ button {
     }
 }
 
+
+/* -----------------------------
+Tabs
+----------------------------- */
+
+.tabs {
+    padding: var(--unit-6);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-x2);
+    background-color: var(--background-muted);
+    border-radius: var(--radius-soft);
+    height: max-content;
+    width: 100%;
+    width: max-content;
+}
+
 .tab {
     border: 0;
     height: var(--unit-32);
@@ -95,6 +117,11 @@ button {
     padding-block: 0;
     border-radius: var(--radius-default);
     color: var(--foreground-subtle);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
 
     &.is-active {
         --background-color: unset;
@@ -110,14 +137,17 @@ button {
     }
 }
 
-.tab {
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-    font-weight: inherit;
-    letter-spacing: inherit;
+/* -----------------------------
+Dropdowns
+----------------------------- */
+.dropdown {
+    border: 1px solid var(--border-muted);
+    border-radius: var(--radius-default);
 }
 
+/* -----------------------------
+Toggles
+----------------------------- */
 .toggle {
     width: var(--unit-48);
     height: var(--unit-24);

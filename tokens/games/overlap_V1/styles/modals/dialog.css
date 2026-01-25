@@ -1,6 +1,6 @@
-/* Results dialog overrides */
-
-
+/* -----------------------------
+All Dialogs
+----------------------------- */
 dialog {
     display: none;
     border: none;
@@ -8,8 +8,8 @@ dialog {
     overflow-x: hidden;
     position: relative;
     background: var(--background-default);
-    width: calc(100vw - (2 * var(--layout-grid-margin)));   
-    height: calc(100svh - (2 * var(--layout-grid-margin))); 
+    width: calc(100vw - (2 * var(--layout-grid-margin)));
+    height: calc(100svh - (2 * var(--layout-grid-margin)));
     max-width: var(--layout-content-md-max);
     max-height: 768px;
     padding: var(--spacing-x32);
@@ -20,7 +20,7 @@ dialog {
     flex-direction: column;
     gap: var(--spacing-x24);
 
-     &::backdrop {
+    &::backdrop {
         background-color: var(--opacity-dimm-strong);
         background-color: color-mix(in oklab, var(--background-default), transparent 10%);
     }
@@ -34,14 +34,32 @@ dialog {
 }
 
 [data-mode="dark"] {
-    dialog{
-        background-color: color-mix(in srgb, var(--background-default), var(--foreground-default) 5%)!important;
+    dialog {
+        background-color: color-mix(in srgb, var(--background-default), var(--foreground-default) 5%) !important;
     }
 }
 
 @starting-style {
-    dialog[open]{
+    dialog[open] {
         opacity: 0;
         transform: translateY(var(--spacing-x24));
+    }
+}
+
+.dialog__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: calc(var(--spacing-x16) * -1);
+
+    .btn {
+        color: var(--foreground-muted);
+        --icon-color: var(--foreground-muted);
+        --icon-width: var(--spacing-x12);
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
+        font-weight: inherit;
+        letter-spacing: inherit;
     }
 }
