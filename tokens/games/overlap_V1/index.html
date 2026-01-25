@@ -196,43 +196,41 @@
 
 
   <!-- Archive -->
-  <div class="archive" id="archiveModal" aria-hidden="true" role="dialog" aria-modal="true" hidden>
-    <div class="archive__dialog card elevation-overlay">
-      <div class="archive__header">
-        <button class="btn text-system-semibold-xs" id="archiveBackBtn" type="button">Back</button>
-        <h2 class="archive__title text-subheadline-semibold-sm">Archive</h2>
-        <button class="btn text-system-semibold-xs" id="archiveTodayBtn" type="button">Today</button>
-      </div>
-      <div class="archive__main">
-        <div class="archive__controls">
-          <button class="btn btn-icon" id="archivePrevMonth" type="button" aria-label="Previous month"></button>
-          <div class="archive__calendar-select">
-            <select class="dropdown text-system-regular-sm" id="archiveMonthSelect" aria-label="Month"></select>
-            <select class="dropdown text-system-regular-sm" id="archiveYearSelect" aria-label="Year"></select>
-          </div>
-          <button class="btn btn-icon" id="archiveNextMonth" type="button" aria-label="Next month"></button>
+  <dialog class="archive card elevation-overlay" id="archiveModal" aria-labelledby="archiveTitle">
+    <div class="archive__header">
+      <button class="btn text-system-semibold-xs" id="archiveBackBtn" type="button">Back</button>
+      <h2 class="archive__title text-subheadline-semibold-sm" id="archiveTitle">Archive</h2>
+      <button class="btn text-system-semibold-xs" id="archiveTodayBtn" type="button">Today</button>
+    </div>
+    <div class="archive__main">
+      <div class="archive__controls">
+        <button class="btn btn-icon" id="archivePrevMonth" type="button" aria-label="Previous month"></button>
+        <div class="archive__calendar-select">
+          <select class="dropdown text-system-regular-sm" id="archiveMonthSelect" aria-label="Month"></select>
+          <select class="dropdown text-system-regular-sm" id="archiveYearSelect" aria-label="Year"></select>
         </div>
-        <div class="archive__calendar">
-          <div class="archive__weekdays text-system-regular-sm">
-            <span>S</span>
-            <span>M</span>
-            <span>T</span>
-            <span>W</span>
-            <span>T</span>
-            <span>F</span>
-            <span>S</span>
-          </div>
-          <div class="archive__grid text-system-regular-sm" id="archiveCalendar"></div>
-        </div>
+        <button class="btn btn-icon" id="archiveNextMonth" type="button" aria-label="Next month"></button>
       </div>
-      <div class="archive__footer">
-        <button class="btn primary text-system-semibold-md" id="archiveActionBtn" type="button">
-          <span class="archiveActionLabel" id="archiveActionLabel">Play</span>
-          <span class="archiveActionMeta" id="archiveActionMeta"></span>
-        </button>
+      <div class="archive__calendar">
+        <div class="archive__weekdays text-system-regular-sm">
+          <span>S</span>
+          <span>M</span>
+          <span>T</span>
+          <span>W</span>
+          <span>T</span>
+          <span>F</span>
+          <span>S</span>
+        </div>
+        <div class="archive__grid text-system-regular-sm" id="archiveCalendar"></div>
       </div>
     </div>
-  </div>
+    <div class="archive__footer">
+      <button class="btn primary text-system-semibold-md" id="archiveActionBtn" type="button">
+        <span class="archiveActionLabel" id="archiveActionLabel">Play</span>
+        <span class="archiveActionMeta" id="archiveActionMeta"></span>
+      </button>
+    </div>
+  </dialog>
 
   <!-- Splash -->
   <dialog class="splash card elevation-overlay" id="splashModal" aria-labelledby="splashTitle">
@@ -322,7 +320,7 @@
       </div>
       <p class="credit splash__meta text-system-regular-xs">
         Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-          id="splashVersion">V4.18</span>
+          id="splashVersion">V4.19</span>
       </p>
     </footer>
   </dialog>

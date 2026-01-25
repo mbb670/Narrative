@@ -34,7 +34,6 @@ export const els = {
   settingsPanel: $("#settingsPanel"),
   settingsCloseBtn: $("#settingsCloseBtn"),
   archiveModal: $("#archiveModal"),
-  archiveDialog: document.querySelector(".archive__dialog"),
   archiveBackBtn: $("#archiveBackBtn"),
   archivePrevMonth: $("#archivePrevMonth"),
   archiveNextMonth: $("#archiveNextMonth"),

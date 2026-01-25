@@ -24,7 +24,7 @@ import {
 import { computed } from "../core/model.js";
 import { createArchiveData } from "../data/archive-data.js";
 import { chainPuzzleKey, loadChainProgressStore, todayKey } from "../data/chain-progress.js";
-import { setAppLock } from "./dialogs.js";
+import { bindDialogDismiss, setAppLock } from "./dialogs.js";
 
 export function createArchiveUI({
   els,
@@ -57,6 +57,7 @@ export function createArchiveUI({
   const hasSeenFtueSafe =
     typeof hasSeenFtue === "function" ? hasSeenFtue : () => true;
   const openFtueSafe = typeof openFtue === "function" ? openFtue : null;
+  bindDialogDismiss(els?.archiveModal);
 
   // Daily puzzle archive with month navigation and resume/admire actions.
   const ARCHIVE_MONTH_LABELS = [
@@ -340,11 +341,15 @@ export function createArchiveUI({
   async function openArchiveModal(opts = {}) {
     if (!els?.archiveModal) return;
     const now = new Date();
-    if (!els.archiveModal.hidden) return;
+    const isOpen = !!els.archiveModal.open || els.archiveModal.hasAttribute("open");
+    if (isOpen) return;
     if (els.splash?.open && typeof closeSplash === "function") closeSplash();
     setLastScreen("archive");
-    els.archiveModal.hidden = false;
-    els.archiveModal.setAttribute("aria-hidden", "false");
+    if (typeof els.archiveModal.showModal === "function") {
+      els.archiveModal.showModal();
+    } else {
+      els.archiveModal.setAttribute("open", "");
+    }
     setAppLock(true);
     // Lock scroll while modal is open.
     document.documentElement.classList.add("is-modal-open");
@@ -352,7 +357,6 @@ export function createArchiveUI({
       document.body.style.overflow = "hidden";
       document.body.style.touchAction = "none";
     }
-    requestAnimationFrame(() => els.archiveModal?.classList.add("is-open"));
     const recentArchive = getLastArchivePlayed();
     const recentAt = Number.isFinite(recentArchive?.at) ? recentArchive.at : null;
     const recentDateKey =
@@ -369,11 +373,14 @@ export function createArchiveUI({
 
   function closeArchiveModal() {
     if (!els?.archiveModal) return;
-    if (els.archiveModal.hidden) return;
+    const wasOpen = !!els.archiveModal.open || els.archiveModal.hasAttribute("open");
+    if (!wasOpen) return;
     setLastScreen(null);
-    els.archiveModal.classList.remove("is-open");
-    els.archiveModal.setAttribute("aria-hidden", "true");
-    els.archiveModal.hidden = true;
+    if (typeof els.archiveModal.close === "function") {
+      els.archiveModal.close();
+    } else {
+      els.archiveModal.removeAttribute("open");
+    }
     setAppLock(false);
     document.documentElement.classList.remove("is-modal-open");
     if (!IS_IOS) {

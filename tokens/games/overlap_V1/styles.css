@@ -1331,16 +1331,6 @@ Splash
 FTUE
 ----------------------------- */
 
-.archive {
-    transition: none !important;
-}
-
-.archive__dialog {
-    transition: unset;
-    transform: unset;
-}
-
-
 .ftue-modal,
 .archive {
     display: grid;
@@ -1405,8 +1395,7 @@ FTUE
         }
     }
 
-    .ftue-modal__dialog,
-    .archive__dialog {
+    .ftue-modal__dialog {
         height: 100%;
         max-width: 94vw;
         width: min(var(--layout-content-md-max), 100%);
@@ -1576,8 +1565,7 @@ FTUE
         display: block;
         visibility: visible;
 
-        .ftue-modal__dialog,
-        .archive__dialog {
+        .ftue-modal__dialog {
             transform: translateY(0);
             opacity: 1;
         }
@@ -1852,8 +1840,8 @@ Results
 
 
 .results,
-.ftue-modal,
-.archive {
+.ftue-modal
+{
     position: fixed;
     inset: 0;
     place-items: center;
@@ -1947,7 +1935,7 @@ Results
 
 .card {
     width: min(var(--layout-content-md-max), 100%);
-    background: var(--background-default);
+    background: var(--background-default)!important;
     padding: var(--spacing-x24);
     border-radius: var(--radius-soft);
     position: relative;
@@ -1958,7 +1946,7 @@ Results
 
 [data-mode="dark"] {
     .card {
-        background-color: color-mix(in srgb, var(--background-default), var(--foreground-default) 5%);
+        background-color: color-mix(in srgb, var(--background-default), var(--foreground-default) 5%)!important;
 
     }
 }
@@ -2171,8 +2159,12 @@ body:has(#showOnscreenKeyboard:checked) .keyboard {
 
 .results,
 .give-up,
-.splash {
+.splash,
+.archive {
     display: none;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
 
     &[open] {
 
@@ -2189,35 +2181,30 @@ dialog {
     overflow: visible;
     &::backdrop {
         background-color: var(--opacity-dimm-strong);
+        background-color: color-mix(in oklab, var(--background-default), transparent 10%);
     }
 }
 
 /* Splash dialog overrides */
-.splash {
+.splash, .archive {
     position: relative;
     width: calc(100vw - (2 * var(--layout-grid-margin)));   
     height: calc(100svh - (2 * var(--layout-grid-margin))); 
     max-width: var(--layout-content-md-max);
     max-height: 768px;
-    overflow-y: scroll;
-    overflow-x: hidden;
     padding: var(--spacing-x32) !important;
-    background: var(--background-default);
     transition: transform 400ms ease-out, opacity 400ms ease-out;
     opacity: 0;
     transform: translateY(var(--spacing-x24));
-
-    &::backdrop {
-        background-color: color-mix(in oklab, var(--background-default), transparent 10%);
-    }
 }
 
-
-
-
+/* Archive dialog overrides */
+.archive {
+    justify-content: space-between;
+}
 
 @starting-style {
-    .splash[open] {
+    .splash[open], .archive[open] {
         opacity: 0;
         transform: translateY(var(--spacing-x24));
     }
