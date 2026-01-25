@@ -26,6 +26,7 @@ import {
   loadChainProgressStore,
   todayKey,
 } from "../data/chain-progress.js";
+import { bindDialogDismiss, setAppLock } from "./dialogs.js";
 
 export function createSplash({
   els,
@@ -52,6 +53,8 @@ export function createSplash({
   let splashShown = false;
   const autoCheckEnabled =
     typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
+
+  bindDialogDismiss(els?.splash);
 
   const getPlayState = () => (typeof getPlay === "function" ? getPlay() : null);
   const getChainState = () => (typeof getChain === "function" ? getChain() : null);
@@ -222,22 +225,34 @@ export function createSplash({
     if (!els?.splash) return;
     setLastScreen("splash");
     updateSplashContent(forceState);
-    els.splash.hidden = false;
-    els.splash.setAttribute("aria-hidden", "false");
+    const isOpen = !!els.splash.open || els.splash.hasAttribute("open");
+    if (!isOpen) {
+      if (typeof els.splash.showModal === "function") {
+        els.splash.showModal();
+      } else {
+        els.splash.setAttribute("open", "");
+      }
+      setAppLock(true);
+    }
     document.documentElement.classList.add("is-modal-open");
     if (!IS_IOS) {
       document.body.style.overflow = "hidden";
       document.body.style.touchAction = "none";
     }
-    requestAnimationFrame(() => els.splash?.classList.add("is-open"));
   }
 
   function closeSplash() {
     if (!els?.splash) return;
     setLastScreen(null);
-    els.splash.classList.remove("is-open");
-    els.splash.setAttribute("aria-hidden", "true");
-    els.splash.hidden = true;
+    const wasOpen = els.splash.open || els.splash.hasAttribute("open");
+    if (wasOpen) {
+      if (typeof els.splash.close === "function") {
+        els.splash.close();
+      } else {
+        els.splash.removeAttribute("open");
+      }
+    }
+    if (wasOpen) setAppLock(false);
     if (typeof closeSettingsPanel === "function") closeSettingsPanel();
     document.documentElement.classList.remove("is-modal-open");
     if (!IS_IOS) {

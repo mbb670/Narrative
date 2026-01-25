@@ -7,6 +7,7 @@
  */
 // Global event wiring (keyboard, grid, visibility, touch pan).
 import { MODE } from "../core/config.js";
+import { isAppLocked } from "./dialogs.js";
 
 export function bindGlobalEvents({
   els,
@@ -41,7 +42,23 @@ export function bindGlobalEvents({
   panState,
   panSlopPx,
 } = {}) {
+  const root = document.documentElement;
+  if (root) {
+    root.classList.add("using-pointer");
+    const setPointerMode = () => root.classList.add("using-pointer");
+    const setKeyboardMode = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const key = e.key;
+      if (key === "Tab" || key === "ArrowUp" || key === "ArrowDown" || key === "ArrowLeft" || key === "ArrowRight") {
+        root.classList.remove("using-pointer");
+      }
+    };
+    window.addEventListener("pointerdown", setPointerMode, { passive: true });
+    window.addEventListener("keydown", setKeyboardMode, true);
+  }
+
   function onKey(e) {
+    if (isAppLocked()) return;
     if (ftueIsOpen()) {
       e.preventDefault();
       e.stopImmediatePropagation?.();

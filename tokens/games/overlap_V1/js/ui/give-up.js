@@ -6,7 +6,7 @@
  * Key interactions: Uses play/actions and dom cache.
  */
 // Give-up confirm modal helpers.
-import { bindDialogDismiss } from "./dialogs.js";
+import { bindDialogDismiss, setAppLock } from "./dialogs.js";
 
 export function createGiveUpModal({
   els,
@@ -45,9 +45,11 @@ export function createGiveUpModal({
     if (els.giveUpWordLabel) els.giveUpWordLabel.textContent = unsolvedWords === 1 ? "word" : "words";
     if (els.giveUpSeconds) els.giveUpSeconds.textContent = formatTime(penaltySec);
 
+    const wasOpen = !!els.giveUpModal.open;
     if (typeof els.giveUpModal.showModal === "function") {
-      els.giveUpModal.showModal();
+      if (!wasOpen) els.giveUpModal.showModal();
     }
+    if (!wasOpen) setAppLock(true);
 
     try {
       els.giveUpConfirm?.focus({ preventScroll: true });
@@ -56,9 +58,11 @@ export function createGiveUpModal({
 
   function closeGiveUpModal() {
     if (!els?.giveUpModal) return;
+    const wasOpen = !!els.giveUpModal.open;
     if (typeof els.giveUpModal.close === "function") {
-      els.giveUpModal.close();
+      if (wasOpen) els.giveUpModal.close();
     }
+    if (wasOpen) setAppLock(false);
   }
 
   return { openGiveUpModal, closeGiveUpModal };

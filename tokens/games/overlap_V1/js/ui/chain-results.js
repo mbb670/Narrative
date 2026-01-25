@@ -7,7 +7,7 @@
  */
 // Chain results modal helpers.
 import { MODE } from "../core/config.js";
-import { bindDialogDismiss } from "./dialogs.js";
+import { bindDialogDismiss, setAppLock } from "./dialogs.js";
 import { puzzleDateLabel, puzzleLabel } from "../utils/index.js";
 
 export function createChainResults({
@@ -34,9 +34,13 @@ export function createChainResults({
 
   function closeChainResults() {
     if (!chainResults) return;
-    if (typeof chainResults.wrap.close === "function") chainResults.wrap.close();
+    const wasOpen = !!chainResults.wrap.open;
+    if (typeof chainResults.wrap.close === "function") {
+      if (wasOpen) chainResults.wrap.close();
+    }
     else chainResults.wrap.classList.remove("is-open");
     if (typeof setResultsInert === "function") setResultsInert(false);
+    if (wasOpen) setAppLock(false);
   }
 
   function ensureChainResults() {
@@ -75,9 +79,12 @@ export function createChainResults({
   function openChainResults(stats, reason) {
     const r = ensureChainResults();
     if (!r) return;
-    if (typeof r.wrap.showModal === "function") r.wrap.showModal();
-    else r.wrap.classList.add("is-open");
+    const wasOpen = !!r.wrap.open;
+    if (typeof r.wrap.showModal === "function") {
+      if (!wasOpen) r.wrap.showModal();
+    } else r.wrap.classList.add("is-open");
     if (typeof setResultsInert === "function") setResultsInert(true);
+    if (!wasOpen) setAppLock(true);
 
     const play = typeof getPlay === "function" ? getPlay() : null;
     const chain = typeof getChain === "function" ? getChain() : null;

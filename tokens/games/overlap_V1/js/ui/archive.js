@@ -24,6 +24,7 @@ import {
 import { computed } from "../core/model.js";
 import { createArchiveData } from "../data/archive-data.js";
 import { chainPuzzleKey, loadChainProgressStore, todayKey } from "../data/chain-progress.js";
+import { setAppLock } from "./dialogs.js";
 
 export function createArchiveUI({
   els,
@@ -340,10 +341,11 @@ export function createArchiveUI({
     if (!els?.archiveModal) return;
     const now = new Date();
     if (!els.archiveModal.hidden) return;
-    if (els.splash && !els.splash.hidden && typeof closeSplash === "function") closeSplash();
+    if (els.splash?.open && typeof closeSplash === "function") closeSplash();
     setLastScreen("archive");
     els.archiveModal.hidden = false;
     els.archiveModal.setAttribute("aria-hidden", "false");
+    setAppLock(true);
     // Lock scroll while modal is open.
     document.documentElement.classList.add("is-modal-open");
     if (!IS_IOS) {
@@ -367,10 +369,12 @@ export function createArchiveUI({
 
   function closeArchiveModal() {
     if (!els?.archiveModal) return;
+    if (els.archiveModal.hidden) return;
     setLastScreen(null);
     els.archiveModal.classList.remove("is-open");
     els.archiveModal.setAttribute("aria-hidden", "true");
     els.archiveModal.hidden = true;
+    setAppLock(false);
     document.documentElement.classList.remove("is-modal-open");
     if (!IS_IOS) {
       document.body.style.overflow = "";

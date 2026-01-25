@@ -31,3 +31,27 @@ export function bindDialogDismiss(dialog, onClose) {
     handleClose();
   });
 }
+
+let appLockCount = 0;
+const lockTargets = () => [
+  document.querySelector("header"),
+  document.querySelector("main"),
+].filter(Boolean);
+
+export function setAppLock(locked) {
+  appLockCount = Math.max(0, appLockCount + (locked ? 1 : -1));
+  const shouldLock = appLockCount > 0;
+  lockTargets().forEach((el) => {
+    if (shouldLock) {
+      el.setAttribute("inert", "");
+      el.setAttribute("aria-hidden", "true");
+    } else {
+      el.removeAttribute("inert");
+      el.removeAttribute("aria-hidden");
+    }
+  });
+}
+
+export function isAppLocked() {
+  return appLockCount > 0;
+}

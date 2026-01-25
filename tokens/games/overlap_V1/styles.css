@@ -124,6 +124,22 @@ body {
 
 * {
     box-sizing: border-box;
+    color: var(--foreground-default);
+}
+
+/* Focus rings only on keyboard navigation */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+[inert] {
+    pointer-events: none;
+    user-select: none;
+}
+
+.using-pointer :focus,
+.using-pointer :focus-visible {
+    outline: none !important;
 }
 
 /* -----------------------------
@@ -270,7 +286,7 @@ button {
     &.primary {
         border-color: var(--border-strong);
         --background-color: var(--background-strong);
-        color: var(--foreground-alt) !important;
+        color: var(--foreground-alt)!important;
     }
 }
 
@@ -444,15 +460,16 @@ header {
         aspect-ratio: 1;
         -webkit-mask: var(--gamePause-icon) center / contain no-repeat;
         mask: var(--gamePause-icon) center / contain no-repeat;
+         --gamePause-icon: url("images/pause.svg");
     }
 
-    &[data-state="running"] {
+    /* &[data-state="running"] {
         --gamePause-icon: url("images/pause.svg") !important;
-    }
+    } */
 
     &[data-state="paused"],
     &[data-state="idle"] {
-        --gamePause-icon: url("images/play.svg");
+        --gamePause-icon: url("images/play.svg")!important;
     }
 }
 
@@ -661,6 +678,7 @@ Range Clues
             border-radius: var(--radius-full);
             border: 0.5px solid var(--color);
             position: relative;
+
             &::before {
                 content: '';
                 width: 110%;
@@ -692,7 +710,8 @@ Range Clues
 
 }
 
-[data-game-state="paused"], [data-game-state="idle"] {
+[data-game-state="paused"],
+[data-game-state="idle"] {
     .rangeClue {
         display: none !important;
     }
@@ -715,6 +734,7 @@ Range Clues
 }
 
 @media (hover: hover) {
+
     .rangeClue .rangeClue-content:hover .rangeClue-hint,
     .rangeClue .rangeClue-string:hover~.rangeClue-hint {
         display: inline-flex;
@@ -724,7 +744,7 @@ Range Clues
     }
 }
 
-.rangeClue.is-hidden .rangeClue-hint  {
+.rangeClue.is-hidden .rangeClue-hint {
     display: none !important;
 }
 
@@ -767,7 +787,7 @@ Cells
 
     .num {
         position: absolute;
-        top:105%;
+        top: 105%;
         z-index: 20;
         padding: var(--spacing-x4);
         color: var(--foreground-subtle);
@@ -882,6 +902,7 @@ Cells
         /* opacity: 0.4; */
     }
 }
+
 .is-dev .num {
     display: block;
 }
@@ -1226,7 +1247,6 @@ Splash settings
         }
 
 
-
 /* -----------------------------
 Splash
 ----------------------------- */
@@ -1322,7 +1342,6 @@ FTUE
 
 
 .ftue-modal,
-.splash,
 .archive {
     display: grid;
     place-content: center;
@@ -1387,7 +1406,6 @@ FTUE
     }
 
     .ftue-modal__dialog,
-    .splash__dialog,
     .archive__dialog {
         height: 100%;
         max-width: 94vw;
@@ -1559,7 +1577,6 @@ FTUE
         visibility: visible;
 
         .ftue-modal__dialog,
-        .splash__dialog,
         .archive__dialog {
             transform: translateY(0);
             opacity: 1;
@@ -1672,6 +1689,10 @@ Archive
     line-height: inherit;
     font-family: inherit;
     font-weight: inherit;
+
+    .archive-day-label{
+        color: inherit;
+    }
 
     .archive-day-meta {
         aspect-ratio: 1;
@@ -1807,6 +1828,9 @@ Archive
 #archiveActionBtn {
     width: 100%;
     height: var(--unit-48);
+    span{
+        color: inherit;
+    }
 }
 
 #archiveDate {
@@ -1829,7 +1853,6 @@ Results
 
 .results,
 .ftue-modal,
-.splash,
 .archive {
     position: fixed;
     inset: 0;
@@ -1851,8 +1874,8 @@ Results
     margin-bottom: var(--spacing-x4);
 }
 
-.results-stats{
- width: 100%; 
+.results-stats {
+    width: 100%;
 }
 
 .stat-label,
@@ -1948,8 +1971,8 @@ Results
     --icon: url("images/close.svg");
 }
 
-.give-up{
-    .actions{
+.give-up {
+    .actions {
         width: 100%;
     }
 }
@@ -2146,17 +2169,56 @@ body:has(#showOnscreenKeyboard:checked) .keyboard {
 /* Results dialog overrides */
 
 
-.results, .give-up {
+.results,
+.give-up,
+.splash {
     display: none;
-    &[open]{
-    display: flex;
+
+    &[open] {
+
+        display: flex;
+
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-dialog{
- border: none;
- overflow: visible;
-    &::backdrop{
-    background-color: var(--opacity-dimm-strong);
+dialog {
+    border: none;
+    overflow: visible;
+    &::backdrop {
+        background-color: var(--opacity-dimm-strong);
+    }
+}
+
+/* Splash dialog overrides */
+.splash {
+    position: relative;
+    width: calc(100vw - (2 * var(--layout-grid-margin)));   
+    height: calc(100svh - (2 * var(--layout-grid-margin))); 
+    max-width: var(--layout-content-md-max);
+    max-height: 768px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: var(--spacing-x32) !important;
+    background: var(--background-default);
+    transition: transform 400ms ease-out, opacity 400ms ease-out;
+    opacity: 0;
+    transform: translateY(var(--spacing-x24));
+
+    &::backdrop {
+        background-color: color-mix(in oklab, var(--background-default), transparent 10%);
+    }
+}
+
+
+
+
+
+@starting-style {
+    .splash[open] {
+        opacity: 0;
+        transform: translateY(var(--spacing-x24));
     }
 }

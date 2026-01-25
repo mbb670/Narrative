@@ -235,99 +235,97 @@
   </div>
 
   <!-- Splash -->
-  <div class="splash" id="splashModal" aria-hidden="true" role="dialog" aria-modal="true" hidden>
-    <div class="splash__dialog card elevation-overlay">
-      <div class="splash__top">
-        <div class="splash__utilities">
-                  <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
-          <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
-            <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
-              aria-live="polite" aria-atomic="true">Copied to clipboard</div>
-          </button>
-          <button class="btn btn-icon settings-btn text-system-semibold-sm" id="settingsBtn" type="button"
-            aria-haspopup="dialog" aria-expanded="false" aria-controls="settingsPanel"></button>
-          <div class="settings-panel card elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
-            aria-modal="false" aria-hidden="true" hidden>
-            <div class="settings-panel__header">
-              <h2 class="text-subheadline-semibold-xs">Settings</h2>
-              <button class="btn btn-icon settings-panel__close" id="settingsCloseBtn" type="button"
-                aria-label="Close settings"></button>
-            </div>
-            <div class="settings-panel__section settings-color-mode">
-              <div>Mode</div>
-              <div class="tabs text-system-semibold-sm" role="tablist" aria-label="Color mode">
-                <button class="tab is-active" type="button" data-mode="auto">Auto</button>
-                <button class="tab" type="button" data-mode="light">Light</button>
-                <button class="tab" type="button" data-mode="dark">Dark</button>
-              </div>
-            </div>
-            <div class="settings-panel__section">
-              <div>
-                <div>Autocheck</div>
-                <div class="settings-panel__desc text-system-regular-sm">Lock and confirm correct words as you type
-                </div>
-              </div>
-              <div class="switch">
-                <input class="switch__input" type="checkbox" id="autoCheckToggle" role="switch" />
-                <label class="toggle" for="autoCheckToggle"></label>
-              </div>
-            </div>
-            <div class="settings-panel__section">
-              <div>
-                <div>On-screen Keyboard</div>
-                <div class="settings-panel__desc text-system-regular-sm">Always show the on-screen keyboard</div>
-              </div>
-              <div class="switch">
-                <input class="switch__input" type="checkbox" id="showOnscreenKeyboard" role="switch" />
-                <label class="toggle" for="showOnscreenKeyboard"></label>
-              </div>
+  <dialog class="splash card elevation-overlay" id="splashModal" aria-labelledby="splashTitle">
+    <div class="splash__top">
+      <div class="splash__utilities">
+                <button class="btn text-system-semibold-sm" id="pClear" type="button">Reset data</button>
+        <button class="btn btn-icon share-btn text-system-semibold-sm" id="shareBtn" type="button">
+          <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
+            aria-live="polite" aria-atomic="true">Copied to clipboard</div>
+        </button>
+        <button class="btn btn-icon settings-btn text-system-semibold-sm" id="settingsBtn" type="button"
+          aria-haspopup="dialog" aria-expanded="false" aria-controls="settingsPanel"></button>
+        <div class="settings-panel card elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
+          aria-modal="false" aria-hidden="true" hidden>
+          <div class="settings-panel__header">
+            <h2 class="text-subheadline-semibold-xs">Settings</h2>
+            <button class="btn btn-icon settings-panel__close" id="settingsCloseBtn" type="button"
+              aria-label="Close settings"></button>
+          </div>
+          <div class="settings-panel__section settings-color-mode">
+            <div>Mode</div>
+            <div class="tabs text-system-semibold-sm" role="tablist" aria-label="Color mode">
+              <button class="tab is-active" type="button" data-mode="auto">Auto</button>
+              <button class="tab" type="button" data-mode="light">Light</button>
+              <button class="tab" type="button" data-mode="dark">Dark</button>
             </div>
           </div>
-        </div>
-        <div class="splash__main">
-          <div class="splash__brand">
-            <div class="logo-icon logo-icon-animation"></div>
-            <div class="splash__text">
-              <h1 class="splash__title text-display-semibold-lg" id="splashTitle">Overlap</h1>
-              <p class="splash__subtitle text-system-regular-md" id="splashSubtitle">Horizontal Crossword Puzzle</p>
-              <p class="splash__date text-system-regular-md" id="splashDate"></p>
+          <div class="settings-panel__section">
+            <div>
+              <div>Autocheck</div>
+              <div class="settings-panel__desc text-system-regular-sm">Lock and confirm correct words as you type
+              </div>
+            </div>
+            <div class="switch">
+              <input class="switch__input" type="checkbox" id="autoCheckToggle" role="switch" />
+              <label class="toggle" for="autoCheckToggle"></label>
             </div>
           </div>
-          <div class="splash__actions">
-            <button class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
-            <div class="splash__row">
-              <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button">Archive</button>
-              <!-- <button class="btn text-system-semibold-md" id="splashPuzzleBtns" type="button">Puzzles</button> -->
-              <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">How to play</button>
+          <div class="settings-panel__section">
+            <div>
+              <div>On-screen Keyboard</div>
+              <div class="settings-panel__desc text-system-regular-sm">Always show the on-screen keyboard</div>
+            </div>
+            <div class="switch">
+              <input class="switch__input" type="checkbox" id="showOnscreenKeyboard" role="switch" />
+              <label class="toggle" for="showOnscreenKeyboard"></label>
             </div>
           </div>
         </div>
       </div>
+      <div class="splash__main">
+        <div class="splash__brand">
+          <div class="logo-icon logo-icon-animation"></div>
+          <div class="splash__text">
+            <h1 class="splash__title text-display-semibold-lg" id="splashTitle">Overlap</h1>
+            <p class="splash__subtitle text-system-regular-md" id="splashSubtitle">Horizontal Crossword Puzzle</p>
+            <p class="splash__date text-system-regular-md" id="splashDate"></p>
+          </div>
+        </div>
+        <div class="splash__actions">
+          <button autofocus class="btn primary text-system-semibold-md" id="splashPrimary" type="button">Play</button>
+          <div class="splash__row">
+            <button class="btn text-system-semibold-md" id="splashArchiveBtn" type="button">Archive</button>
+            <!-- <button class="btn text-system-semibold-md" id="splashPuzzleBtns" type="button">Puzzles</button> -->
+            <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">How to play</button>
+          </div>
+        </div>
+      </div>
+    </div>
       <!-- <div class="inline-notification">
             <h3 class="text-system-semibold-sm">Hello Overlap beta testers!</h3>
             <p class="text-system-regular-sm">I’ve begun a major overhaul of the Overlap backend. I haven’t had a chance to test every part of the game yet, so if you notice any bugs or issues, please let me know ASAP.</p>
             <p class="text-system-regular-sm">&lt;3 Matt</p>
 
           </div> -->
-      <footer class="splash__footer">
-        <!-- <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">How to play</button> -->
-        <div class="splash__stats text-system-regular-sm">
-          <div class="stat">
-            <div class="stat-value text-subheadline-semibold-sm" id="splashAvgTime">---</div>
-            <div class="stat-label">Average time</div>
-          </div>
-          <div class="splash__stat stat">
-            <div class="stat-value text-subheadline-semibold-sm" id="splashGamesPlayed">---</div>
-            <div class="stat-label">Games played</div>
-          </div>
+    <footer class="splash__footer">
+      <!-- <button class="btn text-system-semibold-md" id="splashTutorialBtn" type="button">How to play</button> -->
+      <div class="splash__stats text-system-regular-sm">
+        <div class="stat">
+          <div class="stat-value text-subheadline-semibold-sm" id="splashAvgTime">---</div>
+          <div class="stat-label">Average time</div>
         </div>
-        <p class="credit splash__meta text-system-regular-xs">
-          Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V4.16</span>
-        </p>
-      </footer>
-    </div>
-  </div>
+        <div class="splash__stat stat">
+          <div class="stat-value text-subheadline-semibold-sm" id="splashGamesPlayed">---</div>
+          <div class="stat-label">Games played</div>
+        </div>
+      </div>
+      <p class="credit splash__meta text-system-regular-xs">
+        Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
+          id="splashVersion">V4.18</span>
+      </p>
+    </footer>
+  </dialog>
 
   <script type="module" src="app.js"></script>
 </body>
