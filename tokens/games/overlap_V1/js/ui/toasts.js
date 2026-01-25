@@ -106,7 +106,7 @@ export function createToasts({ els, getPlay, isWordCorrect, isAutoCheckEnabled }
       return;
     }
     const t = els.resultsModal?.querySelector(".resultsShareToast");
-    const resultsOpen = t && els.resultsModal?.classList.contains("is-open");
+    const resultsOpen = t && (els.resultsModal?.open || els.resultsModal?.classList.contains("is-open"));
     if (resultsOpen && t) {
       t.textContent = message;
       const dur = toastDuration("success");

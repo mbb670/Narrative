@@ -47,7 +47,7 @@ export function bindGlobalEvents({
       e.stopImmediatePropagation?.();
       return;
     }
-    if (els.resultsModal?.classList.contains("is-open")) return;
+    if (els.resultsModal?.open || els.resultsModal?.classList.contains("is-open")) return;
     if (e.metaKey && e.key.toLowerCase() === "a") {
       e.preventDefault();
       selectAllUnlockedCells();

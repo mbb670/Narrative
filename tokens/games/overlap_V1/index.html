@@ -112,44 +112,42 @@
 
 
   <!-- Results -->
-  <div class="results text-system-regular-md" id="results" role="dialog" aria-modal="true" aria-label="Results">
-    <div class="card results__dialog">
-      <button class="btn btn-icon resultsClose text-system-regular-lg" type="button"
-        aria-label="Close results"></button>
-      <div class="result-heading">
-        <h2 class="text-headline-semibold-lg resultsTitle">Solved!</h2>
-        <p class="resultsSubtitle"></p>
-      </div>
-      <div class="chainResults-stats">
-        <div class="stat resultsStatTime">
-          <div class="stat-value resultsStatTimeVal text-headline-semibold-md">00:00</div>
-          <div class="stat-label"> Total Time</div>
-        </div>
-        <div class="stat-extras">
-          <div class="stat-container">
-            <div class="stat resultsStatSolved">
-              <div class="stat-value resultsStatSolvedVal text-subheadline-semibold-md">0/0</div>
-              <div class="stat-label">Solved</div>
-            </div>
-            <div class="stat-penalty">+<span id="totalWordPenalty">00</span></div>
-
-          </div>
-          <div class="stat-container">
-            <div class="stat resultsStatHints">
-              <div class="stat-value resultsStatHintsVal text-subheadline-semibold-md">0</div>
-              <div class="stat-label">Hint<span id="pluralHints">s</span></div>
-            </div>
-            <div class="stat-penalty">+<span id="totalHintPenalty">00</span></div>
-
-          </div>
-        </div>
-      </div>
-      <div class="actions">
-        <button class="btn primary resultsShare text-system-regular-md" type="button">Share</button>
-      </div>
-      <div class="toast resultsShareToast" aria-live="polite" aria-atomic="true"></div>
+  <dialog class="results card text-system-regular-md elevation-overlay" id="results" aria-label="Results">
+    <button class="btn btn-icon resultsClose text-system-regular-lg" type="button"
+      aria-label="Close results"></button>
+    <div class="result-heading">
+      <h2 class="text-headline-semibold-lg resultsTitle">Solved!</h2>
+      <p class="resultsSubtitle"></p>
     </div>
-  </div>
+    <div class="results-stats">
+      <div class="stat resultsStatTime">
+        <div class="stat-value resultsStatTimeVal text-headline-semibold-md">00:00</div>
+        <div class="stat-label"> Total Time</div>
+      </div>
+      <div class="stat-extras">
+        <div class="stat-container">
+          <div class="stat resultsStatSolved">
+            <div class="stat-value resultsStatSolvedVal text-subheadline-semibold-md">0/0</div>
+            <div class="stat-label">Solved</div>
+          </div>
+          <div class="stat-penalty">+<span id="totalWordPenalty">00</span></div>
+
+        </div>
+        <div class="stat-container">
+          <div class="stat resultsStatHints">
+            <div class="stat-value resultsStatHintsVal text-subheadline-semibold-md">0</div>
+            <div class="stat-label">Hint<span id="pluralHints">s</span></div>
+          </div>
+          <div class="stat-penalty">+<span id="totalHintPenalty">00</span></div>
+
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary resultsShare text-system-regular-md" type="button">Share</button>
+    </div>
+    <div class="toast resultsShareToast" aria-live="polite" aria-atomic="true"></div>
+  </dialog>
 
   <!-- FTUE modal -->
   <div id="ftueModal" class="ftue-modal" aria-hidden="true" hidden>
@@ -327,7 +325,7 @@
         </div>
         <p class="credit splash__meta text-system-regular-xs">
           Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-            id="splashVersion">V4.14</span>
+            id="splashVersion">V4.15</span>
         </p>
       </footer>
     </div>

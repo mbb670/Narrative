@@ -33,7 +33,8 @@ export function createChainResults({
 
   function closeChainResults() {
     if (!chainResults) return;
-    chainResults.wrap.classList.remove("is-open");
+    if (typeof chainResults.wrap.close === "function") chainResults.wrap.close();
+    else chainResults.wrap.classList.remove("is-open");
     if (typeof setResultsInert === "function") setResultsInert(false);
   }
 
@@ -47,10 +48,28 @@ export function createChainResults({
     const cShare = els?.resultsShare;
 
     wrap.addEventListener("click", (e) => {
-      if (e.target === wrap) {
-        if (typeof onOverlayClose === "function") onOverlayClose();
-        closeChainResults();
-      }
+      if (e.target !== wrap) return;
+      const rect = wrap.getBoundingClientRect();
+      const isBackdropClick =
+        e.clientX < rect.left ||
+        e.clientX > rect.right ||
+        e.clientY < rect.top ||
+        e.clientY > rect.bottom;
+      if (!isBackdropClick) return;
+      if (typeof onOverlayClose === "function") onOverlayClose();
+      closeChainResults();
+    });
+    wrap.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      if (typeof onOverlayClose === "function") onOverlayClose();
+      closeChainResults();
+    });
+    wrap.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof onOverlayClose === "function") onOverlayClose();
+      closeChainResults();
     });
     cClose?.addEventListener("click", closeChainResults);
     cShare?.addEventListener("click", () => {
@@ -75,7 +94,8 @@ export function createChainResults({
   function openChainResults(stats, reason) {
     const r = ensureChainResults();
     if (!r) return;
-    r.wrap.classList.add("is-open");
+    if (typeof r.wrap.showModal === "function") r.wrap.showModal();
+    else r.wrap.classList.add("is-open");
     if (typeof setResultsInert === "function") setResultsInert(true);
 
     const play = typeof getPlay === "function" ? getPlay() : null;

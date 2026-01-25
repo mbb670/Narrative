@@ -1024,7 +1024,9 @@ Puzzle Navigation
     }
 }
 
-/* Slider (word chain scroll) */
+/* -----------------------------
+Slider
+----------------------------- */
 .game-slider {
     position: relative;
     width: min(1080px, 100%);
@@ -1225,8 +1227,8 @@ Splash settings
 
 
 
-        /* -----------------------------
-Splash main
+/* -----------------------------
+Splash
 ----------------------------- */
 
         .splash__main {
@@ -1310,10 +1312,7 @@ FTUE
 ----------------------------- */
 
 .archive {
-
-
     transition: none !important;
-
 }
 
 .archive__dialog {
@@ -1852,6 +1851,10 @@ Results
     margin-bottom: var(--spacing-x4);
 }
 
+.results-stats{
+ width: 100%; 
+}
+
 .stat-label,
 .resultsSubtitle,
 .stat-penalty {
@@ -1998,7 +2001,7 @@ Results
 } */
 
 /* -----------------------------
-On-screen keyboard (touch)
+Keyboard 
 ----------------------------- */
 
 
@@ -2132,4 +2135,22 @@ body:has(#showOnscreenKeyboard:checked) .keyboard {
 
 .keyboard-key-preview.is-visible {
     opacity: 1;
+}
+
+/* Results dialog overrides */
+.results {
+    display: none;
+   
+}
+
+.results[open] {
+    display: flex;
+}
+
+dialog{
+ border: none;
+ overflow: visible;
+    &::backdrop{
+    background-color: var(--opacity-dimm-strong);
+    }
 }
