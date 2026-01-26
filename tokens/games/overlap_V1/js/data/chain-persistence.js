@@ -87,6 +87,7 @@ export function createChainPersistence({
       lockedEntries: [...play.lockedEntries], // word-level locks
       lockedCells: Array.isArray(play.lockedCells) ? play.lockedCells.slice(0, play.n) : [], // per-cell locks (hints)
       hintsUsed: chain.hintsUsed || 0,
+      checksUsed: chain.checksUsed || 0,
       hintPenaltySecTotal: chain.hintPenaltySecTotal || 0,
       wordPenaltySecTotal: chain.wordPenaltySecTotal || 0,
       elapsed: Math.max(0, +elapsed || 0),
@@ -100,6 +101,7 @@ export function createChainPersistence({
         solved: score.correct,
         total: play.entries?.length || 0,
         hintsUsed: snap.hintsUsed,
+        checksUsed: snap.checksUsed,
       };
     }
 
@@ -183,6 +185,7 @@ export function createChainPersistence({
     chain.unsolvedCount = Math.max(0, +data.unsolvedCount || 0);
     chain.hardModeComplete = !!data.hardModeComplete;
     chain.hintsUsed = Math.max(0, +data.hintsUsed || 0);
+    chain.checksUsed = Math.max(0, +data.checksUsed || 0);
     chain.hintPenaltySecTotal = Math.max(
       0,
       +data.hintPenaltySecTotal || chain.hintsUsed * (hintPenaltySec || 0) || 0

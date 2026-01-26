@@ -89,7 +89,14 @@ export function createGridRenderer({
       hintBtn.textContent = "Hint";
       hintBtn.setAttribute("aria-label", `Get a hint for ${e.clue || "this word"}`);
 
-      rcContent.append(clueBtn, hintBtn);
+      const checkBtn = document.createElement("button");
+      checkBtn.type = "button";
+      checkBtn.className = "rangeClue-check text-uppercase-semibold-md elevation-active";
+      checkBtn.dataset.e = String(e.eIdx);
+      checkBtn.textContent = "Check";
+      checkBtn.setAttribute("aria-label", `Check ${e.clue || "this word"} for correctness`);
+
+      rcContent.append(clueBtn, hintBtn, checkBtn);
       rc.appendChild(rcContent);
       target.appendChild(rc);
     }

@@ -15,6 +15,7 @@ export function createHints({
   isCellLocked,
   isWordCorrect,
   isAutoCheckEnabled,
+  toasts,
   clearSelectAll,
   addTimePenalty,
   rebuildLockedCells,
@@ -58,21 +59,33 @@ export function createHints({
   };
   const autoCheckEnabled =
     typeof isAutoCheckEnabled === "function" ? isAutoCheckEnabled : () => true;
+  const showCheckToast = (kind) => {
+    if (!toasts?.showToast) return;
+    const type =
+      kind === "correct" ? "checkCorrect" :
+      kind === "incorrect" ? "checkIncorrect" :
+      "checkIncomplete";
+    toasts.showToast(type);
+  };
 
   function setHintDisplay(rc, visible) {
-    const hint = rc?.querySelector(".rangeClue-hint");
-    if (!hint) return;
-    hint.style.display = visible ? "inline-flex" : "none";
+    if (!rc) return;
+    const hint = rc.querySelector(".rangeClue-hint");
+    const check = rc.querySelector(".rangeClue-check");
+    if (hint) hint.style.display = visible ? "inline-flex" : "none";
+    if (check) check.style.display = visible ? "inline-flex" : "none";
   }
 
   function scheduleHintDisplayNone(rc, delay = HINT_OUT_MS) {
     if (!rc) return;
     const hint = rc.querySelector(".rangeClue-hint");
-    if (!hint) return;
+    const check = rc.querySelector(".rangeClue-check");
+    if (!hint && !check) return;
     if (rc.classList.contains("is-hint-visible") || rc.classList.contains("is-hint-intro")) return;
     window.setTimeout(() => {
       if (rc.classList.contains("is-hint-visible") || rc.classList.contains("is-hint-intro")) return;
-      hint.style.display = "none";
+      if (hint) hint.style.display = "none";
+      if (check) check.style.display = "none";
     }, delay);
   }
 
@@ -126,10 +139,13 @@ export function createHints({
 
     clearRangeHintHideTimer();
     const hint = rc.querySelector(".rangeClue-hint");
-    if (hint) {
-      hint.style.display = "inline-flex";
+    const check = rc.querySelector(".rangeClue-check");
+    if (hint) hint.style.display = "inline-flex";
+    if (check) check.style.display = "inline-flex";
+    const trigger = hint || check;
+    if (trigger) {
       rc.classList.remove("is-hint-visible", "is-hint-intro");
-      void hint.offsetWidth; // ensure transition starts from hidden state
+      void trigger.offsetWidth; // ensure transition starts from hidden state
       requestAnimationFrame(() => rc.classList.add("is-hint-visible"));
     }
     _rangeHintOpen = eIdx;
@@ -260,6 +276,39 @@ export function createHints({
     return null;
   }
 
+  function isEntryComplete(entry) {
+    const play = getPlay();
+    if (!play || !entry) return false;
+    for (let i = entry.start; i < entry.start + entry.len && i < play.n; i++) {
+      if (!play.usr[i]) return false;
+    }
+    return true;
+  }
+
+  function isEntryFullyLocked(entry) {
+    const play = getPlay();
+    if (!play || !entry || play.mode !== MODE.CHAIN) return false;
+    for (let i = entry.start; i < entry.start + entry.len && i < play.n; i++) {
+      if (!isCellLocked(i)) return false;
+    }
+    return true;
+  }
+
+  function lockEntriesFromLockedCells() {
+    const play = getPlay();
+    if (!play || play.mode !== MODE.CHAIN) return [];
+    const newlyLocked = [];
+    for (const e of play.entries || []) {
+      if (play.lockedEntries.has(e.eIdx)) continue;
+      if (isEntryFullyLocked(e)) {
+        play.lockedEntries.add(e.eIdx);
+        newlyLocked.push(e);
+      }
+    }
+    if (newlyLocked.length) rebuildLockedCells();
+    return newlyLocked;
+  }
+
   // Fill one correct cell in a word and apply penalties in chain mode.
   function applyHintForEntry(eIdx) {
     const play = getPlay();
@@ -289,9 +338,13 @@ export function createHints({
         rebuildLockedCells();
       }
 
+      const newlyLocked = lockEntriesFromLockedCells();
       updateLockedWordUI();
       updatePlayUI();
-      if (lockedByHint) requestAnimationFrame(() => requestAnimationFrame(() => triggerSolveAnimation(entry)));
+      if (lockedByHint || newlyLocked.length) {
+        const anim = lockedByHint ? [entry, ...newlyLocked] : newlyLocked;
+        requestAnimationFrame(() => requestAnimationFrame(() => anim.forEach((e) => triggerSolveAnimation(e))));
+      }
       requestChainClues();
       chainMaybeFinishIfSolved();
       requestPersistChainProgress();
@@ -300,6 +353,58 @@ export function createHints({
       checkSolvedOverlapOnly();
     }
 
+    updateResetRevealVisibility();
+    updatePlayControlsVisibility();
+    updatePuzzleActionsVisibility();
+  }
+
+  function applyCheckForEntry(eIdx) {
+    const play = getPlay();
+    const chain = getChain();
+    clearSelectAll();
+    if (!play || play.done) return;
+    const entry = play.entries.find((x) => x.eIdx === eIdx);
+    if (!entry) return;
+
+    if (!isEntryComplete(entry)) {
+      showCheckToast("incomplete");
+      return;
+    }
+
+    const correct = typeof isWordCorrect === "function" && isWordCorrect(entry);
+
+    if (play.mode === MODE.CHAIN) {
+      if (chain && !chain.started && !play.done) chainStartNow();
+
+      if (correct) {
+        const wasLocked = play.lockedEntries?.has(entry.eIdx);
+        if (!wasLocked && play.lockedEntries) {
+          play.lockedEntries.add(entry.eIdx);
+          rebuildLockedCells();
+        }
+        const newlyLocked = lockEntriesFromLockedCells();
+        updateLockedWordUI();
+        updatePlayUI();
+        const anim = [];
+        if (!wasLocked) anim.push(entry);
+        if (newlyLocked.length) anim.push(...newlyLocked);
+        if (anim.length) {
+          requestAnimationFrame(() => requestAnimationFrame(() => anim.forEach((e) => triggerSolveAnimation(e))));
+        }
+        requestChainClues();
+        chainMaybeFinishIfSolved();
+      } else {
+        updatePlayUI();
+      }
+
+      if (chain) chain.checksUsed = Math.max(0, (chain.checksUsed || 0) + 1);
+      requestPersistChainProgress();
+    } else {
+      updatePlayUI();
+      checkSolvedOverlapOnly();
+    }
+
+    showCheckToast(correct ? "correct" : "incorrect");
     updateResetRevealVisibility();
     updatePlayControlsVisibility();
     updatePuzzleActionsVisibility();
@@ -324,6 +429,7 @@ export function createHints({
     pulseRangeHintIntro,
     queueInitialHintIntro,
     applyHintForEntry,
+    applyCheckForEntry,
     pinRangeClueHint,
   };
 }

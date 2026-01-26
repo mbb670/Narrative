@@ -40,10 +40,13 @@ export function createCellUI({
       // are still correct but visually distinct while a word finishes locking in.
       const fullySolved =
         play.mode === MODE.CHAIN &&
-        autoCheckEnabled() &&
         wordsHere.length > 0 &&
         typeof isWordCorrect === "function" &&
-        wordsHere.every((w) => isWordCorrect(w));
+        wordsHere.every((w) => {
+          if (!isWordCorrect(w)) return false;
+          if (autoCheckEnabled()) return true;
+          return play.lockedEntries?.has?.(w.eIdx);
+        });
       const locked =
         play.mode === MODE.CHAIN &&
         typeof isCellLocked === "function" &&

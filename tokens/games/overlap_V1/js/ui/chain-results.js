@@ -68,7 +68,10 @@ export function createChainResults({
       statTime: wrap.querySelector(".resultsStatTimeVal"),
       statSolved: wrap.querySelector(".resultsStatSolvedVal"),
       statHints: wrap.querySelector(".resultsStatHintsVal"),
+      statChecks: wrap.querySelector(".resultsStatChecksVal"),
+      statCheckWrap: wrap.querySelector(".resultsStatCheck"),
       pluralHints: wrap.querySelector("#pluralHints"),
+      pluralChecks: wrap.querySelector("#pluralChecks"),
       cClose,
       cShare,
     };
@@ -116,6 +119,15 @@ export function createChainResults({
     const hintCount = Math.max(0, chain?.hintsUsed || 0);
     r.statHints.textContent = String(hintCount);
     if (r.pluralHints) r.pluralHints.style.display = hintCount === 1 ? "none" : "";
+    if (r.statChecks) {
+      const checkCount = Math.max(0, chain?.checksUsed || 0);
+      r.statChecks.textContent = String(checkCount);
+      if (r.pluralChecks) r.pluralChecks.style.display = checkCount === 1 ? "none" : "";
+      const hardModeComplete = !!(play?.hardModeComplete || chain?.hardModeComplete);
+      if (r.statCheckWrap) {
+        r.statCheckWrap.style.display = checkCount > 0 || hardModeComplete ? "" : "none";
+      }
+    }
     const hintPenalty = Math.max(0, chain?.hintPenaltySecTotal || 0);
     const wordPenalty = Math.max(0, chain?.wordPenaltySecTotal || 0);
     if (els?.totalHintPenalty) {

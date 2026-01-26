@@ -244,6 +244,7 @@ export function createChainHud({
     chain.unsolvedCount = 0;
     chain.lastFinishReason = "idle";
     chain.hintsUsed = 0;
+    chain.checksUsed = 0;
     chain.hardModeComplete = false;
     if (chain.tickId) {
       clearInterval(chain.tickId);
@@ -282,6 +283,7 @@ export function createChainHud({
     if (!chain) return;
     chain.elapsed = 0;
     chain.hintsUsed = 0;
+    chain.checksUsed = 0;
     chain.hintPenaltySecTotal = 0;
     chain.wordPenaltySecTotal = 0;
     updatePauseButtonUI(states.IDLE, ui, 0);

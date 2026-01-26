@@ -43,6 +43,9 @@ Toasts
     color: var(--foreground-alt);
     background: var(--background-strong);
     pointer-events: none;
+    span{
+        color: inherit;
+    }
 
     &.is-showing {
         opacity: 1;

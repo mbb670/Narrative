@@ -3,6 +3,7 @@ Splash
 ----------------------------- */
 #pClear {
     display: none;
+    font-family: var(--system-fontfamily);
 }
 
 .is-dev {

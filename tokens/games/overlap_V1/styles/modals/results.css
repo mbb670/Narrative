@@ -1,8 +1,8 @@
 /* -----------------------------
 Results
 ----------------------------- */
-.results{
-    overflow: visible!important;
+.results {
+    overflow: visible !important;
     height: max-content;
 }
 
@@ -18,7 +18,7 @@ Results
     width: 100%;
 }
 
-.resultsSubtitle{
+.resultsSubtitle {
     color: var(--foreground-subtle);
     margin-top: var(--spacing-x2);
 }
@@ -43,6 +43,33 @@ Results
     border: unset;
     --icon: url("../../images/icons/close.svg");
 }
+
+.hardMode-stat {
+    margin-top: var(--spacing-x8);
+    background-color: var(--system-warning-subtle);
+    border-color: var(--system-warning-default);
+
+    .stat-label {
+        color: var(--system-warning-medium);
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-x8);
+
+        &::before {
+            content: '';
+            width: var(--spacing-x32);
+            aspect-ratio: 1;
+            background-color: var(--system-warning-medium);
+            aspect-ratio: 1;
+            width: var(--icon-size, var(--spacing-x12));
+            -webkit-mask: url("../../images/icons/star.svg") center / contain no-repeat;
+            mask: url("../../images/icons/star.svg") center / contain no-repeat;
+        }
+    }
+
+}
+
+
 
 /* -----------------------------
 Give Up modal

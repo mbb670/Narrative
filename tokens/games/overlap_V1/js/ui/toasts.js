@@ -66,6 +66,9 @@ export function createToasts({ els, getPlay, isWordCorrect, isAutoCheckEnabled }
       error: els.toastError,
       wordSolved: els.toastWordSolved,
       hint: els.toastHint,
+      checkCorrect: els.toastCheckCorrect,
+      checkIncorrect: els.toastCheckIncorrect,
+      checkIncomplete: els.toastCheckIncomplete,
     };
     const el = map[type];
     if (!el) return;
@@ -122,7 +125,7 @@ export function createToasts({ els, getPlay, isWordCorrect, isAutoCheckEnabled }
 
   // Clear all current toasts and timers (useful on reset).
   function clearToasts() {
-    ["success", "warning", "error", "wordSolved", "hint"].forEach((type) => {
+    ["success", "warning", "error", "wordSolved", "hint", "checkCorrect", "checkIncorrect", "checkIncomplete"].forEach((type) => {
       if (toastTimers[type]) {
         clearTimeout(toastTimers[type]);
         toastTimers[type] = 0;
@@ -132,7 +135,10 @@ export function createToasts({ els, getPlay, isWordCorrect, isAutoCheckEnabled }
         type === "warning" ? els.toastWarning :
         type === "error" ? els.toastError :
         type === "wordSolved" ? els.toastWordSolved :
-        els.toastHint;
+        type === "hint" ? els.toastHint :
+        type === "checkCorrect" ? els.toastCheckCorrect :
+        type === "checkIncorrect" ? els.toastCheckIncorrect :
+        els.toastCheckIncomplete;
       if (el) el.classList.remove("is-showing");
     });
   }

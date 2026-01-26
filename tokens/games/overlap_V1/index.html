@@ -58,6 +58,11 @@
           seconds</div>
         <div class="toast toast-error elevation-fixed-top" id="toastError-puzzle" role="status"><span>Puzzle broken -
             Contact Matt & let him know!</span><span class="text-system-regular-xs" id="status"></span></div>
+
+        <div class="toast toast-hint elevation-fixed-top" id="toastCheck-correct" role="status">Correct!</div>
+        <div class="toast toast-hint elevation-fixed-top" id="toastCheck-incorrect" role="status">Word not correct</div>
+        <div class="toast toast-hint elevation-fixed-top" id="toastCheck-incomplete" role="status">Word not complete
+        </div>
       </div>
     </div>
     <div class="puzzle-nav" aria-label="Navigation">
@@ -68,7 +73,8 @@
           title="Previous letter"></button>
       </div>
       <div class="toast-stack toast-stack-working text-system-regular-md" aria-live="polite" aria-atomic="true">
-        <div class="toast toast-word-solved elevation-fixed-top text-system-semibold-sm" id="toastWordSolved" role="status">
+        <div class="toast toast-word-solved elevation-fixed-top text-system-semibold-sm" id="toastWordSolved"
+          role="status">
           Word Solved!
         </div>
         <div class="word-solved-count"></div>
@@ -119,27 +125,38 @@
       <p class="resultsSubtitle"></p>
     </div>
     <div class="results-stats">
+     
       <div class="stat resultsStatTime">
         <div class="stat-value resultsStatTimeVal text-headline-semibold-md">00:00</div>
-        <div class="stat-label"> Total Time</div>
+        <div class="stat-label">Total Time</div>
       </div>
       <div class="stat-extras">
-        <div class="stat-container">
-          <div class="stat resultsStatSolved">
+        <div class="stat-container resultsStatSolved">
+          <div class="stat">
             <div class="stat-value resultsStatSolvedVal text-subheadline-semibold-md">0/0</div>
             <div class="stat-label">Solved</div>
           </div>
           <div class="stat-penalty">+<span id="totalWordPenalty">00</span></div>
 
         </div>
-        <div class="stat-container">
-          <div class="stat resultsStatHints">
+        <div class="stat-container resultsStatHints">
+          <div class="stat">
             <div class="stat-value resultsStatHintsVal text-subheadline-semibold-md">0</div>
             <div class="stat-label">Hint<span id="pluralHints">s</span></div>
           </div>
           <div class="stat-penalty">+<span id="totalHintPenalty">00</span></div>
 
         </div>
+        <div class="stat-container resultsStatCheck">
+          <div class="stat">
+            <div class="stat-value resultsStatChecksVal text-subheadline-semibold-md">0</div>
+            <div class="stat-label">Check<span id="pluralChecks">s</span></div>
+          </div>
+          <!-- <div class="Check-penalty">+<span id="totalCheckPenalty">00</span></div> -->
+        </div>
+      </div>
+       <div class="stat hardMode-stat">
+        <div class="stat-label">Solved in Hard Mode</div>
       </div>
     </div>
     <div class="modal-actions">
@@ -208,8 +225,10 @@
       <div class="archive__controls">
         <button class="btn btn-icon" id="archivePrevMonth" type="button" aria-label="Previous month"></button>
         <div class="archive__calendar-select text-system-regular-sm">
-          <label class="select-dropdown"><select class="dropdown" id="archiveMonthSelect" aria-label="Month"></select></label>
-          <label class="select-dropdown"><select class="dropdown" id="archiveYearSelect" aria-label="Year"></select></label>
+          <label class="select-dropdown"><select class="dropdown" id="archiveMonthSelect"
+              aria-label="Month"></select></label>
+          <label class="select-dropdown"><select class="dropdown" id="archiveYearSelect"
+              aria-label="Year"></select></label>
         </div>
         <button class="btn btn-icon" id="archiveNextMonth" type="button" aria-label="Next month"></button>
       </div>
@@ -244,8 +263,8 @@
         <div class="toast splashShareToast text-system-regular-sm" id="splashShareToast" role="status"
           aria-live="polite" aria-atomic="true">Copied to clipboard</div>
       </button>
-      <button class="btn btn-icon settings-btn btn-ghost" id="settingsBtn" type="button"
-        aria-haspopup="dialog" aria-expanded="false" aria-controls="settingsPanel"></button>
+      <button class="btn btn-icon settings-btn btn-ghost" id="settingsBtn" type="button" aria-haspopup="dialog"
+        aria-expanded="false" aria-controls="settingsPanel"></button>
       <div class="settings-panel elevation-overlay text-system-semibold-sm" id="settingsPanel" role="dialog"
         aria-modal="false" aria-hidden="true" hidden>
         <div class="settings-panel__header">
@@ -322,7 +341,7 @@
       </div>
       <p class="credit splash__meta text-system-regular-xs">
         Created & designed by <a href="https://matthewbarnettdesign.com/" target="_blank">Matthew Barnett</a> • <span
-          id="splashVersion">V4.24</span>
+          id="splashVersion">V4.25</span>
       </p>
     </footer>
   </dialog>

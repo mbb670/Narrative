@@ -151,7 +151,7 @@ Range Clues
     }
 }
 
-.rangeClue-hint {
+.rangeClue-hint, .rangeClue-check {
     display: none;
     opacity: 0;
     transform: translateX(-12px);
@@ -179,19 +179,27 @@ Range Clues
 }
 
 .rangeClue.is-hint-visible .rangeClue-hint,
+.rangeClue.is-hint-visible .rangeClue-check,
 .rangeClue .rangeClue-content:focus-within .rangeClue-hint,
+.rangeClue .rangeClue-content:focus-within .rangeClue-check,
 .rangeClue .rangeClue-string:focus-visible~.rangeClue-hint,
-.rangeClue.is-hint-intro .rangeClue-hint {
+.rangeClue .rangeClue-string:focus-visible~.rangeClue-check,
+.rangeClue.is-hint-intro .rangeClue-hint,
+.rangeClue.is-hint-intro .rangeClue-check {
     display: inline-flex;
     opacity: 1;
     transform: translateX(0);
     pointer-events: auto;
 }
 
+
+
 @media (hover: hover) {
 
     .rangeClue .rangeClue-content:hover .rangeClue-hint,
-    .rangeClue .rangeClue-string:hover~.rangeClue-hint {
+    .rangeClue .rangeClue-content:hover .rangeClue-check,
+    .rangeClue .rangeClue-string:hover~.rangeClue-hint,
+    .rangeClue .rangeClue-string:hover~.rangeClue-check {
         display: inline-flex;
         opacity: 1;
         transform: translateX(0);
@@ -199,6 +207,12 @@ Range Clues
     }
 }
 
-.rangeClue.is-hidden .rangeClue-hint {
+.rangeClue.is-hidden .rangeClue-hint,
+.rangeClue.is-hidden .rangeClue-check,
+[data-autocheck="true"] .rangeClue-check {
     display: none !important;
+}
+
+.rangeClue-check{
+    transition-delay: 50ms;
 }

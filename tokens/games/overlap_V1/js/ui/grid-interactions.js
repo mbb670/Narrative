@@ -18,6 +18,7 @@ export function createGridInteractions({
   markInteracted,
   focusForTyping,
   applyHintForEntry,
+  applyCheckForEntry,
   showRangeClueHint,
   pinRangeClueHint,
   showRangeFocusForEntry,
@@ -38,6 +39,7 @@ export function createGridInteractions({
   const markInteractedSafe = typeof markInteracted === "function" ? markInteracted : () => {};
   const focusForTypingSafe = typeof focusForTyping === "function" ? focusForTyping : () => {};
   const applyHintSafe = typeof applyHintForEntry === "function" ? applyHintForEntry : () => {};
+  const applyCheckSafe = typeof applyCheckForEntry === "function" ? applyCheckForEntry : () => {};
   const showClueSafe = typeof showRangeClueHint === "function" ? showRangeClueHint : () => {};
   const pinClueSafe = typeof pinRangeClueHint === "function" ? pinRangeClueHint : () => {};
   const showFocusSafe = typeof showRangeFocusForEntry === "function" ? showRangeFocusForEntry : () => {};
@@ -62,7 +64,18 @@ export function createGridInteractions({
     const play = getPlaySafe();
     if (!play) return;
 
-    // Hint and clue buttons take precedence over cell clicks.
+    // Hint, check, and clue buttons take precedence over cell clicks.
+    const checkBtn = e.target.closest(".rangeClue-check");
+    if (checkBtn) {
+      const eIdx = Number(checkBtn.dataset.e || checkBtn.closest(".rangeClue")?.dataset.e);
+      if (!Number.isNaN(eIdx)) {
+        markInteractedSafe();
+        focusForTypingSafe();
+        applyCheckSafe(eIdx);
+      }
+      return;
+    }
+
     const hintBtn = e.target.closest(".rangeClue-hint");
     if (hintBtn) {
       const eIdx = Number(hintBtn.dataset.e || hintBtn.closest(".rangeClue")?.dataset.e);
@@ -120,6 +133,19 @@ export function createGridInteractions({
   function onGridPointerUpTouch(e) {
     if (e.pointerType !== "touch") return;
     // Touch pointerup is used to avoid the delayed click on some mobile browsers.
+    const checkBtn = e.target.closest(".rangeClue-check");
+    if (checkBtn) {
+      e.preventDefault();
+      const eIdx = Number(checkBtn.dataset.e || checkBtn.closest(".rangeClue")?.dataset.e);
+      if (!Number.isNaN(eIdx)) {
+        markInteractedSafe();
+        focusForTypingSafe();
+        applyCheckSafe(eIdx);
+        setIgnoreUntil(performance.now() + 500);
+      }
+      return;
+    }
+
     const hintBtn = e.target.closest(".rangeClue-hint");
     if (hintBtn) {
       e.preventDefault();
