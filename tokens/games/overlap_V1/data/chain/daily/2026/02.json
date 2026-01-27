@@ -1747,5 +1747,287 @@
                 "start": 77
             }
         ]
+    },
+    {
+        "id": "2026-02-21",
+        "words": [{
+                "clue": "Quantity",
+                "answer": "AMOUNT",
+                "start": 1
+            },
+            {
+                "clue": "Up to",
+                "answer": "UNTO",
+                "start": 4
+            },
+            {
+                "clue": "Grabbed",
+                "answer": "TOOK",
+                "start": 6
+            },
+            {
+                "clue": "Control dial",
+                "answer": "KNOB",
+                "start": 9
+            },
+            {
+                "clue": "The two",
+                "answer": "BOTH",
+                "start": 12
+            },
+            {
+                "clue": "Old you",
+                "answer": "THOU",
+                "start": 14
+            },
+            {
+                "clue": "Residence",
+                "answer": "HOUSE",
+                "start": 15
+            },
+            {
+                "clue": "Half-",
+                "answer": "SEMI",
+                "start": 18
+            },
+            {
+                "clue": "Gulf sheikhdoms",
+                "answer": "EMIRATES",
+                "start": 19
+            },
+            {
+                "clue": "Hard covering",
+                "answer": "SHELL",
+                "start": 26
+            },
+            {
+                "clue": "Midday meal",
+                "answer": "LUNCH",
+                "start": 30
+            },
+            {
+                "clue": "Small talk",
+                "answer": "CHAT",
+                "start": 33
+            },
+            {
+                "clue": "Detest",
+                "answer": "HATE",
+                "start": 34
+            },
+            {
+                "clue": "Lone Star State",
+                "answer": "TEXAS",
+                "start": 36
+            },
+            {
+                "clue": "Sharp decline",
+                "answer": "SLUMP",
+                "start": 40
+            },
+            {
+                "clue": "Set expression",
+                "answer": "PHRASE",
+                "start": 44
+            },
+            {
+                "clue": "Section",
+                "answer": "SEGMENT",
+                "start": 48
+            },
+            {
+                "clue": "Draining",
+                "answer": "TAXING",
+                "start": 54
+            }
+        ]
+    },
+    {
+        "id": "2026-02-22",
+        "words": [{
+                "clue": "Contest",
+                "answer": "GAME",
+                "start": 1
+            },
+            {
+                "clue": "Breakfasts, say",
+                "answer": "MEALS",
+                "start": 3
+            },
+            {
+                "clue": "Old West bar",
+                "answer": "SALOON",
+                "start": 7
+            },
+            {
+                "clue": "Southwest tribe",
+                "answer": "NAVAJO",
+                "start": 12
+            },
+            {
+                "clue": "Link up",
+                "answer": "JOIN",
+                "start": 16
+            },
+            {
+                "clue": "Welcoming",
+                "answer": "INVITING",
+                "start": 18
+            },
+            {
+                "clue": "Profit",
+                "answer": "GAIN",
+                "start": 25
+            },
+            {
+                "clue": "Occurrence",
+                "answer": "INCIDENT",
+                "start": 27
+            },
+            {
+                "clue": "Sign of affection",
+                "answer": "TOKEN",
+                "start": 34
+            },
+            {
+                "clue": "Lottery game",
+                "answer": "KENO",
+                "start": 36
+            },
+            {
+                "clue": "Massive",
+                "answer": "ENORMOUS",
+                "start": 37
+            },
+            {
+                "clue": "Small mistake",
+                "answer": "SLIP",
+                "start": 44
+            },
+            {
+                "clue": "Cloth fix",
+                "answer": "PATCH",
+                "start": 47
+            },
+            {
+                "clue": "Verifying",
+                "answer": "CHECKING",
+                "start": 50
+            },
+            {
+                "clue": "Pleased",
+                "answer": "GLAD",
+                "start": 57
+            },
+            {
+                "clue": "Shoe brand",
+                "answer": "ADIDAS",
+                "start": 59
+            },
+            {
+                "clue": "Quick run",
+                "answer": "DASH",
+                "start": 62
+            },
+            {
+                "clue": "Fireplace remains",
+                "answer": "ASHES",
+                "start": 63
+            }
+        ]
+    },
+    {
+        "id": "2026-02-23",
+        "words": [{
+                "clue": "Puts on market",
+                "answer": "SELLS",
+                "start": 1
+            },
+            {
+                "clue": "Broth dish",
+                "answer": "SOUP",
+                "start": 5
+            },
+            {
+                "clue": "Muscle nutrient",
+                "answer": "PROTEIN",
+                "start": 8
+            },
+            {
+                "clue": "Internal",
+                "answer": "INNER",
+                "start": 13
+            },
+            {
+                "clue": "Bravery",
+                "answer": "NERVE",
+                "start": 15
+            },
+            {
+                "clue": "National bird",
+                "answer": "EAGLE",
+                "start": 19
+            },
+            {
+                "clue": "Narrow valley",
+                "answer": "GLEN",
+                "start": 21
+            },
+            {
+                "clue": "Loan sources",
+                "answer": "LENDERS",
+                "start": 22
+            },
+            {
+                "clue": "Bath bar",
+                "answer": "SOAP",
+                "start": 28
+            },
+            {
+                "clue": "Nonpoetic writing",
+                "answer": "PROSE",
+                "start": 31
+            },
+            {
+                "clue": "Peddle",
+                "answer": "SELL",
+                "start": 34
+            },
+            {
+                "clue": "Wood-turning tool",
+                "answer": "LATHE",
+                "start": 37
+            },
+            {
+                "clue": "Robbery",
+                "answer": "THEFT",
+                "start": 39
+            },
+            {
+                "clue": "Game plans",
+                "answer": "TACTICS",
+                "start": 43
+            },
+            {
+                "clue": "Writer",
+                "answer": "SCRIBE",
+                "start": 49
+            },
+            {
+                "clue": "Wild animal",
+                "answer": "BEAST",
+                "start": 53
+            },
+            {
+                "clue": "Hitting the books",
+                "answer": "STUDYING",
+                "start": 56
+            },
+            {
+                "clue": "Film director D.W",
+                "answer": "GRIFFITH",
+                "start": 63
+            }
+        ]
     }
 ]

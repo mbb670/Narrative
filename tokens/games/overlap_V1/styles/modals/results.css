@@ -48,6 +48,7 @@ Results
     margin-top: var(--spacing-x8);
     background-color: var(--system-warning-subtle);
     border-color: var(--system-warning-default);
+    display: none;
 
     .stat-label {
         color: var(--system-warning-medium);
@@ -66,9 +67,13 @@ Results
             mask: url("../../images/icons/star.svg") center / contain no-repeat;
         }
     }
-
 }
 
+[data-hard-mode="true"]{
+    .hardMode-stat{
+        display: block;
+    }
+}
 
 
 /* -----------------------------

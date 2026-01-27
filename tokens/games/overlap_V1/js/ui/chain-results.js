@@ -98,9 +98,12 @@ export function createChainResults({
     const total = play?.entries?.length || 0;
     const solved = Math.max(0, total - Math.max(0, chain?.unsolvedCount || 0));
     const allSolved = (chain?.unsolvedCount || 0) === 0;
+    const hardModeComplete = !!(play?.hardModeComplete || chain?.hardModeComplete);
 
     r.wrap.setAttribute("data-result", allSolved ? "solved" : "partial");
     r.title.textContent = allSolved ? "Success!" : "Overlap";
+    if (hardModeComplete) r.wrap.setAttribute("data-hard-mode", "true");
+    else r.wrap.removeAttribute("data-hard-mode");
 
     const p = puzzles[pIdx];
     const label =
@@ -123,7 +126,6 @@ export function createChainResults({
       const checkCount = Math.max(0, chain?.checksUsed || 0);
       r.statChecks.textContent = String(checkCount);
       if (r.pluralChecks) r.pluralChecks.style.display = checkCount === 1 ? "none" : "";
-      const hardModeComplete = !!(play?.hardModeComplete || chain?.hardModeComplete);
       if (r.statCheckWrap) {
         r.statCheckWrap.style.display = checkCount > 0 || hardModeComplete ? "" : "none";
       }
