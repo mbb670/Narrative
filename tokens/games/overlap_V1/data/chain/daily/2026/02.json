@@ -160,7 +160,7 @@
                 "start": 57
             },
             {
-                "clue": "Celebrity",
+                "clue": "Celestial body",
                 "answer": "STAR",
                 "start": 60
             },
@@ -189,7 +189,7 @@
                 "start": 5
             },
             {
-                "clue": "Spoken",
+                "clue": "By mouth",
                 "answer": "ORAL",
                 "start": 7
             },
@@ -239,7 +239,7 @@
                 "start": 48
             },
             {
-                "clue": "Artistic style",
+                "clue": "Beauty-related",
                 "answer": "ESTHETIC",
                 "start": 51
             },
@@ -713,7 +713,7 @@
                 "start": 7
             },
             {
-                "clue": "Stir-fry grain",
+                "clue": "Sushi grain",
                 "answer": "RICE",
                 "start": 11
             },
@@ -807,7 +807,7 @@
                 "start": 23
             },
             {
-                "clue": "Spanish house",
+                "clue": "Spanish home",
                 "answer": "CASA",
                 "start": 29
             },
@@ -1153,7 +1153,7 @@
                 "start": 15
             },
             {
-                "clue": "Tilt",
+                "clue": "Slant",
                 "answer": "CANT",
                 "start": 16
             },
@@ -1193,7 +1193,7 @@
                 "start": 43
             },
             {
-                "clue": "Real-life state",
+                "clue": "State of being real",
                 "answer": "ACTUALITY",
                 "start": 48
             },
@@ -1381,7 +1381,7 @@
                 "start": 50
             },
             {
-                "clue": "Quick raid",
+                "clue": "Sudden charge",
                 "answer": "SALLY",
                 "start": 52
             },
@@ -1470,7 +1470,7 @@
                 "start": 58
             },
             {
-                "clue": "Doe",
+                "clue": "Tarzan's mate",
                 "answer": "JANE",
                 "start": 65
             },
@@ -1499,7 +1499,7 @@
                 "start": 4
             },
             {
-                "clue": "Valve's Newell",
+                "clue": "Gabriel nickname",
                 "answer": "GABE",
                 "start": 12
             },
@@ -1756,7 +1756,7 @@
                 "start": 1
             },
             {
-                "clue": "Up to",
+                "clue": "To, old-style",
                 "answer": "UNTO",
                 "start": 4
             },
@@ -2024,9 +2024,454 @@
                 "start": 56
             },
             {
-                "clue": "Film director D.W",
+                "clue": "L.A. observatory",
                 "answer": "GRIFFITH",
                 "start": 63
+            }
+        ]
+    },
+    {
+        "id": "2026-02-24",
+        "words": [{
+                "clue": "Soup base",
+                "answer": "BROTH",
+                "start": 1
+            },
+            {
+                "clue": "Jefferson's 1st name",
+                "answer": "THOMAS",
+                "start": 4
+            },
+            {
+                "clue": "Takes for granted",
+                "answer": "ASSUMES",
+                "start": 8
+            },
+            {
+                "clue": "Tableland",
+                "answer": "MESA",
+                "start": 12
+            },
+            {
+                "clue": "Putting aside",
+                "answer": "SAVING",
+                "start": 14
+            },
+            {
+                "clue": "Accra's country",
+                "answer": "GHANA",
+                "start": 19
+            },
+            {
+                "clue": "In the middle of",
+                "answer": "AMONGST",
+                "start": 23
+            },
+            {
+                "clue": "Pile up",
+                "answer": "STACK",
+                "start": 28
+            },
+            {
+                "clue": "Stop, in football",
+                "answer": "TACKLE",
+                "start": 29
+            },
+            {
+                "clue": "Seep",
+                "answer": "LEAK",
+                "start": 33
+            },
+            {
+                "clue": "Cosmic payback",
+                "answer": "KARMA",
+                "start": 36
+            },
+            {
+                "clue": "Disguise",
+                "answer": "MASK",
+                "start": 39
+            },
+            {
+                "clue": "Inquired",
+                "answer": "ASKED",
+                "start": 40
+            },
+            {
+                "clue": "Official decree",
+                "answer": "EDICT",
+                "start": 43
+            },
+            {
+                "clue": "Justin, in Ottawa",
+                "answer": "TRUDEAU",
+                "start": 47
+            },
+            {
+                "clue": "All of space",
+                "answer": "UNIVERSE",
+                "start": 53
+            },
+            {
+                "clue": "Arrangement",
+                "answer": "SETUP",
+                "start": 59
+            }
+        ]
+    },
+    {
+        "id": "2026-02-25",
+        "words": [{
+                "clue": "Earlier",
+                "answer": "PRIOR",
+                "start": 1
+            },
+            {
+                "clue": "Inclined plane",
+                "answer": "RAMP",
+                "start": 5
+            },
+            {
+                "clue": "Plumber's tube",
+                "answer": "PIPE",
+                "start": 8
+            },
+            {
+                "clue": "Owned animals",
+                "answer": "PETS",
+                "start": 10
+            },
+            {
+                "clue": "Unemotional",
+                "answer": "STOIC",
+                "start": 13
+            },
+            {
+                "clue": "Grab hold of",
+                "answer": "CATCH",
+                "start": 17
+            },
+            {
+                "clue": "Youngster",
+                "answer": "CHILD",
+                "start": 20
+            },
+            {
+                "clue": "Doe or buck",
+                "answer": "DEER",
+                "start": 24
+            },
+            {
+                "clue": "Tart pie plant",
+                "answer": "RHUBARB",
+                "start": 27
+            },
+            {
+                "clue": "Tony who was PM",
+                "answer": "BLAIR",
+                "start": 33
+            },
+            {
+                "clue": "Pressing tool",
+                "answer": "IRON",
+                "start": 36
+            },
+            {
+                "clue": "Reagan's first name",
+                "answer": "RONALD",
+                "start": 37
+            },
+            {
+                "clue": "Interrupt",
+                "answer": "DISTURB",
+                "start": 42
+            },
+            {
+                "clue": "Knife edge",
+                "answer": "BLADE",
+                "start": 48
+            },
+            {
+                "clue": "Heavily loaded",
+                "answer": "LADEN",
+                "start": 49
+            },
+            {
+                "clue": "Makes certain",
+                "answer": "ENSURES",
+                "start": 52
+            },
+            {
+                "clue": "Marshy area",
+                "answer": "SWAMP",
+                "start": 58
+            }
+        ]
+    },
+    {
+        "id": "2026-02-26",
+        "words": [{
+                "clue": "Well-liked",
+                "answer": "POPULAR",
+                "start": 1
+            },
+            {
+                "clue": "Coming in",
+                "answer": "ARRIVAL",
+                "start": 6
+            },
+            {
+                "clue": "Portable computer",
+                "answer": "LAPTOP",
+                "start": 12
+            },
+            {
+                "clue": "Observable events",
+                "answer": "PHENOMENA",
+                "start": 17
+            },
+            {
+                "clue": "Photoshop maker",
+                "answer": "ADOBE",
+                "start": 25
+            },
+            {
+                "clue": "Started",
+                "answer": "BEGUN",
+                "start": 28
+            },
+            {
+                "clue": "Firearms",
+                "answer": "GUNS",
+                "start": 30
+            },
+            {
+                "clue": "Not autographed",
+                "answer": "UNSIGNED",
+                "start": 31
+            },
+            {
+                "clue": "Chauffeur",
+                "answer": "DRIVER",
+                "start": 38
+            },
+            {
+                "clue": "Streams",
+                "answer": "RIVERS",
+                "start": 39
+            },
+            {
+                "clue": "Edition",
+                "answer": "VERSION",
+                "start": 41
+            },
+            {
+                "clue": "Charged atoms",
+                "answer": "IONS",
+                "start": 45
+            },
+            {
+                "clue": "Turn",
+                "answer": "SPIN",
+                "start": 48
+            },
+            {
+                "clue": "Small amount",
+                "answer": "PINCH",
+                "start": 49
+            },
+            {
+                "clue": "Rhythmic shout",
+                "answer": "CHANT",
+                "start": 52
+            },
+            {
+                "clue": "Deeply upsetting",
+                "answer": "TRAUMATIC",
+                "start": 56
+            },
+            {
+                "clue": "Rustic hut",
+                "answer": "CABIN",
+                "start": 64
+            }
+        ]
+    },
+    {
+        "id": "2026-02-27",
+        "words": [{
+                "clue": "Data entry",
+                "answer": "INPUT",
+                "start": 1
+            },
+            {
+                "clue": "One of two",
+                "answer": "TWIN",
+                "start": 5
+            },
+            {
+                "clue": "Triumphs",
+                "answer": "WINS",
+                "start": 6
+            },
+            {
+                "clue": "Slipped in",
+                "answer": "INSERTED",
+                "start": 7
+            },
+            {
+                "clue": "Pull",
+                "answer": "DRAG",
+                "start": 14
+            },
+            {
+                "clue": "Total amount",
+                "answer": "AGGREGATE",
+                "start": 16
+            },
+            {
+                "clue": "Top tier",
+                "answer": "ELITE",
+                "start": 24
+            },
+            {
+                "clue": "Full of eagerness",
+                "answer": "ENTHUSIASTIC",
+                "start": 28
+            },
+            {
+                "clue": "Construction binder",
+                "answer": "CEMENT",
+                "start": 39
+            },
+            {
+                "clue": "Trusted adviser",
+                "answer": "MENTOR",
+                "start": 41
+            },
+            {
+                "clue": "Ontario's capital",
+                "answer": "TORONTO",
+                "start": 44
+            },
+            {
+                "clue": "Light-bending science",
+                "answer": "OPTICS",
+                "start": 50
+            },
+            {
+                "clue": "Sorrow",
+                "answer": "SADNESS",
+                "start": 55
+            },
+            {
+                "clue": "Excellent",
+                "answer": "SUPERB",
+                "start": 61
+            },
+            {
+                "clue": "Sweetheart",
+                "answer": "BABE",
+                "start": 66
+            },
+            {
+                "clue": "Sandy shore",
+                "answer": "BEACH",
+                "start": 68
+            },
+            {
+                "clue": "Small piece",
+                "answer": "CHIP",
+                "start": 71
+            }
+        ]
+    },
+    {
+        "id": "2026-02-28",
+        "words": [{
+                "clue": "Lean",
+                "answer": "SLIM",
+                "start": 1
+            },
+            {
+                "clue": "Max allowed",
+                "answer": "LIMIT",
+                "start": 2
+            },
+            {
+                "clue": "Odysseus' home",
+                "answer": "ITHACA",
+                "start": 5
+            },
+            {
+                "clue": "Deep ravine",
+                "answer": "CANYON",
+                "start": 9
+            },
+            {
+                "clue": "Any person",
+                "answer": "ANYONE",
+                "start": 10
+            },
+            {
+                "clue": "Making business contacts",
+                "answer": "NETWORKING",
+                "start": 14
+            },
+            {
+                "clue": "Brain chem",
+                "answer": "GABA",
+                "start": 23
+            },
+            {
+                "clue": "Panda's snack",
+                "answer": "BAMBOO",
+                "start": 25
+            },
+            {
+                "clue": "Photo enclosure",
+                "answer": "BOOTH",
+                "start": 28
+            },
+            {
+                "clue": "Pile",
+                "answer": "HEAP",
+                "start": 32
+            },
+            {
+                "clue": "Come nearer",
+                "answer": "APPROACH",
+                "start": 34
+            },
+            {
+                "clue": "Break exam rules",
+                "answer": "CHEAT",
+                "start": 40
+            },
+            {
+                "clue": "Hot-tempered",
+                "answer": "HEATED",
+                "start": 41
+            },
+            {
+                "clue": "Hard to do",
+                "answer": "DIFFICULT",
+                "start": 46
+            },
+            {
+                "clue": "Engine boost",
+                "answer": "TURBO",
+                "start": 54
+            },
+            {
+                "clue": "NYC division",
+                "answer": "BOROUGH",
+                "start": 57
+            },
+            {
+                "clue": "Spooky spirit",
+                "answer": "GHOST",
+                "start": 62
             }
         ]
     }
