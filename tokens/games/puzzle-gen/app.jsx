@@ -3057,6 +3057,17 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
                                             )}
                                         </span>
                                     );
+                                    const overlapParts = [];
+                                    const startWord = showBridgeModal?.startWord || "";
+                                    const endWord = showBridgeModal?.endWord || "";
+                                    if (sol.words?.length) {
+                                        overlapParts.push(getOverlap(startWord, sol.words[0], 1)?.count || 0);
+                                        for (let i = 0; i < sol.words.length - 1; i++) {
+                                            overlapParts.push(getOverlap(sol.words[i], sol.words[i + 1], 1)?.count || 0);
+                                        }
+                                        overlapParts.push(getOverlap(sol.words[sol.words.length - 1], endWord, 1)?.count || 0);
+                                    }
+                                    const overlapLabel = overlapParts.length > 0 ? overlapParts.join('-') : "0";
                                     return (
                                     <button 
                                         key={sol.id} 
@@ -3080,12 +3091,8 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
                                     <div className="text-xs opacity-70 font-normal flex items-center gap-2">
                                         {sol.length === 1 && <CheckCircle2 size={12} className="text-emerald-500" />}
                                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
-                                            <span className="text-slate-500">len</span>
-                                            <span className="font-semibold text-indigo-600">{sol.length}</span>
-                                        </span>
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
                                             <span className="text-slate-500">overlap</span>
-                                            <span className="font-semibold text-emerald-600">{sol.totalOverlap ?? 0}</span>
+                                            <span className="font-semibold text-emerald-600">{overlapLabel}</span>
                                         </span>
                                     </div>
                                 </button>
