@@ -1310,13 +1310,21 @@ export default function App() {
 
   const seededTripleKeys = useMemo(() => {
       const keys = new Set();
+      if (Array.isArray(tripleSeedPool)) {
+          tripleSeedPool.forEach(entry => {
+              if (!entry || !Array.isArray(entry.words) || entry.words.length !== 3) return;
+              const cleaned = entry.words.map(cleanWord);
+              if (cleaned.some(w => !w)) return;
+              keys.add(cleaned.join('|'));
+          });
+      }
       chain.forEach(item => {
           if (item.type !== 'triple' || !item.seeded || !Array.isArray(item.words) || item.words.length !== 3) return;
           const key = item.words.map(w => cleanWord(w)).join('|');
           if (key) keys.add(key);
       });
       return keys;
-  }, [chain]);
+  }, [chain, tripleSeedPool]);
 
   const tripleSeedIndex = useMemo(() => {
       const index = new Map();
