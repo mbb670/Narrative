@@ -59,16 +59,20 @@ Puzzle Colors
     --puzzle-color-2: #F4966C;
 }
 
-/* [data-puzzle-palette="FRI"] {
-    --puzzle-color-1: #034732;
-    --puzzle-color-2: #008148;
-    --puzzle-color-3: #C6C013;
-    --puzzle-color-4: #EF8A17;
-    --puzzle-color-5: #EF2917;
+[data-puzzle-palette="FRI"] {
+    --puzzle-color-1: #8ECAE6;
+    --puzzle-color-3: #229EBC;
+    --puzzle-color-3: #023047;
+    --puzzle-color-4: #FFB700;
+    --puzzle-color-5: #FA8500;
+}
+
+[data-mode="dark"] [data-puzzle-palette="FRI"] {
+    --puzzle-color-3: #01AAFF;
 }
 
 
-[data-puzzle-palette="SAT"] {
+/* [data-puzzle-palette="SAT"] {
     --puzzle-color-1: #173f5f;
     --puzzle-color-2: #20639b;
     --puzzle-color-3: #3caea3;
