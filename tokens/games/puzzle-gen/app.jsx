@@ -1419,6 +1419,41 @@ export default function App() {
       return candidates.slice(0, 6);
   }, [showBridgeModal, tripleSeedPool, tripleSeedIndex, usedWordsSet, devalueWords, isWordExcluded]);
 
+  const tripleFallbackSuggestions = useMemo(() => {
+      if (!showBridgeModal) return [];
+      if (!Array.isArray(tripleSeedPool) || tripleSeedPool.length === 0) return [];
+      if (tripleBridgeSuggestions.length > 0) return [];
+      const results = [];
+      const usedIdx = new Set();
+      const usedKeys = new Set();
+      const maxAttempts = Math.min(tripleSeedPool.length * 2, 5000);
+      let attempts = 0;
+      while (results.length < 10 && attempts < maxAttempts) {
+          const idx = Math.floor(Math.random() * tripleSeedPool.length);
+          attempts++;
+          if (usedIdx.has(idx)) continue;
+          usedIdx.add(idx);
+          const entry = tripleSeedPool[idx];
+          if (!entry || !Array.isArray(entry.words) || entry.words.length !== 3) continue;
+          const words = entry.words.map(w => (typeof w === 'string' ? w.trim() : "")).filter(Boolean);
+          if (words.length !== 3) continue;
+          if (words.some(word => isWordExcluded(word))) continue;
+          const key = words.map(cleanWord).join('|');
+          if (!key || usedKeys.has(key)) continue;
+          usedKeys.add(key);
+          const overlapRaw = Number(entry.overlap);
+          const overlapVal = Number.isFinite(overlapRaw) && overlapRaw > 0 ? Math.floor(overlapRaw) : 1;
+          results.push({
+              id: `seed-random-${idx}-${key}`,
+              words,
+              length: 3,
+              type: 'triple',
+              totalOverlap: overlapVal
+          });
+      }
+      return results;
+  }, [showBridgeModal, tripleSeedPool, tripleBridgeSuggestions, isWordExcluded]);
+
   // Segments based on target length and triple presence
   const segments = useMemo(() => {
       if (displayedNodes.length === 0) return [{ start: 0, end: -1, triples: 0, count: 0 }];
@@ -2888,13 +2923,14 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
     }
   };
 
-  const insertBridge = (solution) => {
+  const insertBridge = (solution, options = {}) => {
     saveToHistory();
+    const { allowDuplicate = false } = options;
     const { leftIndex, rightIndex } = showBridgeModal || {};
     const words = solution.words;
     const existing = new Set(flattenChain.map(w => cleanWord(w)));
     const hasDup = words.some(w => existing.has(cleanWord(w)));
-    if (hasDup) {
+    if (hasDup && !allowDuplicate) {
         showToast("That word already exists in the chain.", "warning");
         return;
     }
@@ -2939,10 +2975,6 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
   const handleManualBridgeSubmit = () => {
     const raw = manualBridgeInput.trim();
     if (!raw) return;
-    const cleaned = cleanWord(raw);
-    if (!cleaned) return;
-    if (isWordExcluded(cleaned)) return;
-    if (filterBadWords([raw]).length === 0) return;
     const manualItem = {
         id: `manual-${Date.now()}`,
         words: [raw],
@@ -2952,7 +2984,7 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
         overlaps: [],
         totalOverlap: 0
     };
-    insertBridge(manualItem);
+    insertBridge(manualItem, { allowDuplicate: true });
     setManualBridgeInput("");
   };
 
@@ -3077,8 +3109,48 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
                                         Triple database not loaded.
                                     </div>
                                 ) : tripleBridgeSuggestions.length === 0 ? (
-                                    <div className="text-center text-xs text-slate-400 italic p-2">
-                                        No triple matches found for this gap.
+                                    <div className="space-y-3">
+                                        <div className="text-center text-xs text-slate-400 italic p-2">
+                                            No triple matches found for this gap.
+                                        </div>
+                                        {tripleFallbackSuggestions.length > 0 && (
+                                            <div className="space-y-2">
+                                                <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-amber-600 uppercase tracking-wide">
+                                                    <AlertTriangle size={12} className="text-amber-500" />
+                                                    Random triples (non-repair)
+                                                </div>
+                                                {tripleFallbackSuggestions.map(sol => (
+                                                    <button
+                                                        key={sol.id}
+                                                        onClick={() => insertBridge(sol)}
+                                                        className="w-full text-left px-4 py-3 border rounded-lg text-sm font-medium transition-colors flex items-center justify-between bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100"
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            {sol.words.map((w, i) => (
+                                                                <React.Fragment key={i}>
+                                                                    {i > 0 && <ArrowRight size={12} className="text-slate-400" />}
+                                                                    <span>{w}</span>
+                                                                </React.Fragment>
+                                                            ))}
+                                                        </div>
+                                                        <div className="text-xs opacity-70 font-normal flex items-center gap-2">
+                                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
+                                                                <span className="text-slate-500">len</span>
+                                                                <span className="font-semibold text-indigo-600">3</span>
+                                                            </span>
+                                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
+                                                                <span className="text-slate-500">overlap</span>
+                                                                <span className="font-semibold text-emerald-600">{sol.totalOverlap}</span>
+                                                            </span>
+                                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100/70 border border-amber-200 text-amber-700">
+                                                                <AlertTriangle size={10} />
+                                                                not a repair
+                                                            </span>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
@@ -3141,7 +3213,8 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
                                                     item,
                                                     ov: computeOverlap(showBridgeModal.startWord || "", item.words[0])
                                                 }));
-                                                let list = source.sort((a,b) => b.ov - a.ov);
+                                                const manualLimit = 10;
+                                                let list = source.sort((a,b) => b.ov - a.ov).slice(0, manualLimit);
                                                 if (list.length === 0) return null;
 
                                                 const groups = {};
@@ -3203,7 +3276,8 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
                                                     item,
                                                     ov: computeOverlap(item.words[0], showBridgeModal.endWord || "")
                                                 }));
-                                                let list = source.sort((a,b) => b.ov - a.ov);
+                                                const manualLimit = 10;
+                                                let list = source.sort((a,b) => b.ov - a.ov).slice(0, manualLimit);
                                                 if (list.length === 0) return null;
 
                                                 const groups = {};
