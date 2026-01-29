@@ -67,14 +67,19 @@ const getTripleDetails = (w1, w2, w3) => {
   const overlapBC = getOverlap(w2, w3, 1);
   if (!overlapAB || !overlapBC) return null;
 
-  // A triple exists when both adjacent overlaps exist AND the first/last
-  // words also overlap (even by 1 letter). This matches the gameplay rule
-  // that all three words share an overlapping letter span.
-  const directOverlap = getOverlap(w1, w3, 1);
-  if (!directOverlap) return null;
+  const a = cleanWord(w1);
+  const b = cleanWord(w2);
+  const c = cleanWord(w3);
+  if (!a || !b || !c) return null;
 
-  const sharedCount = directOverlap.count;
-  const sharedStr = directOverlap.overlapStr;
+  // The shared overlap must be within B (overlaps from both sides intersect).
+  const intersectStart = b.length - overlapBC.count;
+  const intersectEnd = overlapAB.count;
+  const sharedCount = intersectEnd - intersectStart;
+  if (sharedCount < 1) return null;
+
+  const sharedStr = b.substring(intersectStart, intersectEnd);
+  if (!a.endsWith(sharedStr) || !c.startsWith(sharedStr)) return null;
 
   return {
     overlapAB: overlapAB.count,
