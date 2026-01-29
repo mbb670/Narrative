@@ -2235,6 +2235,52 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
       return -1;
   };
 
+  const getTripleSpansFromWords = (words) => {
+      const spans = [];
+      for (let i = 0; i < words.length - 2; i++) {
+          const details = getTripleDetails(words[i], words[i + 1], words[i + 2]);
+          if (!details) continue;
+          spans.push({ start: i, end: i + 2 });
+      }
+      return spans;
+  };
+
+  const getSafeTripleInsertIndex = (words, movingStart, movingEnd, insertIndex, direction) => {
+      const spans = getTripleSpansFromWords(words);
+      for (const span of spans) {
+          const overlapsMoving = span.start <= movingEnd && span.end >= movingStart;
+          if (overlapsMoving && (span.start !== movingStart || span.end !== movingEnd)) {
+              return null;
+          }
+      }
+
+      const adjustedSpans = [];
+      for (const span of spans) {
+          if (span.start === movingStart && span.end === movingEnd) continue;
+          let adjusted = null;
+          if (span.end < movingStart) {
+              adjusted = span;
+          } else if (span.start > movingEnd) {
+              adjusted = { start: span.start - 3, end: span.end - 3 };
+          }
+          if (adjusted) adjustedSpans.push(adjusted);
+      }
+
+      let safeIndex = insertIndex;
+      for (const span of adjustedSpans) {
+          if (safeIndex > span.start && safeIndex <= span.end) {
+              safeIndex = direction < 0 ? span.start : span.end + 1;
+          }
+      }
+
+      for (const span of adjustedSpans) {
+          if (safeIndex > span.start && safeIndex <= span.end) return null;
+      }
+
+      const maxIndex = Math.max(0, words.length - 3);
+      return Math.max(0, Math.min(maxIndex, safeIndex));
+  };
+
   const normalizeChainItems = (seq) => {
       const normalized = [];
       let prevLast = null;
@@ -2321,10 +2367,14 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
           const block = words.slice(startIndex, startIndex + 3);
           const remaining = [...words.slice(0, startIndex), ...words.slice(startIndex + 3)];
           const insertIndex = direction < 0 ? startIndex - 1 : startIndex + 1;
+          const safeInsertIndex = getSafeTripleInsertIndex(words, startIndex, startIndex + 2, insertIndex, direction);
+          if (safeInsertIndex === null) {
+              return prev;
+          }
           const nextWords = [
-              ...remaining.slice(0, insertIndex),
+              ...remaining.slice(0, safeInsertIndex),
               ...block,
-              ...remaining.slice(insertIndex)
+              ...remaining.slice(safeInsertIndex)
           ];
           return buildBridgeChainFromWords(nextWords);
       });
@@ -2352,10 +2402,14 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
               insertIndex = Math.max(0, insertIndex - block.length);
           }
           insertIndex = Math.max(0, Math.min(remaining.length, insertIndex));
+          const safeInsertIndex = getSafeTripleInsertIndex(words, startIdx, endIdx, insertIndex, direction);
+          if (safeInsertIndex === null) {
+              return prev;
+          }
           const nextWords = [
-              ...remaining.slice(0, insertIndex),
+              ...remaining.slice(0, safeInsertIndex),
               ...block,
-              ...remaining.slice(insertIndex)
+              ...remaining.slice(safeInsertIndex)
           ];
           return buildBridgeChainFromWords(nextWords);
       });
