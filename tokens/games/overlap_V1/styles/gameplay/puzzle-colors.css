@@ -10,7 +10,18 @@ Puzzle Colors
     --puzzle-color-5: #d1f3d0;
 }
 
-/* [data-puzzle-palette="MON"] {
+[data-puzzle-palette="MON"] {
+    --puzzle-color-1: #59D3FF;
+    --puzzle-color-2: #313A73;
+    --puzzle-color-3: #61A87D;
+    --puzzle-color-4: #7EE081;
+    --puzzle-color-5: #d1f3d0;
+}
+[data-mode="dark"] [data-puzzle-palette="MON"]  {
+    --puzzle-color-2: #8B95CD;
+}
+
+[data-puzzle-palette="TUE"] {
     --puzzle-color-1: #ff2b1d;
     --puzzle-color-2: #ff7a1a;
     --puzzle-color-3: #f5b800;
@@ -18,7 +29,7 @@ Puzzle Colors
     --puzzle-color-5: #2b74ff;
 }
 
-[data-puzzle-palette="TUE"] {
+[data-mode="dark"] [data-puzzle-palette="TUE"] {
     --puzzle-color-1: #ff5f6d;
     --puzzle-color-2: #ffc371;
     --puzzle-color-3: #ffe29f;
@@ -26,32 +37,29 @@ Puzzle Colors
     --puzzle-color-5: #7aa2ff;
 }
 
-[data-mode="dark"] [data-puzzle-palette="TUE"] {
-    --puzzle-color-1: red;
-    --puzzle-color-2: orange;
-    --puzzle-color-3: yellow;
-    --puzzle-color-4: green;
-    --puzzle-color-5: blue;
-}
-
 
 [data-puzzle-palette="WED"] {
-    --puzzle-color-1: #59D3FF;
-    --puzzle-color-2: #313A73;
-    --puzzle-color-3: #61A87D;
-    --puzzle-color-4: #7EE081;
-    --puzzle-color-5: #d1f3d0;
+    --puzzle-color-1: #CCB000;
+    --puzzle-color-2: #F98E42;
+    --puzzle-color-3: #EB7E86;
+    --puzzle-color-4: #B95E9A;
+    --puzzle-color-5: #5D53A5;
 }
 
 [data-puzzle-palette="THU"] {
-    --puzzle-color-1: #FF8360;
-    --puzzle-color-2: #E8E288;
-    --puzzle-color-3: #7DCE82;
-    --puzzle-color-4: #3CDBD3;
-    --puzzle-color-5: #00FFF5;
+    --puzzle-color-1: #DDB7A4;
+    --puzzle-color-2: #FF6010;
+    --puzzle-color-3: #C8543C;
+    --puzzle-color-4: #4C5059;
+    --puzzle-color-5: #96AAC9;
 }
 
-[data-puzzle-palette="FRI"] {
+[data-mode="dark"] [data-puzzle-palette="THU"] {
+    --puzzle-color-1: #FCC1A3;
+    --puzzle-color-2: #F4966C;
+}
+
+/* [data-puzzle-palette="FRI"] {
     --puzzle-color-1: #034732;
     --puzzle-color-2: #008148;
     --puzzle-color-3: #C6C013;
