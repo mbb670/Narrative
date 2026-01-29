@@ -888,6 +888,7 @@ export default function App() {
   const [draggedItem, setDraggedItem] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBridgeModal, setShowBridgeModal] = useState(null);
+  const [bridgeTab, setBridgeTab] = useState('bridges');
   const [view, setView] = useState('builder'); 
   const [isBridgeLoading, setIsBridgeLoading] = useState(false);
   const [bridgeStatus, setBridgeStatus] = useState("");
@@ -1205,6 +1206,21 @@ export default function App() {
       loadTripleSeeds();
       return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+      if (showBridgeModal) {
+          setBridgeTab('bridges');
+      }
+  }, [showBridgeModal]);
+
+  useEffect(() => {
+      if (!showBridgeModal || typeof document === 'undefined') return;
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+          document.body.style.overflow = prevOverflow;
+      };
+  }, [showBridgeModal]);
 
   const persistApiConfig = (next, remember = rememberApiConfig, nextUseAI = useAI) => {
       setApiConfig(next);
@@ -2988,6 +3004,13 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
     setManualBridgeInput("");
   };
 
+  const bridgeTabCounts = {
+      bridges: showBridgeModal?.solutions?.length || 0,
+      triples: tripleBridgeSuggestions.length > 0 ? tripleBridgeSuggestions.length : tripleFallbackSuggestions.length,
+      manual: (showBridgeModal?.forward?.length || 0) + (showBridgeModal?.backward?.length || 0),
+      custom: null
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-20">
       {toast && (
@@ -3003,7 +3026,7 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
       {/* Modal for Bridges */}
       {showBridgeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-lg p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[80vh] flex flex-col">
+          <Card className="w-full max-w-lg p-6 shadow-2xl animate-in zoom-in-95 duration-200 h-[80vh] flex flex-col">
              <div className="flex justify-between items-center mb-4 flex-shrink-0">
                 <h3 className="font-bold text-lg flex items-center gap-2">
                     <Hammer size={18} className="text-indigo-600" />
@@ -3036,77 +3059,109 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
                 <div className="text-xs text-slate-400 mt-1">Select the best path</div>
              </div>
 
+             <div className="flex items-center justify-center gap-2 mb-3 flex-shrink-0">
+                {[
+                    { id: 'bridges', label: 'Bridges', count: bridgeTabCounts.bridges },
+                    { id: 'triples', label: 'Triples', count: bridgeTabCounts.triples },
+                    { id: 'manual', label: 'Manual', count: bridgeTabCounts.manual },
+                    { id: 'custom', label: 'Custom', count: bridgeTabCounts.custom }
+                ].map(tab => {
+                    const isActive = bridgeTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => setBridgeTab(tab.id)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors flex items-center gap-2 ${
+                                isActive
+                                    ? 'bg-indigo-600 text-white border-indigo-600'
+                                    : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+                            }`}
+                        >
+                            <span>{tab.label}</span>
+                            {tab.count !== null && (
+                                <span className={`text-[10px] font-bold ${isActive ? 'text-white/80' : 'text-slate-400'}`}>
+                                    {tab.count}
+                                </span>
+                            )}
+                        </button>
+                    );
+                })}
+             </div>
+
              <div className="flex-1 overflow-y-auto pr-2 space-y-2">
-                {isBridgeLoading ? (
+                {isBridgeLoading && bridgeTab === 'bridges' ? (
                     <div className="flex flex-col items-center justify-center py-10 text-slate-400">
                         <RefreshCw className="animate-spin mb-2" />
                         <span>{bridgeStatus || "Searching dictionary..."}</span>
                     </div>
                 ) : (
                     <>
-                        {showBridgeModal.solutions && showBridgeModal.solutions.length > 0 ? (
-                            showBridgeModal.solutions.map(sol => (
-                                (() => {
-                                    const isExcludedWord = (w) => isWordExcluded(w);
-                                    const hasExcluded = sol.words.some(isExcludedWord);
-                                    const wordBadges = (w) => (
-                                        <span className="inline-flex items-center gap-1">
-                                            <span>{w}</span>
-                                            {isExcludedWord(w) && (
-                                                <span className="text-[9px] uppercase text-rose-600 font-bold bg-rose-50 border border-rose-200 rounded px-1 py-0.5">Excluded</span>
-                                            )}
-                                        </span>
-                                    );
-                                    const overlapParts = [];
-                                    const startWord = showBridgeModal?.startWord || "";
-                                    const endWord = showBridgeModal?.endWord || "";
-                                    if (sol.words?.length) {
-                                        overlapParts.push(getOverlap(startWord, sol.words[0], 1)?.count || 0);
-                                        for (let i = 0; i < sol.words.length - 1; i++) {
-                                            overlapParts.push(getOverlap(sol.words[i], sol.words[i + 1], 1)?.count || 0);
+                        {bridgeTab === 'bridges' && (
+                            showBridgeModal.solutions && showBridgeModal.solutions.length > 0 ? (
+                                showBridgeModal.solutions.map(sol => (
+                                    (() => {
+                                        const isExcludedWord = (w) => isWordExcluded(w);
+                                        const hasExcluded = sol.words.some(isExcludedWord);
+                                        const wordBadges = (w) => (
+                                            <span className="inline-flex items-center gap-1">
+                                                <span>{w}</span>
+                                                {isExcludedWord(w) && (
+                                                    <span className="text-[9px] uppercase text-rose-600 font-bold bg-rose-50 border border-rose-200 rounded px-1 py-0.5">Excluded</span>
+                                                )}
+                                            </span>
+                                        );
+                                        const overlapParts = [];
+                                        const startWord = showBridgeModal?.startWord || "";
+                                        const endWord = showBridgeModal?.endWord || "";
+                                        if (sol.words?.length) {
+                                            overlapParts.push(getOverlap(startWord, sol.words[0], 1)?.count || 0);
+                                            for (let i = 0; i < sol.words.length - 1; i++) {
+                                                overlapParts.push(getOverlap(sol.words[i], sol.words[i + 1], 1)?.count || 0);
+                                            }
+                                            overlapParts.push(getOverlap(sol.words[sol.words.length - 1], endWord, 1)?.count || 0);
                                         }
-                                        overlapParts.push(getOverlap(sol.words[sol.words.length - 1], endWord, 1)?.count || 0);
-                                    }
-                                    const overlapLabel = overlapParts.length > 0 ? overlapParts.join('-') : "0";
-                                    return (
-                                    <button 
-                                        key={sol.id} 
-                                        onClick={() => insertBridge(sol)} 
-                                        className={`
-                                        w-full text-left px-4 py-3 border rounded-lg text-sm font-medium transition-colors flex items-center justify-between group
-                                        ${sol.length === 1 ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100' : 
-                                          sol.length === 2 ? 'bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100' :
-                                          'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-indigo-300'}
-                                        ${hasExcluded ? 'ring-2 ring-rose-100 border-rose-200' : ''}
-                                    `}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        {sol.words.map((w, i) => (
-                                            <React.Fragment key={i}>
-                                                {i > 0 && <ArrowRight size={12} className="text-slate-400" />}
-                                                {wordBadges(w)}
-                                            </React.Fragment>
-                                        ))}
-                                    </div>
-                                    <div className="text-xs opacity-70 font-normal flex items-center gap-2">
-                                        {sol.length === 1 && <CheckCircle2 size={12} className="text-emerald-500" />}
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
-                                            <span className="text-slate-500">overlap</span>
-                                            <span className="font-semibold text-emerald-600">{overlapLabel}</span>
-                                        </span>
-                                    </div>
-                                </button>
-                                    );
-                                })()
-                            ))
-                        ) : (
-                            <div className="text-center text-sm text-slate-400 italic p-4">
-                                No complete bridges found.
-                            </div>
+                                        const overlapLabel = overlapParts.length > 0 ? overlapParts.join('-') : "0";
+                                        return (
+                                        <button 
+                                            key={sol.id} 
+                                            onClick={() => insertBridge(sol)} 
+                                            className={`
+                                            w-full text-left px-4 py-3 border rounded-lg text-sm font-medium transition-colors flex items-center justify-between group
+                                            ${sol.length === 1 ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100' : 
+                                              sol.length === 2 ? 'bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100' :
+                                              'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-indigo-300'}
+                                            ${hasExcluded ? 'ring-2 ring-rose-100 border-rose-200' : ''}
+                                        `}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {sol.words.map((w, i) => (
+                                                <React.Fragment key={i}>
+                                                    {i > 0 && <ArrowRight size={12} className="text-slate-400" />}
+                                                    {wordBadges(w)}
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
+                                        <div className="text-xs opacity-70 font-normal flex items-center gap-2">
+                                            {sol.length === 1 && <CheckCircle2 size={12} className="text-emerald-500" />}
+                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/70 border border-slate-200">
+                                                <span className="text-slate-500">overlap</span>
+                                                <span className="font-semibold text-emerald-600">{overlapLabel}</span>
+                                            </span>
+                                        </div>
+                                    </button>
+                                        );
+                                    })()
+                                ))
+                            ) : (
+                                <div className="text-center text-sm text-slate-400 italic p-4">
+                                    No complete bridges found.
+                                </div>
+                            )
                         )}
 
-                        {showBridgeModal && (
-                            <div className="pt-4 border-t border-slate-100">
+                        {bridgeTab === 'triples' && (
+                            <div>
                                 <h4 className="text-xs font-bold text-sky-600 uppercase tracking-wide mb-3 text-center flex items-center justify-center gap-2">
                                     <Book size={12} className="text-amber-600" />
                                     Triple Suggestions
@@ -3192,151 +3247,162 @@ Words: ${allowedList.map(item => item.word).join(', ')}`;
                             </div>
                         )}
 
-                        {/* Manual Fallbacks */}
-                        {(showBridgeModal.forward?.length > 0 || showBridgeModal.backward?.length > 0) && (
-                            <div className="pt-4 border-t border-slate-100">
-                                <h4 className="text-xs font-bold text-indigo-500 uppercase tracking-wide mb-3 text-center">Manual Construction</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <h5 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
-                                            Extend From Left <ArrowRight size={10} />
-                                        </h5>
-                                        <div className="space-y-2">
-                                            {(() => {
-                                                const computeOverlap = (a, b) => {
-                                                    const A = cleanWord(a || "");
-                                                    const B = cleanWord(b || "");
-                                                    const min = Math.min(A.length, B.length);
-                                                    let best = 0;
-                                                    for (let len = min; len >= 1; len--) {
-                                                        if (A.endsWith(B.slice(0, len))) {
-                                                            best = len;
-                                                            break;
+                        {bridgeTab === 'manual' && (
+                            (showBridgeModal.forward?.length > 0 || showBridgeModal.backward?.length > 0) ? (
+                                <div>
+                                    <h4 className="text-xs font-bold text-indigo-500 uppercase tracking-wide mb-3 text-center">Manual Construction</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <h5 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
+                                                Extend From Left <ArrowRight size={10} />
+                                            </h5>
+                                            <div className="space-y-2">
+                                                {(() => {
+                                                    const computeOverlap = (a, b) => {
+                                                        const A = cleanWord(a || "");
+                                                        const B = cleanWord(b || "");
+                                                        const min = Math.min(A.length, B.length);
+                                                        let best = 0;
+                                                        for (let len = min; len >= 1; len--) {
+                                                            if (A.endsWith(B.slice(0, len))) {
+                                                                best = len;
+                                                                break;
+                                                            }
                                                         }
-                                                    }
-                                                    return Math.max(best, 1);
-                                                };
-                                                const source = (showBridgeModal.forward || []).map(item => ({
-                                                    item,
-                                                    ov: computeOverlap(showBridgeModal.startWord || "", item.words[0])
-                                                }));
-                                                const manualLimit = 10;
-                                                let list = source.sort((a,b) => b.ov - a.ov).slice(0, manualLimit);
-                                                if (list.length === 0) return null;
+                                                        return Math.max(best, 1);
+                                                    };
+                                                    const source = (showBridgeModal.forward || []).map(item => ({
+                                                        item,
+                                                        ov: computeOverlap(showBridgeModal.startWord || "", item.words[0])
+                                                    }));
+                                                    const manualLimit = 10;
+                                                    let list = source.sort((a,b) => b.ov - a.ov).slice(0, manualLimit);
+                                                    if (list.length === 0) return null;
 
-                                                const groups = {};
-                                                list.forEach(entry => {
-                                                    if (!groups[entry.ov]) groups[entry.ov] = [];
-                                                    groups[entry.ov].push(entry);
-                                                });
+                                                    const groups = {};
+                                                    list.forEach(entry => {
+                                                        if (!groups[entry.ov]) groups[entry.ov] = [];
+                                                        groups[entry.ov].push(entry);
+                                                    });
 
-                                                const sortedOvs = Object.keys(groups).map(k => parseInt(k, 10)).sort((a,b) => b-a);
-                                                const blocks = [];
-                                                sortedOvs.forEach((ov, i) => {
-                                                    const entries = groups[ov];
-                                                    blocks.push(
-                                                        <div key={`fwd-block-${ov}`} className="space-y-1">
-                                                            {i > 0 && <div className="border-t border-slate-100 my-1"></div>}
-                                                            {entries.map(entry => {
-                                                                const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
-                                                                const word = entry.item.words[0];
-                                                                const isExcludedWord = isWordExcluded(word);
-                                                                return (
-                                                                    <button key={key} onClick={() => insertBridge(entry.item)} className={`w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between ${isExcludedWord ? 'ring-1 ring-rose-100 border-rose-200' : ''}`}>
-                                                                        <span className="inline-flex items-center gap-1">
-                                                                            {word}
-                                                                            {isExcludedWord && (
-                                                                                <span className="text-[9px] uppercase text-rose-600 font-bold bg-rose-50 border border-rose-200 rounded px-1 py-0.5">Excluded</span>
-                                                                            )}
-                                                                        </span>
-                                                                        <span className="text-[10px] text-slate-400">{ov}</span>
-                                                                    </button>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    );
-                                                });
-                                                return blocks;
-                                            })()}
+                                                    const sortedOvs = Object.keys(groups).map(k => parseInt(k, 10)).sort((a,b) => b-a);
+                                                    const blocks = [];
+                                                    sortedOvs.forEach((ov, i) => {
+                                                        const entries = groups[ov];
+                                                        blocks.push(
+                                                            <div key={`fwd-block-${ov}`} className="space-y-1">
+                                                                {i > 0 && <div className="border-t border-slate-100 my-1"></div>}
+                                                                {entries.map(entry => {
+                                                                    const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
+                                                                    const word = entry.item.words[0];
+                                                                    const isExcludedWord = isWordExcluded(word);
+                                                                    return (
+                                                                        <button key={key} onClick={() => insertBridge(entry.item)} className={`w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between ${isExcludedWord ? 'ring-1 ring-rose-100 border-rose-200' : ''}`}>
+                                                                            <span className="inline-flex items-center gap-1">
+                                                                                {word}
+                                                                                {isExcludedWord && (
+                                                                                    <span className="text-[9px] uppercase text-rose-600 font-bold bg-rose-50 border border-rose-200 rounded px-1 py-0.5">Excluded</span>
+                                                                                )}
+                                                                            </span>
+                                                                            <span className="text-[10px] text-slate-400">{ov}</span>
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        );
+                                                    });
+                                                    return blocks;
+                                                })()}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <h5 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1 justify-end">
-                                            <ArrowLeft size={10} /> Extend From Right
-                                        </h5>
-                                        <div className="space-y-2">
-                                            {(() => {
-                                                const computeOverlap = (a, b) => {
-                                                    const A = cleanWord(a || "");
-                                                    const B = cleanWord(b || "");
-                                                    const min = Math.min(A.length, B.length);
-                                                    let best = 0;
-                                                    for (let len = min; len >= 1; len--) {
-                                                        if (A.endsWith(B.slice(0, len))) {
-                                                            best = len;
-                                                            break;
+                                        <div>
+                                            <h5 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1 justify-end">
+                                                <ArrowLeft size={10} /> Extend From Right
+                                            </h5>
+                                            <div className="space-y-2">
+                                                {(() => {
+                                                    const computeOverlap = (a, b) => {
+                                                        const A = cleanWord(a || "");
+                                                        const B = cleanWord(b || "");
+                                                        const min = Math.min(A.length, B.length);
+                                                        let best = 0;
+                                                        for (let len = min; len >= 1; len--) {
+                                                            if (A.endsWith(B.slice(0, len))) {
+                                                                best = len;
+                                                                break;
+                                                            }
                                                         }
-                                                    }
-                                                    return Math.max(best, 1);
-                                                };
-                                                const source = (showBridgeModal.backward || []).map(item => ({
-                                                    item,
-                                                    ov: computeOverlap(item.words[0], showBridgeModal.endWord || "")
-                                                }));
-                                                const manualLimit = 10;
-                                                let list = source.sort((a,b) => b.ov - a.ov).slice(0, manualLimit);
-                                                if (list.length === 0) return null;
+                                                        return Math.max(best, 1);
+                                                    };
+                                                    const source = (showBridgeModal.backward || []).map(item => ({
+                                                        item,
+                                                        ov: computeOverlap(item.words[0], showBridgeModal.endWord || "")
+                                                    }));
+                                                    const manualLimit = 10;
+                                                    let list = source.sort((a,b) => b.ov - a.ov).slice(0, manualLimit);
+                                                    if (list.length === 0) return null;
 
-                                                const groups = {};
-                                                list.forEach(entry => {
-                                                    if (!groups[entry.ov]) groups[entry.ov] = [];
-                                                    groups[entry.ov].push(entry);
-                                                });
+                                                    const groups = {};
+                                                    list.forEach(entry => {
+                                                        if (!groups[entry.ov]) groups[entry.ov] = [];
+                                                        groups[entry.ov].push(entry);
+                                                    });
 
-                                                const sortedOvs = Object.keys(groups).map(k => parseInt(k, 10)).sort((a,b) => b-a);
-                                                const blocks = [];
-                                                sortedOvs.forEach((ov, i) => {
-                                                    const entries = groups[ov];
-                                                    blocks.push(
-                                                        <div key={`bwd-block-${ov}`} className="space-y-1">
-                                                            {i > 0 && <div className="border-t border-slate-100 my-1"></div>}
-                                                            {entries.map(entry => {
-                                                                const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
-                                                                const word = entry.item.words[0];
-                                                                const isExcludedWord = isWordExcluded(word);
-                                                                return (
-                                                                    <button key={key} onClick={() => insertBridge(entry.item)} className={`w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between ${isExcludedWord ? 'ring-1 ring-rose-100 border-rose-200' : ''}`}>
-                                                                        <span className="inline-flex items-center gap-1">
-                                                                            {word}
-                                                                            {isExcludedWord && (
-                                                                                <span className="text-[9px] uppercase text-rose-600 font-bold bg-rose-50 border border-rose-200 rounded px-1 py-0.5">Excluded</span>
-                                                                            )}
-                                                                        </span>
-                                                                        <span className="text-[10px] text-slate-400">{ov}</span>
-                                                                    </button>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    );
-                                                });
-                                                return blocks;
-                                            })()}
+                                                    const sortedOvs = Object.keys(groups).map(k => parseInt(k, 10)).sort((a,b) => b-a);
+                                                    const blocks = [];
+                                                    sortedOvs.forEach((ov, i) => {
+                                                        const entries = groups[ov];
+                                                        blocks.push(
+                                                            <div key={`bwd-block-${ov}`} className="space-y-1">
+                                                                {i > 0 && <div className="border-t border-slate-100 my-1"></div>}
+                                                                {entries.map(entry => {
+                                                                    const key = entry.item.id + (entry.padId !== undefined ? `-pad-${entry.padId}` : "");
+                                                                    const word = entry.item.words[0];
+                                                                    const isExcludedWord = isWordExcluded(word);
+                                                                    return (
+                                                                        <button key={key} onClick={() => insertBridge(entry.item)} className={`w-full text-left px-3 py-2 bg-white border border-slate-200 hover:border-indigo-400 rounded text-xs text-slate-700 transition-colors truncate flex justify-between ${isExcludedWord ? 'ring-1 ring-rose-100 border-rose-200' : ''}`}>
+                                                                            <span className="inline-flex items-center gap-1">
+                                                                                {word}
+                                                                                {isExcludedWord && (
+                                                                                    <span className="text-[9px] uppercase text-rose-600 font-bold bg-rose-50 border border-rose-200 rounded px-1 py-0.5">Excluded</span>
+                                                                                )}
+                                                                            </span>
+                                                                            <span className="text-[10px] text-slate-400">{ov}</span>
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        );
+                                                    });
+                                                    return blocks;
+                                                })()}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-4 pt-3 border-t border-slate-100">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Add custom word</label>
-                                    <div className="flex gap-2">
-                                        <input 
-                                            value={manualBridgeInput}
-                                            onChange={(e) => setManualBridgeInput(e.target.value)}
-                                            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500"
-                                            placeholder="Type a word to insert"
-                                        />
-                                        <Button variant="secondary" onClick={handleManualBridgeSubmit} className="text-sm px-3">
-                                            Add
-                                        </Button>
-                                    </div>
+                            ) : (
+                                <div className="text-center text-sm text-slate-400 italic p-4">
+                                    No manual options available.
+                                </div>
+                            )
+                        )}
+
+                        {bridgeTab === 'custom' && (
+                            <div className="space-y-3">
+                                <h4 className="text-xs font-bold text-indigo-500 uppercase tracking-wide text-center">Custom Word</h4>
+                                <div className="text-xs text-slate-400 text-center">
+                                    Inserts the word as-is, even if it does not repair the gap.
+                                </div>
+                                <div className="flex gap-2">
+                                    <input 
+                                        value={manualBridgeInput}
+                                        onChange={(e) => setManualBridgeInput(e.target.value)}
+                                        className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500"
+                                        placeholder="Type a word to insert"
+                                    />
+                                    <Button variant="secondary" onClick={handleManualBridgeSubmit} className="text-sm px-3">
+                                        Add
+                                    </Button>
                                 </div>
                             </div>
                         )}
